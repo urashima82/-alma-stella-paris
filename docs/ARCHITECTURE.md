@@ -13,6 +13,7 @@ alma-stella/
 │   ├── styles/
 │   │   └── app.css          # Tailwind entry point
 │   └── controllers/          # Stimulus controllers
+│       └── currency_selector_controller.js  # Dropdown toggle for currency selector
 ├── config/
 ├── docs/
 │   └── design/
@@ -31,6 +32,7 @@ alma-stella/
 │   │       ├── HomeController.php
 │   │       ├── CatalogController.php
 │   │       ├── ProductController.php
+│   │       ├── CurrencyController.php  # POST /currency/switch — changes active currency
 │   │       └── AboutController.php
 │   ├── Entity/
 │   ├── Enum/
@@ -44,7 +46,8 @@ alma-stella/
 │   │   ├── CurrencyExtension.php
 │   │   └── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
 │   └── EventSubscriber/
-│       └── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
+│       ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
+│       └── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
 ├── templates/
 │   ├── admin/
 │   └── shop/

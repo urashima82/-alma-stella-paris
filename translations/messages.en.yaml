@@ -108,6 +108,11 @@ error:
     500_text: "We're experiencing a temporary issue. Please try again in a few moments."
     500_home: "Back to home"
 
+# ── Currency ──
+currency:
+    label: "Currency"
+    disclaimer: "Prices shown in %currency% are indicative. You will be charged in USD at checkout."
+
 # ── Language switcher ──
 locale:
     en: "EN"

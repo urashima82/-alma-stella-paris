@@ -108,6 +108,11 @@ error:
     500_text: "Nous rencontrons un problème temporaire. Veuillez réessayer dans quelques instants."
     500_home: "Retour à l'accueil"
 
+# ── Currency ──
+currency:
+    label: "Devise"
+    disclaimer: "Les prix affichés en %currency% sont indicatifs. Vous serez débité(e) en USD lors du paiement."
+
 # ── Language switcher ──
 locale:
     en: "EN"

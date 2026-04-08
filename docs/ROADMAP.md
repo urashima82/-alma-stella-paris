@@ -171,13 +171,13 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 2-3h*
 
 ### Tasks
-- [ ] `CurrencyConverter` service (open.er-api.com, cached 6h)
-- [ ] `CurrencyExtension` Twig extension with `|price` filter
-- [ ] Currency selector in header (USD / EUR / CAD / GBP / MXN)
-- [ ] Selection stored in session + cookie (30-day expiry)
-- [ ] Disclaimer displayed when non-USD currency selected:
+- [x] `CurrencyConverter` service (open.er-api.com, cached 6h)
+- [x] `CurrencyExtension` Twig extension with `|price` filter
+- [x] Currency selector in header (USD / EUR / CAD / GBP / MXN)
+- [x] Selection stored in session + cookie (30-day expiry)
+- [x] Disclaimer displayed when non-USD currency selected:
   *"Prices shown in [EUR] are indicative. You will be charged in USD at checkout."*
-- [ ] Fallback to USD if exchange rate API is unavailable
+- [x] Fallback to USD if exchange rate API is unavailable
 
 ### Definition of Done
 - Select EUR → all product prices update across all pages

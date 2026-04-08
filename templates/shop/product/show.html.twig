@@ -100,7 +100,7 @@
 
                 {# Price #}
                 <p class="font-sans text-2xl font-semibold text-alma-text mb-8">
-                    ${{ product.displayPrice | number_format(0) }}
+                    {{ product.displayPrice | price }}
                 </p>
 
                 {# Description #}
@@ -225,7 +225,7 @@
                                         {% if related.isSoldOut %}
                                             <span class="text-alma-text-muted text-xs">{{ 'catalog.sold_label'|trans }}</span>
                                         {% else %}
-                                            ${{ related.displayPrice | number_format(0) }}
+                                            {{ related.displayPrice | price }}
                                         {% endif %}
                                     </p>
                                 </div>
