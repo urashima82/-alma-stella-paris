@@ -224,7 +224,30 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 6 — EasyAdmin order management
+## Milestone 6 — Admin authentication (Magic Link)
+*Estimated effort: 1-2h*
+
+### Tasks
+- [ ] Install `nickdnk/symfony-magic-link-bundle` (or equivalent Magic Link solution)
+- [ ] Create `Admin` entity implementing `UserInterface`
+- [ ] Configure Doctrine user provider in `security.yaml`
+- [ ] Magic Link login flow: enter email → receive link via Brevo → click → authenticated
+- [ ] Login page (`/admin/login`) styled with brand identity
+- [ ] Add `access_control` rule: `^/admin` requires `ROLE_ADMIN`
+- [ ] Logout route (`/admin/logout`)
+- [ ] DataFixtures: default admin user (`admin@almastellaparis.com`)
+
+### Definition of Done
+- `/admin` redirects to `/admin/login` when not authenticated
+- Enter admin email → Magic Link email received → click → EasyAdmin dashboard accessible
+- Non-admin email → no link sent, error message displayed
+- Logout → redirected to login page
+- All EasyAdmin CRUDs inaccessible without `ROLE_ADMIN`
+- No password stored in database
+
+---
+
+## Milestone 7 — EasyAdmin order management
 *Estimated effort: 3-4h*
 
 ### Tasks
@@ -244,7 +267,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 7 — Social publishing
+## Milestone 8 — Social publishing
 *Estimated effort: 4-5h*
 
 ### Tasks
@@ -267,7 +290,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 8 — Email marketing & wishlist
+## Milestone 9 — Email marketing & wishlist
 *Estimated effort: 4-5h*
 
 ### Tasks
@@ -291,7 +314,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 9 — SEO & performance
+## Milestone 10 — SEO & performance
 *Estimated effort: 3h*
 
 ### Tasks
