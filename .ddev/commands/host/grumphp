@@ -1,0 +1,24 @@
+#!/bin/bash
+
+## Description: Run GrumPHP quality checks inside DDEV container
+## Usage: grumphp
+## Example: ddev grumphp
+
+echo "Running PHP CS Fixer..."
+ddev exec vendor/bin/php-cs-fixer fix --dry-run --diff
+CS_EXIT=$?
+
+echo ""
+echo "Running PHPStan..."
+ddev exec vendor/bin/phpstan analyse
+STAN_EXIT=$?
+
+if [ $CS_EXIT -ne 0 ] || [ $STAN_EXIT -ne 0 ]; then
+    echo ""
+    echo "Quality checks failed."
+    exit 1
+fi
+
+echo ""
+echo "All quality checks passed."
+exit 0

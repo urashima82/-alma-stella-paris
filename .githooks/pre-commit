@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Pre-commit hook that runs quality checks via DDEV
+# GrumPHP can't run on the host (no PHP installed), so we use ddev exec directly.
+
+echo "Running pre-commit quality checks via DDEV..."
+
+# Check if DDEV is running
+if ! ddev describe > /dev/null 2>&1; then
+    echo "DDEV is not running. Skipping pre-commit checks."
+    echo "   Run 'ddev start' and try again."
+    exit 0
+fi
+
+# Run PHP CS Fixer (dry-run to check without modifying)
+echo ""
+echo "--- PHP CS Fixer ---"
+ddev exec vendor/bin/php-cs-fixer fix --dry-run --diff 2>&1
+CS_EXIT=$?
+
+# Run PHPStan
+echo ""
+echo "--- PHPStan ---"
+ddev exec vendor/bin/phpstan analyse 2>&1
+STAN_EXIT=$?
+
+if [ $CS_EXIT -ne 0 ] || [ $STAN_EXIT -ne 0 ]; then
+    echo ""
+    echo "Quality checks failed. Fix issues before committing."
+    echo "   Run 'ddev exec vendor/bin/php-cs-fixer fix' to auto-fix code style."
+    exit 1
+fi
+
+echo ""
+echo "All checks passed."
+exit 0

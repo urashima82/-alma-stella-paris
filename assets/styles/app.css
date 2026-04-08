@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+    /* Colors — Alma Stella Paris */
+    --color-alma-bg: #FAF8F4;
+    --color-alma-surface: #F0EBE1;
+    --color-alma-hover: #E8DDD0;
+    --color-alma-gold: #C9A84C;
+    --color-alma-gold-muted: #C9A84C40;
+    --color-alma-text: #2C2418;
+    --color-alma-text-muted: #7A6A55;
+
+    /* Fonts */
+    --font-serif: "Cormorant Garamond", Georgia, serif;
+    --font-sans: Inter, system-ui, sans-serif;
+}

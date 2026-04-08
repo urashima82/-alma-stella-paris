@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Alma Stella Paris — Wear the world.{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}Curated jewelry. Sourced globally. Worn daily. Water-resistant stainless steel jewelry with natural stones.{% endblock %}">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>✦</text></svg>">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+        {% block stylesheets %}{% endblock %}
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body class="bg-alma-bg text-alma-text font-sans antialiased">
+        {% block header %}
+            <header class="border-b border-alma-gold-muted">
+                <nav class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+                    <div class="flex items-center gap-8">
+                        <a href="{{ path('shop_home') }}" class="text-sm font-sans hover:text-alma-gold transition-colors">Shop</a>
+                        <a href="#" class="text-sm font-sans hover:text-alma-gold transition-colors">About</a>
+                    </div>
+                    <a href="{{ path('shop_home') }}" class="font-serif text-2xl tracking-wide">
+                        <span class="text-alma-gold">✦</span> Alma Stella
+                    </a>
+                    <div class="flex items-center gap-6">
+                        <button class="text-sm hover:text-alma-gold transition-colors" aria-label="Shopping cart">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </nav>
+            </header>
+        {% endblock %}
+
+        <main>
+            {% block body %}{% endblock %}
+        </main>
+
+        {% block footer %}
+            <footer class="bg-alma-text text-alma-bg">
+                <div class="max-w-7xl mx-auto px-6 py-16">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                        <div>
+                            <p class="font-serif text-lg mb-3"><span class="text-alma-gold">✦</span> Alma Stella Paris</p>
+                            <p class="text-sm text-alma-hover leading-relaxed">
+                                Curated jewelry. Sourced globally. Worn daily.<br>
+                                Craft your story.
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs uppercase tracking-widest mb-4 text-alma-hover">Navigate</p>
+                            <ul class="space-y-2 text-sm">
+                                <li><a href="{{ path('shop_home') }}" class="text-alma-hover hover:text-alma-gold transition-colors">Shop</a></li>
+                                <li><a href="#" class="text-alma-hover hover:text-alma-gold transition-colors">Our Story</a></li>
+                                <li><a href="#" class="text-alma-hover hover:text-alma-gold transition-colors">Shipping &amp; Returns</a></li>
+                                <li><a href="#" class="text-alma-hover hover:text-alma-gold transition-colors">Contact</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <p class="text-xs uppercase tracking-widest mb-4 text-alma-hover">Connect</p>
+                            <ul class="space-y-2 text-sm">
+                                <li><a href="https://www.instagram.com/alma_stella_paris/" target="_blank" rel="noopener" class="text-alma-hover hover:text-alma-gold transition-colors">Instagram</a></li>
+                                <li><a href="#" class="text-alma-hover hover:text-alma-gold transition-colors">Pinterest</a></li>
+                                <li><a href="mailto:hello@almastellaparis.com" class="text-alma-hover hover:text-alma-gold transition-colors">hello@almastellaparis.com</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="border-t border-alma-hover/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-alma-hover">
+                        <p>&copy; {{ "now"|date("Y") }} Alma Stella Paris. All rights reserved.</p>
+                        <p class="mt-2 md:mt-0 font-serif italic">"Porter le monde." ✦</p>
+                    </div>
+                </div>
+            </footer>
+        {% endblock %}
+    </body>
+</html>
