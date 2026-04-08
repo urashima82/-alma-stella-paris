@@ -27,6 +27,10 @@ alma-stella/
 │   ├── Controller/
 │   │   ├── Admin/            # EasyAdmin CRUD controllers
 │   │   └── Shop/             # Public-facing controllers
+│   │       ├── HomeController.php
+│   │       ├── CatalogController.php
+│   │       ├── ProductController.php
+│   │       └── AboutController.php
 │   ├── Entity/
 │   ├── Enum/
 │   ├── Repository/
@@ -45,8 +49,12 @@ alma-stella/
 │       ├── home/
 │       ├── catalog/
 │       ├── product/
+│       ├── about/
 │       ├── cart/
 │       └── account/
+├── bundles/
+│   └── TwigBundle/
+│       └── Exception/         # Custom 404/500 error pages
 └── tests/
 ```
 

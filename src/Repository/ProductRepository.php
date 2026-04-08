@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\Product;
+use App\Entity\ProductCategory;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,5 +18,42 @@ class ProductRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
+    }
+
+    /**
+     * @return Product[]
+     */
+    /**
+     * @return Product[]
+     */
+    public function findFeatured(int $limit = 4): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isPublished = true')
+            ->andWhere('p.isFeatured = true')
+            ->andWhere('p.isSoldOut = false')
+            ->orderBy('p.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findVisibleQuery(?ProductCategory $category = null): QueryBuilder
+    {
+        $soldOutCutoff = new \DateTimeImmutable('-14 days');
+
+        $qb = $this->createQueryBuilder('p')
+            ->andWhere('p.isPublished = true')
+            ->andWhere('p.isSoldOut = false OR (p.isSoldOut = true AND p.soldAt > :soldOutCutoff)')
+            ->setParameter('soldOutCutoff', $soldOutCutoff)
+            ->orderBy('p.isSoldOut', 'ASC')
+            ->addOrderBy('p.createdAt', 'DESC');
+
+        if (null !== $category) {
+            $qb->andWhere('p.category = :category')
+                ->setParameter('category', $category);
+        }
+
+        return $qb;
     }
 }

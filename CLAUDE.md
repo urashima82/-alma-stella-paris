@@ -94,6 +94,9 @@ background context.
 - **Incremental:** Work step by step, one sub-step at a time. Don't batch
   multiple sub-steps without user confirmation.
 - **Current milestone:** Check `docs/ROADMAP.md` for the next unchecked sub-step.
+- **Roadmap tracking:** After completing each task or sub-task, immediately
+  check it off in `docs/ROADMAP.md` (`- [ ]` → `- [x]`). This keeps the
+  roadmap as the single source of truth for project progress.
 - **Tailwind rebuild:** Run `ddev exec php bin/console tailwind:build` after
   every template or CSS change.
 - **Architecture updates:** Update `docs/ARCHITECTURE.md` when adding entities,

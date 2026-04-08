@@ -53,7 +53,10 @@ class Product
     private bool $isFeatured = false;
 
     #[ORM\Column]
-    private int $stock = 0;
+    private bool $isSoldOut = false;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $soldAt = null;
 
     /** @var Collection<int, ProductImage> */
     #[ORM\OneToMany(targetEntity: ProductImage::class, mappedBy: 'product', cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -224,16 +227,51 @@ class Product
         return $this;
     }
 
-    public function getStock(): int
+    public function isSoldOut(): bool
     {
-        return $this->stock;
+        return $this->isSoldOut;
     }
 
-    public function setStock(int $stock): static
+    public function setIsSoldOut(bool $isSoldOut): static
     {
-        $this->stock = $stock;
+        $this->isSoldOut = $isSoldOut;
+
+        if ($isSoldOut && null === $this->soldAt) {
+            $this->soldAt = new \DateTimeImmutable();
+        }
+
+        if (!$isSoldOut) {
+            $this->soldAt = null;
+        }
 
         return $this;
+    }
+
+    public function getSoldAt(): ?\DateTimeImmutable
+    {
+        return $this->soldAt;
+    }
+
+    public function isNew(int $days = 14): bool
+    {
+        return $this->createdAt > new \DateTimeImmutable(\sprintf('-%d days', $days));
+    }
+
+    public function isVisibleInCatalog(int $soldVisibilityDays = 14): bool
+    {
+        if (!$this->isPublished) {
+            return false;
+        }
+
+        if (!$this->isSoldOut) {
+            return true;
+        }
+
+        if (null === $this->soldAt) {
+            return false;
+        }
+
+        return $this->soldAt > new \DateTimeImmutable(\sprintf('-%d days', $soldVisibilityDays));
     }
 
     /** @return Collection<int, ProductImage> */

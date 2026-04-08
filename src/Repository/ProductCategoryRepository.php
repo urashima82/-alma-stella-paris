@@ -17,4 +17,15 @@ class ProductCategoryRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, ProductCategory::class);
     }
+
+    /**
+     * @return ProductCategory[]
+     */
+    public function findAllOrdered(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->orderBy('c.position', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

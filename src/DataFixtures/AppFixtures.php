@@ -154,7 +154,7 @@ class AppFixtures extends Fixture
             $product->setCategory($categories[$cat]);
             $product->setIsPublished($published);
             $product->setIsFeatured($featured);
-            $product->setStock(\random_int(5, 30));
+            $product->setIsSoldOut(false);
             $manager->persist($product);
             $products[$name] = $product;
         }

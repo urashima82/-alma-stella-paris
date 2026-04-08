@@ -1,0 +1,228 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ product.name }} — Alma Stella Paris{% endblock %}
+
+{% block meta_description %}{{ product.description|slice(0, 160) }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-7xl mx-auto px-6 py-10 md:py-16">
+
+        {# ── Breadcrumb ── #}
+        <nav class="text-sm font-sans text-alma-text-muted mb-8" aria-label="Breadcrumb">
+            <a href="{{ path('shop_catalog') }}" class="hover:text-alma-gold transition-colors">Shop</a>
+            <span class="mx-2">/</span>
+            <a href="{{ path('shop_catalog', {categorySlug: product.category.slug}) }}" class="hover:text-alma-gold transition-colors">
+                {{ product.category.name }}
+            </a>
+            <span class="mx-2">/</span>
+            <span class="text-alma-text">{{ product.name }}</span>
+        </nav>
+
+        {# ── Main product layout ── #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
+
+            {# ── Left: Image gallery ── #}
+            <div>
+                {# Main image #}
+                <div class="aspect-[4/5] bg-alma-surface border border-alma-hover overflow-hidden flex items-center justify-center
+                            {{ product.isSoldOut ? 'opacity-50 grayscale' : '' }}">
+                    {% if product.images is not empty %}
+                        <img src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
+                             alt="{{ product.name }}"
+                             class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="text-center">
+                            <p class="text-alma-gold text-5xl mb-3">✦</p>
+                            <p class="font-serif text-lg text-alma-text-muted italic">Photo coming soon</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Thumbnail strip #}
+                {% if product.images|length > 1 %}
+                    <div class="flex gap-3 mt-4">
+                        {% for image in product.images %}
+                            <div class="w-20 h-20 bg-alma-surface border border-alma-hover overflow-hidden cursor-pointer
+                                        hover:border-alma-gold transition-colors
+                                        {{ product.isSoldOut ? 'opacity-50 grayscale' : '' }}">
+                                <img src="{{ asset('uploads/products/' ~ image.filename) }}"
+                                     alt="{{ product.name }} — image {{ loop.index }}"
+                                     class="w-full h-full object-cover"
+                                     loading="lazy">
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# ── Right: Product info ── #}
+            <div>
+                {# Status badges #}
+                <div class="flex flex-wrap gap-2 mb-4">
+                    {% if product.isSoldOut %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1
+                                     bg-alma-text text-alma-bg text-xs font-sans font-medium">
+                            Vendue
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1
+                                     bg-alma-gold text-white text-xs font-sans font-medium">
+                            Pièce unique
+                        </span>
+                    {% endif %}
+                    {% if product.isNew() %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1
+                                     bg-alma-surface text-alma-text text-xs font-sans font-medium border border-alma-hover">
+                            Nouvelle
+                        </span>
+                    {% endif %}
+                </div>
+
+                {# Name #}
+                <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-1">
+                    {{ product.name }}
+                </h1>
+                <p class="font-serif text-lg text-alma-text-muted italic mb-6">
+                    {{ product.nameFr }}
+                </p>
+
+                {# Price #}
+                <p class="font-sans text-2xl font-semibold text-alma-text mb-8">
+                    ${{ product.displayPrice | number_format(0) }}
+                </p>
+
+                {# Description #}
+                <div class="font-sans text-sm text-alma-text leading-relaxed mb-8 space-y-3">
+                    <p>{{ product.description }}</p>
+                    <p class="italic text-alma-text-muted">{{ product.descriptionFr }}</p>
+                </div>
+
+                {# Material badges #}
+                <div class="flex flex-wrap gap-2 mb-8">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1
+                                 bg-alma-surface text-alma-text-muted text-xs font-sans font-medium
+                                 border border-alma-hover">
+                        Acier inoxydable
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1
+                                 bg-alma-surface text-alma-text-muted text-xs font-sans font-medium
+                                 border border-alma-hover">
+                        Pierre naturelle
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1
+                                 bg-alma-surface text-alma-text-muted text-xs font-sans font-medium
+                                 border border-alma-hover">
+                        Résistant à l'eau
+                    </span>
+                </div>
+
+                {# Add to cart #}
+                {% if product.isSoldOut %}
+                    <button disabled
+                            class="w-full bg-alma-hover text-alma-text-muted px-8 py-4 font-sans text-sm font-medium cursor-not-allowed">
+                        Sold out
+                    </button>
+                {% else %}
+                    <button class="w-full bg-alma-gold text-white px-8 py-4 font-sans text-sm font-medium
+                                   hover:bg-alma-gold/90 transition-colors cursor-pointer">
+                        Add to cart
+                    </button>
+                {% endif %}
+
+                {# ── Shipping info accordion ── #}
+                <div class="mt-10 border-t border-alma-hover">
+                    <details class="group">
+                        <summary class="flex items-center justify-between py-4 cursor-pointer
+                                        text-sm font-sans text-alma-text hover:text-alma-gold transition-colors">
+                            <span>Shipping information</span>
+                            <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </summary>
+                        <div class="pb-4 text-sm text-alma-text-muted leading-relaxed space-y-2">
+                            <p>Shipping tier: <strong class="text-alma-text">{{ product.shippingTier.label() }}</strong></p>
+                            <p>Shipping cost included in the displayed price (${{ product.shippingTier.shippingCostUsd() | number_format(0) }}).</p>
+                            <p>Estimated delivery: 7–14 business days worldwide.</p>
+                            <p>Ships from France or Mexico depending on availability.</p>
+                        </div>
+                    </details>
+
+                    <details class="group border-t border-alma-hover">
+                        <summary class="flex items-center justify-between py-4 cursor-pointer
+                                        text-sm font-sans text-alma-text hover:text-alma-gold transition-colors">
+                            <span>Materials &amp; care</span>
+                            <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none"
+                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </summary>
+                        <div class="pb-4 text-sm text-alma-text-muted leading-relaxed space-y-2">
+                            <p>Water-resistant stainless steel with 18K gold plating.</p>
+                            <p>Natural stones — each piece is unique with subtle variations.</p>
+                            <p>Safe to wear daily: shower, swim, and sweat-proof.</p>
+                            <p>Wipe gently with a soft cloth to maintain shine.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        {# ── Wear it with (related products) ── #}
+        {% if product.relatedProducts|length > 0 %}
+            <section class="mt-20 md:mt-28">
+                <div class="h-px bg-alma-gold-muted mb-16"></div>
+
+                <div class="text-center mb-12">
+                    <h2 class="font-serif text-2xl md:text-3xl font-light text-alma-text mb-2">
+                        Wear it with
+                    </h2>
+                    <p class="font-sans text-sm text-alma-text-muted">Curated pieces that pair beautifully.</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
+                    {% for related in product.relatedProducts|slice(0, 3) %}
+                        <article class="group">
+                            <a href="{{ path('shop_product', {slug: related.slug}) }}" class="block">
+                                <div class="aspect-[4/5] bg-alma-surface overflow-hidden
+                                            border border-transparent group-hover:border-alma-gold
+                                            transition-colors duration-300 flex items-center justify-center
+                                            {{ related.isSoldOut ? 'opacity-50 grayscale' : '' }}">
+                                    {% if related.images is not empty %}
+                                        <img src="{{ asset('uploads/products/' ~ related.images.first.filename) }}"
+                                             alt="{{ related.name }}"
+                                             class="w-full h-full object-cover
+                                                    group-hover:scale-105 transition-transform duration-500"
+                                             loading="lazy">
+                                    {% else %}
+                                        <div class="text-center">
+                                            <p class="text-alma-gold text-3xl mb-2">✦</p>
+                                            <p class="text-xs text-alma-text-muted">{{ related.name }}</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="mt-3 flex justify-between items-start gap-2">
+                                    <div>
+                                        <h3 class="font-serif text-base text-alma-text group-hover:text-alma-gold transition-colors">
+                                            {{ related.name }}
+                                        </h3>
+                                        <p class="text-alma-text-muted text-xs mt-0.5">
+                                            {{ related.category.name }}
+                                        </p>
+                                    </div>
+                                    <p class="font-sans font-semibold text-alma-text whitespace-nowrap">
+                                        {% if related.isSoldOut %}
+                                            <span class="text-alma-text-muted text-xs">Sold</span>
+                                        {% else %}
+                                            ${{ related.displayPrice | number_format(0) }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </a>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}

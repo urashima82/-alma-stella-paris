@@ -13,7 +13,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
@@ -73,8 +72,8 @@ class ProductCrudController extends AbstractCrudController
 
         yield BooleanField::new('isPublished', 'Publié');
         yield BooleanField::new('isFeatured', 'Mis en avant')->hideOnIndex();
-
-        yield IntegerField::new('stock', 'Stock');
+        yield BooleanField::new('isSoldOut', 'Vendu');
+        yield DateTimeField::new('soldAt', 'Vendu le')->hideOnForm();
 
         yield AssociationField::new('relatedProducts', 'Wear it with')
             ->setFormTypeOption('by_reference', false)

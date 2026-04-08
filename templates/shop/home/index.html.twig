@@ -2,70 +2,161 @@
 
 {% block title %}Alma Stella Paris — Wear the world.{% endblock %}
 
-{% block header %}{% endblock %}
-{% block footer %}{% endblock %}
-
 {% block body %}
-    <div class="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-        {# Logo & brand #}
-        <p class="text-alma-gold text-4xl mb-6">✦</p>
-        <h1 class="font-serif text-5xl md:text-7xl font-light text-alma-text leading-tight mb-4">
-            Alma Stella
-        </h1>
-        <p class="font-serif text-xl md:text-2xl text-alma-text-muted italic mb-2">Paris</p>
-
-        {# Divider #}
-        <div class="w-16 h-px bg-alma-gold mt-8 mb-8"></div>
-
-        {# Tagline #}
-        <p class="font-serif text-2xl md:text-3xl font-light text-alma-text mb-3">
-            Wear the world.
-        </p>
-        <p class="font-sans text-sm text-alma-text-muted max-w-md leading-relaxed mb-12">
-            Curated jewelry. Sourced globally. Worn daily.<br>
-            Water-resistant stainless steel with natural stones.
-        </p>
-
-        {# 3 icons #}
-        <div class="flex flex-col sm:flex-row gap-8 sm:gap-16 mb-16">
-            <div class="flex flex-col items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-alma-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-                </svg>
-                <span class="text-xs uppercase tracking-widest text-alma-text-muted">Water resistant</span>
+    {# ── Hero section ── #}
+    <section class="relative bg-alma-surface overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 py-24 md:py-36 flex flex-col md:flex-row items-center gap-12 md:gap-20">
+            {# Text #}
+            <div class="flex-1 text-center md:text-left">
+                <p class="text-alma-gold text-3xl mb-4">✦</p>
+                <h1 class="font-serif text-5xl md:text-7xl font-light text-alma-text leading-tight mb-4">
+                    Wear the world.
+                </h1>
+                <p class="font-serif text-xl md:text-2xl text-alma-text-muted italic mb-2">
+                    Porter le monde.
+                </p>
+                <p class="font-sans text-sm text-alma-text-muted max-w-md leading-relaxed mt-6 mb-10 mx-auto md:mx-0">
+                    Curated stainless steel jewelry with natural stones.
+                    Water-resistant. Sourced between Paris and Mexico City.
+                    Worn daily.
+                </p>
+                <a href="{{ path('shop_catalog') }}"
+                   class="inline-block bg-alma-gold text-white px-8 py-3 font-sans text-sm font-medium
+                          hover:bg-alma-gold/90 transition-colors">
+                    Shop the collection
+                </a>
             </div>
-            <div class="flex flex-col items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-alma-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                </svg>
-                <span class="text-xs uppercase tracking-widest text-alma-text-muted">Natural stones</span>
-            </div>
-            <div class="flex flex-col items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-alma-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                </svg>
-                <span class="text-xs uppercase tracking-widest text-alma-text-muted">Ships worldwide</span>
+            {# Hero image placeholder #}
+            <div class="flex-1 max-w-lg w-full">
+                <div class="aspect-[4/5] bg-alma-hover/50 flex items-center justify-center border border-alma-hover">
+                    <div class="text-center px-8">
+                        <p class="text-alma-gold text-5xl mb-4">✦</p>
+                        <p class="font-serif text-lg text-alma-text-muted italic">Lifestyle photo</p>
+                        <p class="text-xs text-alma-text-muted mt-1">Coming soon</p>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
-        {# Coming soon notice #}
-        <div class="bg-alma-surface border border-alma-hover px-8 py-5 max-w-md">
-            <p class="font-serif text-lg text-alma-text mb-1">Coming soon</p>
-            <p class="text-sm text-alma-text-muted">
-                Our collection is being carefully curated between Paris and Mexico City.
-            </p>
+    {# ── 3-icon strip ── #}
+    <section class="border-y border-alma-gold-muted">
+        <div class="max-w-7xl mx-auto px-6 py-10">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-10 sm:gap-20">
+                <div class="flex flex-col items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-alma-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+                    </svg>
+                    <span class="text-xs uppercase tracking-widest text-alma-text-muted font-medium">Water resistant</span>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-alma-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                    <span class="text-xs uppercase tracking-widest text-alma-text-muted font-medium">Natural stones</span>
+                </div>
+                <div class="flex flex-col items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-alma-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                    </svg>
+                    <span class="text-xs uppercase tracking-widest text-alma-text-muted font-medium">Ships worldwide</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ── Featured products ── #}
+    <section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+        <div class="text-center mb-14">
+            <h2 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                Coups de c&oelig;ur
+            </h2>
+            <p class="font-sans text-sm text-alma-text-muted">Our favorites, curated for you.</p>
         </div>
 
-        {# Instagram link #}
-        <a href="https://www.instagram.com/alma_stella_paris/"
-           target="_blank" rel="noopener"
-           class="mt-10 text-xs text-alma-text-muted hover:text-alma-gold transition-colors uppercase tracking-widest">
-            @alma_stella_paris
-        </a>
+        {% if featuredProducts is not empty %}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+                {% for product in featuredProducts %}
+                    <article class="group cursor-pointer">
+                        <a href="{{ path('shop_product', {slug: product.slug}) }}" class="block">
+                            <div class="relative aspect-[4/5] bg-alma-surface overflow-hidden
+                                        border border-transparent group-hover:border-alma-gold
+                                        transition-colors duration-300 flex items-center justify-center">
+                                {% if product.images is not empty %}
+                                    <img src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
+                                         alt="{{ product.name }}"
+                                         class="w-full h-full object-cover
+                                                group-hover:scale-105 transition-transform duration-500"
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="text-center">
+                                        <p class="text-alma-gold text-3xl mb-2">✦</p>
+                                        <p class="text-xs text-alma-text-muted">{{ product.name }}</p>
+                                    </div>
+                                {% endif %}
+                                {# Badges #}
+                                <div class="absolute top-2 left-2 flex flex-col gap-1">
+                                    {% if product.isNew() %}
+                                        <span class="px-2 py-0.5 bg-alma-surface text-alma-text text-[10px] font-sans font-medium border border-alma-hover">Nouvelle</span>
+                                    {% endif %}
+                                    <span class="px-2 py-0.5 bg-alma-gold text-white text-[10px] font-sans font-medium">Pièce unique</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex justify-between items-start gap-2">
+                                <div>
+                                    <h3 class="font-serif text-base text-alma-text group-hover:text-alma-gold transition-colors">
+                                        {{ product.name }}
+                                    </h3>
+                                    <p class="text-alma-text-muted text-xs mt-0.5">
+                                        {{ product.category.name }}
+                                    </p>
+                                </div>
+                                <p class="font-sans font-semibold text-alma-text whitespace-nowrap">
+                                    ${{ product.displayPrice | number_format(0) }}
+                                </p>
+                            </div>
+                        </a>
+                    </article>
+                {% endfor %}
+            </div>
 
-        {# Footer tagline #}
-        <p class="mt-16 font-serif text-sm text-alma-text-muted italic">
-            "Porter le monde." ✦
-        </p>
+            <div class="text-center mt-12">
+                <a href="{{ path('shop_catalog') }}"
+                   class="inline-block border border-alma-gold text-alma-gold px-8 py-3 font-sans text-sm
+                          hover:bg-alma-gold hover:text-white transition-colors">
+                    View all jewelry
+                </a>
+            </div>
+        {% endif %}
+    </section>
+
+    {# ── Thin gold divider ── #}
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="h-px bg-alma-gold-muted"></div>
     </div>
+
+    {# ── Instagram feed strip ── #}
+    <section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+        <div class="text-center mb-14">
+            <h2 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                @alma_stella_paris
+            </h2>
+            <p class="font-sans text-sm text-alma-text-muted">Follow us on Instagram for daily inspiration.</p>
+        </div>
+
+        <div class="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+            {% for i in 1..6 %}
+                <a href="https://www.instagram.com/alma_stella_paris/"
+                   target="_blank" rel="noopener"
+                   class="group block aspect-square bg-alma-surface border border-transparent
+                          hover:border-alma-gold transition-colors duration-300
+                          flex items-center justify-center">
+                    <div class="text-center">
+                        <p class="text-alma-gold text-2xl mb-1 group-hover:scale-110 transition-transform duration-300">✦</p>
+                        <p class="text-[10px] text-alma-text-muted uppercase tracking-widest">Instagram</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </section>
 {% endblock %}

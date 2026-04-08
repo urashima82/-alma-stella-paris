@@ -24,9 +24,9 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 2-3h*
 
 ### Tasks
-- [ ] DDEV configuration (`php 8.3`, `mariadb 10.11`, `symfony` project type)
-- [ ] `composer create-project symfony/skeleton`
-- [ ] Install core bundles:
+- [x] DDEV configuration (`php 8.3`, `mariadb 10.11`, `symfony` project type)
+- [x] `composer create-project symfony/skeleton`
+- [x] Install core bundles:
   - `symfony/orm-pack` (Doctrine + migrations)
   - `easycorp/easyadmin-bundle`
   - `symfony/asset-mapper` + Tailwind CSS
@@ -34,11 +34,11 @@ Shall I proceed to Milestone Y?"
   - `symfony/mailer`
   - `knplabs/knp-paginator-bundle`
   - `liip/imagine-bundle` (image resizing)
-- [ ] `.env.local` template with required keys documented (no actual values)
-- [ ] Base Twig layout (`templates/shop/base.html.twig`) with correct font imports
+- [x] `.env.local` template with required keys documented (no actual values)
+- [x] Base Twig layout (`templates/shop/base.html.twig`) with correct font imports
   (Cormorant Garamond + Inter via Google Fonts)
-- [ ] Tailwind configured with Alma Stella color tokens
-- [ ] EasyAdmin `DashboardController` accessible at `/admin`
+- [x] Tailwind configured with Alma Stella color tokens
+- [x] EasyAdmin `DashboardController` accessible at `/admin`
 
 ### Definition of Done
 - `ddev start && ddev exec php bin/console cache:clear` runs without error
@@ -52,18 +52,24 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 4-5h*
 
 ### Tasks
-- [ ] Create all entities: `Product`, `ProductCategory`, `ProductImage`,
+- [x] Create all entities: `Product`, `ProductCategory`, `ProductImage`,
   `ShippingTier` enum
-- [ ] Doctrine migrations generated and applied
-- [ ] EasyAdmin CRUD for `Product`:
+- [x] Doctrine migrations generated and applied
+- [x] EasyAdmin CRUD for `Product`:
   - All fields editable
   - `ShippingTier` displayed as colored badge (green/orange/blue)
   - `basePrice` and computed `displayPrice` both visible in index
   - Image upload with preview
   - `relatedProducts` via `AssociationField` (ManyToMany self-referencing)
-- [ ] EasyAdmin CRUD for `ProductCategory`
-- [ ] DataFixtures: 12 sample products matching `DESIGN.md` product list
-- [ ] Sluggable behavior on `Product::$name` (auto-generated, unique)
+  - `isSoldOut` toggle (boolean) — replaces integer `stock` field
+  - `soldAt` datetime (nullable) — set when `isSoldOut` toggled to `true`
+- [x] EasyAdmin CRUD for `ProductCategory`
+- [x] DataFixtures: 12 sample products matching `DESIGN.md` product list
+- [x] Sluggable behavior on `Product::$name` (auto-generated, unique)
+
+> **Stock model:** Each piece is unique (pièce unique). `isSoldOut` (boolean)
+> replaces the `stock` (integer) field. `soldAt` tracks when the piece was sold.
+> Sold pieces stay visible for 14 days with a "Vendue" badge, then are hidden.
 
 ### Definition of Done
 - Create a product in EasyAdmin → appears in the database
@@ -71,6 +77,7 @@ Shall I proceed to Milestone Y?"
 - `displayPrice` = `basePrice` + tier cost (verify with $38 + $10 = $48)
 - All 12 fixture products load correctly via `doctrine:fixtures:load`
 - French labels in EasyAdmin show correct accents (é, à, è, ù, ê, etc.)
+- `isSoldOut` toggle works in EasyAdmin, `soldAt` auto-set when toggled
 
 ---
 
@@ -78,25 +85,28 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 5-6h*
 
 ### Tasks
-- [ ] Homepage (`/`):
+- [x] Homepage (`/`):
   - Hero section (lifestyle image placeholder, headline, CTA)
   - 3-icon strip (Water resistant / Natural stones / Ships worldwide)
   - Featured products grid (4 products, `isFeatured = true`)
   - Instagram feed strip (6 placeholder squares with @alma_stella_paris)
-- [ ] Catalog page (`/shop`):
+- [x] Catalog page (`/shop`):
   - Product grid (12 per page, paginated)
   - Category filter (All / Necklaces / Earrings / Bracelets / Rings / Anklets)
   - Hover state: gold border on product card
-- [ ] Product detail page (`/shop/{slug}`):
+  - Badges on product cards: "Pièce unique", "Vendue" (greyed out), "Nouvelle" (< 14 days)
+  - Sold pieces visible for 14 days after sale, then hidden from catalog
+- [x] Product detail page (`/product/{slug}`):
   - Large image + thumbnail strip
   - Name, display price in selected currency
   - Material badges (Acier inoxydable / Pierre naturelle / Résistant à l'eau)
+  - "Pièce unique" badge + "Vendue" state (greyed, "Add to cart" disabled)
   - Shipping info accordion
   - "Wear it with" — 3 related products
-- [ ] About page (`/about`):
+- [x] About page (`/about`):
   - Brand story with correct French accents
   - 3 values cards
-- [ ] 404 and 500 error pages styled with brand identity
+- [x] 404 and 500 error pages styled with brand identity
 
 ### Definition of Done
 - All pages load without Symfony profiler errors
@@ -106,10 +116,58 @@ Shall I proceed to Milestone Y?"
 - All French copy uses correct UTF-8 accented characters
 - Pages are mobile-responsive (test at 375px and 768px viewport)
 - Visual result matches `docs/design/screenshots/` reference images
+- "Pièce unique" badge visible on all available product cards
+- Sold products show "Vendue" badge, greyed out, "Add to cart" disabled
+- "Nouvelle" badge visible on products created within last 14 days
+- Sold products older than 14 days are hidden from the catalog
 
 ---
 
-## Milestone 3 — Currency selector
+## Milestone 3 — Internationalization (FR/EN)
+*Estimated effort: 5-6h*
+
+### Tasks
+- [ ] Add `slugFr` field to `Product` and `ProductCategory` entities
+- [ ] Modify initial migration to include `slug_fr` columns
+- [ ] Update DataFixtures with French slugs for all products and categories
+- [ ] Configure Symfony Translation (`default_locale: en`, `enabled_locales: [en, fr]`)
+- [ ] Set up locale-prefixed routing (`/{_locale}/...`) with `en|fr` requirement
+- [ ] Define translated route paths:
+  - `/en/shop` ↔ `/fr/boutique`
+  - `/en/shop/{categorySlug}` ↔ `/fr/boutique/{categorySlug}` (uses locale-appropriate slug)
+  - `/en/shop/{slug}` ↔ `/fr/boutique/{slug}` (uses locale-appropriate slug)
+  - `/en/about` ↔ `/fr/a-propos`
+- [ ] Root `/` redirects to `/{_locale}/` based on: cookie → `Accept-Language` → `en`
+- [ ] Language switcher in header (EN / FR) — links to equivalent page in other locale
+- [ ] Store locale preference in session + cookie (30-day expiry)
+- [ ] Create translation files (`messages.en.yaml`, `messages.fr.yaml`) for all UI strings:
+  - Navigation, buttons, labels, footer, error pages
+  - Product badge labels, shipping info, empty states
+  - Homepage hero text, section headings
+- [ ] Create `LocaleProductExtension` Twig extension:
+  - `|localized_name` filter → returns `name` or `nameFr` based on current locale
+  - `|localized_description` filter → returns `description` or `descriptionFr`
+  - `|localized_slug` filter → returns `slug` or `slugFr`
+- [ ] Update all existing templates to use `|trans` for UI strings
+- [ ] Add `<link rel="alternate" hreflang="...">` tags in `<head>` for SEO
+- [ ] Update EasyAdmin product/category forms to include `slugFr` field
+- [ ] EasyAdmin stays in English (admin interface not translated)
+
+### Definition of Done
+- `/en/shop` shows English UI with English product names and descriptions
+- `/fr/boutique` shows French UI with French product names and descriptions
+- `/en/shop/necklaces` ↔ `/fr/boutique/colliers` — both resolve correctly
+- Click language switcher EN→FR → redirects to the French equivalent URL
+- `hreflang` tags present in HTML `<head>` on all public pages
+- Cookie persists language preference across browser sessions
+- New visitor gets language from browser `Accept-Language` header
+- All French content uses correct accented characters (é, à, è, ù, ê, î, ô, ç, œ)
+- Product detail page shows localized name, description, and material badges
+- Pagination and category filters work identically in both locales
+
+---
+
+## Milestone 4 — Currency selector
 *Estimated effort: 2-3h*
 
 ### Tasks
@@ -130,14 +188,14 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 4 — Cart & Stripe checkout
+## Milestone 5 — Cart & Stripe checkout
 *Estimated effort: 6-8h*
 
 ### Tasks
 - [ ] Cart stored in session (no login required at launch)
 - [ ] Cart drawer (slide-in, Stimulus controller):
   - Item list with thumbnails
-  - Quantity update
+  - No quantity selector (pièce unique = always 1)
   - Item removal
   - Subtotal in selected currency
 - [ ] Checkout page (`/checkout`):
@@ -152,20 +210,21 @@ Shall I proceed to Milestone Y?"
   - Order summary
   - Estimated delivery note
 - [ ] Brevo order confirmation email sent automatically
-- [ ] Stock decrement on successful order
+- [ ] On successful payment: set `isSoldOut = true` + `soldAt = now()` on purchased products
+- [ ] Prevent adding sold-out product to cart (server-side check)
 
 ### Definition of Done
 - Add product to cart → drawer opens and shows item
-- Update quantity → subtotal updates
+- Cannot add sold-out product to cart (button disabled + server-side rejection)
 - Complete Stripe test payment (use test card `4242 4242 4242 4242`)
 - Order appears in EasyAdmin with correct status `pending`
+- Purchased product automatically marked `isSoldOut` with `soldAt` timestamp
 - Confirmation email received in Brevo test inbox
-- Stock decrements correctly in the database
 - Cart clears after successful payment
 
 ---
 
-## Milestone 5 — EasyAdmin order management
+## Milestone 6 — EasyAdmin order management
 *Estimated effort: 3-4h*
 
 ### Tasks
@@ -185,7 +244,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 6 — Social publishing
+## Milestone 7 — Social publishing
 *Estimated effort: 4-5h*
 
 ### Tasks
@@ -208,7 +267,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 7 — Email marketing & wishlist
+## Milestone 8 — Email marketing & wishlist
 *Estimated effort: 4-5h*
 
 ### Tasks
@@ -232,7 +291,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 8 — SEO & performance
+## Milestone 9 — SEO & performance
 *Estimated effort: 3h*
 
 ### Tasks

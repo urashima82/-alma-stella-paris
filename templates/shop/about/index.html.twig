@@ -1,0 +1,100 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}About — Alma Stella Paris{% endblock %}
+{% block meta_description %}Alma Stella Paris was born from Estelle's passion for sourcing beautiful, water-resistant jewelry between Paris and Mexico City.{% endblock %}
+
+{% block body %}
+    {# ── Hero section ── #}
+    <section class="max-w-3xl mx-auto px-6 py-20 md:py-28 text-center">
+        {# Portrait placeholder #}
+        <div class="mx-auto mb-8 w-36 h-36 md:w-44 md:h-44 rounded-full bg-alma-surface border border-alma-hover
+                    overflow-hidden flex items-center justify-center">
+            <div class="text-center">
+                <p class="text-alma-gold text-3xl mb-1">✦</p>
+                <p class="text-[10px] text-alma-text-muted uppercase tracking-widest">Estelle</p>
+            </div>
+        </div>
+
+        <p class="text-alma-gold text-2xl mb-6">✦</p>
+
+        <h1 class="font-serif text-4xl md:text-5xl font-light text-alma-text leading-tight mb-8">
+            Une histoire entre<br>deux mondes.
+        </h1>
+
+        <div class="max-w-xl mx-auto space-y-5 text-sm text-alma-text-muted leading-relaxed">
+            <p>
+                Alma Stella Paris was born from Estelle's passion for traveling and finding beauty
+                in unexpected places. Between the elegance of Paris and the vibrant energy of
+                Mexico, each piece is personally sourced and chosen with intention.
+            </p>
+            <p>
+                Our jewelry is made to be worn every day &mdash; by the sea, in the city, at the market.
+                Water-resistant, durable, and always beautiful.
+            </p>
+        </div>
+
+        <p class="text-alma-gold text-2xl mt-10">✦</p>
+    </section>
+
+    {# ── Thin gold divider ── #}
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="h-px bg-alma-gold-muted"></div>
+    </div>
+
+    {# ── Values section ── #}
+    <section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+        <div class="text-center mb-14">
+            <p class="text-xs uppercase tracking-widest text-alma-text-muted font-medium mb-3">Our philosophy</p>
+            <h2 class="font-serif text-3xl md:text-4xl font-light text-alma-text">
+                What we believe
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14 max-w-4xl mx-auto">
+            {# Value 1 — Personally sourced #}
+            <div class="text-center">
+                <p class="text-alma-gold text-2xl mb-4">✦</p>
+                <h3 class="font-serif text-lg text-alma-text mb-3">Personally sourced</h3>
+                <p class="text-sm text-alma-text-muted leading-relaxed">
+                    Every piece is hand-selected by
+                    Estelle during her travels between
+                    Paris and Mexico.
+                </p>
+            </div>
+
+            {# Value 2 — Natural materials #}
+            <div class="text-center">
+                <p class="text-alma-gold text-2xl mb-4">✦</p>
+                <h3 class="font-serif text-lg text-alma-text mb-3">Natural materials</h3>
+                <p class="text-sm text-alma-text-muted leading-relaxed">
+                    Turquoise, opal, quartz, moonstone,
+                    mother of pearl &mdash; each stone tells
+                    its own story.
+                </p>
+            </div>
+
+            {# Value 3 — Crafted to last #}
+            <div class="text-center">
+                <p class="text-alma-gold text-2xl mb-4">✦</p>
+                <h3 class="font-serif text-lg text-alma-text mb-3">Crafted to last</h3>
+                <p class="text-sm text-alma-text-muted leading-relaxed">
+                    Water-resistant stainless steel with
+                    18k gold plating. Wear it
+                    everywhere, every day.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    {# ── Paris ✦ Mexico City banner ── #}
+    <section class="bg-alma-surface">
+        <div class="max-w-7xl mx-auto px-6 py-16 md:py-20 text-center">
+            <p class="font-serif text-2xl md:text-3xl text-alma-text font-light">
+                Paris <span class="text-alma-gold mx-3">✦</span> Mexico City
+            </p>
+            <p class="text-sm text-alma-text-muted mt-3">
+                Where the world's energy meets timeless craft.
+            </p>
+        </div>
+    </section>
+{% endblock %}
