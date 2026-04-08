@@ -27,6 +27,9 @@ class ProductCategory
     #[ORM\Column(length: 120, unique: true)]
     private string $slug = '';
 
+    #[ORM\Column(length: 120, unique: true)]
+    private string $slugFr = '';
+
     #[ORM\Column]
     private int $position = 0;
 
@@ -74,6 +77,10 @@ class ProductCategory
     {
         $this->nameFr = $nameFr;
 
+        if ('' === $this->slugFr) {
+            $this->slugFr = (string) (new AsciiSlugger('fr'))->slug($nameFr)->lower();
+        }
+
         return $this;
     }
 
@@ -85,6 +92,18 @@ class ProductCategory
     public function setSlug(string $slug): static
     {
         $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getSlugFr(): string
+    {
+        return $this->slugFr;
+    }
+
+    public function setSlugFr(string $slugFr): static
+    {
+        $this->slugFr = $slugFr;
 
         return $this;
     }

@@ -10,7 +10,10 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class AboutController extends AbstractController
 {
-    #[Route('/about', name: 'shop_about')]
+    #[Route(
+        path: ['en' => '/about', 'fr' => '/a-propos'],
+        name: 'shop_about',
+    )]
     public function index(): Response
     {
         return $this->render('shop/about/index.html.twig');

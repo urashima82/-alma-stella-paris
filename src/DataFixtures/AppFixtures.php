@@ -27,19 +27,20 @@ class AppFixtures extends Fixture
     private function loadCategories(ObjectManager $manager): array
     {
         $data = [
-            ['Necklaces', 'Colliers', 0],
-            ['Earrings', 'Boucles d\'oreilles', 1],
-            ['Bracelets', 'Bracelets', 2],
-            ['Rings', 'Bagues', 3],
-            ['Anklets', 'Chaînes de cheville', 4],
-            ['Sets', 'Coffrets', 5],
+            ['Necklaces', 'Colliers', 'colliers', 0],
+            ['Earrings', 'Boucles d\'oreilles', 'boucles-d-oreilles', 1],
+            ['Bracelets', 'Bracelets', 'bracelets', 2],
+            ['Rings', 'Bagues', 'bagues', 3],
+            ['Anklets', 'Chaînes de cheville', 'chaines-de-cheville', 4],
+            ['Sets', 'Coffrets', 'coffrets', 5],
         ];
 
         $categories = [];
-        foreach ($data as [$name, $nameFr, $position]) {
+        foreach ($data as [$name, $nameFr, $slugFr, $position]) {
             $category = new ProductCategory();
             $category->setName($name);
             $category->setNameFr($nameFr);
+            $category->setSlugFr($slugFr);
             $category->setPosition($position);
             $manager->persist($category);
             $categories[$name] = $category;

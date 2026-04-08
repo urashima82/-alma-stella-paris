@@ -34,6 +34,7 @@ class ProductCategoryCrudController extends AbstractCrudController
         yield TextField::new('name', 'Name (EN)');
         yield TextField::new('nameFr', 'Nom (FR)');
         yield SlugField::new('slug')->setTargetFieldName('name');
+        yield SlugField::new('slugFr', 'Slug (FR)')->setTargetFieldName('nameFr');
         yield IntegerField::new('position', 'Ordre');
     }
 }

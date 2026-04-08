@@ -30,6 +30,9 @@ class Product
     #[ORM\Column(length: 280, unique: true)]
     private string $slug = '';
 
+    #[ORM\Column(length: 280, unique: true)]
+    private string $slugFr = '';
+
     #[ORM\Column(type: Types::TEXT)]
     private string $description = '';
 
@@ -123,6 +126,10 @@ class Product
     {
         $this->nameFr = $nameFr;
 
+        if ('' === $this->slugFr) {
+            $this->slugFr = (string) (new AsciiSlugger('fr'))->slug($nameFr)->lower();
+        }
+
         return $this;
     }
 
@@ -134,6 +141,18 @@ class Product
     public function setSlug(string $slug): static
     {
         $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getSlugFr(): string
+    {
+        return $this->slugFr;
+    }
+
+    public function setSlugFr(string $slugFr): static
+    {
+        $this->slugFr = $slugFr;
 
         return $this;
     }

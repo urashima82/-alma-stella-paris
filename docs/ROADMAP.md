@@ -127,31 +127,31 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 5-6h*
 
 ### Tasks
-- [ ] Add `slugFr` field to `Product` and `ProductCategory` entities
-- [ ] Modify initial migration to include `slug_fr` columns
-- [ ] Update DataFixtures with French slugs for all products and categories
-- [ ] Configure Symfony Translation (`default_locale: en`, `enabled_locales: [en, fr]`)
-- [ ] Set up locale-prefixed routing (`/{_locale}/...`) with `en|fr` requirement
-- [ ] Define translated route paths:
+- [x] Add `slugFr` field to `Product` and `ProductCategory` entities
+- [x] Modify initial migration to include `slug_fr` columns
+- [x] Update DataFixtures with French slugs for all products and categories
+- [x] Configure Symfony Translation (`default_locale: en`, `enabled_locales: [en, fr]`)
+- [x] Set up locale-prefixed routing (`/{_locale}/...`) with `en|fr` requirement
+- [x] Define translated route paths:
   - `/en/shop` ↔ `/fr/boutique`
   - `/en/shop/{categorySlug}` ↔ `/fr/boutique/{categorySlug}` (uses locale-appropriate slug)
-  - `/en/shop/{slug}` ↔ `/fr/boutique/{slug}` (uses locale-appropriate slug)
+  - `/en/product/{slug}` ↔ `/fr/produit/{slug}` (uses locale-appropriate slug)
   - `/en/about` ↔ `/fr/a-propos`
-- [ ] Root `/` redirects to `/{_locale}/` based on: cookie → `Accept-Language` → `en`
-- [ ] Language switcher in header (EN / FR) — links to equivalent page in other locale
-- [ ] Store locale preference in session + cookie (30-day expiry)
-- [ ] Create translation files (`messages.en.yaml`, `messages.fr.yaml`) for all UI strings:
+- [x] Root `/` redirects to `/{_locale}/` based on: cookie → `Accept-Language` → `en`
+- [x] Language switcher in header (EN / FR) — links to equivalent page in other locale
+- [x] Store locale preference in session + cookie (30-day expiry)
+- [x] Create translation files (`messages.en.yaml`, `messages.fr.yaml`) for all UI strings:
   - Navigation, buttons, labels, footer, error pages
   - Product badge labels, shipping info, empty states
   - Homepage hero text, section headings
-- [ ] Create `LocaleProductExtension` Twig extension:
+- [x] Create `LocaleProductExtension` Twig extension:
   - `|localized_name` filter → returns `name` or `nameFr` based on current locale
   - `|localized_description` filter → returns `description` or `descriptionFr`
   - `|localized_slug` filter → returns `slug` or `slugFr`
-- [ ] Update all existing templates to use `|trans` for UI strings
-- [ ] Add `<link rel="alternate" hreflang="...">` tags in `<head>` for SEO
-- [ ] Update EasyAdmin product/category forms to include `slugFr` field
-- [ ] EasyAdmin stays in English (admin interface not translated)
+- [x] Update all existing templates to use `|trans` for UI strings
+- [x] Add `<link rel="alternate" hreflang="...">` tags in `<head>` for SEO
+- [x] Update EasyAdmin product/category forms to include `slugFr` field
+- [x] EasyAdmin stays in English (admin interface not translated)
 
 ### Definition of Done
 - `/en/shop` shows English UI with English product names and descriptions

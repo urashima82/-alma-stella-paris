@@ -2,17 +2,17 @@
 
 {% block title %}
     {% if activeCategory %}
-        {{ activeCategory.name }} — Alma Stella Paris
+        {{ 'catalog.title_category'|trans({'%category%': activeCategory|localized_name}) }}
     {% else %}
-        Shop — Alma Stella Paris
+        {{ 'catalog.title'|trans }}
     {% endif %}
 {% endblock %}
 
 {% block meta_description %}
     {% if activeCategory %}
-        Discover our {{ activeCategory.name|lower }} collection. Curated stainless steel jewelry with natural stones.
+        {{ 'catalog.meta_description_category'|trans({'%category%': activeCategory|localized_name|lower}) }}
     {% else %}
-        Shop the full Alma Stella Paris collection. Curated stainless steel jewelry with natural stones, sourced between Paris and Mexico.
+        {{ 'catalog.meta_description'|trans }}
     {% endif %}
 {% endblock %}
 
@@ -22,16 +22,14 @@
         <div class="max-w-7xl mx-auto px-6 py-14 md:py-20 text-center">
             <h1 class="font-serif text-4xl md:text-5xl font-light text-alma-text mb-3">
                 {% if activeCategory %}
-                    {{ activeCategory.name }}
+                    {{ activeCategory|localized_name }}
                 {% else %}
-                    The Collection
+                    {{ 'catalog.heading'|trans }}
                 {% endif %}
             </h1>
             <p class="font-sans text-sm text-alma-text-muted">
-                {% if activeCategory %}
-                    {{ activeCategory.nameFr }}
-                {% else %}
-                    Curated jewelry. Sourced globally. Worn daily.
+                {% if activeCategory is null %}
+                    {{ 'catalog.subtitle'|trans }}
                 {% endif %}
             </p>
         </div>
@@ -45,15 +43,15 @@
                       {{ activeCategory is null
                           ? 'bg-alma-text text-alma-bg border-alma-text'
                           : 'text-alma-text-muted border-alma-hover hover:border-alma-gold hover:text-alma-text' }}">
-                All
+                {{ 'catalog.filter_all'|trans }}
             </a>
             {% for category in categories %}
-                <a href="{{ path('shop_catalog', {categorySlug: category.slug}) }}"
+                <a href="{{ path('shop_catalog', {categorySlug: category|localized_slug}) }}"
                    class="px-4 py-2 text-sm font-sans transition-colors border
                           {{ activeCategory is not null and activeCategory.id == category.id
                               ? 'bg-alma-text text-alma-bg border-alma-text'
                               : 'text-alma-text-muted border-alma-hover hover:border-alma-gold hover:text-alma-text' }}">
-                    {{ category.name }}
+                    {{ category|localized_name }}
                 </a>
             {% endfor %}
         </nav>
@@ -63,47 +61,47 @@
             <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
                 {% for product in pagination %}
                     <article class="group">
-                        <a href="{{ path('shop_product', {slug: product.slug}) }}" class="block cursor-pointer">
+                        <a href="{{ path('shop_product', {slug: product|localized_slug}) }}" class="block cursor-pointer">
                             <div class="relative aspect-[4/5] bg-alma-surface overflow-hidden
                                         border border-transparent group-hover:border-alma-gold
                                         transition-colors duration-300 flex items-center justify-center
                                         {{ product.isSoldOut ? 'opacity-60 grayscale' : '' }}">
                                 {% if product.images is not empty %}
                                     <img src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
-                                         alt="{{ product.name }}"
+                                         alt="{{ product|localized_name }}"
                                          class="w-full h-full object-cover
                                                 group-hover:scale-105 transition-transform duration-500"
                                          loading="lazy">
                                 {% else %}
                                     <div class="text-center">
                                         <p class="text-alma-gold text-3xl mb-2">✦</p>
-                                        <p class="text-xs text-alma-text-muted">{{ product.name }}</p>
+                                        <p class="text-xs text-alma-text-muted">{{ product|localized_name }}</p>
                                     </div>
                                 {% endif %}
                                 {# Badges #}
                                 <div class="absolute top-2 left-2 flex flex-col gap-1">
                                     {% if product.isSoldOut %}
-                                        <span class="px-2 py-0.5 bg-alma-text text-alma-bg text-[10px] font-sans font-medium">Vendue</span>
+                                        <span class="px-2 py-0.5 bg-alma-text text-alma-bg text-[10px] font-sans font-medium">{{ 'badge.sold'|trans }}</span>
                                     {% else %}
-                                        <span class="px-2 py-0.5 bg-alma-gold text-white text-[10px] font-sans font-medium">Pièce unique</span>
+                                        <span class="px-2 py-0.5 bg-alma-gold text-white text-[10px] font-sans font-medium">{{ 'badge.unique'|trans }}</span>
                                     {% endif %}
                                     {% if product.isNew() %}
-                                        <span class="px-2 py-0.5 bg-alma-surface text-alma-text text-[10px] font-sans font-medium border border-alma-hover">Nouvelle</span>
+                                        <span class="px-2 py-0.5 bg-alma-surface text-alma-text text-[10px] font-sans font-medium border border-alma-hover">{{ 'badge.new'|trans }}</span>
                                     {% endif %}
                                 </div>
                             </div>
                             <div class="mt-3 flex justify-between items-start gap-2">
                                 <div>
                                     <h3 class="font-serif text-base text-alma-text group-hover:text-alma-gold transition-colors">
-                                        {{ product.name }}
+                                        {{ product|localized_name }}
                                     </h3>
                                     <p class="text-alma-text-muted text-xs mt-0.5">
-                                        {{ product.category.name }}
+                                        {{ product.category|localized_name }}
                                     </p>
                                 </div>
                                 <p class="font-sans font-semibold text-alma-text whitespace-nowrap">
                                     {% if product.isSoldOut %}
-                                        <span class="text-alma-text-muted text-xs">Sold</span>
+                                        <span class="text-alma-text-muted text-xs">{{ 'catalog.sold_label'|trans }}</span>
                                     {% else %}
                                         ${{ product.displayPrice | number_format(0) }}
                                     {% endif %}
@@ -122,7 +120,7 @@
                         <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({page: pagination.currentPageNumber - 1})) }}"
                            class="px-4 py-2 text-sm font-sans border border-alma-hover text-alma-text-muted
                                   hover:border-alma-gold hover:text-alma-text transition-colors">
-                            &larr; Previous
+                            {{ 'catalog.pagination_previous'|trans|raw }}
                         </a>
                     {% endif %}
 
@@ -146,7 +144,7 @@
                         <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({page: pagination.currentPageNumber + 1})) }}"
                            class="px-4 py-2 text-sm font-sans border border-alma-hover text-alma-text-muted
                                   hover:border-alma-gold hover:text-alma-text transition-colors">
-                            Next &rarr;
+                            {{ 'catalog.pagination_next'|trans|raw }}
                         </a>
                     {% endif %}
                 </nav>
@@ -156,19 +154,19 @@
             {# ── Empty state ── #}
             <div class="text-center py-20">
                 <p class="text-alma-gold text-4xl mb-4">✦</p>
-                <p class="font-serif text-2xl text-alma-text mb-2">No pieces found</p>
+                <p class="font-serif text-2xl text-alma-text mb-2">{{ 'catalog.empty_heading'|trans }}</p>
                 <p class="text-sm text-alma-text-muted mb-8">
                     {% if activeCategory %}
-                        No published products in this category yet.
+                        {{ 'catalog.empty_text_category'|trans }}
                     {% else %}
-                        Our collection is being curated. Check back soon.
+                        {{ 'catalog.empty_text'|trans }}
                     {% endif %}
                 </p>
                 {% if activeCategory %}
                     <a href="{{ path('shop_catalog') }}"
                        class="inline-block border border-alma-gold text-alma-gold px-8 py-3 font-sans text-sm
                               hover:bg-alma-gold hover:text-white transition-colors">
-                        View all jewelry
+                        {{ 'home.view_all'|trans }}
                     </a>
                 {% endif %}
             </div>

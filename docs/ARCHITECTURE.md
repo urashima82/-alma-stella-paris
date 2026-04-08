@@ -26,7 +26,8 @@ alma-stella/
 ├── src/
 │   ├── Controller/
 │   │   ├── Admin/            # EasyAdmin CRUD controllers
-│   │   └── Shop/             # Public-facing controllers
+│   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
+│   │   └── Shop/             # Public-facing controllers (locale-prefixed)
 │   │       ├── HomeController.php
 │   │       ├── CatalogController.php
 │   │       ├── ProductController.php
@@ -40,8 +41,10 @@ alma-stella/
 │   │   ├── BrevoMailer.php
 │   │   └── ShippingCalculator.php
 │   ├── Twig/
-│   │   └── CurrencyExtension.php
+│   │   ├── CurrencyExtension.php
+│   │   └── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
 │   └── EventSubscriber/
+│       └── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
 ├── templates/
 │   ├── admin/
 │   └── shop/

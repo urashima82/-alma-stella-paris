@@ -14,7 +14,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CatalogController extends AbstractController
 {
-    #[Route('/shop/{categorySlug?}', name: 'shop_catalog')]
+    #[Route(
+        path: ['en' => '/shop/{categorySlug}', 'fr' => '/boutique/{categorySlug}'],
+        name: 'shop_catalog',
+        defaults: ['categorySlug' => null],
+    )]
     public function index(
         Request $request,
         ProductRepository $productRepository,
@@ -26,7 +30,8 @@ class CatalogController extends AbstractController
         $activeCategory = null;
 
         if (null !== $categorySlug) {
-            $activeCategory = $categoryRepository->findOneBy(['slug' => $categorySlug]);
+            $slugField = 'fr' === $request->getLocale() ? 'slugFr' : 'slug';
+            $activeCategory = $categoryRepository->findOneBy([$slugField => $categorySlug]);
 
             if (null === $activeCategory) {
                 throw $this->createNotFoundException('Category not found.');

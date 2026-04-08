@@ -1,0 +1,114 @@
+# ── Navigation ──
+nav:
+    shop: "Boutique"
+    about: "À propos"
+
+# ── Meta ──
+meta:
+    default_title: "Alma Stella Paris — Porter le monde."
+    default_description: "Bijoux sélectionnés. Sourcés dans le monde entier. Portés au quotidien. Bijoux en acier inoxydable résistant à l'eau avec pierres naturelles."
+
+# ── Home page ──
+home:
+    hero_heading: "Porter le monde."
+    hero_subheading: "Wear the world."
+    hero_description: "Bijoux en acier inoxydable avec pierres naturelles. Résistants à l'eau. Sélectionnés entre Paris et Mexico. Portés au quotidien."
+    hero_cta: "Découvrir la collection"
+    icon_water: "Résistant à l'eau"
+    icon_stones: "Pierres naturelles"
+    icon_shipping: "Livraison mondiale"
+    featured_heading: "Coups de cœur"
+    featured_subtitle: "Nos favoris, sélectionnés pour vous."
+    view_all: "Voir tous les bijoux"
+    instagram_heading: "@alma_stella_paris"
+    instagram_subtitle: "Suivez-nous sur Instagram pour votre dose d'inspiration quotidienne."
+
+# ── Catalog page ──
+catalog:
+    title: "Boutique — Alma Stella Paris"
+    title_category: "%category% — Alma Stella Paris"
+    meta_description: "Découvrez la collection complète Alma Stella Paris. Bijoux en acier inoxydable avec pierres naturelles, sélectionnés entre Paris et Mexico."
+    meta_description_category: "Découvrez notre collection %category%. Bijoux en acier inoxydable avec pierres naturelles."
+    heading: "La Collection"
+    subtitle: "Bijoux sélectionnés. Sourcés dans le monde entier. Portés au quotidien."
+    filter_all: "Tout"
+    pagination_previous: "&larr; Précédent"
+    pagination_next: "Suivant &rarr;"
+    empty_heading: "Aucune pièce trouvée"
+    empty_text: "Notre collection est en cours de création. Revenez bientôt."
+    empty_text_category: "Aucun produit publié dans cette catégorie pour le moment."
+    sold_label: "Vendue"
+
+# ── Product badges ──
+badge:
+    sold: "Vendue"
+    unique: "Pièce unique"
+    new: "Nouveau"
+
+# ── Product detail page ──
+product:
+    breadcrumb_shop: "Boutique"
+    photo_coming_soon: "Photo à venir"
+    add_to_cart: "Ajouter au panier"
+    sold_out: "Épuisée"
+    shipping_heading: "Informations de livraison"
+    shipping_tier: "Catégorie d'expédition : <strong class=\"text-alma-text\">%tier%</strong>"
+    shipping_included: "Frais de livraison inclus dans le prix affiché (%cost% $)."
+    shipping_delivery: "Livraison estimée : 7 à 14 jours ouvrés dans le monde entier."
+    shipping_origin: "Expédié depuis la France ou le Mexique selon la disponibilité."
+    materials_heading: "Matériaux et entretien"
+    materials_steel: "Acier inoxydable résistant à l'eau avec placage or 18 carats."
+    materials_stones: "Pierres naturelles — chaque pièce est unique avec de subtiles variations."
+    materials_daily: "À porter au quotidien : douche, baignade et transpiration."
+    materials_care: "Essuyez délicatement avec un chiffon doux pour maintenir l'éclat."
+    material_badge_steel: "Acier inoxydable"
+    material_badge_stone: "Pierre naturelle"
+    material_badge_water: "Résistant à l'eau"
+    related_heading: "Portez-le avec"
+    related_subtitle: "Des pièces sélectionnées qui se marient à merveille."
+
+# ── About page ──
+about:
+    title: "À propos — Alma Stella Paris"
+    meta_description: "Alma Stella Paris est née de la passion d'Estelle pour la recherche de beaux bijoux résistants à l'eau entre Paris et Mexico."
+    heading: "Une histoire entre deux mondes."
+    paragraph_1: "Alma Stella Paris est née de la passion d'Estelle pour les voyages et la découverte de la beauté dans des lieux inattendus. Entre l'élégance de Paris et l'énergie vibrante du Mexique, chaque pièce est personnellement sourcée et choisie avec intention."
+    paragraph_2: "Nos bijoux sont faits pour être portés tous les jours — au bord de la mer, en ville, au marché. Résistants à l'eau, durables, et toujours beaux."
+    philosophy_label: "Notre philosophie"
+    philosophy_heading: "Ce en quoi nous croyons"
+    value_1_title: "Sélectionnés personnellement"
+    value_1_text: "Chaque pièce est sélectionnée à la main par Estelle lors de ses voyages entre Paris et le Mexique."
+    value_2_title: "Matériaux naturels"
+    value_2_text: "Turquoise, opale, quartz, pierre de lune, nacre — chaque pierre raconte sa propre histoire."
+    value_3_title: "Conçus pour durer"
+    value_3_text: "Acier inoxydable résistant à l'eau avec placage or 18 carats. Portez-les partout, tous les jours."
+    banner_subtitle: "Là où l'énergie du monde rencontre l'artisanat intemporel."
+
+# ── Footer ──
+footer:
+    tagline: "Bijoux sélectionnés. Sourcés dans le monde entier. Portés au quotidien."
+    tagline_sub: "Écrivez votre histoire."
+    navigate: "Naviguer"
+    our_story: "Notre histoire"
+    shipping_returns: "Livraison et retours"
+    contact: "Contact"
+    connect: "Connecter"
+    copyright: "© %year% Alma Stella Paris. Tous droits réservés."
+    motto: '« Porter le monde. » ✦'
+
+# ── Error pages ──
+error:
+    404_title: "Page introuvable — Alma Stella Paris"
+    404_heading: "Page introuvable"
+    404_text: "La page que vous recherchez n'existe pas ou a été déplacée. Retrouvons votre chemin."
+    404_home: "Retour à l'accueil"
+    404_shop: "Découvrir la collection"
+    500_title: "Un problème est survenu — Alma Stella Paris"
+    500_heading: "Oups, un problème est survenu"
+    500_text: "Nous rencontrons un problème temporaire. Veuillez réessayer dans quelques instants."
+    500_home: "Retour à l'accueil"
+
+# ── Language switcher ──
+locale:
+    en: "EN"
+    fr: "FR"

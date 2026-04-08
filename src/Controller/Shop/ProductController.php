@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace App\Controller\Shop;
 
-use App\Entity\Product;
-use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ProductController extends AbstractController
 {
-    #[Route('/product/{slug}', name: 'shop_product')]
-    public function show(#[MapEntity(mapping: ['slug' => 'slug'])] Product $product): Response
+    #[Route(
+        path: ['en' => '/product/{slug}', 'fr' => '/produit/{slug}'],
+        name: 'shop_product',
+    )]
+    public function show(string $slug, Request $request, ProductRepository $productRepository): Response
     {
-        if (!$product->isVisibleInCatalog()) {
+        $slugField = 'fr' === $request->getLocale() ? 'slugFr' : 'slug';
+        $product = $productRepository->findOneBy([$slugField => $slug]);
+
+        if (null === $product || !$product->isVisibleInCatalog()) {
             throw $this->createNotFoundException('Product not found.');
         }
 

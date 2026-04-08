@@ -42,6 +42,7 @@ class ProductCrudController extends AbstractCrudController
         yield TextField::new('name', 'Name (EN)');
         yield TextField::new('nameFr', 'Nom (FR)')->hideOnIndex();
         yield SlugField::new('slug')->setTargetFieldName('name')->hideOnIndex();
+        yield SlugField::new('slugFr', 'Slug (FR)')->setTargetFieldName('nameFr')->hideOnIndex();
 
         yield TextareaField::new('description', 'Description (EN)')->hideOnIndex();
         yield TextareaField::new('descriptionFr', 'Description (FR)')->hideOnIndex();
