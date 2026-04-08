@@ -33,7 +33,7 @@
                     <div class="flex items-center gap-6">
                         {# Language switcher #}
                         {% set other_locale = app.request.locale == 'en' ? 'fr' : 'en' %}
-                        <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': other_locale})) }}"
+                        <a href="{% block language_switch_href %}{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': other_locale})) }}{% endblock %}"
                            class="text-xs font-sans uppercase tracking-widest text-alma-text-muted hover:text-alma-gold transition-colors"
                            title="{{ other_locale == 'fr' ? 'Français' : 'English' }}">
                             {{ ('locale.' ~ other_locale)|trans }}

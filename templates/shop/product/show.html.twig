@@ -10,6 +10,8 @@
     <link rel="alternate" hreflang="x-default" href="{{ url('shop_product', {'slug': product.slug, '_locale': 'en'}) }}">
 {% endblock %}
 
+{% block language_switch_href %}{{ app.request.locale == 'en' ? path('shop_product', {slug: product.slugFr, '_locale': 'fr'}) : path('shop_product', {slug: product.slug, '_locale': 'en'}) }}{% endblock %}
+
 {% block body %}
     <div class="max-w-7xl mx-auto px-6 py-10 md:py-16">
 

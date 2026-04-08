@@ -1,5 +1,24 @@
 {% extends 'shop/base.html.twig' %}
 
+{% block language_switch_href %}
+    {%- set other_locale = app.request.locale == 'en' ? 'fr' : 'en' -%}
+    {%- if activeCategory -%}
+        {{ path('shop_catalog', {categorySlug: other_locale == 'fr' ? activeCategory.slugFr : activeCategory.slug, '_locale': other_locale}) }}
+    {%- else -%}
+        {{ path('shop_catalog', {'_locale': other_locale}) }}
+    {%- endif -%}
+{% endblock %}
+
+{% block hreflang %}
+    {% if activeCategory %}
+        <link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {categorySlug: activeCategory.slug, '_locale': 'en'}) }}">
+        <link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {categorySlug: activeCategory.slugFr, '_locale': 'fr'}) }}">
+        <link rel="alternate" hreflang="x-default" href="{{ url('shop_catalog', {categorySlug: activeCategory.slug, '_locale': 'en'}) }}">
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
 {% block title %}
     {% if activeCategory %}
         {{ 'catalog.title_category'|trans({'%category%': activeCategory|localized_name}) }}
