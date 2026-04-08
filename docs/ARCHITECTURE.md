@@ -13,7 +13,8 @@ alma-stella/
 │   ├── styles/
 │   │   └── app.css          # Tailwind entry point
 │   └── controllers/          # Stimulus controllers
-│       └── currency_selector_controller.js  # Dropdown toggle for currency selector
+│       ├── currency_selector_controller.js  # Dropdown toggle for currency selector
+│       └── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
 ├── config/
 ├── docs/
 │   └── design/
@@ -33,12 +34,14 @@ alma-stella/
 │   │       ├── CatalogController.php
 │   │       ├── ProductController.php
 │   │       ├── CurrencyController.php  # POST /currency/switch — changes active currency
+│   │       ├── CartController.php      # Cart API: add/remove/content (JSON responses)
 │   │       └── AboutController.php
 │   ├── Entity/
 │   ├── Enum/
 │   ├── Repository/
 │   ├── Service/
 │   │   ├── CurrencyConverter.php
+│   │   ├── CartManager.php          # Session-based cart (add/remove/get products)
 │   │   ├── SocialPublisher.php
 │   │   ├── BrevoMailer.php
 │   │   └── ShippingCalculator.php

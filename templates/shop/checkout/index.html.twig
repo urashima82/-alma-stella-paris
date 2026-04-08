@@ -1,0 +1,219 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'checkout.title'|trans }}{% endblock %}
+
+{% block hreflang %}
+    <link rel="alternate" hreflang="en" href="{{ url('shop_checkout', {'_locale': 'en'}) }}">
+    <link rel="alternate" hreflang="fr" href="{{ url('shop_checkout_fr', {'_locale': 'fr'}) }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url('shop_checkout', {'_locale': 'en'}) }}">
+{% endblock %}
+
+{% block language_switch_href %}
+    {{ app.request.locale == 'en' ? path('shop_checkout_fr', {'_locale': 'fr'}) : path('shop_checkout', {'_locale': 'en'}) }}
+{% endblock %}
+
+{% block body %}
+    <div class="max-w-7xl mx-auto px-6 py-10 md:py-16">
+        <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-10">
+            {{ 'checkout.heading'|trans }}
+        </h1>
+
+        <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
+
+            {# ── Left: Customer & shipping forms (2 cols) ── #}
+            <div class="lg:col-span-2 space-y-10">
+
+                {# Customer info #}
+                <section>
+                    <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'checkout.customer_info'|trans }}</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="customer_name" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_name'|trans }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="customer_name" name="customer_name"
+                                   value="{{ formData.customer_name }}"
+                                   required
+                                   class="w-full border {{ errors.customer_name is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                          bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                            {% if errors.customer_name is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.customer_name|trans }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="customer_email" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_email'|trans }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="email" id="customer_email" name="customer_email"
+                                   value="{{ formData.customer_email }}"
+                                   required
+                                   class="w-full border {{ errors.customer_email is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                          bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                            {% if errors.customer_email is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.customer_email|trans }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                {# Shipping address #}
+                <section>
+                    <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'checkout.shipping_address'|trans }}</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="address_line1" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_address'|trans }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="address_line1" name="address_line1"
+                                   value="{{ formData.address_line1 }}"
+                                   required
+                                   class="w-full border {{ errors.address_line1 is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                          bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                            {% if errors.address_line1 is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.address_line1|trans }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="address_line2" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_address2'|trans }}
+                            </label>
+                            <input type="text" id="address_line2" name="address_line2"
+                                   value="{{ formData.address_line2 }}"
+                                   class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                        </div>
+                        <div>
+                            <label for="city" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_city'|trans }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="city" name="city"
+                                   value="{{ formData.city }}"
+                                   required
+                                   class="w-full border {{ errors.city is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                          bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                            {% if errors.city is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.city|trans }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="state" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_state'|trans }}
+                            </label>
+                            <input type="text" id="state" name="state"
+                                   value="{{ formData.state }}"
+                                   class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                        </div>
+                        <div>
+                            <label for="postal_code" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_postal_code'|trans }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="postal_code" name="postal_code"
+                                   value="{{ formData.postal_code }}"
+                                   required
+                                   class="w-full border {{ errors.postal_code is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                          bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                            {% if errors.postal_code is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.postal_code|trans }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="country" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_country'|trans }} <span class="text-red-500">*</span>
+                            </label>
+                            <select id="country" name="country"
+                                    required
+                                    class="w-full border {{ errors.country is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                           bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                           focus:border-alma-gold focus:outline-none transition-colors">
+                                <option value="">{{ 'checkout.select_country'|trans }}</option>
+                                {% for code, name in countries %}
+                                    <option value="{{ code }}" {{ formData.country == code ? 'selected' : '' }}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if errors.country is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.country|trans }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                {# Submit (mobile) #}
+                <div class="lg:hidden">
+                    <button type="submit"
+                            class="w-full bg-alma-gold text-white px-8 py-4 font-sans text-sm font-medium
+                                   hover:bg-alma-gold/90 transition-colors cursor-pointer">
+                        {{ 'checkout.continue_to_payment'|trans }}
+                    </button>
+                </div>
+            </div>
+
+            {# ── Right: Order summary (1 col) ── #}
+            <aside class="lg:col-span-1">
+                <div class="bg-alma-surface border border-alma-hover p-6 sticky top-6">
+                    <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'checkout.order_summary'|trans }}</h2>
+
+                    <div class="space-y-4 mb-6">
+                        {% for item in items %}
+                            <div class="flex gap-3">
+                                <div class="shrink-0 w-16 h-16 bg-white border border-alma-hover overflow-hidden">
+                                    {% if item.product.images is not empty %}
+                                        <img src="{{ asset('uploads/products/' ~ item.product.images.first.filename) }}"
+                                             alt="{{ item.product|localized_name }}"
+                                             class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center text-alma-gold">✦</div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-serif text-sm text-alma-text truncate">{{ item.product|localized_name }}</p>
+                                    <p class="font-sans text-sm font-semibold text-alma-text mt-0.5">
+                                        {{ item.priceConverted|price_format(currency) }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="border-t border-alma-hover pt-4 space-y-2">
+                        <div class="flex justify-between text-sm font-sans">
+                            <span class="text-alma-text-muted">{{ 'checkout.shipping_label'|trans }}</span>
+                            <span class="text-alma-text">{{ 'checkout.shipping_included'|trans }}</span>
+                        </div>
+                        <div class="flex justify-between font-sans">
+                            <span class="text-alma-text font-medium">{{ 'checkout.total'|trans }}</span>
+                            <span class="text-lg font-semibold text-alma-text">
+                                {{ subtotalConverted|price_format(currency) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if currency != 'USD' %}
+                        <p class="text-xs text-alma-text-muted mt-3">
+                            {{ 'currency.disclaimer'|trans({'%currency%': currency}) }}
+                        </p>
+                    {% endif %}
+
+                    {# Submit (desktop) #}
+                    <div class="hidden lg:block mt-6">
+                        <button type="submit"
+                                class="w-full bg-alma-gold text-white px-8 py-4 font-sans text-sm font-medium
+                                       hover:bg-alma-gold/90 transition-colors cursor-pointer">
+                            {{ 'checkout.continue_to_payment'|trans }}
+                        </button>
+                    </div>
+
+                    <a href="{{ path('shop_catalog') }}"
+                       class="block text-center mt-4 text-sm font-sans text-alma-text-muted hover:text-alma-gold transition-colors">
+                        {{ 'cart.continue_shopping'|trans }}
+                    </a>
+                </div>
+            </aside>
+        </form>
+    </div>
+{% endblock %}

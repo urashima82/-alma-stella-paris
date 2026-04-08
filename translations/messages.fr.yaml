@@ -50,6 +50,7 @@ product:
     breadcrumb_shop: "Boutique"
     photo_coming_soon: "Photo à venir"
     add_to_cart: "Ajouter au panier"
+    in_cart: "Dans votre panier"
     sold_out: "Épuisée"
     shipping_heading: "Informations de livraison"
     shipping_tier: "Catégorie d'expédition : <strong class=\"text-alma-text\">%tier%</strong>"
@@ -107,6 +108,63 @@ error:
     500_heading: "Oups, un problème est survenu"
     500_text: "Nous rencontrons un problème temporaire. Veuillez réessayer dans quelques instants."
     500_home: "Retour à l'accueil"
+
+# ── Cart ──
+cart:
+    label: "Panier"
+    title: "Votre Panier"
+    close: "Fermer le panier"
+    empty_title: "Votre panier est vide"
+    empty_subtitle: "Découvrez nos pièces uniques, chacune sélectionnée personnellement."
+    continue_shopping: "Continuer vos achats"
+    subtotal: "Sous-total"
+    shipping_note: "Livraison incluse dans les prix affichés."
+    checkout: "Passer la commande"
+
+# ── Checkout ──
+checkout:
+    title: "Paiement — Alma Stella Paris"
+    heading: "Paiement"
+    customer_info: "Vos informations"
+    label_name: "Nom complet"
+    label_email: "Adresse e-mail"
+    shipping_address: "Adresse de livraison"
+    label_address: "Adresse"
+    label_address2: "Appartement, suite, etc. (optionnel)"
+    label_city: "Ville"
+    label_state: "État / Province"
+    label_postal_code: "Code postal"
+    label_country: "Pays"
+    select_country: "Sélectionnez un pays…"
+    order_summary: "Récapitulatif"
+    shipping_label: "Livraison"
+    shipping_included: "Incluse"
+    total: "Total"
+    continue_to_payment: "Continuer vers le paiement"
+    payment_title: "Paiement — Alma Stella Paris"
+    payment_heading: "Paiement"
+    payment_subtitle: "Commande %reference% — finalisez votre achat."
+    payment_loading: "Chargement du formulaire de paiement…"
+    order_reference: "Référence de commande"
+    charged_in_usd: "Vous serez débité(e) de %amount% (USD)."
+    pay_now: "Payer %amount%"
+    back_to_checkout: "Retour au paiement"
+    error:
+        name_required: "Veuillez entrer votre nom."
+        email_invalid: "Veuillez entrer une adresse e-mail valide."
+        address_required: "Veuillez entrer votre adresse de livraison."
+        city_required: "Veuillez entrer votre ville."
+        postal_code_required: "Veuillez entrer votre code postal."
+        country_required: "Veuillez sélectionner votre pays."
+
+# ── Confirmation de commande ──
+confirmation:
+    title: "Commande confirmée — Alma Stella Paris"
+    heading: "Merci ! ✦ Votre commande est confirmée."
+    subtitle: "Un e-mail de confirmation a été envoyé à %email%."
+    items_count: "Articles"
+    delivery_note: "Livraison estimée : 7 à 14 jours ouvrés. Votre commande est expédiée depuis la France ou le Mexique selon la disponibilité."
+    continue_shopping: "Continuer vos achats"
 
 # ── Currency ──
 currency:

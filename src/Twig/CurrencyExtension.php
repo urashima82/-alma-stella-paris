@@ -22,6 +22,7 @@ class CurrencyExtension extends AbstractExtension
     {
         return [
             new TwigFilter('price', $this->formatPrice(...)),
+            new TwigFilter('price_format', $this->formatPriceRaw(...)),
         ];
     }
 
@@ -45,6 +46,23 @@ class CurrencyExtension extends AbstractExtension
 
         // Format with 2 decimals, strip trailing .00
         $formatted = \number_format($converted, 2, '.', ',');
+
+        if (\str_ends_with($formatted, '.00')) {
+            $formatted = \substr($formatted, 0, -3);
+        }
+
+        return $symbol.$formatted;
+    }
+
+    /**
+     * Format an already-converted amount with the currency symbol (no conversion).
+     */
+    public function formatPriceRaw(float $amount, ?string $currency = null): string
+    {
+        $currency = $currency ?? $this->getCurrentCurrency();
+        $symbol = CurrencyConverter::getSymbol($currency);
+
+        $formatted = \number_format($amount, 2, '.', ',');
 
         if (\str_ends_with($formatted, '.00')) {
             $formatted = \substr($formatted, 0, -3);

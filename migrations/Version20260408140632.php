@@ -28,6 +28,12 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('ALTER TABLE product_related ADD CONSTRAINT FK_B18E6B203DF63ED7 FOREIGN KEY (product_source) REFERENCES product (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE product_related ADD CONSTRAINT FK_B18E6B2024136E58 FOREIGN KEY (product_target) REFERENCES product (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE product_image ADD CONSTRAINT FK_64617F034584665A FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE');
+
+        // Order tables
+        $this->addSql('CREATE TABLE `order` (id INT AUTO_INCREMENT NOT NULL, reference VARCHAR(20) NOT NULL, status VARCHAR(20) NOT NULL, customer_email VARCHAR(255) NOT NULL, customer_name VARCHAR(255) NOT NULL, shipping_address_line1 VARCHAR(255) NOT NULL, shipping_address_line2 VARCHAR(255) DEFAULT NULL, shipping_city VARCHAR(255) NOT NULL, shipping_state VARCHAR(100) DEFAULT NULL, shipping_postal_code VARCHAR(20) NOT NULL, shipping_country VARCHAR(2) NOT NULL, origin_country VARCHAR(2) DEFAULT NULL, total_usd NUMERIC(10, 2) NOT NULL, stripe_payment_intent_id VARCHAR(255) DEFAULT NULL, tracking_number VARCHAR(255) DEFAULT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, UNIQUE INDEX UNIQ_F5299398AEA34913 (reference), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE order_item (id INT AUTO_INCREMENT NOT NULL, order_id INT NOT NULL, product_id INT DEFAULT NULL, product_name VARCHAR(255) NOT NULL, product_price NUMERIC(8, 2) NOT NULL, shipping_cost NUMERIC(8, 2) NOT NULL, INDEX IDX_52EA1F098D9F6D38 (order_id), INDEX IDX_52EA1F094584665A (product_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_52EA1F098D9F6D38 FOREIGN KEY (order_id) REFERENCES `order` (id)');
+        $this->addSql('ALTER TABLE order_item ADD CONSTRAINT FK_52EA1F094584665A FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE SET NULL');
     }
 
     public function down(Schema $schema): void
@@ -37,6 +43,10 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('ALTER TABLE product_related DROP FOREIGN KEY FK_B18E6B203DF63ED7');
         $this->addSql('ALTER TABLE product_related DROP FOREIGN KEY FK_B18E6B2024136E58');
         $this->addSql('ALTER TABLE product_image DROP FOREIGN KEY FK_64617F034584665A');
+        $this->addSql('ALTER TABLE order_item DROP FOREIGN KEY FK_52EA1F098D9F6D38');
+        $this->addSql('ALTER TABLE order_item DROP FOREIGN KEY FK_52EA1F094584665A');
+        $this->addSql('DROP TABLE `order`');
+        $this->addSql('DROP TABLE order_item');
         $this->addSql('DROP TABLE product');
         $this->addSql('DROP TABLE product_related');
         $this->addSql('DROP TABLE product_category');

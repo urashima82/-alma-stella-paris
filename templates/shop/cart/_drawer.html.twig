@@ -1,0 +1,62 @@
+{# Cart drawer — included in base.html.twig #}
+
+{# Overlay #}
+<div class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity"
+     data-cart-drawer-target="overlay"
+     data-action="click->cart-drawer#close"></div>
+
+{# Drawer panel #}
+<aside class="fixed top-0 right-0 h-full w-full max-w-md bg-alma-bg z-50
+              transform translate-x-full transition-transform duration-300 ease-in-out
+              flex flex-col shadow-2xl"
+       data-cart-drawer-target="drawer">
+
+    {# Header #}
+    <div class="flex items-center justify-between px-6 py-5 border-b border-alma-hover">
+        <h2 class="font-serif text-lg text-alma-text">{{ 'cart.title'|trans }}</h2>
+        <button type="button"
+                class="text-alma-text-muted hover:text-alma-text transition-colors p-1"
+                data-action="click->cart-drawer#close"
+                aria-label="{{ 'cart.close'|trans }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+    {# Items list (populated by Stimulus) #}
+    <div class="flex-1 overflow-y-auto px-6" data-cart-drawer-target="itemList"></div>
+
+    {# Empty state #}
+    <div class="flex-1 flex flex-col items-center justify-center px-6 hidden"
+         data-cart-drawer-target="emptyState">
+        <p class="text-alma-gold text-4xl mb-4">✦</p>
+        <p class="font-serif text-lg text-alma-text mb-2">{{ 'cart.empty_title'|trans }}</p>
+        <p class="text-sm text-alma-text-muted text-center mb-6">{{ 'cart.empty_subtitle'|trans }}</p>
+        <a href="{{ path('shop_catalog') }}"
+           class="text-sm font-sans text-alma-gold hover:underline transition-colors"
+           data-action="click->cart-drawer#close">
+            {{ 'cart.continue_shopping'|trans }}
+        </a>
+    </div>
+
+    {# Footer with subtotal + checkout #}
+    <div class="border-t border-alma-hover px-6 py-5 hidden" data-cart-drawer-target="footer">
+        <div class="flex justify-between items-center mb-4">
+            <span class="font-sans text-sm text-alma-text-muted">{{ 'cart.subtotal'|trans }}</span>
+            <span class="font-sans text-lg font-semibold text-alma-text" data-cart-drawer-target="subtotal">—</span>
+        </div>
+        <p class="text-xs text-alma-text-muted mb-4">{{ 'cart.shipping_note'|trans }}</p>
+        <a href="{{ path('shop_checkout') }}"
+           class="block w-full bg-alma-gold text-white text-center px-6 py-3.5 font-sans text-sm font-medium
+                  hover:bg-alma-gold/90 transition-colors"
+           data-cart-drawer-target="checkoutLink">
+            {{ 'cart.checkout'|trans }}
+        </a>
+        <button type="button"
+                class="block w-full text-center mt-3 text-sm font-sans text-alma-text-muted hover:text-alma-gold transition-colors"
+                data-action="click->cart-drawer#close">
+            {{ 'cart.continue_shopping'|trans }}
+        </button>
+    </div>
+</aside>

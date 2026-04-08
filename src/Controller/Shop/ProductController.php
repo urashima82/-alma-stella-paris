@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Shop;
 
 use App\Repository\ProductRepository;
+use App\Service\CartManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,7 @@ class ProductController extends AbstractController
         path: ['en' => '/product/{slug}', 'fr' => '/produit/{slug}'],
         name: 'shop_product',
     )]
-    public function show(string $slug, Request $request, ProductRepository $productRepository): Response
+    public function show(string $slug, Request $request, ProductRepository $productRepository, CartManager $cartManager): Response
     {
         $slugField = 'fr' === $request->getLocale() ? 'slugFr' : 'slug';
         $product = $productRepository->findOneBy([$slugField => $slug]);
@@ -27,6 +28,7 @@ class ProductController extends AbstractController
 
         return $this->render('shop/product/show.html.twig', [
             'product' => $product,
+            'isInCart' => null !== $product->getId() && $cartManager->contains($product->getId()),
         ]);
     }
 }

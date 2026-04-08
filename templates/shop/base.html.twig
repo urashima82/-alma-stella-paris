@@ -19,7 +19,10 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body class="bg-alma-bg text-alma-text font-sans antialiased">
+    <body class="bg-alma-bg text-alma-text font-sans antialiased"
+          data-controller="cart-drawer"
+          data-cart-drawer-content-url-value="{{ path('cart_content') }}"
+          data-cart-drawer-locale-value="{{ app.request.locale }}">
         {% block header %}
             <header class="border-b border-alma-gold-muted">
                 <nav class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
@@ -63,10 +66,16 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        <button class="text-sm hover:text-alma-gold transition-colors" aria-label="Shopping cart">
+                        {# Cart button #}
+                        <button class="relative text-sm hover:text-alma-gold transition-colors"
+                                data-action="click->cart-drawer#open"
+                                aria-label="{{ 'cart.label'|trans }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                             </svg>
+                            <span class="absolute -top-1.5 -right-1.5 bg-alma-gold text-white text-[10px] font-sans font-medium
+                                        w-4 h-4 rounded-full flex items-center justify-center hidden"
+                                  data-cart-drawer-target="badge"></span>
                         </button>
                     </div>
                 </nav>
@@ -121,5 +130,8 @@
                 </div>
             </footer>
         {% endblock %}
+
+        {# Cart drawer #}
+        {% include 'shop/cart/_drawer.html.twig' %}
     </body>
 </html>

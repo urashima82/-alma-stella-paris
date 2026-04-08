@@ -1,0 +1,76 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'confirmation.title'|trans }}{% endblock %}
+
+{% block hreflang %}
+    <link rel="alternate" hreflang="en" href="{{ url('shop_order_confirmation', {'reference': order.reference, '_locale': 'en'}) }}">
+    <link rel="alternate" hreflang="fr" href="{{ url('shop_order_confirmation_fr', {'reference': order.reference, '_locale': 'fr'}) }}">
+{% endblock %}
+
+{% block body %}
+    <div class="max-w-2xl mx-auto px-6 py-10 md:py-20 text-center">
+        {# Success icon #}
+        <p class="text-alma-gold text-5xl mb-6">✦</p>
+
+        <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+            {{ 'confirmation.heading'|trans }}
+        </h1>
+        <p class="font-sans text-sm text-alma-text-muted mb-10">
+            {{ 'confirmation.subtitle'|trans({'%email%': order.customerEmail}) }}
+        </p>
+
+        {# Order details #}
+        <div class="bg-alma-surface border border-alma-hover p-6 text-left mb-8 max-w-md mx-auto">
+            <div class="space-y-3">
+                <div class="flex justify-between text-sm font-sans">
+                    <span class="text-alma-text-muted">{{ 'checkout.order_reference'|trans }}</span>
+                    <span class="font-medium text-alma-text">{{ order.reference }}</span>
+                </div>
+                <div class="flex justify-between text-sm font-sans">
+                    <span class="text-alma-text-muted">{{ 'confirmation.items_count'|trans }}</span>
+                    <span class="text-alma-text">{{ order.items|length }}</span>
+                </div>
+                <div class="border-t border-alma-hover pt-3 flex justify-between font-sans">
+                    <span class="text-alma-text font-medium">{{ 'checkout.total'|trans }}</span>
+                    <span class="text-lg font-semibold text-alma-text">
+                        {{ totalConverted|price_format(currency) }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {# Order items #}
+        <div class="max-w-md mx-auto mb-10">
+            {% for item in order.items %}
+                <div class="flex gap-3 py-3 {{ not loop.last ? 'border-b border-alma-hover' : '' }}">
+                    {% if item.product and item.product.images is not empty %}
+                        <div class="shrink-0 w-14 h-14 bg-alma-surface border border-alma-hover overflow-hidden">
+                            <img src="{{ asset('uploads/products/' ~ item.product.images.first.filename) }}"
+                                 alt="{{ item.productName }}"
+                                 class="w-full h-full object-cover">
+                        </div>
+                    {% else %}
+                        <div class="shrink-0 w-14 h-14 bg-alma-surface border border-alma-hover flex items-center justify-center text-alma-gold">✦</div>
+                    {% endif %}
+                    <div class="flex-1 text-left">
+                        <p class="font-serif text-sm text-alma-text">{{ item.productName }}</p>
+                        <p class="font-sans text-xs text-alma-text-muted mt-0.5">
+                            {{ item.lineTotal|price }}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {# Delivery note #}
+        <div class="bg-alma-surface border border-alma-hover p-5 max-w-md mx-auto mb-10">
+            <p class="text-sm text-alma-text">{{ 'confirmation.delivery_note'|trans }}</p>
+        </div>
+
+        <a href="{{ path('shop_catalog') }}"
+           class="inline-block border border-alma-gold text-alma-gold px-8 py-3 font-sans text-sm
+                  hover:bg-alma-gold hover:text-white transition-colors">
+            {{ 'confirmation.continue_shopping'|trans }}
+        </a>
+    </div>
+{% endblock %}

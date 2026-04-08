@@ -192,26 +192,26 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 6-8h*
 
 ### Tasks
-- [ ] Cart stored in session (no login required at launch)
-- [ ] Cart drawer (slide-in, Stimulus controller):
+- [x] Cart stored in session (no login required at launch)
+- [x] Cart drawer (slide-in, Stimulus controller):
   - Item list with thumbnails
   - No quantity selector (pièce unique = always 1)
   - Item removal
   - Subtotal in selected currency
-- [ ] Checkout page (`/checkout`):
+- [x] Checkout page (`/checkout`):
   - Customer info form (name, email)
   - Shipping address form with country selector
   - Order summary
   - Stripe Elements payment form (card + Apple Pay + Google Pay)
 - [ ] Stripe PaymentIntent creation (server-side)
-- [ ] Order entity created on successful payment
-- [ ] Confirmation page (`/order/{reference}/confirmation`):
+- [x] Order entity created on successful payment
+- [x] Confirmation page (`/order/{reference}/confirmation`):
   - "Merci ! ✦ Your order is confirmed." message
   - Order summary
   - Estimated delivery note
 - [ ] Brevo order confirmation email sent automatically
 - [ ] On successful payment: set `isSoldOut = true` + `soldAt = now()` on purchased products
-- [ ] Prevent adding sold-out product to cart (server-side check)
+- [x] Prevent adding sold-out product to cart (server-side check)
 
 ### Definition of Done
 - Add product to cart → drawer opens and shows item
