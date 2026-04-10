@@ -6,7 +6,7 @@ nav:
 
 # ── Meta ──
 meta:
-    default_title: "Alma Stella Paris — Wear the world."
+    default_title: "Alma Stella Paris | Wear the world."
     default_description: "Curated jewelry. Sourced globally. Worn daily. Water-resistant stainless steel jewelry with natural stones."
 
 # ── Home page ──
@@ -26,8 +26,8 @@ home:
 
 # ── Catalog page ──
 catalog:
-    title: "Shop — Alma Stella Paris"
-    title_category: "%category% — Alma Stella Paris"
+    title: "Shop | Alma Stella Paris"
+    title_category: "%category% | Alma Stella Paris"
     meta_description: "Shop the full Alma Stella Paris collection. Curated stainless steel jewelry with natural stones, sourced between Paris and Mexico."
     meta_description_category: "Discover our %category% collection. Curated stainless steel jewelry with natural stones."
     heading: "The Collection"
@@ -71,7 +71,7 @@ product:
 
 # ── About page ──
 about:
-    title: "About — Alma Stella Paris"
+    title: "About | Alma Stella Paris"
     meta_description: "Alma Stella Paris was born from Estelle's passion for sourcing beautiful, water-resistant jewelry between Paris and Mexico City."
     heading: "A story between two worlds."
     paragraph_1: "Alma Stella Paris was born from Estelle's passion for traveling and finding beauty in unexpected places. Between the elegance of Paris and the vibrant energy of Mexico, each piece is personally sourced and chosen with intention."
@@ -100,12 +100,12 @@ footer:
 
 # ── Error pages ──
 error:
-    404_title: "Page not found — Alma Stella Paris"
+    404_title: "Page not found | Alma Stella Paris"
     404_heading: "Page not found"
     404_text: "The page you're looking for doesn't exist or has been moved. Let's get you back on track."
     404_home: "Back to home"
     404_shop: "Shop the collection"
-    500_title: "Something went wrong — Alma Stella Paris"
+    500_title: "Something went wrong | Alma Stella Paris"
     500_heading: "Oops, something went wrong"
     500_text: "We're experiencing a temporary issue. Please try again in a few moments."
     500_home: "Back to home"
@@ -124,7 +124,7 @@ cart:
 
 # ── Checkout ──
 checkout:
-    title: "Checkout — Alma Stella Paris"
+    title: "Checkout | Alma Stella Paris"
     heading: "Checkout"
     customer_info: "Your information"
     label_name: "Full name"
@@ -142,7 +142,7 @@ checkout:
     shipping_included: "Included"
     total: "Total"
     continue_to_payment: "Continue to payment"
-    payment_title: "Payment — Alma Stella Paris"
+    payment_title: "Payment | Alma Stella Paris"
     payment_heading: "Payment"
     payment_subtitle: "Order %reference% — complete your purchase."
     payment_loading: "Loading payment form…"
@@ -161,7 +161,7 @@ checkout:
 
 # ── Order confirmation ──
 confirmation:
-    title: "Order confirmed — Alma Stella Paris"
+    title: "Order confirmed | Alma Stella Paris"
     heading: "Merci ! ✦ Your order is confirmed."
     subtitle: "A confirmation email has been sent to %email%."
     items_count: "Items"

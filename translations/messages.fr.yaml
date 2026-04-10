@@ -6,7 +6,7 @@ nav:
 
 # ── Meta ──
 meta:
-    default_title: "Alma Stella Paris — Porter le monde."
+    default_title: "Alma Stella Paris | Porter le monde."
     default_description: "Bijoux sélectionnés. Sourcés dans le monde entier. Portés au quotidien. Bijoux en acier inoxydable résistant à l'eau avec pierres naturelles."
 
 # ── Home page ──
@@ -26,8 +26,8 @@ home:
 
 # ── Catalog page ──
 catalog:
-    title: "Boutique — Alma Stella Paris"
-    title_category: "%category% — Alma Stella Paris"
+    title: "Boutique | Alma Stella Paris"
+    title_category: "%category% | Alma Stella Paris"
     meta_description: "Découvrez la collection complète Alma Stella Paris. Bijoux en acier inoxydable avec pierres naturelles, sélectionnés entre Paris et Mexico."
     meta_description_category: "Découvrez notre collection %category%. Bijoux en acier inoxydable avec pierres naturelles."
     heading: "La Collection"
@@ -71,7 +71,7 @@ product:
 
 # ── About page ──
 about:
-    title: "À propos — Alma Stella Paris"
+    title: "À propos | Alma Stella Paris"
     meta_description: "Alma Stella Paris est née de la passion d'Estelle pour la recherche de beaux bijoux résistants à l'eau entre Paris et Mexico."
     heading: "Une histoire entre deux mondes."
     paragraph_1: "Alma Stella Paris est née de la passion d'Estelle pour les voyages et la découverte de la beauté dans des lieux inattendus. Entre l'élégance de Paris et l'énergie vibrante du Mexique, chaque pièce est personnellement sourcée et choisie avec intention."
@@ -100,12 +100,12 @@ footer:
 
 # ── Error pages ──
 error:
-    404_title: "Page introuvable — Alma Stella Paris"
+    404_title: "Page introuvable | Alma Stella Paris"
     404_heading: "Page introuvable"
     404_text: "La page que vous recherchez n'existe pas ou a été déplacée. Retrouvons votre chemin."
     404_home: "Retour à l'accueil"
     404_shop: "Découvrir la collection"
-    500_title: "Un problème est survenu — Alma Stella Paris"
+    500_title: "Un problème est survenu | Alma Stella Paris"
     500_heading: "Oups, un problème est survenu"
     500_text: "Nous rencontrons un problème temporaire. Veuillez réessayer dans quelques instants."
     500_home: "Retour à l'accueil"
@@ -124,7 +124,7 @@ cart:
 
 # ── Checkout ──
 checkout:
-    title: "Paiement — Alma Stella Paris"
+    title: "Paiement | Alma Stella Paris"
     heading: "Paiement"
     customer_info: "Vos informations"
     label_name: "Nom complet"
@@ -142,7 +142,7 @@ checkout:
     shipping_included: "Incluse"
     total: "Total"
     continue_to_payment: "Continuer vers le paiement"
-    payment_title: "Paiement — Alma Stella Paris"
+    payment_title: "Paiement | Alma Stella Paris"
     payment_heading: "Paiement"
     payment_subtitle: "Commande %reference% — finalisez votre achat."
     payment_loading: "Chargement du formulaire de paiement…"
@@ -161,7 +161,7 @@ checkout:
 
 # ── Confirmation de commande ──
 confirmation:
-    title: "Commande confirmée — Alma Stella Paris"
+    title: "Commande confirmée | Alma Stella Paris"
     heading: "Merci ! ✦ Votre commande est confirmée."
     subtitle: "Un e-mail de confirmation a été envoyé à %email%."
     items_count: "Articles"
