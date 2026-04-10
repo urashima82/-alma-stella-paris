@@ -258,14 +258,14 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 3-4h*
 
 ### Tasks
-- [ ] EasyAdmin CRUD for `Order`:
+- [x] EasyAdmin CRUD for `Order`:
   - Status workflow: `pending → processing → shipped → delivered`
   - Tracking number field
   - Origin country field (France / Mexico) — affects shipping display only
   - Customer details visible
   - Order items list with product snapshots
-- [ ] Order status change triggers email via Symfony Mailer (shipped → sends tracking number)
-- [ ] Dashboard stats widget: orders today, revenue this week, low stock alert
+- [x] Order status change triggers email via Symfony Mailer (shipped → sends tracking number)
+- [x] Dashboard stats widget: orders today, revenue this week, low stock alert
 
 ### Definition of Done
 - Change order status to "shipped" + add tracking number → customer receives email

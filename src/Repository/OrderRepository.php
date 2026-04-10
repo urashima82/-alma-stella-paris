@@ -37,4 +37,44 @@ class OrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function countTodayOrders(): int
+    {
+        $today = new \DateTimeImmutable('today');
+
+        return (int) $this->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->where('o.createdAt >= :today')
+            ->andWhere('o.status != :cancelled')
+            ->setParameter('today', $today)
+            ->setParameter('cancelled', OrderStatus::Cancelled)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function revenueThisWeek(): float
+    {
+        $monday = new \DateTimeImmutable('monday this week');
+
+        $result = $this->createQueryBuilder('o')
+            ->select('SUM(o.totalUsd)')
+            ->where('o.createdAt >= :monday')
+            ->andWhere('o.status != :cancelled')
+            ->setParameter('monday', $monday)
+            ->setParameter('cancelled', OrderStatus::Cancelled)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (float) ($result ?? 0);
+    }
+
+    public function countByStatus(OrderStatus $status): int
+    {
+        return (int) $this->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->where('o.status = :status')
+            ->setParameter('status', $status)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

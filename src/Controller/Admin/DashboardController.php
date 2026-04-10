@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Enum\OrderStatus;
+use App\Repository\OrderRepository;
+use App\Repository\ProductRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -19,9 +22,22 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class DashboardController extends AbstractDashboardController
 {
+    public function __construct(
+        private readonly OrderRepository $orderRepository,
+        private readonly ProductRepository $productRepository,
+    ) {
+    }
+
     public function index(): Response
     {
-        return $this->render('admin/dashboard.html.twig');
+        return $this->render('admin/dashboard.html.twig', [
+            'orders_today' => $this->orderRepository->countTodayOrders(),
+            'revenue_week' => $this->orderRepository->revenueThisWeek(),
+            'pending_orders' => $this->orderRepository->countByStatus(OrderStatus::Pending),
+            'processing_orders' => $this->orderRepository->countByStatus(OrderStatus::Processing),
+            'products_available' => $this->productRepository->countAvailable(),
+            'recently_sold' => $this->productRepository->countRecentlySold(),
+        ]);
     }
 
     #[Route('/admin/flash-messages', name: 'admin_flush_flashes', methods: ['GET'])]
@@ -62,6 +78,8 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Catalogue');
         yield MenuItem::linkTo(ProductCrudController::class, 'Produits', 'fa fa-gem');
         yield MenuItem::linkTo(ProductCategoryCrudController::class, 'Catégories', 'fa fa-tags');
+        yield MenuItem::section('Ventes');
+        yield MenuItem::linkTo(OrderCrudController::class, 'Commandes', 'fa fa-shopping-bag');
         yield MenuItem::section('');
         yield MenuItem::linkToUrl('Retour au site', 'fa fa-arrow-left', '/');
         yield MenuItem::linkToLogout('Déconnexion', 'fa fa-sign-out');

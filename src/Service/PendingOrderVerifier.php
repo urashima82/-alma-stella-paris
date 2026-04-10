@@ -44,6 +44,8 @@ final class PendingOrderVerifier
                 continue;
             }
 
+            $order->setStripePaymentStatus($paymentIntent->status);
+
             if ('succeeded' === $paymentIntent->status) {
                 $order->setStatus(OrderStatus::Processing);
 

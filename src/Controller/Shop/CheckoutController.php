@@ -191,6 +191,7 @@ class CheckoutController extends AbstractController
         }
 
         // Mark order as processing
+        $order->setStripePaymentStatus($paymentIntent->status);
         $order->setStatus(OrderStatus::Processing);
 
         // Mark purchased products as sold (setIsSoldOut auto-sets soldAt)

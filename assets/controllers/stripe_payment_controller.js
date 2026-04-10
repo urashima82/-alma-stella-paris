@@ -12,8 +12,10 @@ export default class extends Controller {
     static targets = ['element', 'submit', 'error'];
 
     async connect() {
-        // Wait for Stripe.js to load from CDN
-        if (typeof Stripe === 'undefined') {
+        // Wait for Stripe.js to load from CDN (deferred script may not be ready yet)
+        try {
+            await this.waitForStripe();
+        } catch {
             this.showError('Stripe.js failed to load.');
             return;
         }
@@ -150,5 +152,26 @@ export default class extends Controller {
             this.errorTarget.textContent = '';
             this.errorTarget.classList.add('hidden');
         }
+    }
+
+    waitForStripe(timeout = 10000) {
+        return new Promise((resolve, reject) => {
+            if (typeof Stripe !== 'undefined') {
+                resolve();
+                return;
+            }
+
+            const interval = setInterval(() => {
+                if (typeof Stripe !== 'undefined') {
+                    clearInterval(interval);
+                    resolve();
+                }
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                reject(new Error('Stripe.js timeout'));
+            }, timeout);
+        });
     }
 }

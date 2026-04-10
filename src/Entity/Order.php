@@ -63,6 +63,9 @@ class Order
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $trackingNumber = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $stripePaymentStatus = null;
+
     /** @var Collection<int, OrderItem> */
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'order', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $items;
@@ -268,6 +271,18 @@ class Order
     public function setTrackingNumber(?string $trackingNumber): static
     {
         $this->trackingNumber = $trackingNumber;
+
+        return $this;
+    }
+
+    public function getStripePaymentStatus(): ?string
+    {
+        return $this->stripePaymentStatus;
+    }
+
+    public function setStripePaymentStatus(?string $stripePaymentStatus): static
+    {
+        $this->stripePaymentStatus = $stripePaymentStatus;
 
         return $this;
     }

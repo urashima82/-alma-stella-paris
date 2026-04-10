@@ -29,7 +29,9 @@ alma-stella/
 ├── src/
 │   ├── Controller/
 │   │   ├── Admin/            # EasyAdmin CRUD controllers
-│   │   │   └── AdminLoginController.php  # Magic link login flow
+│   │   │   ├── AdminLoginController.php  # Magic link login flow
+│   │   │   ├── OrderCrudController.php   # Order management with status workflow
+│   │   │   └── OrderItemCrudController.php # OrderItem sub-form (read-only)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
 │   │   └── Shop/             # Public-facing controllers (locale-prefixed)
 │   │       ├── HomeController.php
@@ -57,7 +59,8 @@ alma-stella/
 │   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
 │   │   ├── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
 │   │   ├── AdminLoginSubscriber.php      # Updates lastLoggedInAt on login (invalidates link)
-│   │   └── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
+│   │   ├── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
+│   │   └── OrderStatusSubscriber.php     # Sends shipped email when order status → shipped
 │   ├── Message/
 │   │   └── VerifyPendingOrdersMessage.php
 │   ├── MessageHandler/
@@ -71,6 +74,7 @@ alma-stella/
 │   │   └── login.html.twig              # Magic link login page (brand-styled)
 │   ├── email/
 │   │   ├── order_confirmation.html.twig  # Bilingual order confirmation email
+│   │   ├── order_shipped.html.twig       # Bilingual shipped notification with tracking
 │   │   └── admin_login_link.html.twig    # Magic link email template
 │   └── shop/
 │       ├── base.html.twig
@@ -271,6 +275,7 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 | Trigger | Template |
 |---|---|
 | Order confirmed | `email/order_confirmation.html.twig` — bilingual (FR/EN), order summary with items |
+| Order shipped | `email/order_shipped.html.twig` — bilingual, tracking number + origin country |
 | Admin login link | `email/admin_login_link.html.twig` — magic link with 10min expiry |
 
 - Sender: `hello@almastellaparis.com`

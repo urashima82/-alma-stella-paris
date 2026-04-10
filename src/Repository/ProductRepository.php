@@ -38,6 +38,29 @@ class ProductRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function countRecentlySold(int $days = 7): int
+    {
+        $since = new \DateTimeImmutable(\sprintf('-%d days', $days));
+
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->where('p.isSoldOut = true')
+            ->andWhere('p.soldAt >= :since')
+            ->setParameter('since', $since)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countAvailable(): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->where('p.isPublished = true')
+            ->andWhere('p.isSoldOut = false')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function findVisibleQuery(?ProductCategory $category = null): QueryBuilder
     {
         $soldOutCutoff = new \DateTimeImmutable('-14 days');
