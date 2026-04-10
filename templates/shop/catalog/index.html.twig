@@ -77,7 +77,7 @@
 
         {# ── Product grid ── #}
         {% if pagination|length > 0 %}
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
                 {% for product in pagination %}
                     <article class="group">
                         <a href="{{ path('shop_product', {slug: product|localized_slug}) }}" class="block cursor-pointer">
@@ -98,7 +98,7 @@
                                     </div>
                                 {% endif %}
                                 {# Badges #}
-                                <div class="absolute top-2 left-2 flex flex-col gap-1">
+                                <div class="absolute top-2 left-2 flex flex-row gap-1">
                                     {% if product.isSoldOut %}
                                         <span class="px-2 py-0.5 bg-alma-text text-alma-bg text-[10px] font-sans font-medium">{{ 'badge.sold'|trans }}</span>
                                     {% else %}

@@ -37,11 +37,11 @@ catalog:
     empty_heading: "Aucune pièce trouvée"
     empty_text: "Notre collection est en cours de création. Revenez bientôt."
     empty_text_category: "Aucun produit publié dans cette catégorie pour le moment."
-    sold_label: "Vendue"
+    sold_label: "Vendu"
 
 # ── Product badges ──
 badge:
-    sold: "Vendue"
+    sold: "Vendu"
     unique: "Pièce unique"
     new: "Nouveau"
 

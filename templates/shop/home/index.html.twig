@@ -60,7 +60,7 @@
         </div>
 
         {% if featuredProducts is not empty %}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                 {% for product in featuredProducts %}
                     <article class="group cursor-pointer">
                         <a href="{{ path('shop_product', {slug: product|localized_slug}) }}" class="block">
@@ -80,7 +80,7 @@
                                     </div>
                                 {% endif %}
                                 {# Badges #}
-                                <div class="absolute top-2 left-2 flex flex-col gap-1">
+                                <div class="absolute top-2 left-2 flex flex-row gap-1">
                                     {% if product.isNew() %}
                                         <span class="px-2 py-0.5 bg-alma-surface text-alma-text text-[10px] font-sans font-medium border border-alma-hover">{{ 'badge.new'|trans }}</span>
                                     {% endif %}

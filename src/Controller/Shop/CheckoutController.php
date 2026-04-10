@@ -18,6 +18,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\Routing\Attribute\Route;
 
 class CheckoutController extends AbstractController
@@ -93,7 +94,7 @@ class CheckoutController extends AbstractController
             'currency' => $currency,
             'errors' => $errors,
             'formData' => $this->getFormData($request),
-            'countries' => self::getShippingCountries(),
+            'countries' => self::getShippingCountries($request->getLocale()),
         ]);
     }
 
@@ -339,48 +340,25 @@ class CheckoutController extends AbstractController
         return $order;
     }
 
+    private const SHIPPING_COUNTRY_CODES = [
+        'US', 'CA', 'FR', 'GB', 'MX', 'DE', 'ES', 'IT', 'NL', 'BE',
+        'CH', 'AT', 'PT', 'IE', 'AU', 'NZ', 'JP', 'KR', 'SG', 'AE',
+        'BR', 'CO', 'CL', 'AR', 'SE', 'DK', 'NO', 'FI', 'PL', 'CZ',
+        'GR', 'IL', 'TH', 'MY', 'PH', 'IN',
+    ];
+
     /**
      * @return array<string, string>
      */
-    private static function getShippingCountries(): array
+    private static function getShippingCountries(string $locale): array
     {
-        return [
-            'US' => 'United States',
-            'CA' => 'Canada',
-            'FR' => 'France',
-            'GB' => 'United Kingdom',
-            'MX' => 'Mexico',
-            'DE' => 'Germany',
-            'ES' => 'Spain',
-            'IT' => 'Italy',
-            'NL' => 'Netherlands',
-            'BE' => 'Belgium',
-            'CH' => 'Switzerland',
-            'AT' => 'Austria',
-            'PT' => 'Portugal',
-            'IE' => 'Ireland',
-            'AU' => 'Australia',
-            'NZ' => 'New Zealand',
-            'JP' => 'Japan',
-            'KR' => 'South Korea',
-            'SG' => 'Singapore',
-            'AE' => 'United Arab Emirates',
-            'BR' => 'Brazil',
-            'CO' => 'Colombia',
-            'CL' => 'Chile',
-            'AR' => 'Argentina',
-            'SE' => 'Sweden',
-            'DK' => 'Denmark',
-            'NO' => 'Norway',
-            'FI' => 'Finland',
-            'PL' => 'Poland',
-            'CZ' => 'Czech Republic',
-            'GR' => 'Greece',
-            'IL' => 'Israel',
-            'TH' => 'Thailand',
-            'MY' => 'Malaysia',
-            'PH' => 'Philippines',
-            'IN' => 'India',
-        ];
+        $countries = [];
+        foreach (self::SHIPPING_COUNTRY_CODES as $code) {
+            $countries[$code] = Countries::getName($code, $locale);
+        }
+
+        \asort($countries, \SORT_LOCALE_STRING);
+
+        return $countries;
     }
 }
