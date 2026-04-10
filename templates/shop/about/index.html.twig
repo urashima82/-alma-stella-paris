@@ -6,13 +6,10 @@
 {% block body %}
     {# ── Hero section ── #}
     <section class="max-w-3xl mx-auto px-6 py-20 md:py-28 text-center">
-        {# Portrait placeholder #}
-        <div class="mx-auto mb-8 w-36 h-36 md:w-44 md:h-44 rounded-full bg-alma-surface border border-alma-hover
-                    overflow-hidden flex items-center justify-center">
-            <div class="text-center">
-                <p class="text-alma-gold text-3xl mb-1">✦</p>
-                <p class="text-[10px] text-alma-text-muted uppercase tracking-widest">Estelle</p>
-            </div>
+        {# Portrait #}
+        <div class="mx-auto mb-8 w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden border border-alma-hover">
+            <img src="{{ asset('images/estelle.webp') }}" alt="Estelle, fondatrice d'Alma Stella Paris"
+                 class="w-full h-full object-cover">
         </div>
 
         <p class="text-alma-gold text-2xl mb-6">✦</p>

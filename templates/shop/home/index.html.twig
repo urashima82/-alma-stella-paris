@@ -4,36 +4,17 @@
 
 {% block body %}
     {# ── Hero section ── #}
-    <section class="relative bg-alma-surface overflow-hidden">
-        <div class="max-w-7xl mx-auto px-6 py-24 md:py-36 flex flex-col md:flex-row items-center gap-12 md:gap-20">
-            {# Text #}
-            <div class="flex-1 text-center md:text-left">
-                <p class="text-alma-gold text-3xl mb-4">✦</p>
-                <h1 class="font-serif text-5xl md:text-7xl font-light text-alma-text leading-tight mb-4">
-                    {{ 'home.hero_heading'|trans }}
-                </h1>
-                <p class="font-serif text-xl md:text-2xl text-alma-text-muted italic mb-2">
-                    {{ 'home.hero_subheading'|trans }}
-                </p>
-                <p class="font-sans text-sm text-alma-text-muted max-w-md leading-relaxed mt-6 mb-10 mx-auto md:mx-0">
-                    {{ 'home.hero_description'|trans }}
-                </p>
-                <a href="{{ path('shop_catalog') }}"
-                   class="inline-block bg-alma-gold text-white px-8 py-3 font-sans text-sm font-medium
-                          hover:bg-alma-gold/90 transition-colors">
-                    {{ 'home.hero_cta'|trans }}
-                </a>
-            </div>
-            {# Hero image placeholder #}
-            <div class="flex-1 max-w-lg w-full">
-                <div class="aspect-[4/5] bg-alma-hover/50 flex items-center justify-center border border-alma-hover">
-                    <div class="text-center px-8">
-                        <p class="text-alma-gold text-5xl mb-4">✦</p>
-                        <p class="font-serif text-lg text-alma-text-muted italic">Lifestyle photo</p>
-                        <p class="text-xs text-alma-text-muted mt-1">Coming soon</p>
-                    </div>
-                </div>
-            </div>
+    <section class="relative min-h-[60vh] md:min-h-[70vh] flex items-center justify-center overflow-hidden">
+        <img src="{{ asset('images/hero_bg.png') }}" alt=""
+             class="absolute inset-0 w-full h-full object-cover opacity-40">
+        <div class="absolute inset-0 bg-gradient-to-b from-alma-bg/60 via-alma-bg/30 to-alma-bg"></div>
+        <div class="relative text-center px-6 py-24 md:py-36">
+            <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl font-light text-alma-text leading-tight mb-4">
+                {{ 'home.hero_heading'|trans }}
+            </h1>
+            <p class="font-serif text-lg md:text-xl text-alma-text-muted italic">
+                {{ 'home.hero_subheading'|trans }}
+            </p>
         </div>
     </section>
 

@@ -37,8 +37,8 @@
 
                     {# Desktop nav links — hidden on mobile #}
                     <div class="hidden md:flex items-center gap-8">
-                        <a href="{{ path('shop_catalog') }}" class="text-sm font-sans hover:text-alma-gold transition-colors">{{ 'nav.shop'|trans }}</a>
-                        <a href="{{ path('shop_about') }}" class="text-sm font-sans hover:text-alma-gold transition-colors">{{ 'nav.about'|trans }}</a>
+                        <a href="{{ path('shop_catalog') }}" class="font-sans text-xs uppercase tracking-[0.25em] font-light hover:text-alma-gold transition-colors {{ app.request.attributes.get('_route') == 'shop_catalog' ? 'text-alma-gold-dark' : '' }}">{{ 'nav.shop'|trans }}</a>
+                        <a href="{{ path('shop_about') }}" class="font-sans text-xs uppercase tracking-[0.25em] font-light hover:text-alma-gold transition-colors {{ app.request.attributes.get('_route') == 'shop_about' ? 'text-alma-gold-dark' : '' }}">{{ 'nav.about'|trans }}</a>
                     </div>
 
                     {# Medallion logo — centered, overflows below nav like a wax seal #}
