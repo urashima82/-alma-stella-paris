@@ -6,11 +6,16 @@ namespace App\Controller\Shop;
 
 use App\Entity\Order;
 use App\Entity\OrderItem;
+use App\Enum\OrderStatus;
 use App\Repository\OrderRepository;
 use App\Service\CartManager;
 use App\Service\CurrencyConverter;
+use App\Service\OrderMailer;
+use App\Service\StripeService;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,6 +27,10 @@ class CheckoutController extends AbstractController
         private readonly CurrencyConverter $currencyConverter,
         private readonly EntityManagerInterface $entityManager,
         private readonly OrderRepository $orderRepository,
+        private readonly StripeService $stripeService,
+        private readonly OrderMailer $orderMailer,
+        private readonly LoggerInterface $logger,
+        private readonly string $stripePublicKey,
     ) {
     }
 
@@ -114,12 +123,106 @@ class CheckoutController extends AbstractController
             return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
         }
 
+        // Create or reuse Stripe PaymentIntent
+        $paymentIntentId = $order->getStripePaymentIntentId();
+
+        try {
+            if (null !== $paymentIntentId) {
+                $paymentIntent = $this->stripeService->retrievePaymentIntent($paymentIntentId);
+            } else {
+                $paymentIntent = $this->stripeService->createPaymentIntent($order);
+                $order->setStripePaymentIntentId($paymentIntent->id);
+                $this->entityManager->flush();
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('Stripe PaymentIntent error: {message}', ['message' => $e->getMessage()]);
+            $this->addFlash('error', 'checkout.payment_error');
+
+            return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
+        }
+
         $currency = $request->getSession()->get('_currency', CurrencyConverter::BASE_CURRENCY);
 
         return $this->render('shop/checkout/payment.html.twig', [
             'order' => $order,
             'totalConverted' => $this->currencyConverter->convert($order->getTotalUsd(), $currency),
             'currency' => $currency,
+            'stripePublicKey' => $this->stripePublicKey,
+            'clientSecret' => $paymentIntent->client_secret,
+        ]);
+    }
+
+    #[Route(
+        path: '/payment/confirm',
+        name: 'shop_payment_confirm',
+        methods: ['POST'],
+        requirements: ['_locale' => 'en'],
+    )]
+    #[Route(
+        path: '/paiement/confirmer',
+        name: 'shop_payment_confirm_fr',
+        methods: ['POST'],
+        requirements: ['_locale' => 'fr'],
+    )]
+    public function confirmPayment(Request $request): JsonResponse
+    {
+        $orderRef = $request->getSession()->get('_pending_order');
+
+        if (null === $orderRef) {
+            return new JsonResponse(['error' => 'no_pending_order'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $order = $this->orderRepository->findByReference($orderRef);
+
+        if (null === $order || null === $order->getStripePaymentIntentId()) {
+            return new JsonResponse(['error' => 'order_not_found'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $paymentIntent = $this->stripeService->retrievePaymentIntent($order->getStripePaymentIntentId());
+        } catch (\Exception $e) {
+            $this->logger->error('Stripe retrieve error: {message}', ['message' => $e->getMessage()]);
+
+            return new JsonResponse(['error' => 'payment_verification_failed'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        if ('succeeded' !== $paymentIntent->status) {
+            return new JsonResponse(['error' => 'payment_not_completed', 'status' => $paymentIntent->status], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Mark order as processing
+        $order->setStatus(OrderStatus::Processing);
+
+        // Mark purchased products as sold (setIsSoldOut auto-sets soldAt)
+        foreach ($order->getItems() as $item) {
+            $product = $item->getProduct();
+            if (null !== $product && !$product->isSoldOut()) {
+                $product->setIsSoldOut(true);
+            }
+        }
+
+        $this->entityManager->flush();
+
+        // Send confirmation email
+        $locale = $request->getLocale();
+
+        try {
+            $this->orderMailer->sendOrderConfirmation($order, $locale);
+        } catch (\Exception $e) {
+            $this->logger->error('Order confirmation email failed: {message}', ['message' => $e->getMessage()]);
+        }
+
+        // Clear cart and pending order from session
+        $this->cartManager->clear();
+        $request->getSession()->remove('_pending_order');
+        $confirmationRoute = 'fr' === $locale ? 'shop_order_confirmation_fr' : 'shop_order_confirmation';
+
+        return new JsonResponse([
+            'success' => true,
+            'redirectUrl' => $this->generateUrl($confirmationRoute, [
+                '_locale' => $locale,
+                'reference' => $order->getReference(),
+            ]),
         ]);
     }
 

@@ -81,7 +81,8 @@ via pre-commit hooks.
 | Admin | EasyAdmin | 5.x |
 | Dev environment | DDEV | latest |
 | Payment | Stripe PHP SDK | latest |
-| Email | Brevo (ex-Sendinblue) | API v3 |
+| Email | Symfony Mailer | (built-in) |
+| Scheduler | Symfony Scheduler + Messenger | 7.2.x |
 | PHP | PHP | 8.3 |
 
 **Drupal is not used in this project.** It is referenced only as the developer's
@@ -123,6 +124,11 @@ ddev exec php bin/console doctrine:fixtures:load
 # Assets (NO npm — uses Symfony TailwindCSS Bundle)
 ddev exec php bin/console tailwind:build   # Rebuild CSS (dev)
 ddev exec php bin/console asset-map:compile # Production only
+
+# Scheduler (Symfony Scheduler + Messenger)
+ddev exec php bin/console messenger:consume scheduler_default  # Run scheduled tasks
+ddev exec php bin/console debug:scheduler                      # List scheduled tasks
+ddev exec php bin/console app:verify-pending-orders            # Manual run
 
 # Code quality
 ddev exec vendor/bin/php-cs-fixer fix      # Fix code style

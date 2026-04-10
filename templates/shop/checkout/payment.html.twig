@@ -7,8 +7,20 @@
     <link rel="alternate" hreflang="fr" href="{{ url('shop_payment_fr', {'_locale': 'fr'}) }}">
 {% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://js.stripe.com/v3/" defer></script>
+{% endblock %}
+
 {% block body %}
-    <div class="max-w-2xl mx-auto px-6 py-10 md:py-16">
+    <div class="max-w-2xl mx-auto px-6 py-10 md:py-16"
+         data-controller="stripe-payment"
+         data-stripe-payment-public-key-value="{{ stripePublicKey }}"
+         data-stripe-payment-client-secret-value="{{ clientSecret }}"
+         data-stripe-payment-confirm-url-value="{{ path(app.request.locale == 'fr' ? 'shop_payment_confirm_fr' : 'shop_payment_confirm', {'_locale': app.request.locale}) }}"
+         data-stripe-payment-return-url-value="{{ url(app.request.locale == 'fr' ? 'shop_payment_fr' : 'shop_payment', {'_locale': app.request.locale}) }}"
+         data-stripe-payment-locale-value="{{ app.request.locale }}">
+
         <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-2">
             {{ 'checkout.payment_heading'|trans }}
         </h1>
@@ -35,14 +47,21 @@
             {% endif %}
         </div>
 
-        {# Stripe Elements placeholder — will be activated in Step 3 #}
-        <div id="stripe-payment-element" class="bg-white border border-alma-hover p-6 mb-6">
+        {# Stripe Payment Element #}
+        <div data-stripe-payment-target="element"
+             class="bg-white border border-alma-hover p-6 mb-4 min-h-[200px]">
             <p class="text-center text-sm text-alma-text-muted py-8">
                 {{ 'checkout.payment_loading'|trans }}
             </p>
         </div>
 
-        <button id="stripe-submit-button"
+        {# Error messages #}
+        <div data-stripe-payment-target="error"
+             class="hidden mb-4 p-4 bg-red-50 border border-red-200 text-red-700 text-sm">
+        </div>
+
+        <button data-stripe-payment-target="submit"
+                data-action="click->stripe-payment#submit"
                 type="button"
                 disabled
                 class="w-full bg-alma-gold text-white px-8 py-4 font-sans text-sm font-medium
@@ -50,7 +69,7 @@
             {{ 'checkout.pay_now'|trans({'%amount%': totalConverted|price_format(currency)}) }}
         </button>
 
-        <a href="{{ path('shop_checkout') }}"
+        <a href="{{ path(app.request.locale == 'fr' ? 'shop_checkout_fr' : 'shop_checkout', {'_locale': app.request.locale}) }}"
            class="block text-center mt-4 text-sm font-sans text-alma-text-muted hover:text-alma-gold transition-colors">
             {{ 'checkout.back_to_checkout'|trans }}
         </a>

@@ -149,6 +149,7 @@ checkout:
     charged_in_usd: "You will be charged %amount% (USD)."
     pay_now: "Pay %amount%"
     back_to_checkout: "Back to checkout"
+    payment_error: "An error occurred while preparing your payment. Please try again."
     error:
         name_required: "Please enter your name."
         email_invalid: "Please enter a valid email address."

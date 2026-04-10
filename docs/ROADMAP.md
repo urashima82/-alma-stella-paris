@@ -203,15 +203,22 @@ Shall I proceed to Milestone Y?"
   - Shipping address form with country selector
   - Order summary
   - Stripe Elements payment form (card + Apple Pay + Google Pay)
-- [ ] Stripe PaymentIntent creation (server-side)
+- [x] Stripe PaymentIntent creation (server-side)
 - [x] Order entity created on successful payment
 - [x] Confirmation page (`/order/{reference}/confirmation`):
   - "Merci ! ✦ Your order is confirmed." message
   - Order summary
   - Estimated delivery note
-- [ ] Brevo order confirmation email sent automatically
-- [ ] On successful payment: set `isSoldOut = true` + `soldAt = now()` on purchased products
+- [x] Order confirmation email sent automatically (Symfony Mailer + Twig template, Mailpit in dev)
+- [x] On successful payment: set `isSoldOut = true` + `soldAt = now()` on purchased products
 - [x] Prevent adding sold-out product to cart (server-side check)
+- [x] Payment verification on return (3D Secure redirect handling)
+- [x] `app:verify-pending-orders` console command + Symfony Scheduler (every 5 min) —
+  verifies Stripe status for pending orders, confirms or cancels them automatically
+
+> **No Stripe webhooks.** Payment verification uses 3 layers: immediate
+> (Stimulus controller), on-return (3DS redirect), and Symfony Scheduler.
+> Single cron in prod: `* * * * * php bin/console messenger:consume scheduler_default`
 
 ### Definition of Done
 - Add product to cart → drawer opens and shows item
@@ -219,7 +226,7 @@ Shall I proceed to Milestone Y?"
 - Complete Stripe test payment (use test card `4242 4242 4242 4242`)
 - Order appears in EasyAdmin with correct status `pending`
 - Purchased product automatically marked `isSoldOut` with `soldAt` timestamp
-- Confirmation email received in Brevo test inbox
+- Confirmation email received in Mailpit (dev) or real inbox (prod)
 - Cart clears after successful payment
 
 ---
@@ -231,7 +238,7 @@ Shall I proceed to Milestone Y?"
 - [ ] Install `nickdnk/symfony-magic-link-bundle` (or equivalent Magic Link solution)
 - [ ] Create `Admin` entity implementing `UserInterface`
 - [ ] Configure Doctrine user provider in `security.yaml`
-- [ ] Magic Link login flow: enter email → receive link via Brevo → click → authenticated
+- [ ] Magic Link login flow: enter email → receive link via Symfony Mailer → click → authenticated
 - [ ] Login page (`/admin/login`) styled with brand identity
 - [ ] Add `access_control` rule: `^/admin` requires `ROLE_ADMIN`
 - [ ] Logout route (`/admin/logout`)
@@ -257,7 +264,7 @@ Shall I proceed to Milestone Y?"
   - Origin country field (France / Mexico) — affects shipping display only
   - Customer details visible
   - Order items list with product snapshots
-- [ ] Order status change triggers Brevo email (shipped → sends tracking number)
+- [ ] Order status change triggers email via Symfony Mailer (shipped → sends tracking number)
 - [ ] Dashboard stats widget: orders today, revenue this week, low stock alert
 
 ### Definition of Done
@@ -290,27 +297,24 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 9 — Email marketing & wishlist
-*Estimated effort: 4-5h*
+## Milestone 9 — Automated emails & reviews
+*Estimated effort: 3-4h*
 
 ### Tasks
-- [ ] Newsletter subscriber entity + GDPR-compliant signup form (footer + exit popup)
-- [ ] Welcome email sequence via Brevo (immediate + 10% off code)
-- [ ] Abandoned cart detection (session-based, 1h delay via Symfony Messenger)
-- [ ] Abandoned cart email with product images
-- [ ] Post-purchase review request email (J+14 via Messenger scheduler)
-- [ ] Wishlist (guest via email, no account required):
-  - Add/remove from product cards and detail pages
-  - Back-in-stock notification email when stock > 0
+- [ ] Abandoned cart detection (session-based, Symfony Scheduler cron command)
+- [ ] Abandoned cart email with product images (Symfony Mailer + Twig template)
+- [ ] Post-purchase review request email (J+14 via Symfony Scheduler)
 - [ ] `ProductReview` entity + submission form (post-purchase email link only)
 - [ ] Reviews displayed on product detail page with country flag
 
+> **No newsletter, no Brevo.** Communication strategy relies on social media
+> (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
+> Symfony Mailer + SMTP.
+
 ### Definition of Done
-- Subscribe to newsletter → welcome email received within 1 minute
-- Add to cart, wait for simulated 1h timeout → abandoned cart email received
+- Add to cart, wait for simulated 1h timeout → abandoned cart email received in Mailpit
 - Submit a review via post-purchase email link → review appears on product page
-- Add out-of-stock product to wishlist → email received when stock restored
-- GDPR consent checkbox present and required on all email capture forms
+- Scheduler cron commands run correctly via `php bin/console messenger:consume`
 
 ---
 

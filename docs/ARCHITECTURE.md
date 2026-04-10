@@ -14,7 +14,8 @@ alma-stella/
 │   │   └── app.css          # Tailwind entry point
 │   └── controllers/          # Stimulus controllers
 │       ├── currency_selector_controller.js  # Dropdown toggle for currency selector
-│       └── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
+│       ├── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
+│       └── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
 ├── config/
 ├── docs/
 │   └── design/
@@ -43,16 +44,26 @@ alma-stella/
 │   │   ├── CurrencyConverter.php
 │   │   ├── CartManager.php          # Session-based cart (add/remove/get products)
 │   │   ├── SocialPublisher.php
-│   │   ├── BrevoMailer.php
+│   │   ├── OrderMailer.php              # Order confirmation email via Symfony Mailer
+│   │   ├── PendingOrderVerifier.php    # Verifies pending orders against Stripe API
 │   │   └── ShippingCalculator.php
 │   ├── Twig/
 │   │   ├── CurrencyExtension.php
 │   │   └── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
-│   └── EventSubscriber/
-│       ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
-│       └── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
+│   ├── EventSubscriber/
+│   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
+│   │   └── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
+│   ├── Message/
+│   │   └── VerifyPendingOrdersMessage.php
+│   ├── MessageHandler/
+│   │   └── VerifyPendingOrdersHandler.php
+│   ├── Command/
+│   │   └── VerifyPendingOrdersCommand.php  # CLI: app:verify-pending-orders
+│   └── Schedule.php                        # Symfony Scheduler provider (default)
 ├── templates/
 │   ├── admin/
+│   ├── email/
+│   │   └── order_confirmation.html.twig  # Bilingual order confirmation email
 │   └── shop/
 │       ├── base.html.twig
 │       ├── home/
@@ -190,6 +201,18 @@ class Order
 - Falls back to USD silently if the external API is unavailable
 - Formats output using PHP `NumberFormatter` with correct locale per currency
 
+### StripeService
+
+- Creates Stripe PaymentIntents server-side (amount in cents, USD)
+- Retrieves existing PaymentIntents for verification
+- Uses `StripeClient` (SDK v20) with secret key from env
+- Automatic payment methods enabled (card, Apple Pay, Google Pay)
+- Order reference stored in PaymentIntent metadata
+- **No webhooks** — payment verification via 3 layers:
+  1. Immediate: Stimulus controller calls `POST /payment/confirm` after payment
+  2. On-return: payment page detects 3DS redirect return and auto-confirms
+  3. Scheduler: `VerifyPendingOrdersMessage` runs every 5 min via Symfony Scheduler
+
 ### SocialPublisher
 
 Three channels, three integration levels:
@@ -206,17 +229,16 @@ Auto-generated content per product:
 - **Hashtags:** `#jewelry #bijoux #bohemian #frenchjewelry #almastellaparis`
 - **Link:** canonical product URL on the site
 
-### BrevoMailer
+### OrderMailer
 
-Automated email sequences via Brevo API v3:
+Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 
-| Trigger | Delay | Template |
-|---|---|---|
-| Cart abandoned | +1 hour | Product image + CTA |
-| Order confirmed | Immediate | Order summary |
-| Post-purchase | +14 days | Review request + related products |
-| Back in stock | On stock update | Wishlist notification |
-| New subscriber | Immediate | Welcome + 10% off code |
+| Trigger | Template |
+|---|---|
+| Order confirmed | `email/order_confirmation.html.twig` — bilingual (FR/EN), order summary with items |
+
+- Sender: `hello@almastellaparis.com`
+- Email failure does not block the payment flow (caught and logged)
 
 ---
 
@@ -227,7 +249,7 @@ Automated email sequences via Brevo API v3:
 - CSRF protection on all forms (Symfony default)
 - Product images stored outside `public/` and served via a controller
   (prevents direct URL guessing of unpublished products)
-- API keys (Stripe, Brevo, TikTok, Pinterest) stored in `.env.local` only —
+- API keys (Stripe, TikTok, Pinterest) stored in `.env.local` only —
   never committed, never hardcoded
 - Rate limiting on checkout and login endpoints via Symfony RateLimiter
 
