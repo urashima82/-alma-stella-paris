@@ -41,3 +41,8 @@
 /compose.yaml
 /compose.override.yaml
 ###< docker compose ###
+
+###> uploads ###
+/public/uploads/products/*
+!/public/uploads/products/.gitkeep
+###< uploads ###
