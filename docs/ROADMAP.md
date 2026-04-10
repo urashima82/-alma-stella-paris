@@ -235,14 +235,14 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 1-2h*
 
 ### Tasks
-- [ ] Install `nickdnk/symfony-magic-link-bundle` (or equivalent Magic Link solution)
-- [ ] Create `Admin` entity implementing `UserInterface`
-- [ ] Configure Doctrine user provider in `security.yaml`
-- [ ] Magic Link login flow: enter email → receive link via Symfony Mailer → click → authenticated
-- [ ] Login page (`/admin/login`) styled with brand identity
-- [ ] Add `access_control` rule: `^/admin` requires `ROLE_ADMIN`
-- [ ] Logout route (`/admin/logout`)
-- [ ] DataFixtures: default admin user (`admin@almastellaparis.com`)
+- [x] Install `nickdnk/symfony-magic-link-bundle` (or equivalent Magic Link solution)
+- [x] Create `Admin` entity implementing `UserInterface`
+- [x] Configure Doctrine user provider in `security.yaml`
+- [x] Magic Link login flow: enter email → receive link via Symfony Mailer → click → authenticated
+- [x] Login page (`/admin/login`) styled with brand identity
+- [x] Add `access_control` rule: `^/admin` requires `ROLE_ADMIN`
+- [x] Logout route (`/admin/logout`)
+- [x] DataFixtures: default admin user (`admin@almastellaparis.com`)
 
 ### Definition of Done
 - `/admin` redirects to `/admin/login` when not authenticated

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your login link</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #FAF8F4; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2C2418;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAF8F4;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
+
+                    {# Header #}
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px; border-bottom: 1px solid #C9A84C;">
+                            <h1 style="margin: 0; font-family: 'Georgia', 'Times New Roman', serif; font-size: 28px; font-weight: 300; color: #2C2418; letter-spacing: 2px;">
+                                ALMA STELLA PARIS
+                            </h1>
+                        </td>
+                    </tr>
+
+                    {# Star #}
+                    <tr>
+                        <td align="center" style="padding: 40px 0 10px;">
+                            <p style="margin: 0; font-size: 36px; color: #C9A84C;">&#10022;</p>
+                        </td>
+                    </tr>
+
+                    {# Content #}
+                    <tr>
+                        <td align="center" style="padding: 10px 30px 30px;">
+                            <h2 style="margin: 0 0 16px; font-family: 'Georgia', 'Times New Roman', serif; font-size: 22px; font-weight: 400; color: #2C2418;">
+                                Admin Login
+                            </h2>
+                            <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #5A4D3E;">
+                                Click the button below to sign in to the Alma Stella Paris admin panel.
+                                This link expires in {{ expiration_minutes }} minutes.
+                            </p>
+                            <a href="{{ login_link_url }}" style="display: inline-block; padding: 14px 40px; background-color: #C9A84C; color: #FFFFFF; text-decoration: none; font-size: 15px; font-weight: 500; border-radius: 6px; letter-spacing: 0.5px;">
+                                Sign in
+                            </a>
+                            <p style="margin: 24px 0 0; font-size: 13px; line-height: 1.6; color: #7A6A55;">
+                                If you did not request this link, you can safely ignore this email.
+                            </p>
+                        </td>
+                    </tr>
+
+                    {# Footer #}
+                    <tr>
+                        <td align="center" style="padding: 30px; border-top: 1px solid #E8DDD0;">
+                            <p style="margin: 0; font-size: 12px; color: #7A6A55;">
+                                Alma Stella Paris &mdash; Jewelry curated between Paris &amp; Mexico
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

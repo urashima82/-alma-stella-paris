@@ -1,0 +1,76 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller\Admin;
+
+use App\Entity\Admin;
+use App\Repository\AdminRepository;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
+
+class AdminLoginController extends AbstractController
+{
+    private const SENDER_EMAIL = 'hello@almastellaparis.com';
+    private const SENDER_NAME = 'Alma Stella Paris';
+
+    #[Route('/admin/login', name: 'admin_login', methods: ['GET', 'POST'])]
+    public function login(
+        Request $request,
+        AdminRepository $adminRepository,
+        LoginLinkHandlerInterface $loginLinkHandler,
+        MailerInterface $mailer,
+    ): Response {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('admin');
+        }
+
+        $emailSent = false;
+
+        if ($request->isMethod('POST')) {
+            $email = \trim((string) $request->request->get('email', ''));
+
+            $admin = $adminRepository->findOneBy(['email' => $email]);
+
+            if ($admin instanceof Admin) {
+                $loginLinkDetails = $loginLinkHandler->createLoginLink($admin);
+
+                $message = (new TemplatedEmail())
+                    ->from(new Address(self::SENDER_EMAIL, self::SENDER_NAME))
+                    ->to(new Address($admin->getEmail()))
+                    ->subject('Your login link — Alma Stella Paris')
+                    ->htmlTemplate('email/admin_login_link.html.twig')
+                    ->context([
+                        'login_link_url' => $loginLinkDetails->getUrl(),
+                        'expiration_minutes' => 10,
+                    ]);
+
+                $mailer->send($message);
+            }
+
+            $emailSent = true;
+        }
+
+        return $this->render('admin/login.html.twig', [
+            'email_sent' => $emailSent,
+        ]);
+    }
+
+    #[Route('/admin/login-check', name: 'admin_login_check')]
+    public function loginCheck(): never
+    {
+        throw new \LogicException('This route is handled by the login_link authenticator.');
+    }
+
+    #[Route('/admin/logout', name: 'admin_logout')]
+    public function logout(): never
+    {
+        throw new \LogicException('This route is handled by the security firewall.');
+    }
+}

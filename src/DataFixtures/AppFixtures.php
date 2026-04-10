@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
+use App\Entity\Admin;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
 use App\Enum\ShippingTier;
@@ -14,11 +15,26 @@ class AppFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
+        $this->loadAdmins($manager);
         $categories = $this->loadCategories($manager);
         $products = $this->loadProducts($manager, $categories);
         $this->linkRelatedProducts($products);
 
         $manager->flush();
+    }
+
+    private function loadAdmins(ObjectManager $manager): void
+    {
+        $admins = [
+            'admin@almastellaparis.com',
+            'contact@nicolas-bede.fr',
+        ];
+
+        foreach ($admins as $email) {
+            $admin = new Admin();
+            $admin->setEmail($email);
+            $manager->persist($admin);
+        }
     }
 
     /**

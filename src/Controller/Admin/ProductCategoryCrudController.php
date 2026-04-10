@@ -31,7 +31,7 @@ class ProductCategoryCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->hideOnForm();
-        yield TextField::new('name', 'Name (EN)');
+        yield TextField::new('name', 'Nom (EN)');
         yield TextField::new('nameFr', 'Nom (FR)');
         yield SlugField::new('slug')->setTargetFieldName('name');
         yield SlugField::new('slugFr', 'Slug (FR)')->setTargetFieldName('nameFr');

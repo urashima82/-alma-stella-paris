@@ -29,6 +29,7 @@ alma-stella/
 ├── src/
 │   ├── Controller/
 │   │   ├── Admin/            # EasyAdmin CRUD controllers
+│   │   │   └── AdminLoginController.php  # Magic link login flow
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
 │   │   └── Shop/             # Public-facing controllers (locale-prefixed)
 │   │       ├── HomeController.php
@@ -50,9 +51,12 @@ alma-stella/
 │   ├── Twig/
 │   │   ├── CurrencyExtension.php
 │   │   └── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
+│   ├── Security/
+│   │   └── AdminAuthenticationEntryPoint.php  # Redirects unauthenticated to /admin/login
 │   ├── EventSubscriber/
 │   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
-│   │   └── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
+│   │   ├── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
+│   │   └── AdminLoginSubscriber.php      # Updates lastLoggedInAt on login (invalidates link)
 │   ├── Message/
 │   │   └── VerifyPendingOrdersMessage.php
 │   ├── MessageHandler/
@@ -62,8 +66,11 @@ alma-stella/
 │   └── Schedule.php                        # Symfony Scheduler provider (default)
 ├── templates/
 │   ├── admin/
+│   │   ├── dashboard.html.twig
+│   │   └── login.html.twig              # Magic link login page (brand-styled)
 │   ├── email/
-│   │   └── order_confirmation.html.twig  # Bilingual order confirmation email
+│   │   ├── order_confirmation.html.twig  # Bilingual order confirmation email
+│   │   └── admin_login_link.html.twig    # Magic link email template
 │   └── shop/
 │       ├── base.html.twig
 │       ├── home/
@@ -178,6 +185,24 @@ class Order
 }
 ```
 
+### Admin
+
+```php
+// src/Entity/Admin.php
+class Admin implements UserInterface
+{
+    private int $id;
+    private string $email;              // Unique, used as user identifier
+    private array $roles;               // ROLE_ADMIN always included
+    private ?\DateTimeImmutable $lastLoggedInAt;  // Updated on login, invalidates old links
+    private \DateTimeImmutable $createdAt;
+}
+```
+
+> **Authentication:** Passwordless via Symfony Login Link. No password stored.
+> Link is signed (HMAC) using `email` + `lastLoggedInAt`, expires in 10 minutes,
+> single-use (lastLoggedInAt changes on login, invalidating old links).
+
 ### Other entities (summary)
 
 | Entity | Purpose |
@@ -185,6 +210,7 @@ class Order
 | `ProductCategory` | Necklaces, Earrings, Bracelets, Rings, Anklets, Sets |
 | `ProductImage` | Ordered images per product |
 | `OrderItem` | Snapshot of product + price at order time |
+| `Admin` | Admin users — passwordless auth via magic link |
 | `WishlistItem` | Guest (email) or user + product + notification flag |
 | `ProductReview` | Rating 1-5, text, country, verified purchase flag |
 | `NewsletterSubscriber` | Email + consent + source (popup/footer/checkout) |
@@ -236,6 +262,7 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 | Trigger | Template |
 |---|---|
 | Order confirmed | `email/order_confirmation.html.twig` — bilingual (FR/EN), order summary with items |
+| Admin login link | `email/admin_login_link.html.twig` — magic link with 10min expiry |
 
 - Sender: `hello@almastellaparis.com`
 - Email failure does not block the payment flow (caught and logged)

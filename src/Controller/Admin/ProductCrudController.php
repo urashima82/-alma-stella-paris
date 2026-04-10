@@ -39,7 +39,7 @@ class ProductCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->hideOnForm();
 
-        yield TextField::new('name', 'Name (EN)');
+        yield TextField::new('name', 'Nom (EN)');
         yield TextField::new('nameFr', 'Nom (FR)')->hideOnIndex();
         yield SlugField::new('slug')->setTargetFieldName('name')->hideOnIndex();
         yield SlugField::new('slugFr', 'Slug (FR)')->setTargetFieldName('nameFr')->hideOnIndex();
@@ -47,17 +47,17 @@ class ProductCrudController extends AbstractCrudController
         yield TextareaField::new('description', 'Description (EN)')->hideOnIndex();
         yield TextareaField::new('descriptionFr', 'Description (FR)')->hideOnIndex();
 
-        yield MoneyField::new('basePrice', 'Base price (USD)')
+        yield MoneyField::new('basePrice', 'Prix de base (USD)')
             ->setCurrency('USD')
             ->setStoredAsCents(false)
             ->setNumDecimals(2);
 
-        yield NumberField::new('displayPrice', 'Display price (USD)')
+        yield NumberField::new('displayPrice', 'Prix affiché (USD)')
             ->setNumDecimals(2)
             ->formatValue(static fn (float $value): string => '$'.\number_format($value, 2))
             ->hideOnForm();
 
-        yield ChoiceField::new('shippingTier', 'Shipping tier')
+        yield ChoiceField::new('shippingTier', 'Tranche d\'expédition')
             ->setChoices([
                 ShippingTier::Standard->label() => ShippingTier::Standard,
                 ShippingTier::Heavy->label() => ShippingTier::Heavy,
@@ -76,7 +76,7 @@ class ProductCrudController extends AbstractCrudController
         yield BooleanField::new('isSoldOut', 'Vendu');
         yield DateTimeField::new('soldAt', 'Vendu le')->hideOnForm();
 
-        yield AssociationField::new('relatedProducts', 'Wear it with')
+        yield AssociationField::new('relatedProducts', 'À porter avec')
             ->setFormTypeOption('by_reference', false)
             ->hideOnIndex();
 

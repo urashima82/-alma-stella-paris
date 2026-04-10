@@ -201,6 +201,9 @@ See `ARCHITECTURE.md` for full technical details.
   You will be charged in USD at checkout."*
 - French content must use correct UTF-8 accented characters at all times
 - Product descriptions are bilingual FR/EN (see content guidelines in `DESIGN.md`)
+- **EasyAdmin is in French** — locale `fr`, all menu items, labels, and
+  dashboard text must be in French. Field labels use format `Nom (EN)` / `Nom (FR)`
+  to distinguish bilingual fields.
 
 ---
 

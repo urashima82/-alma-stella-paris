@@ -1,0 +1,30 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContext #}
+{% set ea = ea() %}
+{% trans_default_domain null != ea ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? 'messages') %}
+
+{% set flash_messages = app.flashes %}
+
+{% set flash_icons = {
+    'success': 'fa-circle-check',
+    'danger': 'fa-circle-xmark',
+    'warning': 'fa-triangle-exclamation',
+    'info': 'fa-circle-info',
+} %}
+
+{% if flash_messages|length > 0 %}
+    <div id="flash-messages" class="admin-toast-container">
+        {% for label, messages in flash_messages %}
+            {% for message in messages %}
+                {% set translated_message = message|trans %}
+                <div class="admin-toast admin-toast--{{ label }}" role="alert">
+                    <div class="admin-toast__icon">
+                        <i class="fa {{ flash_icons[label]|default('fa-circle-info') }}"></i>
+                    </div>
+                    <div class="admin-toast__body">{{ translated_message|raw }}</div>
+                    <button type="button" class="admin-toast__close" aria-label="Fermer">&times;</button>
+                    <div class="admin-toast__progress"></div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endif %}
