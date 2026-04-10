@@ -56,7 +56,8 @@ alma-stella/
 │   ├── EventSubscriber/
 │   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
 │   │   ├── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
-│   │   └── AdminLoginSubscriber.php      # Updates lastLoggedInAt on login (invalidates link)
+│   │   ├── AdminLoginSubscriber.php      # Updates lastLoggedInAt on login (invalidates link)
+│   │   └── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
 │   ├── Message/
 │   │   └── VerifyPendingOrdersMessage.php
 │   ├── MessageHandler/
@@ -79,6 +80,14 @@ alma-stella/
 │       ├── about/
 │       ├── cart/
 │       └── account/
+│   └── bundles/
+│       └── EasyAdminBundle/
+│           └── flash_messages.html.twig  # Override: toast markup instead of default alerts
+├── public/
+│   ├── css/
+│   │   └── admin.css             # EasyAdmin dark-mode fix + toast notification styles
+│   └── js/
+│       └── admin-toast.js        # Toast system: intercepts AJAX, auto-dismiss, progress bar
 ├── bundles/
 │   └── TwigBundle/
 │       └── Exception/         # Custom 404/500 error pages
