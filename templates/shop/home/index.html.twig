@@ -80,8 +80,8 @@
                             <div class="relative aspect-[4/5] bg-alma-surface overflow-hidden
                                         border border-transparent group-hover:border-alma-gold
                                         transition-colors duration-300 flex items-center justify-center">
-                                {% if product.images is not empty %}
-                                    <img src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
+                                {% if product.thumbnail %}
+                                    <img src="{{ asset('uploads/products/' ~ product.thumbnail) }}"
                                          alt="{{ product|localized_name }}"
                                          class="w-full h-full object-cover
                                                 group-hover:scale-105 transition-transform duration-500"

@@ -85,8 +85,8 @@
                                         border border-transparent group-hover:border-alma-gold
                                         transition-colors duration-300 flex items-center justify-center
                                         {{ product.isSoldOut ? 'opacity-60 grayscale' : '' }}">
-                                {% if product.images is not empty %}
-                                    <img src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
+                                {% if product.thumbnail %}
+                                    <img src="{{ asset('uploads/products/' ~ product.thumbnail) }}"
                                          alt="{{ product|localized_name }}"
                                          class="w-full h-full object-cover
                                                 group-hover:scale-105 transition-transform duration-500"

@@ -120,7 +120,9 @@ class Product
     private bool $isPublished;
     private bool $isFeatured;
     private int $stock;
-    private array $images;                   // Ordered list of image paths
+    private ?string $thumbnail;               // VichUploader — card/catalog image (4:5, 600×750)
+    private ?string $wornPhoto;                // VichUploader — worn photo, hero on detail page (4:5, 800×1000)
+    private ?string $contextPhoto;             // VichUploader — lifestyle/context photo (4:5, 800×1000)
     private Collection $relatedProducts;     // "Wear it with" — ManyToMany self-ref
     private Collection $wishlistItems;
     private \DateTimeImmutable $createdAt;
@@ -221,7 +223,7 @@ class Admin implements UserInterface
 | Entity | Purpose |
 |---|---|
 | `ProductCategory` | Necklaces, Earrings, Bracelets, Rings, Anklets, Sets |
-| `ProductImage` | Ordered images per product |
+| ~~`ProductImage`~~ | **Removed** — replaced by 3 VichUploader fields on `Product`: `thumbnail`, `wornPhoto`, `contextPhoto` |
 | `OrderItem` | Snapshot of product + price at order time |
 | `Admin` | Admin users — passwordless auth via magic link |
 | `WishlistItem` | Guest (email) or user + product + notification flag |
@@ -239,6 +241,18 @@ class Admin implements UserInterface
 - Supported currencies: `USD`, `EUR`, `CAD`, `GBP`, `MXN`
 - Falls back to USD silently if the external API is unavailable
 - Formats output using PHP `NumberFormatter` with correct locale per currency
+
+### ImageProcessor
+
+- Resizes and converts images to WebP (quality 85%)
+- Uses Intervention Image v4 with GD driver
+- Called by `ImageUploadSubscriber` after EasyAdmin persist/update events
+
+### ImageUploadSubscriber
+
+- Listens to `AfterEntityPersistedEvent` and `AfterEntityUpdatedEvent`
+- Processes Product images: thumbnail (600×750), wornPhoto (800×1000), contextPhoto (800×1000)
+- Converts non-WebP uploads to WebP, resizes to max dimensions
 
 ### StripeService
 
@@ -288,8 +302,8 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 - Stripe webhook signature verified on every webhook call
 - All admin routes protected by `ROLE_ADMIN`
 - CSRF protection on all forms (Symfony default)
-- Product images stored outside `public/` and served via a controller
-  (prevents direct URL guessing of unpublished products)
+- Product images stored in `public/uploads/products/` with hashed filenames
+  (SmartUniqueNamer) — unpublished products not linked in HTML
 - API keys (Stripe, TikTok, Pinterest) stored in `.env.local` only —
   never committed, never hardcoded
 - Rate limiting on checkout and login endpoints via Symfony RateLimiter

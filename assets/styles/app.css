@@ -14,3 +14,181 @@
     --font-serif: "Cormorant Garamond", Georgia, serif;
     --font-sans: Inter, system-ui, sans-serif;
 }
+
+/* ── Lightbox ── */
+
+.alma-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.alma-lightbox--visible {
+    opacity: 1;
+}
+
+.alma-lightbox__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(44, 36, 24, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.alma-lightbox__close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    border-radius: 50%;
+    background: rgba(44, 36, 24, 0.6);
+    color: #FAF8F4;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.alma-lightbox__close:hover {
+    border-color: #C9A84C;
+    background: rgba(44, 36, 24, 0.8);
+}
+
+.alma-lightbox__stage {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 3rem 1rem;
+}
+
+@media (min-width: 768px) {
+    .alma-lightbox__stage {
+        padding: 4rem 5rem;
+    }
+}
+
+.alma-lightbox__img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 2px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.alma-lightbox__img--exit-left {
+    transform: translateX(-60px);
+    opacity: 0;
+}
+
+.alma-lightbox__img--exit-right {
+    transform: translateX(60px);
+    opacity: 0;
+}
+
+.alma-lightbox__img--enter-right {
+    animation: alma-lb-enter-right 0.3s ease forwards;
+}
+
+.alma-lightbox__img--enter-left {
+    animation: alma-lb-enter-left 0.3s ease forwards;
+}
+
+@keyframes alma-lb-enter-right {
+    from { transform: translateX(60px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes alma-lb-enter-left {
+    from { transform: translateX(-60px); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Navigation arrows */
+.alma-lightbox__nav {
+    position: absolute;
+    top: 50%;
+    z-index: 10;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    border-radius: 50%;
+    background: rgba(44, 36, 24, 0.5);
+    color: #FAF8F4;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
+}
+
+.alma-lightbox__nav:hover {
+    border-color: #C9A84C;
+    background: rgba(44, 36, 24, 0.8);
+}
+
+.alma-lightbox__nav--prev {
+    left: 1rem;
+}
+
+.alma-lightbox__nav--prev:hover {
+    transform: translateY(-50%) translateX(-2px);
+}
+
+.alma-lightbox__nav--next {
+    right: 1rem;
+}
+
+.alma-lightbox__nav--next:hover {
+    transform: translateY(-50%) translateX(2px);
+}
+
+@media (min-width: 768px) {
+    .alma-lightbox__nav--prev { left: 2rem; }
+    .alma-lightbox__nav--next { right: 2rem; }
+}
+
+/* Dots */
+.alma-lightbox__dots {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    gap: 0.625rem;
+}
+
+.alma-lightbox__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(201, 168, 76, 0.5);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.25s, border-color 0.25s, transform 0.25s;
+}
+
+.alma-lightbox__dot:hover {
+    border-color: #C9A84C;
+    transform: scale(1.2);
+}
+
+.alma-lightbox__dot--active {
+    background: #C9A84C;
+    border-color: #C9A84C;
+}

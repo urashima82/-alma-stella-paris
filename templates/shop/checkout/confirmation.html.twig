@@ -43,9 +43,9 @@
         <div class="max-w-md mx-auto mb-10">
             {% for item in order.items %}
                 <div class="flex gap-3 py-3 {{ not loop.last ? 'border-b border-alma-hover' : '' }}">
-                    {% if item.product and item.product.images is not empty %}
+                    {% if item.product and item.product.thumbnail %}
                         <div class="shrink-0 w-14 h-14 bg-alma-surface border border-alma-hover overflow-hidden">
-                            <img src="{{ asset('uploads/products/' ~ item.product.images.first.filename) }}"
+                            <img src="{{ asset('uploads/products/' ~ item.product.thumbnail) }}"
                                  alt="{{ item.productName }}"
                                  class="w-full h-full object-cover">
                         </div>

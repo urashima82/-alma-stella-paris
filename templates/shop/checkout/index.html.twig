@@ -162,8 +162,8 @@
                         {% for item in items %}
                             <div class="flex gap-3">
                                 <div class="shrink-0 w-16 h-16 bg-white border border-alma-hover overflow-hidden">
-                                    {% if item.product.images is not empty %}
-                                        <img src="{{ asset('uploads/products/' ~ item.product.images.first.filename) }}"
+                                    {% if item.product.thumbnail %}
+                                        <img src="{{ asset('uploads/products/' ~ item.product.thumbnail) }}"
                                              alt="{{ item.product|localized_name }}"
                                              class="w-full h-full object-cover">
                                     {% else %}

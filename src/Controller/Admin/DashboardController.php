@@ -89,6 +89,10 @@ class DashboardController extends AbstractDashboardController
     {
         return Assets::new()
             ->addCssFile('css/admin.css')
+            ->addCssFile('vendor/cropperjs/cropper.min.css')
+            ->addCssFile('css/admin-crop.css')
+            ->addJsFile('vendor/cropperjs/cropper.min.js')
+            ->addJsFile('js/admin-image-crop.js')
             ->addJsFile('js/admin-toast.js');
     }
 

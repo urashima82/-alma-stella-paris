@@ -30,12 +30,26 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
 
             {# ── Left: Image gallery ── #}
-            <div>
-                {# Main image #}
+            {% set galleryPhotos = [] %}
+            {% if product.wornPhoto %}
+                {% set galleryPhotos = galleryPhotos|merge([product.wornPhoto]) %}
+            {% endif %}
+            {% if product.contextPhoto %}
+                {% set galleryPhotos = galleryPhotos|merge([product.contextPhoto]) %}
+            {% endif %}
+            {% if product.thumbnail %}
+                {% set galleryPhotos = galleryPhotos|merge([product.thumbnail]) %}
+            {% endif %}
+
+            <div data-controller="lightbox">
+                {# Main image — worn photo first #}
+                {% set mainPhoto = product.wornPhoto ?? product.thumbnail %}
                 <div class="aspect-[4/5] bg-alma-surface border border-alma-hover overflow-hidden flex items-center justify-center
-                            {{ product.isSoldOut ? 'opacity-50 grayscale' : '' }}">
-                    {% if product.images is not empty %}
-                        <img src="{{ asset('uploads/products/' ~ product.images.first.filename) }}"
+                            {{ product.isSoldOut ? 'opacity-50 grayscale' : '' }}
+                            {{ mainPhoto ? 'cursor-pointer' : '' }}"
+                     {% if mainPhoto %}data-action="click->lightbox#open"{% endif %}>
+                    {% if mainPhoto %}
+                        <img src="{{ asset('uploads/products/' ~ mainPhoto) }}"
                              alt="{{ product|localized_name }}"
                              class="w-full h-full object-cover">
                     {% else %}
@@ -46,20 +60,27 @@
                     {% endif %}
                 </div>
 
-                {# Thumbnail strip #}
-                {% if product.images|length > 1 %}
-                    <div class="flex gap-3 mt-4">
-                        {% for image in product.images %}
-                            <div class="w-20 h-20 bg-alma-surface border border-alma-hover overflow-hidden cursor-pointer
+                {# Thumbnail strip — order: worn, context, thumbnail #}
+                {% if galleryPhotos|length > 1 %}
+                    <div class="grid grid-cols-3 gap-3 mt-3">
+                        {% for photo in galleryPhotos %}
+                            <div class="aspect-square bg-alma-surface border border-alma-hover overflow-hidden cursor-pointer
                                         hover:border-alma-gold transition-colors
-                                        {{ product.isSoldOut ? 'opacity-50 grayscale' : '' }}">
-                                <img src="{{ asset('uploads/products/' ~ image.filename) }}"
+                                        {{ product.isSoldOut ? 'opacity-50 grayscale' : '' }}"
+                                 data-action="click->lightbox#open">
+                                <img src="{{ asset('uploads/products/' ~ photo) }}"
                                      alt="{{ product|localized_name }} — image {{ loop.index }}"
                                      class="w-full h-full object-cover"
+                                     data-lightbox-target="photo"
                                      loading="lazy">
                             </div>
                         {% endfor %}
                     </div>
+                {% endif %}
+
+                {# Hidden target when only 1 image (no thumbnail strip) #}
+                {% if galleryPhotos|length <= 1 and mainPhoto %}
+                    <img src="{{ asset('uploads/products/' ~ mainPhoto) }}" class="hidden" data-lightbox-target="photo">
                 {% endif %}
             </div>
 
@@ -221,8 +242,8 @@
                                             border border-transparent group-hover:border-alma-gold
                                             transition-colors duration-300 flex items-center justify-center
                                             {{ related.isSoldOut ? 'opacity-50 grayscale' : '' }}">
-                                    {% if related.images is not empty %}
-                                        <img src="{{ asset('uploads/products/' ~ related.images.first.filename) }}"
+                                    {% if related.thumbnail %}
+                                        <img src="{{ asset('uploads/products/' ~ related.thumbnail) }}"
                                              alt="{{ related|localized_name }}"
                                              class="w-full h-full object-cover
                                                     group-hover:scale-105 transition-transform duration-500"

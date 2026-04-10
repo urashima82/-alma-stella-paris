@@ -82,9 +82,9 @@ class CartController extends AbstractController
                 'id' => $product->getId(),
                 'name' => 'fr' === $locale ? $product->getNameFr() : $product->getName(),
                 'priceFormatted' => $this->formatPrice($convertedPrice, $currency),
-                'image' => $product->getImages()->isEmpty()
-                    ? null
-                    : '/uploads/products/'.$product->getImages()->first()->getFilename(),
+                'image' => null !== $product->getThumbnail()
+                    ? '/uploads/products/'.$product->getThumbnail()
+                    : null,
                 'slug' => 'fr' === $locale ? $product->getSlugFr() : $product->getSlug(),
             ];
         }

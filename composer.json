@@ -11,8 +11,8 @@
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.6",
         "easycorp/easyadmin-bundle": "^5.0",
+        "intervention/image": "^4.0",
         "knplabs/knp-paginator-bundle": "^6.10",
-        "liip/imagine-bundle": "^2.15",
         "stripe/stripe-php": "^20.0",
         "symfony/asset-mapper": "7.2.*",
         "symfony/console": "7.2.*",
@@ -31,7 +31,8 @@
         "symfony/yaml": "7.2.*",
         "symfonycasts/tailwind-bundle": "^0.12.0",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "twig/twig": "^2.12|^3.0",
+        "vich/uploader-bundle": "^2.9"
     },
     "config": {
         "allow-plugins": {

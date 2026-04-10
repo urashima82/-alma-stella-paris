@@ -10,10 +10,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\HasLifecycleCallbacks]
+#[Vich\Uploadable]
 class Product
 {
     #[ORM\Id]
@@ -61,10 +64,23 @@ class Product
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $soldAt = null;
 
-    /** @var Collection<int, ProductImage> */
-    #[ORM\OneToMany(targetEntity: ProductImage::class, mappedBy: 'product', cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['position' => 'ASC'])]
-    private Collection $images;
+    #[Vich\UploadableField(mapping: 'product_images', fileNameProperty: 'thumbnail')]
+    private ?File $thumbnailFile = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $thumbnail = null;
+
+    #[Vich\UploadableField(mapping: 'product_images', fileNameProperty: 'wornPhoto')]
+    private ?File $wornPhotoFile = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $wornPhoto = null;
+
+    #[Vich\UploadableField(mapping: 'product_images', fileNameProperty: 'contextPhoto')]
+    private ?File $contextPhotoFile = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $contextPhoto = null;
 
     /** @var Collection<int, self> */
     #[ORM\ManyToMany(targetEntity: self::class)]
@@ -79,7 +95,6 @@ class Product
 
     public function __construct()
     {
-        $this->images = new ArrayCollection();
         $this->relatedProducts = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
@@ -293,29 +308,86 @@ class Product
         return $this->soldAt > new \DateTimeImmutable(\sprintf('-%d days', $soldVisibilityDays));
     }
 
-    /** @return Collection<int, ProductImage> */
-    public function getImages(): Collection
+    public function getThumbnailFile(): ?File
     {
-        return $this->images;
+        return $this->thumbnailFile;
     }
 
-    public function addImage(ProductImage $image): static
+    public function setThumbnailFile(?File $thumbnailFile): static
     {
-        if (!$this->images->contains($image)) {
-            $this->images->add($image);
-            $image->setProduct($this);
+        $this->thumbnailFile = $thumbnailFile;
+
+        if (null !== $thumbnailFile) {
+            $this->updatedAt = new \DateTimeImmutable();
         }
 
         return $this;
     }
 
-    public function removeImage(ProductImage $image): static
+    public function getThumbnail(): ?string
     {
-        if ($this->images->removeElement($image)) {
-            if ($image->getProduct() === $this) {
-                $image->setProduct(null);
-            }
+        return $this->thumbnail;
+    }
+
+    public function setThumbnail(?string $thumbnail): static
+    {
+        $this->thumbnail = $thumbnail;
+
+        return $this;
+    }
+
+    public function getWornPhotoFile(): ?File
+    {
+        return $this->wornPhotoFile;
+    }
+
+    public function setWornPhotoFile(?File $wornPhotoFile): static
+    {
+        $this->wornPhotoFile = $wornPhotoFile;
+
+        if (null !== $wornPhotoFile) {
+            $this->updatedAt = new \DateTimeImmutable();
         }
+
+        return $this;
+    }
+
+    public function getWornPhoto(): ?string
+    {
+        return $this->wornPhoto;
+    }
+
+    public function setWornPhoto(?string $wornPhoto): static
+    {
+        $this->wornPhoto = $wornPhoto;
+
+        return $this;
+    }
+
+    public function getContextPhotoFile(): ?File
+    {
+        return $this->contextPhotoFile;
+    }
+
+    public function setContextPhotoFile(?File $contextPhotoFile): static
+    {
+        $this->contextPhotoFile = $contextPhotoFile;
+
+        if (null !== $contextPhotoFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+
+        return $this;
+    }
+
+    public function getContextPhoto(): ?string
+    {
+        return $this->contextPhoto;
+    }
+
+    public function setContextPhoto(?string $contextPhoto): static
+    {
+        $this->contextPhoto = $contextPhoto;
 
         return $this;
     }
