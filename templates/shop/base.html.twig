@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{{ 'meta.default_title'|trans }}{% endblock %}</title>
         <meta name="description" content="{% block meta_description %}{{ 'meta.default_description'|trans }}{% endblock %}">
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>✦</text></svg>">
+        <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
         {% block hreflang %}
             <link rel="alternate" hreflang="en" href="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': 'en'})) }}">
             <link rel="alternate" hreflang="fr" href="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': 'fr'})) }}">
@@ -24,25 +24,42 @@
           data-cart-drawer-content-url-value="{{ path('cart_content') }}"
           data-cart-drawer-locale-value="{{ app.request.locale }}">
         {% block header %}
-            <header class="border-b border-alma-gold-muted">
-                <nav class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
-                    <div class="flex items-center gap-8">
+            <header class="relative z-20 border-b border-alma-gold-muted" data-controller="mobile-menu" data-action="keydown@document->mobile-menu#closeOnKeydown">
+                <nav class="relative max-w-7xl mx-auto px-6 h-12 md:h-14 flex items-center justify-between">
+                    {# Burger button — mobile only #}
+                    <button class="md:hidden text-alma-text hover:text-alma-gold transition-colors"
+                            data-action="click->mobile-menu#open"
+                            aria-label="Menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                        </svg>
+                    </button>
+
+                    {# Desktop nav links — hidden on mobile #}
+                    <div class="hidden md:flex items-center gap-8">
                         <a href="{{ path('shop_catalog') }}" class="text-sm font-sans hover:text-alma-gold transition-colors">{{ 'nav.shop'|trans }}</a>
                         <a href="{{ path('shop_about') }}" class="text-sm font-sans hover:text-alma-gold transition-colors">{{ 'nav.about'|trans }}</a>
                     </div>
-                    <a href="{{ path('shop_home') }}" class="font-serif text-2xl tracking-wide">
-                        <span class="text-alma-gold">✦</span> Alma Stella
+
+                    {# Medallion logo — centered, overflows below nav like a wax seal #}
+                    <a href="{{ path('shop_home') }}"
+                       class="absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2 z-30 group">
+                        <span class="absolute inset-[-6px] rounded-full bg-alma-bg"></span>
+                        <img src="{{ asset('images/logo.png') }}" alt="Alma Stella Paris"
+                             class="relative h-16 md:h-[5.5rem] drop-shadow-[0_2px_8px_rgba(44,36,24,0.08)]
+                                    transition-transform duration-300 group-hover:scale-105">
                     </a>
-                    <div class="flex items-center gap-6">
-                        {# Language switcher #}
+
+                    <div class="flex items-center gap-4 md:gap-6">
+                        {# Language switcher — desktop only #}
                         {% set other_locale = app.request.locale == 'en' ? 'fr' : 'en' %}
                         <a href="{% block language_switch_href %}{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': other_locale})) }}{% endblock %}"
-                           class="text-xs font-sans uppercase tracking-widest text-alma-text-muted hover:text-alma-gold transition-colors"
+                           class="hidden md:inline text-xs font-sans uppercase tracking-widest text-alma-text-muted hover:text-alma-gold transition-colors"
                            title="{{ other_locale == 'fr' ? 'Français' : 'English' }}">
                             {{ ('locale.' ~ other_locale)|trans }}
                         </a>
-                        {# Currency selector #}
-                        <div class="relative" data-controller="currency-selector">
+                        {# Currency selector — desktop only #}
+                        <div class="hidden md:block relative" data-controller="currency-selector">
                             <button type="button"
                                     class="text-xs font-sans uppercase tracking-widest text-alma-text-muted hover:text-alma-gold transition-colors flex items-center gap-1"
                                     data-action="click->currency-selector#toggle"
@@ -79,16 +96,52 @@
                         </button>
                     </div>
                 </nav>
+
+                {# Mobile slide-over menu #}
+                <div class="fixed inset-0 z-50 hidden" data-mobile-menu-target="overlay" data-action="click->mobile-menu#close">
+                    <div class="absolute inset-0 bg-alma-text/40 backdrop-blur-sm"></div>
+                </div>
+                <div class="fixed top-0 left-0 z-50 h-full w-72 bg-alma-bg border-r border-alma-gold-muted
+                            shadow-xl -translate-x-full transition-transform duration-300 ease-out"
+                     data-mobile-menu-target="panel">
+                    <div class="flex items-center justify-between px-6 h-12 border-b border-alma-gold-muted">
+                        <span class="font-serif text-lg tracking-wide text-alma-text">Menu</span>
+                        <button data-action="click->mobile-menu#close" class="text-alma-text-muted hover:text-alma-gold transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <nav class="px-6 py-8 flex flex-col gap-6">
+                        <a href="{{ path('shop_catalog') }}" class="font-serif text-xl text-alma-text hover:text-alma-gold transition-colors">{{ 'nav.shop'|trans }}</a>
+                        <a href="{{ path('shop_about') }}" class="font-serif text-xl text-alma-text hover:text-alma-gold transition-colors">{{ 'nav.about'|trans }}</a>
+                        <div class="h-px bg-alma-gold-muted my-2"></div>
+                        {# Language #}
+                        {% set other_locale = app.request.locale == 'en' ? 'fr' : 'en' %}
+                        <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': other_locale})) }}"
+                           class="text-sm font-sans text-alma-text-muted hover:text-alma-gold transition-colors">
+                            {{ other_locale == 'fr' ? 'Français' : 'English' }}
+                        </a>
+                        {# Currency #}
+                        <div>
+                            <p class="text-xs uppercase tracking-widest text-alma-text-muted mb-3">{{ 'currency.label'|trans }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for code in ['USD', 'EUR', 'CAD', 'GBP', 'MXN'] %}
+                                    <form method="post" action="{{ path('currency_switch') }}">
+                                        <input type="hidden" name="currency" value="{{ code }}">
+                                        <button type="submit"
+                                                class="px-3 py-1.5 text-xs uppercase tracking-widest border transition-colors
+                                                       {{ current_currency() == code ? 'border-alma-gold text-alma-gold bg-alma-gold/10' : 'border-alma-hover text-alma-text-muted hover:border-alma-gold hover:text-alma-gold' }}">
+                                            {{ currency_symbol(code) }}&nbsp;{{ code }}
+                                        </button>
+                                    </form>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </nav>
+                </div>
             </header>
         {% endblock %}
-
-        {% if is_non_usd_currency() %}
-            <div class="bg-alma-surface border-b border-alma-gold-muted">
-                <p class="max-w-7xl mx-auto px-6 py-2 text-xs text-alma-text-muted text-center font-sans">
-                    {{ 'currency.disclaimer'|trans({'%currency%': current_currency()}) }}
-                </p>
-            </div>
-        {% endif %}
 
         <main>
             {% block body %}{% endblock %}
@@ -99,7 +152,8 @@
                 <div class="max-w-7xl mx-auto px-6 py-16">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
                         <div>
-                            <p class="font-serif text-lg mb-3"><span class="text-alma-gold">✦</span> Alma Stella Paris</p>
+                            <img src="{{ asset('images/logo.png') }}" alt="Alma Stella Paris"
+                                 class="h-20 md:h-24 invert sepia-[.1] brightness-[.85] opacity-90 mb-4">
                             <p class="text-sm text-alma-hover leading-relaxed">
                                 {{ 'footer.tagline'|trans }}<br>
                                 {{ 'footer.tagline_sub'|trans }}
