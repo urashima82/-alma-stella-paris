@@ -121,7 +121,7 @@
 
                 {# Price #}
                 <p class="font-sans text-2xl font-semibold text-alma-text mb-8">
-                    {{ product.displayPrice | price }}
+                    {{ display_price(product) | price }}
                 </p>
 
                 {# Description #}
@@ -195,8 +195,8 @@
                             </svg>
                         </summary>
                         <div class="pb-4 text-sm text-alma-text-muted leading-relaxed space-y-2">
-                            <p>{{ 'product.shipping_tier'|trans({'%tier%': product.shippingTier.label()})|raw }}</p>
-                            <p>{{ 'product.shipping_included'|trans({'%cost%': product.shippingTier.shippingCostUsd()|number_format(0)}) }}</p>
+                            <p>{{ 'product.shipping_tier'|trans({'%tier%': shipping_label(product.shippingTier)})|raw }}</p>
+                            <p>{{ 'product.shipping_included'|trans({'%cost%': shipping_cost(product.shippingTier)|number_format(0)}) }}</p>
                             <p>{{ 'product.shipping_delivery'|trans }}</p>
                             <p>{{ 'product.shipping_origin'|trans }}</p>
                         </div>
@@ -268,7 +268,7 @@
                                         {% if related.isSoldOut %}
                                             <span class="text-alma-text-muted text-xs">{{ 'catalog.sold_label'|trans }}</span>
                                         {% else %}
-                                            {{ related.displayPrice | price }}
+                                            {{ display_price(related) | price }}
                                         {% endif %}
                                     </p>
                                 </div>

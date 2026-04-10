@@ -1,0 +1,7 @@
+{% set tier = entity.instance.tier %}
+{% set colors = {
+    'standard': 'success',
+    'heavy': 'warning',
+    'set': 'info',
+} %}
+<span class="badge badge-{{ colors[tier.value] ?? 'secondary' }}">{{ entity.instance.label }}</span>

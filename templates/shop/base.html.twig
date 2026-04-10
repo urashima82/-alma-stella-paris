@@ -72,7 +72,7 @@
                             </button>
                             <div class="absolute right-0 top-full mt-2 bg-white border border-alma-gold-muted rounded shadow-lg py-1 z-50 hidden"
                                  data-currency-selector-target="dropdown">
-                                {% for code in ['USD', 'EUR', 'CAD', 'GBP', 'MXN'] %}
+                                {% for code in ['USD', 'EUR', 'GBP', 'CAD', 'MXN'] %}
                                     <form method="post" action="{{ path('currency_switch') }}">
                                         <input type="hidden" name="currency" value="{{ code }}">
                                         <button type="submit"
@@ -116,17 +116,11 @@
                         <a href="{{ path('shop_catalog') }}" class="font-serif text-xl text-alma-text hover:text-alma-gold transition-colors">{{ 'nav.shop'|trans }}</a>
                         <a href="{{ path('shop_about') }}" class="font-serif text-xl text-alma-text hover:text-alma-gold transition-colors">{{ 'nav.about'|trans }}</a>
                         <div class="h-px bg-alma-gold-muted my-2"></div>
-                        {# Language #}
-                        {% set other_locale = app.request.locale == 'en' ? 'fr' : 'en' %}
-                        <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': other_locale})) }}"
-                           class="text-sm font-sans text-alma-text-muted hover:text-alma-gold transition-colors">
-                            {{ other_locale == 'fr' ? 'Français' : 'English' }}
-                        </a>
                         {# Currency #}
                         <div>
                             <p class="text-xs uppercase tracking-widest text-alma-text-muted mb-3">{{ 'currency.label'|trans }}</p>
                             <div class="flex flex-wrap gap-2">
-                                {% for code in ['USD', 'EUR', 'CAD', 'GBP', 'MXN'] %}
+                                {% for code in ['USD', 'EUR', 'GBP', 'CAD', 'MXN'] %}
                                     <form method="post" action="{{ path('currency_switch') }}">
                                         <input type="hidden" name="currency" value="{{ code }}">
                                         <button type="submit"
@@ -135,6 +129,22 @@
                                             {{ currency_symbol(code) }}&nbsp;{{ code }}
                                         </button>
                                     </form>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {# Language toggle #}
+                        {% set current_locale = app.request.locale %}
+                        <div>
+                            <p class="text-xs uppercase tracking-widest text-alma-text-muted mb-3">{{ 'nav.language'|trans }}</p>
+                            <div class="inline-flex border border-alma-hover rounded-full overflow-hidden">
+                                {% for locale_code, locale_label in { 'en': 'English', 'fr': 'Français' } %}
+                                    <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': locale_code})) }}"
+                                       class="px-4 py-2 text-xs font-sans uppercase tracking-widest transition-colors
+                                              {{ current_locale == locale_code
+                                                  ? 'bg-alma-gold text-white'
+                                                  : 'text-alma-text-muted hover:bg-alma-surface' }}">
+                                        {{ locale_label }}
+                                    </a>
                                 {% endfor %}
                             </div>
                         </div>

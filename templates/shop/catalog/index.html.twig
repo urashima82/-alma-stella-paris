@@ -122,7 +122,7 @@
                                     {% if product.isSoldOut %}
                                         <span class="text-alma-text-muted text-xs">{{ 'catalog.sold_label'|trans }}</span>
                                     {% else %}
-                                        {{ product.displayPrice | price }}
+                                        {{ display_price(product) | price }}
                                     {% endif %}
                                 </p>
                             </div>

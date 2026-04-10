@@ -15,6 +15,7 @@ class CartManager
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly ProductRepository $productRepository,
+        private readonly ShippingCostProvider $shippingCostProvider,
     ) {
     }
 
@@ -123,7 +124,7 @@ class CartManager
         $total = 0.0;
 
         foreach ($this->getProducts() as $product) {
-            $total += $product->getDisplayPrice();
+            $total += $this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier());
         }
 
         return $total;

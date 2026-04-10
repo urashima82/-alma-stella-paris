@@ -7,6 +7,7 @@ namespace App\DataFixtures;
 use App\Entity\Admin;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
+use App\Entity\ShippingSettings;
 use App\Enum\ShippingTier;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -16,11 +17,19 @@ class AppFixtures extends Fixture
     public function load(ObjectManager $manager): void
     {
         $this->loadAdmins($manager);
+        $this->loadShippingSettings($manager);
         $categories = $this->loadCategories($manager);
         $products = $this->loadProducts($manager, $categories);
         $this->linkRelatedProducts($products);
 
         $manager->flush();
+    }
+
+    private function loadShippingSettings(ObjectManager $manager): void
+    {
+        foreach (ShippingTier::cases() as $tier) {
+            $manager->persist(ShippingSettings::createFromTier($tier));
+        }
     }
 
     private function loadAdmins(ObjectManager $manager): void

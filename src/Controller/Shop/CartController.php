@@ -7,6 +7,7 @@ namespace App\Controller\Shop;
 use App\Repository\ProductRepository;
 use App\Service\CartManager;
 use App\Service\CurrencyConverter;
+use App\Service\ShippingCostProvider;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ class CartController extends AbstractController
         private readonly CartManager $cartManager,
         private readonly ProductRepository $productRepository,
         private readonly CurrencyConverter $currencyConverter,
+        private readonly ShippingCostProvider $shippingCostProvider,
     ) {
     }
 
@@ -75,7 +77,7 @@ class CartController extends AbstractController
 
         $items = [];
         foreach ($products as $product) {
-            $displayPrice = $product->getDisplayPrice();
+            $displayPrice = $this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier());
             $convertedPrice = $this->currencyConverter->convert($displayPrice, $currency);
 
             $items[] = [

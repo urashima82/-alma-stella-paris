@@ -2,6 +2,7 @@
 nav:
     shop: Shop
     about: About
+    language: Language
 
 # ── Meta ──
 meta:

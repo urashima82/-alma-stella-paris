@@ -27,6 +27,9 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('ALTER TABLE product_related ADD CONSTRAINT FK_B18E6B203DF63ED7 FOREIGN KEY (product_source) REFERENCES product (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE product_related ADD CONSTRAINT FK_B18E6B2024136E58 FOREIGN KEY (product_target) REFERENCES product (id) ON DELETE CASCADE');
 
+        // Shipping settings table
+        $this->addSql('CREATE TABLE shipping_settings (id INT AUTO_INCREMENT NOT NULL, tier VARCHAR(20) NOT NULL, label VARCHAR(100) NOT NULL, shipping_cost_usd NUMERIC(8, 2) NOT NULL, max_weight_grams INT NOT NULL, UNIQUE INDEX UNIQ_SHIPPING_TIER (tier), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+
         // Admin table
         $this->addSql('CREATE TABLE admin (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, last_logged_in_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL, UNIQUE INDEX UNIQ_880E0D76E7927C74 (email), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
 
@@ -48,6 +51,7 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('DROP TABLE admin');
         $this->addSql('DROP TABLE `order`');
         $this->addSql('DROP TABLE order_item');
+        $this->addSql('DROP TABLE shipping_settings');
         $this->addSql('DROP TABLE product');
         $this->addSql('DROP TABLE product_related');
         $this->addSql('DROP TABLE product_category');

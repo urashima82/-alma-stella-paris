@@ -11,6 +11,7 @@ use App\Repository\OrderRepository;
 use App\Service\CartManager;
 use App\Service\CurrencyConverter;
 use App\Service\OrderMailer;
+use App\Service\ShippingCostProvider;
 use App\Service\StripeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -28,6 +29,7 @@ class CheckoutController extends AbstractController
         private readonly CurrencyConverter $currencyConverter,
         private readonly EntityManagerInterface $entityManager,
         private readonly OrderRepository $orderRepository,
+        private readonly ShippingCostProvider $shippingCostProvider,
         private readonly StripeService $stripeService,
         private readonly OrderMailer $orderMailer,
         private readonly LoggerInterface $logger,
@@ -80,7 +82,7 @@ class CheckoutController extends AbstractController
         // Build cart items for display
         $items = [];
         foreach ($products as $product) {
-            $displayPrice = $product->getDisplayPrice();
+            $displayPrice = $this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier());
             $items[] = [
                 'product' => $product,
                 'priceConverted' => $this->currencyConverter->convert($displayPrice, $currency),
@@ -333,7 +335,8 @@ class CheckoutController extends AbstractController
         $order->setTotalUsd($subtotalUsd);
 
         foreach ($products as $product) {
-            $item = OrderItem::fromProduct($product);
+            $shippingCost = $this->shippingCostProvider->getCost($product->getShippingTier());
+            $item = OrderItem::fromProduct($product, $shippingCost);
             $order->addItem($item);
         }
 

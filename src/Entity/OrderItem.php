@@ -109,13 +109,13 @@ class OrderItem
     /**
      * Create an OrderItem from a Product, snapshotting current prices.
      */
-    public static function fromProduct(Product $product): self
+    public static function fromProduct(Product $product, float $shippingCost): self
     {
         $item = new self();
         $item->setProduct($product);
         $item->setProductName($product->getName());
         $item->setProductPrice($product->getBasePrice());
-        $item->setShippingCost($product->getShippingTier()->shippingCostUsd());
+        $item->setShippingCost($shippingCost);
 
         return $item;
     }
