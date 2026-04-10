@@ -22,6 +22,7 @@ export default class extends Controller {
 
         this.stripe = Stripe(this.publicKeyValue);
         this.isProcessing = false;
+        this.hasReturnError = false;
 
         // Check if returning from a 3DS redirect
         const params = new URLSearchParams(window.location.search);
@@ -59,12 +60,20 @@ export default class extends Controller {
 
         this.paymentElement.on('ready', () => {
             this.submitTarget.disabled = false;
+
+            if (this.hasReturnError) {
+                const msg = this.localeValue === 'fr'
+                    ? 'Le paiement n\u2019a pas abouti. Veuillez réessayer.'
+                    : 'Payment was not completed. Please try again.';
+                this.showError(msg);
+            }
         });
 
         this.paymentElement.on('change', (event) => {
             if (event.error) {
                 this.showError(event.error.message);
-            } else {
+                this.hasReturnError = false;
+            } else if (!this.hasReturnError) {
                 this.clearError();
             }
         });
@@ -79,7 +88,7 @@ export default class extends Controller {
         if (paymentIntent && paymentIntent.status === 'succeeded') {
             await this.confirmOnServer();
         } else {
-            this.showError('Payment was not completed. Please try again.');
+            this.hasReturnError = true;
             this.mountPaymentElement();
         }
     }
@@ -93,6 +102,7 @@ export default class extends Controller {
 
         this.isProcessing = true;
         this.submitTarget.disabled = true;
+        this.hasReturnError = false;
         this.clearError();
 
         const { error } = await this.stripe.confirmPayment({

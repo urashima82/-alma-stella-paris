@@ -24,7 +24,7 @@
           data-cart-drawer-content-url-value="{{ path('cart_content') }}"
           data-cart-drawer-locale-value="{{ app.request.locale }}">
         {% block header %}
-            <header class="relative z-20 border-b border-alma-gold-muted" data-controller="mobile-menu" data-action="keydown@document->mobile-menu#closeOnKeydown">
+            <header class="sticky top-0 z-20 bg-alma-bg border-b border-alma-gold-muted" data-controller="mobile-menu" data-action="keydown@document->mobile-menu#closeOnKeydown">
                 <nav class="relative max-w-7xl mx-auto px-6 h-12 md:h-14 flex items-center justify-between">
                     {# Burger button — mobile only #}
                     <button class="md:hidden text-alma-text hover:text-alma-gold transition-colors"

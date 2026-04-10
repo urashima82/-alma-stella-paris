@@ -47,17 +47,17 @@
             {% endif %}
         </div>
 
+        {# Error messages #}
+        <div data-stripe-payment-target="error"
+             class="hidden mb-4 p-4 bg-red-50 border border-red-200 text-red-700 text-sm">
+        </div>
+
         {# Stripe Payment Element #}
         <div data-stripe-payment-target="element"
              class="bg-white border border-alma-hover p-6 mb-4 min-h-[200px]">
             <p class="text-center text-sm text-alma-text-muted py-8">
                 {{ 'checkout.payment_loading'|trans }}
             </p>
-        </div>
-
-        {# Error messages #}
-        <div data-stripe-payment-target="error"
-             class="hidden mb-4 p-4 bg-red-50 border border-red-200 text-red-700 text-sm">
         </div>
 
         <button data-stripe-payment-target="submit"
