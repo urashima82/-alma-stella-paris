@@ -36,3 +36,8 @@
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+###> docker compose (unused — DDEV manages containers) ###
+/compose.yaml
+/compose.override.yaml
+###< docker compose ###
