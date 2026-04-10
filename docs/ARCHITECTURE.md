@@ -52,7 +52,8 @@ alma-stella/
 │   │   └── ShippingCalculator.php
 │   ├── Twig/
 │   │   ├── CurrencyExtension.php
-│   │   └── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
+│   │   ├── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
+│   │   └── TrackingExtension.php         # tracking_url() — generates 17track URL from tracking number
 │   ├── Security/
 │   │   └── AdminAuthenticationEntryPoint.php  # Redirects unauthenticated to /admin/login
 │   ├── EventSubscriber/
@@ -60,7 +61,7 @@ alma-stella/
 │   │   ├── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
 │   │   ├── AdminLoginSubscriber.php      # Updates lastLoggedInAt on login (invalidates link)
 │   │   ├── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
-│   │   └── OrderStatusSubscriber.php     # Sends shipped email when order status → shipped
+│   │   └── OrderStatusSubscriber.php     # Sends shipped email (in customer's locale) when status → shipped, blocks without tracking number
 │   ├── Message/
 │   │   └── VerifyPendingOrdersMessage.php
 │   ├── MessageHandler/
@@ -289,7 +290,7 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 | Trigger | Template |
 |---|---|
 | Order confirmed | `email/order_confirmation.html.twig` — bilingual (FR/EN), order summary with items |
-| Order shipped | `email/order_shipped.html.twig` — bilingual, tracking number + origin country |
+| Order shipped | `email/order_shipped.html.twig` — bilingual, clickable tracking link (La Poste/17track), link to tracking page |
 | Admin login link | `email/admin_login_link.html.twig` — magic link with 10min expiry |
 
 - Sender: `hello@almastellaparis.com`

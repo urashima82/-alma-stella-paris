@@ -259,6 +259,35 @@ class CheckoutController extends AbstractController
         ]);
     }
 
+    #[Route(
+        path: '/order/{reference}/tracking',
+        name: 'shop_order_tracking',
+        methods: ['GET'],
+        requirements: ['_locale' => 'en'],
+    )]
+    #[Route(
+        path: '/commande/{reference}/suivi',
+        name: 'shop_order_tracking_fr',
+        methods: ['GET'],
+        requirements: ['_locale' => 'fr'],
+    )]
+    public function tracking(string $reference, Request $request): Response
+    {
+        $order = $this->orderRepository->findByReference($reference);
+
+        if (null === $order) {
+            throw $this->createNotFoundException();
+        }
+
+        $currency = $request->getSession()->get('_currency', CurrencyConverter::BASE_CURRENCY);
+
+        return $this->render('shop/checkout/tracking.html.twig', [
+            'order' => $order,
+            'totalConverted' => $this->currencyConverter->convert($order->getTotalUsd(), $currency),
+            'currency' => $currency,
+        ]);
+    }
+
     /**
      * @return array<string, string>
      */
@@ -324,6 +353,7 @@ class CheckoutController extends AbstractController
     {
         $order = new Order();
         $order->setReference(Order::generateReference());
+        $order->setCustomerLocale($request->getLocale());
         $order->setCustomerName(\trim((string) $request->request->get('customer_name', '')));
         $order->setCustomerEmail(\trim((string) $request->request->get('customer_email', '')));
         $order->setShippingAddressLine1(\trim((string) $request->request->get('address_line1', '')));

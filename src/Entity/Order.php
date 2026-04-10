@@ -51,20 +51,23 @@ class Order
     #[ORM\Column(length: 2)]
     private string $shippingCountry = '';
 
-    #[ORM\Column(length: 2, nullable: true)]
-    private ?string $originCountry = null;
-
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private string $totalUsd = '0.00';
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripePaymentIntentId = null;
 
+    #[ORM\Column(length: 5, nullable: true)]
+    private ?string $customerLocale = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $trackingNumber = null;
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $stripePaymentStatus = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $internalNotes = null;
 
     /** @var Collection<int, OrderItem> */
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'order', cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -122,6 +125,16 @@ class Order
     public function getStatus(): OrderStatus
     {
         return $this->status;
+    }
+
+    public function getStatusLabel(): string
+    {
+        return \sprintf(
+            '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;color:%s;border:1px solid %s;background:transparent;">%s</span>',
+            $this->status->badgeColor(),
+            $this->status->badgeColor(),
+            \htmlspecialchars($this->status->label()),
+        );
     }
 
     public function setStatus(OrderStatus $status): static
@@ -227,18 +240,6 @@ class Order
         return $this;
     }
 
-    public function getOriginCountry(): ?string
-    {
-        return $this->originCountry;
-    }
-
-    public function setOriginCountry(?string $originCountry): static
-    {
-        $this->originCountry = null !== $originCountry ? \strtoupper($originCountry) : null;
-
-        return $this;
-    }
-
     public function getTotalUsd(): float
     {
         return (float) $this->totalUsd;
@@ -263,6 +264,18 @@ class Order
         return $this;
     }
 
+    public function getCustomerLocale(): ?string
+    {
+        return $this->customerLocale;
+    }
+
+    public function setCustomerLocale(?string $customerLocale): static
+    {
+        $this->customerLocale = $customerLocale;
+
+        return $this;
+    }
+
     public function getTrackingNumber(): ?string
     {
         return $this->trackingNumber;
@@ -283,6 +296,18 @@ class Order
     public function setStripePaymentStatus(?string $stripePaymentStatus): static
     {
         $this->stripePaymentStatus = $stripePaymentStatus;
+
+        return $this;
+    }
+
+    public function getInternalNotes(): ?string
+    {
+        return $this->internalNotes;
+    }
+
+    public function setInternalNotes(?string $internalNotes): static
+    {
+        $this->internalNotes = $internalNotes;
 
         return $this;
     }
@@ -312,6 +337,56 @@ class Order
         }
 
         return $this;
+    }
+
+    public function getItemCount(): int
+    {
+        return $this->items->count();
+    }
+
+    public function getFullShippingAddress(): string
+    {
+        return \implode(', ', \array_filter([
+            $this->shippingAddressLine1,
+            $this->shippingAddressLine2,
+            $this->shippingPostalCode.' '.$this->shippingCity,
+            $this->shippingState,
+            $this->shippingCountry,
+        ]));
+    }
+
+    public function getItemsSummary(): string
+    {
+        if ($this->items->isEmpty()) {
+            return '<em class="text-body-secondary">Aucun article</em>';
+        }
+
+        $rows = '';
+        foreach ($this->items as $item) {
+            $rows .= \sprintf(
+                '<tr><td style="padding:6px 12px 6px 0;">%s</td><td style="padding:6px 8px;text-align:right;">$%s</td><td class="text-body-secondary" style="padding:6px 8px;text-align:right;">$%s</td><td style="padding:6px 0 6px 8px;text-align:right;font-weight:600;">$%s</td></tr>',
+                \htmlspecialchars($item->getProductName()),
+                \number_format($item->getProductPrice(), 2),
+                \number_format($item->getShippingCost(), 2),
+                \number_format($item->getLineTotal(), 2),
+            );
+        }
+
+        return \sprintf(
+            '<table style="width:100%%;border-collapse:collapse;font-size:13px;"><thead><tr style="border-bottom:2px solid var(--bs-border-color);"><th class="text-body-secondary" style="padding:6px 12px 6px 0;text-align:left;font-weight:600;">Produit</th><th class="text-body-secondary" style="padding:6px 8px;text-align:right;font-weight:600;">Prix</th><th class="text-body-secondary" style="padding:6px 8px;text-align:right;font-weight:600;">Livraison</th><th class="text-body-secondary" style="padding:6px 0 6px 8px;text-align:right;font-weight:600;">Total</th></tr></thead><tbody>%s</tbody><tfoot><tr style="border-top:2px solid var(--bs-border-color);"><td style="padding:8px 12px 0 0;font-weight:700;">Total</td><td colspan="2"></td><td style="padding:8px 0 0 8px;text-align:right;font-weight:700;font-size:14px;">$%s</td></tr></tfoot></table>',
+            $rows,
+            \number_format($this->getTotalUsd(), 2),
+        );
+    }
+
+    public function getTrackingLink(): ?string
+    {
+        return $this->trackingNumber;
+    }
+
+    public function getPublicTrackingPage(): string
+    {
+        return $this->reference;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

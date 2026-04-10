@@ -168,6 +168,18 @@ confirmation:
     delivery_note: "Estimated delivery: 7–14 business days. Your order ships from France or Mexico depending on availability."
     continue_shopping: "Continue shopping"
 
+# ── Order tracking ──
+tracking:
+    title: "Order tracking %reference% | Alma Stella Paris"
+    heading: "Track your order"
+    subtitle: "Order %reference%"
+    status: "Status"
+    ordered_on: "Ordered on"
+    tracking_number: "Tracking number"
+    track_package: "Track my package"
+    items: "Items in this order"
+    cancelled: "This order has been cancelled."
+
 # ── Currency ──
 currency:
     label: "Currency"

@@ -38,6 +38,25 @@ final class OrderMailer
         $this->mailer->send($email);
     }
 
+    public function sendDeliveredNotification(Order $order, string $locale = 'en'): void
+    {
+        $subject = 'fr' === $locale
+            ? \sprintf('Votre commande %s a été livrée', $order->getReference())
+            : \sprintf('Your order %s has been delivered', $order->getReference());
+
+        $email = (new TemplatedEmail())
+            ->from(new Address(self::SENDER_EMAIL, self::SENDER_NAME))
+            ->to(new Address($order->getCustomerEmail(), $order->getCustomerName()))
+            ->subject($subject)
+            ->htmlTemplate('email/order_delivered.html.twig')
+            ->context([
+                'order' => $order,
+                'locale' => $locale,
+            ]);
+
+        $this->mailer->send($email);
+    }
+
     public function sendShippedNotification(Order $order, string $locale = 'en'): void
     {
         $subject = 'fr' === $locale

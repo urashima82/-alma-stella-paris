@@ -168,6 +168,18 @@ confirmation:
     delivery_note: "Livraison estimée : 7 à 14 jours ouvrés. Votre commande est expédiée depuis la France ou le Mexique selon la disponibilité."
     continue_shopping: "Continuer vos achats"
 
+# ── Suivi de commande ──
+tracking:
+    title: "Suivi de commande %reference% | Alma Stella Paris"
+    heading: "Suivre votre commande"
+    subtitle: "Commande %reference%"
+    status: "Statut"
+    ordered_on: "Commandée le"
+    tracking_number: "Numéro de suivi"
+    track_package: "Suivre mon colis"
+    items: "Articles de cette commande"
+    cancelled: "Cette commande a été annulée."
+
 # ── Currency ──
 currency:
     label: "Devise"

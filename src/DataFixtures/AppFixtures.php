@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\Admin;
+use App\Entity\Order;
+use App\Entity\OrderItem;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
 use App\Entity\ShippingSettings;
+use App\Enum\OrderStatus;
 use App\Enum\ShippingTier;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -21,6 +24,7 @@ class AppFixtures extends Fixture
         $categories = $this->loadCategories($manager);
         $products = $this->loadProducts($manager, $categories);
         $this->linkRelatedProducts($products);
+        $this->loadOrders($manager, $products);
 
         $manager->flush();
     }
@@ -206,5 +210,153 @@ class AppFixtures extends Fixture
         $products['Layered Gold Chain Bracelet']->addRelatedProduct($products['Hammered Gold Cuff']);
         $products['Layered Gold Chain Bracelet']->addRelatedProduct($products['Beaded Stone Bracelet']);
         $products['Layered Gold Chain Bracelet']->addRelatedProduct($products['Shell & Gold Anklet']);
+    }
+
+    /**
+     * @param array<string, Product> $products
+     */
+    private function loadOrders(ObjectManager $manager, array $products): void
+    {
+        $orders = [
+            [
+                'reference' => 'ASP-2026-00001',
+                'status' => OrderStatus::Delivered,
+                'name' => 'Sarah Johnson',
+                'email' => 'sarah.johnson@example.com',
+                'locale' => 'en',
+                'line1' => '742 Evergreen Terrace',
+                'city' => 'Portland',
+                'state' => 'OR',
+                'postal' => '97201',
+                'country' => 'US',
+
+                'tracking' => 'CF123456789FR',
+                'stripe_status' => 'succeeded',
+                'items' => [['Gold Star Pendant Necklace', 38.00, 4.90]],
+                'days_ago' => 21,
+            ],
+            [
+                'reference' => 'ASP-2026-00002',
+                'status' => OrderStatus::Shipped,
+                'name' => 'Marie Dupont',
+                'email' => 'marie.dupont@example.com',
+                'locale' => 'fr',
+                'line1' => '15 rue de la Paix',
+                'city' => 'Paris',
+                'state' => null,
+                'postal' => '75002',
+                'country' => 'FR',
+
+                'tracking' => '6A12345678901',
+                'stripe_status' => 'succeeded',
+                'items' => [
+                    ['Black Onyx Drop Earrings', 32.00, 4.90],
+                    ['Layered Gold Chain Bracelet', 26.00, 4.90],
+                ],
+                'days_ago' => 5,
+            ],
+            [
+                'reference' => 'ASP-2026-00003',
+                'status' => OrderStatus::Processing,
+                'name' => 'Emily Carter',
+                'email' => 'emily.carter@example.com',
+                'locale' => 'en',
+                'line1' => '88 Queen Street West',
+                'city' => 'Toronto',
+                'state' => 'ON',
+                'postal' => 'M5H 2N2',
+                'country' => 'CA',
+
+                'tracking' => null,
+                'stripe_status' => 'succeeded',
+                'items' => [['Mother of Pearl Choker', 40.00, 6.90]],
+                'days_ago' => 2,
+            ],
+            [
+                'reference' => 'ASP-2026-00004',
+                'status' => OrderStatus::Shipped,
+                'name' => 'Ana García López',
+                'email' => 'ana.garcia@example.com',
+                'locale' => 'en',
+                'line1' => '4521 Sunset Blvd',
+                'city' => 'Los Angeles',
+                'state' => 'CA',
+                'postal' => '90027',
+                'country' => 'US',
+
+                'tracking' => 'MX987654321',
+                'stripe_status' => 'succeeded',
+                'items' => [
+                    ['Turquoise Stone Ring', 28.00, 4.90],
+                    ['Beaded Stone Bracelet', 22.00, 4.90],
+                ],
+                'days_ago' => 3,
+            ],
+            [
+                'reference' => 'ASP-2026-00005',
+                'status' => OrderStatus::Pending,
+                'name' => 'James Wilson',
+                'email' => 'james.wilson@example.com',
+                'locale' => 'en',
+                'line1' => '12 Baker Street',
+                'city' => 'London',
+                'state' => null,
+                'postal' => 'W1U 3BW',
+                'country' => 'GB',
+
+                'tracking' => null,
+                'stripe_status' => null,
+                'items' => [['Hammered Gold Cuff', 52.00, 6.90]],
+                'days_ago' => 0,
+            ],
+            [
+                'reference' => 'ASP-2026-00006',
+                'status' => OrderStatus::Cancelled,
+                'name' => 'Sophie Martin',
+                'email' => 'sophie.martin@example.com',
+                'locale' => 'fr',
+                'line1' => '7 avenue des Champs-Élysées',
+                'city' => 'Paris',
+                'state' => null,
+                'postal' => '75008',
+                'country' => 'FR',
+
+                'tracking' => null,
+                'stripe_status' => 'canceled',
+                'items' => [['Pearl & Gold Hoops', 36.00, 4.90]],
+                'days_ago' => 10,
+            ],
+        ];
+
+        foreach ($orders as $data) {
+            $order = new Order();
+            $order->setReference($data['reference']);
+            $order->setStatus($data['status']);
+            $order->setCustomerName($data['name']);
+            $order->setCustomerEmail($data['email']);
+            $order->setCustomerLocale($data['locale']);
+            $order->setShippingAddressLine1($data['line1']);
+            $order->setShippingCity($data['city']);
+            $order->setShippingState($data['state']);
+            $order->setShippingPostalCode($data['postal']);
+            $order->setShippingCountry($data['country']);
+
+            $order->setTrackingNumber($data['tracking']);
+            $order->setStripePaymentStatus($data['stripe_status']);
+
+            $total = 0.0;
+            foreach ($data['items'] as [$productName, $price, $shipping]) {
+                $item = new OrderItem();
+                $item->setProduct($products[$productName] ?? null);
+                $item->setProductName($productName);
+                $item->setProductPrice($price);
+                $item->setShippingCost($shipping);
+                $order->addItem($item);
+                $total += $price + $shipping;
+            }
+
+            $order->setTotalUsd($total);
+            $manager->persist($order);
+        }
     }
 }
