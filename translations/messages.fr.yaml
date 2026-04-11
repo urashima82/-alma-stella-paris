@@ -3,6 +3,7 @@ nav:
     home: "Accueil"
     shop: "Boutique"
     about: "À propos"
+    contact: "Contact"
     language: "Langue"
     account: "Compte"
 
@@ -410,6 +411,36 @@ profile:
         current_password_invalid: "Le mot de passe actuel est incorrect."
         password_too_short: "Le nouveau mot de passe doit contenir au moins 8 caractères."
         password_mismatch: "Les mots de passe ne correspondent pas."
+
+# ── Contact ──
+contact:
+    title: "Contact | Alma Stella Paris"
+    meta_description: "Contactez Alma Stella Paris. Questions sur votre commande, un retour ou une collaboration ? Nous serions ravies de vous lire."
+    heading: "Nous contacter"
+    subtitle: "Une question, une demande particulière ou simplement un mot gentil ? Nous serions ravies de vous lire."
+    label_name: "Nom complet"
+    label_email: "Adresse e-mail"
+    label_subject: "Sujet"
+    label_message: "Votre message"
+    placeholder_name: "Votre nom complet"
+    placeholder_email: "vous@exemple.com"
+    placeholder_message: "Dites-nous comment nous pouvons vous aider…"
+    subject:
+        general: "Question générale"
+        order: "À propos d'une commande"
+        return: "Retour ou échange"
+        collaboration: "Collaboration"
+        other: "Autre"
+    submit: "Envoyer le message"
+    email_fallback: "Vous pouvez aussi nous écrire directement à"
+    success: "Votre message a bien été envoyé ! Nous vous répondrons dans les plus brefs délais."
+    error:
+        name_required: "Veuillez saisir votre nom."
+        email_required: "Veuillez saisir votre adresse e-mail."
+        email_invalid: "Veuillez saisir une adresse e-mail valide."
+        message_required: "Veuillez saisir votre message."
+        message_too_short: "Votre message doit contenir au moins 10 caractères."
+        rate_limited: "Vous avez envoyé trop de messages. Veuillez réessayer plus tard."
 
 # ── Language switcher ──
 locale:

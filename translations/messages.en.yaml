@@ -3,6 +3,7 @@ nav:
     home: Home
     shop: Shop
     about: About
+    contact: Contact
     language: Language
     account: "Account"
 
@@ -410,6 +411,36 @@ profile:
         current_password_invalid: "Current password is incorrect."
         password_too_short: "New password must be at least 8 characters."
         password_mismatch: "Passwords do not match."
+
+# ── Contact ──
+contact:
+    title: "Contact | Alma Stella Paris"
+    meta_description: "Get in touch with Alma Stella Paris. Questions about your order, a return, or a collaboration? We'd love to hear from you."
+    heading: "Get in touch"
+    subtitle: "A question, a special request, or just a kind word? We'd love to hear from you."
+    label_name: "Full name"
+    label_email: "Email address"
+    label_subject: "Subject"
+    label_message: "Your message"
+    placeholder_name: "Your full name"
+    placeholder_email: "you@example.com"
+    placeholder_message: "Tell us how we can help…"
+    subject:
+        general: "General question"
+        order: "About an order"
+        return: "Return or exchange"
+        collaboration: "Collaboration"
+        other: "Other"
+    submit: "Send message"
+    email_fallback: "You can also reach us directly at"
+    success: "Your message has been sent! We'll get back to you as soon as possible."
+    error:
+        name_required: "Please enter your name."
+        email_required: "Please enter your email address."
+        email_invalid: "Please enter a valid email address."
+        message_required: "Please enter your message."
+        message_too_short: "Your message must be at least 10 characters."
+        rate_limited: "You've sent too many messages. Please try again later."
 
 # ── Language switcher ──
 locale:

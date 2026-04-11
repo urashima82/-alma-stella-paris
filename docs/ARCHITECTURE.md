@@ -34,7 +34,8 @@ alma-stella/
 │   │   │   ├── AdminCrudController.php   # Admin user management (Super Admin only)
 │   │   │   ├── OrderCrudController.php   # Order management with status workflow
 │   │   │   ├── OrderItemCrudController.php # OrderItem sub-form (read-only)
-│   │   │   └── CustomerCrudController.php  # Customer list (read-only for admin)
+│   │   │   ├── CustomerCrudController.php  # Customer list (read-only for admin)
+│   │   └── ContactMessageCrudController.php # Contact messages (read/delete)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
 │   │   └── Shop/             # Public-facing controllers (locale-prefixed)
 │   │       ├── HomeController.php
@@ -43,6 +44,7 @@ alma-stella/
 │   │       ├── CurrencyController.php  # POST /currency/switch — changes active currency
 │   │       ├── CartController.php      # Cart API: add/remove/content (JSON responses)
 │   │       ├── AboutController.php
+│   │       ├── ContactController.php   # Contact form with honeypot + rate limiter
 │   │       ├── SecurityController.php  # Customer login, register, logout
 │   │       ├── ResetPasswordController.php  # Forgot password + reset flow
 │   │       └── AccountController.php   # Dashboard, orders, addresses, profile
@@ -53,6 +55,7 @@ alma-stella/
 │   │   ├── CurrencyConverter.php
 │   │   ├── CartManager.php          # Session-based cart (add/remove/get products)
 │   │   ├── SocialPublisher.php
+│   │   ├── ContactMailer.php             # Contact form notification (plain text to admins, reply-to sender)
 │   │   ├── OrderMailer.php              # Order emails (confirmation, shipped, delivered, admin notification)
 │   │   ├── PendingOrderVerifier.php    # Verifies pending orders against Stripe API
 │   │   └── ShippingCalculator.php
@@ -90,6 +93,7 @@ alma-stella/
 │       ├── catalog/
 │       ├── product/
 │       ├── about/
+│       ├── contact/
 │       ├── cart/
 │       ├── security/            # Login, register, forgot/reset password
 │       └── account/             # Dashboard, orders, addresses, profile (authenticated)
@@ -279,6 +283,27 @@ class CustomerAddress
 }
 ```
 
+### ContactMessage
+
+```php
+// src/Entity/ContactMessage.php
+class ContactMessage
+{
+    private int $id;
+    private string $name;
+    private string $email;
+    private ContactSubject $subject;  // Enum: General, Order, Return, Collaboration, Other
+    private string $message;
+    private bool $isRead;
+    private \DateTimeImmutable $createdAt;
+}
+```
+
+> **Anti-spam:** Honeypot field (hidden `website` input, rejected if filled)
+> + Symfony RateLimiter (3 submissions / 15 min / IP).
+> **Admin notification:** Plain text email with Reply-To set to sender's email
+> for easy direct response.
+
 ### Other entities (summary)
 
 | Entity | Purpose |
@@ -289,6 +314,7 @@ class CustomerAddress
 | `Admin` | Admin users — passwordless auth via magic link |
 | `Customer` | Customer accounts — email + password auth, order history, saved addresses |
 | `CustomerAddress` | Customer shipping addresses with default flag |
+| `ContactMessage` | Contact form submissions — name, email, subject, message, read flag |
 | `ResetPasswordRequest` | Token storage for password reset flow (symfonycasts bundle) |
 | `WishlistItem` | Guest (email) or user + product + notification flag |
 | `ProductReview` | Rating 1-5, text, country, verified purchase flag |

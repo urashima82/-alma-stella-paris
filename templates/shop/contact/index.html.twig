@@ -1,0 +1,103 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'contact.title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'contact.meta_description'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="max-w-2xl mx-auto px-6 py-20 md:py-28">
+        <div class="text-center mb-12">
+            <p class="text-alma-gold text-2xl mb-6">✦</p>
+            <h1 class="font-serif text-4xl md:text-5xl font-light text-alma-text leading-tight mb-4">
+                {{ 'contact.heading'|trans }}
+            </h1>
+            <p class="text-sm text-alma-text-muted leading-relaxed max-w-md mx-auto">
+                {{ 'contact.subtitle'|trans }}
+            </p>
+        </div>
+
+        {# Flash messages #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="mb-6 px-4 py-3 rounded text-sm
+                    {{ type == 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200' }}">
+                    {{ message|trans }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {{ form_start(form, {
+            attr: {class: 'space-y-6'}
+        }) }}
+
+            {# Name #}
+            <div>
+                <label for="{{ form.name.vars.id }}" class="block text-xs uppercase tracking-widest text-alma-text-muted font-medium mb-2">
+                    {{ 'contact.label_name'|trans }}
+                </label>
+                {{ form_widget(form.name, {
+                    attr: {
+                        class: 'w-full border border-alma-hover rounded px-4 py-3 text-sm text-alma-text bg-white placeholder-alma-text-muted/50 focus:border-alma-gold focus:ring-1 focus:ring-alma-gold outline-none transition-colors',
+                        placeholder: 'contact.placeholder_name'|trans
+                    }
+                }) }}
+                {{ form_errors(form.name, {attr: {class: 'text-red-600 text-xs mt-1'}}) }}
+            </div>
+
+            {# Email #}
+            <div>
+                <label for="{{ form.email.vars.id }}" class="block text-xs uppercase tracking-widest text-alma-text-muted font-medium mb-2">
+                    {{ 'contact.label_email'|trans }}
+                </label>
+                {{ form_widget(form.email, {
+                    attr: {
+                        class: 'w-full border border-alma-hover rounded px-4 py-3 text-sm text-alma-text bg-white placeholder-alma-text-muted/50 focus:border-alma-gold focus:ring-1 focus:ring-alma-gold outline-none transition-colors',
+                        placeholder: 'contact.placeholder_email'|trans
+                    }
+                }) }}
+                {{ form_errors(form.email, {attr: {class: 'text-red-600 text-xs mt-1'}}) }}
+            </div>
+
+            {# Subject #}
+            <div>
+                <label for="{{ form.subject.vars.id }}" class="block text-xs uppercase tracking-widest text-alma-text-muted font-medium mb-2">
+                    {{ 'contact.label_subject'|trans }}
+                </label>
+                {{ form_widget(form.subject, {
+                    attr: {
+                        class: 'w-full border border-alma-hover rounded px-4 py-3 text-sm text-alma-text bg-white focus:border-alma-gold focus:ring-1 focus:ring-alma-gold outline-none transition-colors'
+                    }
+                }) }}
+            </div>
+
+            {# Message #}
+            <div>
+                <label for="{{ form.message.vars.id }}" class="block text-xs uppercase tracking-widest text-alma-text-muted font-medium mb-2">
+                    {{ 'contact.label_message'|trans }}
+                </label>
+                {{ form_widget(form.message, {
+                    attr: {
+                        class: 'w-full border border-alma-hover rounded px-4 py-3 text-sm text-alma-text bg-white placeholder-alma-text-muted/50 focus:border-alma-gold focus:ring-1 focus:ring-alma-gold outline-none transition-colors resize-vertical',
+                        rows: 6,
+                        placeholder: 'contact.placeholder_message'|trans
+                    }
+                }) }}
+                {{ form_errors(form.message, {attr: {class: 'text-red-600 text-xs mt-1'}}) }}
+            </div>
+
+            {# Honeypot — hidden from humans #}
+            <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;">
+                {{ form_widget(form.website) }}
+            </div>
+
+            {# Submit button #}
+            <div class="text-center pt-2">
+                <button type="submit"
+                        class="inline-block bg-alma-gold hover:bg-alma-gold-dark text-white text-xs uppercase tracking-widest
+                               px-10 py-3.5 transition-colors font-medium rounded">
+                    {{ 'contact.submit'|trans }}
+                </button>
+            </div>
+
+        {{ form_end(form) }}
+    </section>
+{% endblock %}
