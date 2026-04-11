@@ -67,6 +67,15 @@ final class PendingOrderVerifier
                     ]);
                 }
 
+                try {
+                    $this->orderMailer->sendNewOrderAdminNotification($order);
+                } catch (\Exception $e) {
+                    $this->logger->error('Admin notification failed for order {ref}: {message}', [
+                        'ref' => $order->getReference(),
+                        'message' => $e->getMessage(),
+                    ]);
+                }
+
                 $this->logger->info('Order {ref} confirmed via scheduler.', ['ref' => $order->getReference()]);
                 ++$result['confirmed'];
             } elseif (\in_array($paymentIntent->status, ['canceled', 'requires_payment_method'], true)) {

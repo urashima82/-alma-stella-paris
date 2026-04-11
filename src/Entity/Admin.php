@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\AdminRole;
 use App\Repository\AdminRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -22,6 +23,12 @@ class Admin implements UserInterface
     /** @var list<string> */
     #[ORM\Column]
     private array $roles = [];
+
+    #[ORM\Column(length: 20, enumType: AdminRole::class)]
+    private AdminRole $role = AdminRole::Admin;
+
+    #[ORM\Column]
+    private bool $receivesAdminEmails = true;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastLoggedInAt = null;
@@ -59,7 +66,11 @@ class Admin implements UserInterface
         $roles = $this->roles;
         $roles[] = 'ROLE_ADMIN';
 
-        return \array_unique($roles);
+        if (AdminRole::SuperAdmin === $this->role) {
+            $roles[] = 'ROLE_SUPER_ADMIN';
+        }
+
+        return \array_values(\array_unique($roles));
     }
 
     /**
@@ -103,5 +114,49 @@ class Admin implements UserInterface
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    public function getRole(): AdminRole
+    {
+        return $this->role;
+    }
+
+    public function setRole(AdminRole $role): static
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return AdminRole::SuperAdmin === $this->role;
+    }
+
+    public function getReceivesAdminEmails(): bool
+    {
+        return $this->receivesAdminEmails;
+    }
+
+    public function setReceivesAdminEmails(bool $receivesAdminEmails): static
+    {
+        $this->receivesAdminEmails = $receivesAdminEmails;
+
+        return $this;
+    }
+
+    public function getRoleLabel(): string
+    {
+        return \sprintf(
+            '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;color:%s;border:1px solid %s;background:transparent;">%s</span>',
+            $this->role->badgeColor(),
+            $this->role->badgeColor(),
+            \htmlspecialchars($this->role->label()),
+        );
+    }
+
+    public function __toString(): string
+    {
+        return $this->email;
     }
 }

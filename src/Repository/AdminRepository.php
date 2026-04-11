@@ -17,4 +17,16 @@ class AdminRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Admin::class);
     }
+
+    /**
+     * @return list<Admin>
+     */
+    public function findEmailRecipients(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.receivesAdminEmails = :enabled')
+            ->setParameter('enabled', true)
+            ->getQuery()
+            ->getResult();
+    }
 }

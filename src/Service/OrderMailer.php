@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Entity\Admin;
 use App\Entity\Order;
+use App\Repository\AdminRepository;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -13,6 +16,8 @@ final class OrderMailer
 {
     public function __construct(
         private readonly MailerInterface $mailer,
+        private readonly AdminRepository $adminRepository,
+        private readonly AdminUrlGenerator $adminUrlGenerator,
         private readonly string $mailerFromEmail,
         private readonly string $mailerFromName,
     ) {
@@ -73,5 +78,41 @@ final class OrderMailer
             ]);
 
         $this->mailer->send($email);
+    }
+
+    /**
+     * @return list<Admin>
+     */
+    public function sendNewOrderAdminNotification(Order $order): array
+    {
+        $recipients = $this->adminRepository->findEmailRecipients();
+
+        if ([] === $recipients) {
+            return [];
+        }
+
+        $adminUrl = $this->adminUrlGenerator
+            ->setController(\App\Controller\Admin\OrderCrudController::class)
+            ->setAction('edit')
+            ->setEntityId($order->getId())
+            ->generateUrl();
+
+        $from = new Address($this->mailerFromEmail, $this->mailerFromName);
+
+        foreach ($recipients as $admin) {
+            $email = (new TemplatedEmail())
+                ->from($from)
+                ->to(new Address($admin->getEmail()))
+                ->subject(\sprintf('Nouvelle commande %s en préparation', $order->getReference()))
+                ->htmlTemplate('email/admin_new_order.html.twig')
+                ->context([
+                    'order' => $order,
+                    'adminUrl' => $adminUrl,
+                ]);
+
+            $this->mailer->send($email);
+        }
+
+        return $recipients;
     }
 }

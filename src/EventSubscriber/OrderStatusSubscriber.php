@@ -57,6 +57,10 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
             return;
         }
 
+        if (OrderStatus::Processing === $newStatus) {
+            $this->sendAdminNotification($entity);
+        }
+
         if (OrderStatus::Shipped === $newStatus) {
             if (null === $entity->getTrackingNumber() || '' === \trim($entity->getTrackingNumber())) {
                 $this->addFlash('warning', 'Impossible de passer en « Expédiée » sans numéro de suivi.');
@@ -98,6 +102,27 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
                 'error' => $e->getMessage(),
             ]);
             $this->addFlash('danger', \sprintf('Erreur lors de l\'envoi de l\'email de %s.', $label));
+        }
+    }
+
+    private function sendAdminNotification(Order $order): void
+    {
+        try {
+            $recipients = $this->orderMailer->sendNewOrderAdminNotification($order);
+
+            if ([] !== $recipients) {
+                $emails = \array_map(static fn ($admin) => $admin->getEmail(), $recipients);
+                $this->addFlash('success', \sprintf(
+                    'Notification admin envoyée à %s',
+                    \implode(', ', $emails),
+                ));
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to send admin notification for order {reference}: {error}', [
+                'reference' => $order->getReference(),
+                'error' => $e->getMessage(),
+            ]);
+            $this->addFlash('danger', 'Erreur lors de l\'envoi de la notification admin.');
         }
     }
 

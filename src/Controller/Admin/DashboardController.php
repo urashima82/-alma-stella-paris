@@ -83,6 +83,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(OrderCrudController::class, 'Commandes', 'fa fa-shopping-bag');
         yield MenuItem::section('Réglages');
         yield MenuItem::linkTo(SiteSettingsCrudController::class, 'Paramètres du site', 'fa fa-cog');
+        yield MenuItem::linkTo(AdminCrudController::class, 'Administrateurs', 'fa fa-users');
         yield MenuItem::section('');
         yield MenuItem::linkToUrl('Retour au site', 'fa fa-arrow-left', '/');
         yield MenuItem::linkToLogout('Déconnexion', 'fa fa-sign-out');

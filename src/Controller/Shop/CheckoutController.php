@@ -216,6 +216,12 @@ class CheckoutController extends AbstractController
             $this->logger->error('Order confirmation email failed: {message}', ['message' => $e->getMessage()]);
         }
 
+        try {
+            $this->orderMailer->sendNewOrderAdminNotification($order);
+        } catch (\Exception $e) {
+            $this->logger->error('Admin notification email failed: {message}', ['message' => $e->getMessage()]);
+        }
+
         // Clear cart and pending order from session
         $this->cartManager->clear();
         $request->getSession()->remove('_pending_order');

@@ -1,4 +1,7 @@
 security:
+    role_hierarchy:
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN]
+
     providers:
         admin_provider:
             entity:

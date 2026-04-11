@@ -30,6 +30,7 @@ alma-stella/
 │   ├── Controller/
 │   │   ├── Admin/            # EasyAdmin CRUD controllers
 │   │   │   ├── AdminLoginController.php  # Magic link login flow
+│   │   │   ├── AdminCrudController.php   # Admin user management (Super Admin only)
 │   │   │   ├── OrderCrudController.php   # Order management with status workflow
 │   │   │   └── OrderItemCrudController.php # OrderItem sub-form (read-only)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
@@ -47,7 +48,7 @@ alma-stella/
 │   │   ├── CurrencyConverter.php
 │   │   ├── CartManager.php          # Session-based cart (add/remove/get products)
 │   │   ├── SocialPublisher.php
-│   │   ├── OrderMailer.php              # Order confirmation email via Symfony Mailer
+│   │   ├── OrderMailer.php              # Order emails (confirmation, shipped, delivered, admin notification)
 │   │   ├── PendingOrderVerifier.php    # Verifies pending orders against Stripe API
 │   │   └── ShippingCalculator.php
 │   ├── Twig/
@@ -61,7 +62,7 @@ alma-stella/
 │   │   ├── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
 │   │   ├── AdminLoginSubscriber.php      # Updates lastLoggedInAt on login (invalidates link)
 │   │   ├── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
-│   │   └── OrderStatusSubscriber.php     # Sends shipped email (in customer's locale) when status → shipped, blocks without tracking number
+│   │   └── OrderStatusSubscriber.php     # Handles status changes: admin email on Processing, shipped/delivered emails to customer
 │   ├── Message/
 │   │   └── VerifyPendingOrdersMessage.php
 │   ├── MessageHandler/
@@ -209,7 +210,9 @@ class Admin implements UserInterface
 {
     private int $id;
     private string $email;              // Unique, used as user identifier
-    private array $roles;               // ROLE_ADMIN always included
+    private array $roles;               // ROLE_ADMIN always included, ROLE_SUPER_ADMIN for super admins
+    private AdminRole $role;            // SuperAdmin or Admin (enum)
+    private bool $receivesAdminEmails;  // Whether to receive admin notifications (new orders, etc.)
     private ?\DateTimeImmutable $lastLoggedInAt;  // Updated on login, invalidates old links
     private \DateTimeImmutable $createdAt;
 }
@@ -218,6 +221,10 @@ class Admin implements UserInterface
 > **Authentication:** Passwordless via Symfony Login Link. No password stored.
 > Link is signed (HMAC) using `email` + `lastLoggedInAt`, expires in 10 minutes,
 > single-use (lastLoggedInAt changes on login, invalidating old links).
+>
+> **Roles:** `AdminRole` enum — `SuperAdmin` (full management access) vs `Admin`
+> (read-only access to admin list). Super Admin accounts cannot be deleted.
+> `receivesAdminEmails` controls who gets notified on new orders.
 
 ### Other entities (summary)
 
@@ -291,6 +298,8 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 |---|---|
 | Order confirmed | `email/order_confirmation.html.twig` — bilingual (FR/EN), order summary with items |
 | Order shipped | `email/order_shipped.html.twig` — bilingual, clickable tracking link (La Poste/17track), link to tracking page |
+| Order delivered | `email/order_delivered.html.twig` — bilingual, care instructions + Instagram CTA |
+| Order → Processing (admin) | `email/admin_new_order.html.twig` — FR only, full summary + link to EasyAdmin order |
 | Admin login link | `email/admin_login_link.html.twig` — magic link with 10min expiry |
 
 - Sender: `hello@almastellaparis.com`

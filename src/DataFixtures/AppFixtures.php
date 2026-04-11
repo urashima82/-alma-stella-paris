@@ -11,6 +11,7 @@ use App\Entity\Product;
 use App\Entity\ProductCategory;
 use App\Entity\ShippingSettings;
 use App\Entity\SiteSettings;
+use App\Enum\AdminRole;
 use App\Enum\OrderStatus;
 use App\Enum\ShippingTier;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -48,13 +49,15 @@ class AppFixtures extends Fixture
     private function loadAdmins(ObjectManager $manager): void
     {
         $admins = [
-            'admin@almastellaparis.com',
-            'contact@nicolas-bede.fr',
+            ['admin@almastellaparis.com', AdminRole::Admin, true],
+            ['contact@nicolas-bede.fr', AdminRole::SuperAdmin, true],
         ];
 
-        foreach ($admins as $email) {
+        foreach ($admins as [$email, $role, $receivesEmails]) {
             $admin = new Admin();
             $admin->setEmail($email);
+            $admin->setRole($role);
+            $admin->setReceivesAdminEmails($receivesEmails);
             $manager->persist($admin);
         }
     }
