@@ -4,6 +4,7 @@ nav:
     shop: Shop
     about: About
     language: Language
+    account: "Account"
 
 # ── Meta ──
 meta:
@@ -143,6 +144,12 @@ checkout:
     label_postal_code: "Postal code"
     label_country: "Country"
     select_country: "Select a country…"
+    account_prompt: "Already have an account? Sign in for a faster checkout."
+    account_prompt_sub: "Your saved addresses will be pre-filled automatically."
+    sign_in: "Sign in"
+    create_account: "Create account"
+    saved_addresses: "Use a saved address"
+    new_address: "Enter a new address"
     order_summary: "Order summary"
     shipping_label: "Shipping"
     shipping_included: "Included"
@@ -173,6 +180,9 @@ confirmation:
     items_count: "Items"
     delivery_note: "Estimated delivery: 7–14 business days. Your order ships from France or Mexico depending on availability."
     continue_shopping: "Continue shopping"
+    create_account_heading: "Track your order easily"
+    create_account_text: "Create your account to follow your order status, save your addresses, and enjoy a faster checkout next time."
+    create_account_button: "Create my account"
 
 # ── Order tracking ──
 tracking:
@@ -246,6 +256,160 @@ terms:
     liability_text: "Alma Stella Paris shall not be held liable for damages resulting from improper use of the products. Stainless steel jewelry is water-resistant, but regular care is recommended to maintain its shine."
     law_heading: "Applicable law"
     law_text: "These terms are governed by French law. In the event of a dispute, an amicable resolution will be sought before any legal action. Failing that, the courts of Toulouse, France shall have exclusive jurisdiction."
+
+# ── Customer account ──
+login:
+    title: "Sign in | Alma Stella Paris"
+    heading: "Sign in"
+    subtitle: "Access your account to track your orders."
+    label_email: "Email address"
+    label_password: "Password"
+    remember_me: "Remember me"
+    forgot_password: "Forgot password?"
+    submit: "Sign in"
+    no_account: "Don't have an account?"
+    create_account: "Create one"
+    error:
+        invalid_credentials: "Invalid email or password. Please try again."
+    success:
+        registered: "Your account has been created. You can now sign in."
+        password_reset: "Your password has been reset. You can now sign in."
+
+register:
+    title: "Create account | Alma Stella Paris"
+    heading: "Create your account"
+    subtitle: "Track your orders and enjoy a faster checkout."
+    label_first_name: "First name"
+    label_last_name: "Last name"
+    label_email: "Email address"
+    label_password: "Password"
+    label_password_confirm: "Confirm password"
+    password_hint: "Minimum 8 characters."
+    submit: "Create my account"
+    already_have_account: "Already have an account?"
+    sign_in: "Sign in"
+    error:
+        first_name_required: "First name is required."
+        last_name_required: "Last name is required."
+        email_invalid: "Please enter a valid email address."
+        email_already_used: "An account already exists with this email address."
+        password_too_short: "Password must be at least 8 characters."
+        password_mismatch: "Passwords do not match."
+
+forgot_password:
+    title: "Forgot password | Alma Stella Paris"
+    heading: "Reset your password"
+    subtitle: "Enter your email address and we'll send you a link to reset your password."
+    label_email: "Email address"
+    submit: "Send reset link"
+    back_to_login: "Back to sign in"
+    email_sent_heading: "Check your inbox"
+    email_sent_text: "If an account exists with this email address, a reset link has been sent. It expires in 1 hour."
+
+reset_password:
+    title: "Reset password | Alma Stella Paris"
+    heading: "Choose a new password"
+    label_password: "New password"
+    label_password_confirm: "Confirm new password"
+    password_hint: "Minimum 8 characters."
+    submit: "Reset password"
+    error:
+        token_expired: "This reset link has expired. Please request a new one."
+        password_too_short: "Password must be at least 8 characters."
+        password_mismatch: "Passwords do not match."
+
+account:
+    title: "My account | Alma Stella Paris"
+    heading: "My account"
+    welcome: "Welcome, %name%"
+    member_since: "Member since %date%"
+    order_count: "%count% order(s)"
+    dropdown:
+        greeting: "Hi, %name%"
+    nav:
+        dashboard: "Dashboard"
+        orders: "My orders"
+        addresses: "Address book"
+        profile: "My profile"
+        logout: "Sign out"
+    quick_links:
+        orders: "View my orders"
+        addresses: "Manage addresses"
+        profile: "Edit profile"
+
+orders:
+    title: "My orders | Alma Stella Paris"
+    heading: "My orders"
+    empty: "You haven't placed any orders yet."
+    shop_now: "Start shopping"
+    reference: "Order"
+    date: "Date"
+    status: "Status"
+    total: "Total"
+    view: "View details"
+    detail:
+        title: "Order %reference% | Alma Stella Paris"
+        heading: "Order %reference%"
+        placed_on: "Placed on %date%"
+        items: "Items"
+        product: "Product"
+        price: "Price"
+        shipping: "Shipping"
+        line_total: "Subtotal"
+        order_total: "Total"
+        shipping_address: "Shipping address"
+        tracking: "Tracking"
+        tracking_number: "Tracking number"
+        track_package: "Track your package"
+        back: "Back to orders"
+
+addresses:
+    title: "Address book | Alma Stella Paris"
+    heading: "Address book"
+    empty: "You haven't saved any addresses yet."
+    add: "Add an address"
+    edit: "Edit"
+    delete: "Delete"
+    set_default: "Set as default"
+    default_badge: "Default"
+    confirm_delete: "Are you sure you want to delete this address?"
+    form:
+        title_add: "Add an address"
+        title_edit: "Edit address"
+        label_label: "Address label"
+        label_label_hint: "e.g. Home, Office"
+        label_address_line1: "Address"
+        label_address_line2: "Address line 2"
+        label_city: "City"
+        label_state: "State / Province"
+        label_postal_code: "Postal code"
+        label_country: "Country"
+        label_default: "Set as default address"
+        submit_add: "Save address"
+        submit_edit: "Update address"
+        cancel: "Cancel"
+
+profile:
+    title: "My profile | Alma Stella Paris"
+    heading: "My profile"
+    section_info: "Personal information"
+    label_first_name: "First name"
+    label_last_name: "Last name"
+    label_email: "Email address"
+    submit_info: "Update profile"
+    section_password: "Change password"
+    label_current_password: "Current password"
+    label_new_password: "New password"
+    label_new_password_confirm: "Confirm new password"
+    password_hint: "Minimum 8 characters."
+    submit_password: "Change password"
+    success:
+        info_updated: "Your profile has been updated."
+        password_changed: "Your password has been changed."
+    error:
+        current_password_invalid: "Current password is incorrect."
+        password_too_short: "New password must be at least 8 characters."
+        password_mismatch: "Passwords do not match."
 
 # ── Language switcher ──
 locale:

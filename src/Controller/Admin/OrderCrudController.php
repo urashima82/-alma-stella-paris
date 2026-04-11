@@ -11,6 +11,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\CountryField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
@@ -89,6 +90,9 @@ class OrderCrudController extends AbstractCrudController
             ->setNumDecimals(2);
         yield CountryField::new('shippingCountry', 'Destination');
         yield TextField::new('trackingNumber', 'N° suivi');
+        yield AssociationField::new('customer', 'Compte')
+            ->setCrudController(CustomerCrudController::class)
+            ->formatValue(static fn ($value, Order $entity) => $entity->getCustomer()?->getFullName() ?? '-');
         yield DateTimeField::new('createdAt', 'Date')
             ->setFormat('dd/MM/yyyy HH:mm');
     }

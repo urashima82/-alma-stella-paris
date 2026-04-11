@@ -1,0 +1,97 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'register.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-md mx-auto px-6 py-16 md:py-24">
+        <div class="text-center mb-10">
+            <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                {{ 'register.heading'|trans }}
+            </h1>
+            <p class="text-sm text-alma-text-muted">
+                {{ 'register.subtitle'|trans }}
+            </p>
+        </div>
+
+        {% if errors is not empty %}
+            <div class="border border-red-300 bg-red-50 text-red-700 text-sm px-4 py-3 mb-6">
+                <ul class="list-disc list-inside space-y-1">
+                    {% for error in errors %}
+                        <li>{{ error|trans }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="first_name" class="block text-sm font-sans text-alma-text-muted mb-1">
+                        {{ 'register.label_first_name'|trans }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="first_name" name="first_name"
+                           value="{{ form_data.first_name }}"
+                           required
+                           class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                  focus:border-alma-gold focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label for="last_name" class="block text-sm font-sans text-alma-text-muted mb-1">
+                        {{ 'register.label_last_name'|trans }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="last_name" name="last_name"
+                           value="{{ form_data.last_name }}"
+                           required
+                           class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                  focus:border-alma-gold focus:outline-none transition-colors">
+                </div>
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'register.label_email'|trans }} <span class="text-red-500">*</span>
+                </label>
+                <input type="email" id="email" name="email"
+                       value="{{ form_data.email }}"
+                       required
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'register.label_password'|trans }} <span class="text-red-500">*</span>
+                </label>
+                <input type="password" id="password" name="password"
+                       required minlength="8"
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+                <p class="text-xs text-alma-text-muted mt-1">{{ 'register.password_hint'|trans }}</p>
+            </div>
+
+            <div>
+                <label for="password_confirm" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'register.label_password_confirm'|trans }} <span class="text-red-500">*</span>
+                </label>
+                <input type="password" id="password_confirm" name="password_confirm"
+                       required minlength="8"
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-alma-gold text-white font-sans text-sm uppercase tracking-widest
+                           py-3.5 hover:bg-alma-gold-dark transition-colors">
+                {{ 'register.submit'|trans }}
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-alma-text-muted mt-8">
+            {{ 'register.already_have_account'|trans }}
+            <a href="{{ path('shop_login', {'_locale': app.request.locale}) }}"
+               class="text-alma-gold hover:text-alma-gold-dark transition-colors font-medium">
+                {{ 'register.sign_in'|trans }}
+            </a>
+        </p>
+    </div>
+{% endblock %}

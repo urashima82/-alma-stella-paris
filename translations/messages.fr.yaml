@@ -4,6 +4,7 @@ nav:
     shop: "Boutique"
     about: "À propos"
     language: "Langue"
+    account: "Compte"
 
 # ── Meta ──
 meta:
@@ -143,6 +144,12 @@ checkout:
     label_postal_code: "Code postal"
     label_country: "Pays"
     select_country: "Sélectionnez un pays…"
+    account_prompt: "Vous avez déjà un compte ? Connectez-vous pour un paiement plus rapide."
+    account_prompt_sub: "Vos adresses enregistrées seront pré-remplies automatiquement."
+    sign_in: "Se connecter"
+    create_account: "Créer un compte"
+    saved_addresses: "Utiliser une adresse enregistrée"
+    new_address: "Saisir une nouvelle adresse"
     order_summary: "Récapitulatif"
     shipping_label: "Livraison"
     shipping_included: "Incluse"
@@ -173,6 +180,9 @@ confirmation:
     items_count: "Articles"
     delivery_note: "Livraison estimée : 7 à 14 jours ouvrés. Votre commande est expédiée depuis la France ou le Mexique selon la disponibilité."
     continue_shopping: "Continuer vos achats"
+    create_account_heading: "Suivez votre commande facilement"
+    create_account_text: "Créez votre compte pour suivre le statut de votre commande, enregistrer vos adresses et profiter d'un paiement plus rapide."
+    create_account_button: "Créer mon compte"
 
 # ── Suivi de commande ──
 tracking:
@@ -246,6 +256,160 @@ terms:
     liability_text: "Alma Stella Paris ne saurait être tenue responsable des dommages résultant d'une mauvaise utilisation des produits. Les bijoux en acier inoxydable sont résistants à l'eau, mais un entretien régulier est recommandé pour préserver leur éclat."
     law_heading: "Droit applicable"
     law_text: "Les présentes CGV sont soumises au droit français. En cas de litige, une solution amiable sera recherchée avant toute action judiciaire. À défaut, les tribunaux compétents de Toulouse seront seuls compétents."
+
+# ── Compte client ──
+login:
+    title: "Connexion | Alma Stella Paris"
+    heading: "Connexion"
+    subtitle: "Accédez à votre compte pour suivre vos commandes."
+    label_email: "Adresse e-mail"
+    label_password: "Mot de passe"
+    remember_me: "Se souvenir de moi"
+    forgot_password: "Mot de passe oublié ?"
+    submit: "Se connecter"
+    no_account: "Pas encore de compte ?"
+    create_account: "Créer un compte"
+    error:
+        invalid_credentials: "E-mail ou mot de passe incorrect. Veuillez réessayer."
+    success:
+        registered: "Votre compte a été créé. Vous pouvez maintenant vous connecter."
+        password_reset: "Votre mot de passe a été réinitialisé. Vous pouvez maintenant vous connecter."
+
+register:
+    title: "Créer un compte | Alma Stella Paris"
+    heading: "Créer votre compte"
+    subtitle: "Suivez vos commandes et profitez d'un paiement plus rapide."
+    label_first_name: "Prénom"
+    label_last_name: "Nom"
+    label_email: "Adresse e-mail"
+    label_password: "Mot de passe"
+    label_password_confirm: "Confirmer le mot de passe"
+    password_hint: "8 caractères minimum."
+    submit: "Créer mon compte"
+    already_have_account: "Vous avez déjà un compte ?"
+    sign_in: "Se connecter"
+    error:
+        first_name_required: "Le prénom est obligatoire."
+        last_name_required: "Le nom est obligatoire."
+        email_invalid: "Veuillez saisir une adresse e-mail valide."
+        email_already_used: "Un compte existe déjà avec cette adresse e-mail."
+        password_too_short: "Le mot de passe doit contenir au moins 8 caractères."
+        password_mismatch: "Les mots de passe ne correspondent pas."
+
+forgot_password:
+    title: "Mot de passe oublié | Alma Stella Paris"
+    heading: "Réinitialiser votre mot de passe"
+    subtitle: "Saisissez votre adresse e-mail et nous vous enverrons un lien de réinitialisation."
+    label_email: "Adresse e-mail"
+    submit: "Envoyer le lien"
+    back_to_login: "Retour à la connexion"
+    email_sent_heading: "Vérifiez votre boîte mail"
+    email_sent_text: "Si un compte existe avec cette adresse e-mail, un lien de réinitialisation vous a été envoyé. Il expire dans 1 heure."
+
+reset_password:
+    title: "Réinitialiser le mot de passe | Alma Stella Paris"
+    heading: "Choisissez un nouveau mot de passe"
+    label_password: "Nouveau mot de passe"
+    label_password_confirm: "Confirmer le nouveau mot de passe"
+    password_hint: "8 caractères minimum."
+    submit: "Réinitialiser le mot de passe"
+    error:
+        token_expired: "Ce lien de réinitialisation a expiré. Veuillez en demander un nouveau."
+        password_too_short: "Le mot de passe doit contenir au moins 8 caractères."
+        password_mismatch: "Les mots de passe ne correspondent pas."
+
+account:
+    title: "Mon compte | Alma Stella Paris"
+    heading: "Mon compte"
+    welcome: "Bienvenue, %name%"
+    member_since: "Membre depuis %date%"
+    order_count: "%count% commande(s)"
+    dropdown:
+        greeting: "Bonjour, %name%"
+    nav:
+        dashboard: "Tableau de bord"
+        orders: "Mes commandes"
+        addresses: "Carnet d'adresses"
+        profile: "Mon profil"
+        logout: "Se déconnecter"
+    quick_links:
+        orders: "Voir mes commandes"
+        addresses: "Gérer mes adresses"
+        profile: "Modifier mon profil"
+
+orders:
+    title: "Mes commandes | Alma Stella Paris"
+    heading: "Mes commandes"
+    empty: "Vous n'avez pas encore passé de commande."
+    shop_now: "Commencer vos achats"
+    reference: "Commande"
+    date: "Date"
+    status: "Statut"
+    total: "Total"
+    view: "Voir le détail"
+    detail:
+        title: "Commande %reference% | Alma Stella Paris"
+        heading: "Commande %reference%"
+        placed_on: "Passée le %date%"
+        items: "Articles"
+        product: "Produit"
+        price: "Prix"
+        shipping: "Livraison"
+        line_total: "Sous-total"
+        order_total: "Total"
+        shipping_address: "Adresse de livraison"
+        tracking: "Suivi"
+        tracking_number: "Numéro de suivi"
+        track_package: "Suivre votre colis"
+        back: "Retour aux commandes"
+
+addresses:
+    title: "Carnet d'adresses | Alma Stella Paris"
+    heading: "Carnet d'adresses"
+    empty: "Vous n'avez pas encore enregistré d'adresse."
+    add: "Ajouter une adresse"
+    edit: "Modifier"
+    delete: "Supprimer"
+    set_default: "Définir par défaut"
+    default_badge: "Par défaut"
+    confirm_delete: "Êtes-vous sûr(e) de vouloir supprimer cette adresse ?"
+    form:
+        title_add: "Ajouter une adresse"
+        title_edit: "Modifier l'adresse"
+        label_label: "Nom de l'adresse"
+        label_label_hint: "ex. Domicile, Bureau"
+        label_address_line1: "Adresse"
+        label_address_line2: "Complément d'adresse"
+        label_city: "Ville"
+        label_state: "État / Province"
+        label_postal_code: "Code postal"
+        label_country: "Pays"
+        label_default: "Définir comme adresse par défaut"
+        submit_add: "Enregistrer l'adresse"
+        submit_edit: "Mettre à jour l'adresse"
+        cancel: "Annuler"
+
+profile:
+    title: "Mon profil | Alma Stella Paris"
+    heading: "Mon profil"
+    section_info: "Informations personnelles"
+    label_first_name: "Prénom"
+    label_last_name: "Nom"
+    label_email: "Adresse e-mail"
+    submit_info: "Mettre à jour"
+    section_password: "Changer le mot de passe"
+    label_current_password: "Mot de passe actuel"
+    label_new_password: "Nouveau mot de passe"
+    label_new_password_confirm: "Confirmer le nouveau mot de passe"
+    password_hint: "8 caractères minimum."
+    submit_password: "Changer le mot de passe"
+    success:
+        info_updated: "Votre profil a été mis à jour."
+        password_changed: "Votre mot de passe a été modifié."
+    error:
+        current_password_invalid: "Le mot de passe actuel est incorrect."
+        password_too_short: "Le nouveau mot de passe doit contenir au moins 8 caractères."
+        password_mismatch: "Les mots de passe ne correspondent pas."
 
 # ── Language switcher ──
 locale:

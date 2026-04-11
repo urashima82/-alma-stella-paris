@@ -8,7 +8,11 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-HznMydX.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-ZFG-jN8.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/address_selector_controller.js": {
+        "path": "\/assets\/controllers\/address_selector_controller-l5fEkRR.js",
         "type": "js"
     },
     "\/assets\/controllers\/hello_controller.js": {
@@ -35,12 +39,16 @@
         "path": "\/assets\/controllers\/currency_selector_controller-kq9ihR0.js",
         "type": "js"
     },
+    "\/assets\/controllers\/account_dropdown_controller.js": {
+        "path": "\/assets\/controllers\/account_dropdown_controller-oeOGf29.js",
+        "type": "js"
+    },
     "\/assets\/controllers\/csrf_protection_controller.js": {
         "path": "\/assets\/controllers\/csrf_protection_controller-6ynUAeX.js",
         "type": "js"
     },
     "\/assets\/styles\/app.css": {
-        "path": "\/assets\/styles\/app-DQv9ZgT.css",
+        "path": "\/assets\/styles\/app-trwbltD.css",
         "type": "css"
     },
     "@hotwired\/stimulus": {

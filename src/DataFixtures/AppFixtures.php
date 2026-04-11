@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\DataFixtures;
 
 use App\Entity\Admin;
+use App\Entity\Customer;
+use App\Entity\CustomerAddress;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Product;
@@ -16,18 +18,25 @@ use App\Enum\OrderStatus;
 use App\Enum\ShippingTier;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
+    public function __construct(
+        private readonly UserPasswordHasherInterface $passwordHasher,
+    ) {
+    }
+
     public function load(ObjectManager $manager): void
     {
         $this->loadAdmins($manager);
         $this->loadShippingSettings($manager);
         $this->loadSiteSettings($manager);
+        $customers = $this->loadCustomers($manager);
         $categories = $this->loadCategories($manager);
         $products = $this->loadProducts($manager, $categories);
         $this->linkRelatedProducts($products);
-        $this->loadOrders($manager, $products);
+        $this->loadOrders($manager, $products, $customers);
 
         $manager->flush();
     }
@@ -226,9 +235,74 @@ class AppFixtures extends Fixture
     }
 
     /**
-     * @param array<string, Product> $products
+     * @return array<string, Customer>
      */
-    private function loadOrders(ObjectManager $manager, array $products): void
+    private function loadCustomers(ObjectManager $manager): array
+    {
+        $data = [
+            [
+                'email' => 'sarah.johnson@example.com',
+                'password' => 'password123',
+                'firstName' => 'Sarah',
+                'lastName' => 'Johnson',
+                'addresses' => [
+                    ['Home', '742 Evergreen Terrace', null, 'Portland', 'OR', '97201', 'US', true],
+                ],
+            ],
+            [
+                'email' => 'marie.dupont@example.com',
+                'password' => 'password123',
+                'firstName' => 'Marie',
+                'lastName' => 'Dupont',
+                'addresses' => [
+                    ['Domicile', '15 rue de la Paix', null, 'Paris', null, '75002', 'FR', true],
+                    ['Bureau', '100 avenue de la République', '3e étage', 'Paris', null, '75011', 'FR', false],
+                ],
+            ],
+            [
+                'email' => 'emily.carter@example.com',
+                'password' => 'password123',
+                'firstName' => 'Emily',
+                'lastName' => 'Carter',
+                'addresses' => [
+                    ['Home', '88 Queen Street West', null, 'Toronto', 'ON', 'M5H 2N2', 'CA', true],
+                ],
+            ],
+        ];
+
+        $customers = [];
+        foreach ($data as $item) {
+            $customer = new Customer();
+            $customer->setEmail($item['email']);
+            $customer->setFirstName($item['firstName']);
+            $customer->setLastName($item['lastName']);
+            $customer->setPassword($this->passwordHasher->hashPassword($customer, $item['password']));
+
+            foreach ($item['addresses'] as [$label, $line1, $line2, $city, $state, $postal, $country, $isDefault]) {
+                $address = new CustomerAddress();
+                $address->setLabel($label);
+                $address->setAddressLine1($line1);
+                $address->setAddressLine2($line2);
+                $address->setCity($city);
+                $address->setState($state);
+                $address->setPostalCode($postal);
+                $address->setCountry($country);
+                $address->setIsDefault($isDefault);
+                $customer->addAddress($address);
+            }
+
+            $manager->persist($customer);
+            $customers[$item['email']] = $customer;
+        }
+
+        return $customers;
+    }
+
+    /**
+     * @param array<string, Product>  $products
+     * @param array<string, Customer> $customers
+     */
+    private function loadOrders(ObjectManager $manager, array $products, array $customers): void
     {
         $orders = [
             [
@@ -353,6 +427,11 @@ class AppFixtures extends Fixture
             $order->setShippingState($data['state']);
             $order->setShippingPostalCode($data['postal']);
             $order->setShippingCountry($data['country']);
+
+            // Link to customer account if exists
+            if (isset($customers[$data['email']])) {
+                $order->setCustomer($customers[$data['email']]);
+            }
 
             $order->setTrackingNumber($data['tracking']);
             $order->setStripePaymentStatus($data['stripe_status']);

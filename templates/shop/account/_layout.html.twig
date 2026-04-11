@@ -1,0 +1,71 @@
+{% extends 'shop/base.html.twig' %}
+
+{% set current_route = app.request.attributes.get('_route') %}
+
+{% block body %}
+    <div class="max-w-7xl mx-auto px-6 py-10 md:py-16">
+
+        {# Mobile: horizontal scrollable tabs #}
+        <nav class="md:hidden flex gap-1 overflow-x-auto pb-4 mb-6 border-b border-alma-hover -mx-6 px-6 scrollbar-none">
+            <a href="{{ path('shop_account') }}"
+               class="shrink-0 px-4 py-2 text-xs font-sans uppercase tracking-wider transition-colors
+                      {{ current_route == 'shop_account' ? 'text-alma-gold border-b-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold' }}">
+                {{ 'account.nav.dashboard'|trans }}
+            </a>
+            <a href="{{ path('shop_account_orders') }}"
+               class="shrink-0 px-4 py-2 text-xs font-sans uppercase tracking-wider transition-colors
+                      {{ current_route in ['shop_account_orders', 'shop_account_order_detail'] ? 'text-alma-gold border-b-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold' }}">
+                {{ 'account.nav.orders'|trans }}
+            </a>
+            <a href="{{ path('shop_account_addresses') }}"
+               class="shrink-0 px-4 py-2 text-xs font-sans uppercase tracking-wider transition-colors
+                      {{ current_route starts with 'shop_account_address' ? 'text-alma-gold border-b-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold' }}">
+                {{ 'account.nav.addresses'|trans }}
+            </a>
+            <a href="{{ path('shop_account_profile') }}"
+               class="shrink-0 px-4 py-2 text-xs font-sans uppercase tracking-wider transition-colors
+                      {{ current_route == 'shop_account_profile' ? 'text-alma-gold border-b-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold' }}">
+                {{ 'account.nav.profile'|trans }}
+            </a>
+        </nav>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-16">
+
+            {# Desktop: sidebar navigation #}
+            <aside class="hidden md:block md:col-span-1">
+                <nav class="space-y-1">
+                    <a href="{{ path('shop_account') }}"
+                       class="block px-4 py-2.5 text-sm font-sans transition-colors
+                              {{ current_route == 'shop_account' ? 'text-alma-gold bg-alma-gold/5 border-l-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold hover:bg-alma-surface' }}">
+                        {{ 'account.nav.dashboard'|trans }}
+                    </a>
+                    <a href="{{ path('shop_account_orders') }}"
+                       class="block px-4 py-2.5 text-sm font-sans transition-colors
+                              {{ current_route in ['shop_account_orders', 'shop_account_order_detail'] ? 'text-alma-gold bg-alma-gold/5 border-l-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold hover:bg-alma-surface' }}">
+                        {{ 'account.nav.orders'|trans }}
+                    </a>
+                    <a href="{{ path('shop_account_addresses') }}"
+                       class="block px-4 py-2.5 text-sm font-sans transition-colors
+                              {{ current_route starts with 'shop_account_address' ? 'text-alma-gold bg-alma-gold/5 border-l-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold hover:bg-alma-surface' }}">
+                        {{ 'account.nav.addresses'|trans }}
+                    </a>
+                    <a href="{{ path('shop_account_profile') }}"
+                       class="block px-4 py-2.5 text-sm font-sans transition-colors
+                              {{ current_route == 'shop_account_profile' ? 'text-alma-gold bg-alma-gold/5 border-l-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold hover:bg-alma-surface' }}">
+                        {{ 'account.nav.profile'|trans }}
+                    </a>
+                    <div class="h-px bg-alma-hover/50 my-2"></div>
+                    <a href="{{ path('shop_logout') }}"
+                       class="block px-4 py-2.5 text-sm font-sans text-alma-text-muted hover:text-red-600 transition-colors">
+                        {{ 'account.nav.logout'|trans }}
+                    </a>
+                </nav>
+            </aside>
+
+            {# Main content #}
+            <div class="md:col-span-3">
+                {% block account_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

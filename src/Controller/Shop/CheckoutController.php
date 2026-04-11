@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Shop;
 
+use App\Entity\Customer;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Enum\OrderStatus;
@@ -89,6 +90,25 @@ class CheckoutController extends AbstractController
             ];
         }
 
+        // Build address data for logged-in customer's address selector
+        $customer = $this->getUser();
+        $customerAddresses = [];
+        if ($customer instanceof Customer) {
+            foreach ($customer->getAddresses() as $address) {
+                $customerAddresses[] = [
+                    'id' => $address->getId(),
+                    'label' => $address->getLabel(),
+                    'addressLine1' => $address->getAddressLine1(),
+                    'addressLine2' => $address->getAddressLine2() ?? '',
+                    'city' => $address->getCity(),
+                    'state' => $address->getState() ?? '',
+                    'postalCode' => $address->getPostalCode(),
+                    'country' => $address->getCountry(),
+                    'isDefault' => $address->isDefault(),
+                ];
+            }
+        }
+
         return $this->render('shop/checkout/index.html.twig', [
             'items' => $items,
             'subtotalUsd' => $subtotalUsd,
@@ -97,6 +117,7 @@ class CheckoutController extends AbstractController
             'errors' => $errors,
             'formData' => $this->getFormData($request),
             'countries' => self::getShippingCountries($request->getLocale()),
+            'customerAddresses' => $customerAddresses,
         ]);
     }
 
@@ -340,15 +361,46 @@ class CheckoutController extends AbstractController
      */
     private function getFormData(Request $request): array
     {
+        // On POST, use submitted data
+        if ($request->isMethod('POST')) {
+            return [
+                'customer_name' => \trim((string) $request->request->get('customer_name', '')),
+                'customer_email' => \trim((string) $request->request->get('customer_email', '')),
+                'address_line1' => \trim((string) $request->request->get('address_line1', '')),
+                'address_line2' => \trim((string) $request->request->get('address_line2', '')),
+                'city' => \trim((string) $request->request->get('city', '')),
+                'state' => \trim((string) $request->request->get('state', '')),
+                'postal_code' => \trim((string) $request->request->get('postal_code', '')),
+                'country' => \trim((string) $request->request->get('country', '')),
+            ];
+        }
+
+        // On GET, pre-fill from logged-in customer's default address
+        $user = $this->getUser();
+        if ($user instanceof Customer) {
+            $address = $user->getDefaultAddress();
+
+            return [
+                'customer_name' => $user->getFullName(),
+                'customer_email' => $user->getEmail(),
+                'address_line1' => $address?->getAddressLine1() ?? '',
+                'address_line2' => $address?->getAddressLine2() ?? '',
+                'city' => $address?->getCity() ?? '',
+                'state' => $address?->getState() ?? '',
+                'postal_code' => $address?->getPostalCode() ?? '',
+                'country' => $address?->getCountry() ?? '',
+            ];
+        }
+
         return [
-            'customer_name' => \trim((string) $request->request->get('customer_name', '')),
-            'customer_email' => \trim((string) $request->request->get('customer_email', '')),
-            'address_line1' => \trim((string) $request->request->get('address_line1', '')),
-            'address_line2' => \trim((string) $request->request->get('address_line2', '')),
-            'city' => \trim((string) $request->request->get('city', '')),
-            'state' => \trim((string) $request->request->get('state', '')),
-            'postal_code' => \trim((string) $request->request->get('postal_code', '')),
-            'country' => \trim((string) $request->request->get('country', '')),
+            'customer_name' => '',
+            'customer_email' => '',
+            'address_line1' => '',
+            'address_line2' => '',
+            'city' => '',
+            'state' => '',
+            'postal_code' => '',
+            'country' => '',
         ];
     }
 
@@ -369,6 +421,12 @@ class CheckoutController extends AbstractController
         $order->setShippingPostalCode(\trim((string) $request->request->get('postal_code', '')));
         $order->setShippingCountry(\trim((string) $request->request->get('country', '')));
         $order->setTotalUsd($subtotalUsd);
+
+        // Link order to customer if logged in
+        $user = $this->getUser();
+        if ($user instanceof Customer) {
+            $order->setCustomer($user);
+        }
 
         foreach ($products as $product) {
             $shippingCost = $this->shippingCostProvider->getCost($product->getShippingTier());

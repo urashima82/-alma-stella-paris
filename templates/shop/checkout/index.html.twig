@@ -18,6 +18,27 @@
             {{ 'checkout.heading'|trans }}
         </h1>
 
+        {# ── Account prompt for guests ── #}
+        {% if not is_granted('ROLE_CUSTOMER') %}
+            <div class="border border-alma-hover bg-white p-5 mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <p class="font-sans text-sm text-alma-text">{{ 'checkout.account_prompt'|trans }}</p>
+                    <p class="font-sans text-xs text-alma-text-muted mt-1">{{ 'checkout.account_prompt_sub'|trans }}</p>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                    <a href="{{ path('shop_login', {'_locale': app.request.locale}) }}"
+                       class="border border-alma-gold text-alma-gold px-5 py-2 font-sans text-xs uppercase tracking-widest
+                              hover:bg-alma-gold hover:text-white transition-colors">
+                        {{ 'checkout.sign_in'|trans }}
+                    </a>
+                    <a href="{{ path('shop_register', {'_locale': app.request.locale}) }}"
+                       class="text-xs text-alma-text-muted hover:text-alma-gold transition-colors">
+                        {{ 'checkout.create_account'|trans }}
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
         <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
 
             {# ── Left: Customer & shipping forms (2 cols) ── #}
@@ -59,8 +80,31 @@
                 </section>
 
                 {# Shipping address #}
-                <section>
+                <section data-controller="address-selector"
+                         data-address-selector-addresses-value="{{ customerAddresses|json_encode }}">
                     <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'checkout.shipping_address'|trans }}</h2>
+
+                    {# Address selector for logged-in customers with saved addresses #}
+                    {% if customerAddresses is not empty %}
+                        <div class="mb-6">
+                            <label for="saved_address" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.saved_addresses'|trans }}
+                            </label>
+                            <select id="saved_address"
+                                    data-action="change->address-selector#fill"
+                                    data-address-selector-target="select"
+                                    class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                           focus:border-alma-gold focus:outline-none transition-colors">
+                                <option value="">{{ 'checkout.new_address'|trans }}</option>
+                                {% for addr in customerAddresses %}
+                                    <option value="{{ addr.id }}" {{ addr.isDefault ? 'selected' : '' }}>
+                                        {{ addr.label }} — {{ addr.addressLine1 }}, {{ addr.postalCode }} {{ addr.city }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <label for="address_line1" class="block text-sm font-sans text-alma-text-muted mb-1">
@@ -69,6 +113,7 @@
                             <input type="text" id="address_line1" name="address_line1"
                                    value="{{ formData.address_line1 }}"
                                    required
+                                   data-address-selector-target="addressLine1"
                                    class="w-full border {{ errors.address_line1 is defined ? 'border-red-400' : 'border-alma-hover' }}
                                           bg-white px-4 py-3 text-sm font-sans text-alma-text
                                           focus:border-alma-gold focus:outline-none transition-colors">
@@ -82,6 +127,7 @@
                             </label>
                             <input type="text" id="address_line2" name="address_line2"
                                    value="{{ formData.address_line2 }}"
+                                   data-address-selector-target="addressLine2"
                                    class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
                                           focus:border-alma-gold focus:outline-none transition-colors">
                         </div>
@@ -92,6 +138,7 @@
                             <input type="text" id="city" name="city"
                                    value="{{ formData.city }}"
                                    required
+                                   data-address-selector-target="city"
                                    class="w-full border {{ errors.city is defined ? 'border-red-400' : 'border-alma-hover' }}
                                           bg-white px-4 py-3 text-sm font-sans text-alma-text
                                           focus:border-alma-gold focus:outline-none transition-colors">
@@ -105,6 +152,7 @@
                             </label>
                             <input type="text" id="state" name="state"
                                    value="{{ formData.state }}"
+                                   data-address-selector-target="state"
                                    class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
                                           focus:border-alma-gold focus:outline-none transition-colors">
                         </div>
@@ -115,6 +163,7 @@
                             <input type="text" id="postal_code" name="postal_code"
                                    value="{{ formData.postal_code }}"
                                    required
+                                   data-address-selector-target="postalCode"
                                    class="w-full border {{ errors.postal_code is defined ? 'border-red-400' : 'border-alma-hover' }}
                                           bg-white px-4 py-3 text-sm font-sans text-alma-text
                                           focus:border-alma-gold focus:outline-none transition-colors">
@@ -128,6 +177,7 @@
                             </label>
                             <select id="country" name="country"
                                     required
+                                    data-address-selector-target="country"
                                     class="w-full border {{ errors.country is defined ? 'border-red-400' : 'border-alma-hover' }}
                                            bg-white px-4 py-3 text-sm font-sans text-alma-text
                                            focus:border-alma-gold focus:outline-none transition-colors">

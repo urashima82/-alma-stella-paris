@@ -1,0 +1,128 @@
+{% extends 'shop/account/_layout.html.twig' %}
+
+{% block title %}{{ is_edit ? 'addresses.form.title_edit'|trans : 'addresses.form.title_add'|trans }} | Alma Stella Paris{% endblock %}
+
+{% block account_content %}
+    <div class="mb-8">
+        <a href="{{ path('shop_account_addresses') }}"
+           class="text-sm text-alma-gold hover:text-alma-gold-dark transition-colors">
+            &larr; {{ 'addresses.heading'|trans }}
+        </a>
+    </div>
+
+    <h1 class="font-serif text-3xl font-light text-alma-text mb-8">
+        {{ is_edit ? 'addresses.form.title_edit'|trans : 'addresses.form.title_add'|trans }}
+    </h1>
+
+    {% if errors is not empty %}
+        <div class="border border-red-300 bg-red-50 text-red-700 text-sm px-4 py-3 mb-6">
+            <ul class="list-disc list-inside space-y-1">
+                {% for error in errors %}
+                    <li>{{ error|trans }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="post" class="max-w-lg space-y-5">
+        <div>
+            <label for="label" class="block text-sm font-sans text-alma-text-muted mb-1">
+                {{ 'addresses.form.label_label'|trans }} <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="label" name="label"
+                   value="{{ form_data.label }}"
+                   required
+                   placeholder="{{ 'addresses.form.label_label_hint'|trans }}"
+                   class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                          focus:border-alma-gold focus:outline-none transition-colors">
+        </div>
+
+        <div>
+            <label for="address_line1" class="block text-sm font-sans text-alma-text-muted mb-1">
+                {{ 'addresses.form.label_address_line1'|trans }} <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="address_line1" name="address_line1"
+                   value="{{ form_data.address_line1 }}"
+                   required
+                   class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                          focus:border-alma-gold focus:outline-none transition-colors">
+        </div>
+
+        <div>
+            <label for="address_line2" class="block text-sm font-sans text-alma-text-muted mb-1">
+                {{ 'addresses.form.label_address_line2'|trans }}
+            </label>
+            <input type="text" id="address_line2" name="address_line2"
+                   value="{{ form_data.address_line2 }}"
+                   class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                          focus:border-alma-gold focus:outline-none transition-colors">
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="city" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'addresses.form.label_city'|trans }} <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="city" name="city"
+                       value="{{ form_data.city }}"
+                       required
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+            <div>
+                <label for="state" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'addresses.form.label_state'|trans }}
+                </label>
+                <input type="text" id="state" name="state"
+                       value="{{ form_data.state }}"
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="postal_code" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'addresses.form.label_postal_code'|trans }} <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="postal_code" name="postal_code"
+                       value="{{ form_data.postal_code }}"
+                       required
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+            <div>
+                <label for="country" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'addresses.form.label_country'|trans }} <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="country" name="country"
+                       value="{{ form_data.country }}"
+                       required maxlength="2" pattern="[A-Za-z]{2}"
+                       placeholder="US"
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors uppercase">
+            </div>
+        </div>
+
+        <div>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" name="is_default" value="1"
+                       {{ form_data.is_default ? 'checked' : '' }}
+                       class="accent-alma-gold w-4 h-4">
+                <span class="text-sm text-alma-text-muted">{{ 'addresses.form.label_default'|trans }}</span>
+            </label>
+        </div>
+
+        <div class="flex items-center gap-4 pt-2">
+            <button type="submit"
+                    class="bg-alma-gold text-white font-sans text-sm uppercase tracking-widest
+                           px-8 py-3 hover:bg-alma-gold-dark transition-colors">
+                {{ is_edit ? 'addresses.form.submit_edit'|trans : 'addresses.form.submit_add'|trans }}
+            </button>
+            <a href="{{ path('shop_account_addresses') }}"
+               class="text-sm text-alma-text-muted hover:text-alma-gold transition-colors">
+                {{ 'addresses.form.cancel'|trans }}
+            </a>
+        </div>
+    </form>
+{% endblock %}

@@ -81,6 +81,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(ShippingSettingsCrudController::class, 'Frais de port', 'fa fa-truck');
         yield MenuItem::section('Ventes');
         yield MenuItem::linkTo(OrderCrudController::class, 'Commandes', 'fa fa-shopping-bag');
+        yield MenuItem::linkTo(CustomerCrudController::class, 'Clients', 'fa fa-user');
         yield MenuItem::section('Réglages');
         yield MenuItem::linkTo(SiteSettingsCrudController::class, 'Paramètres du site', 'fa fa-cog');
         yield MenuItem::linkTo(AdminCrudController::class, 'Administrateurs', 'fa fa-users');

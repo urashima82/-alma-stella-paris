@@ -1,0 +1,120 @@
+{% extends 'shop/account/_layout.html.twig' %}
+
+{% block title %}{{ 'profile.title'|trans }}{% endblock %}
+
+{% block account_content %}
+    <h1 class="font-serif text-3xl font-light text-alma-text mb-8">
+        {{ 'profile.heading'|trans }}
+    </h1>
+
+    {% if success %}
+        <div class="border border-green-300 bg-green-50 text-green-700 text-sm px-4 py-3 mb-6">
+            {{ success|trans }}
+        </div>
+    {% endif %}
+
+    {% if errors is not empty %}
+        <div class="border border-red-300 bg-red-50 text-red-700 text-sm px-4 py-3 mb-6">
+            <ul class="list-disc list-inside space-y-1">
+                {% for error in errors %}
+                    <li>{{ error|trans }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {# Personal info #}
+    <section class="border border-alma-hover bg-white p-6 mb-8">
+        <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'profile.section_info'|trans }}</h2>
+
+        <form method="post" class="max-w-lg space-y-5">
+            <input type="hidden" name="_action" value="update_info">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="first_name" class="block text-sm font-sans text-alma-text-muted mb-1">
+                        {{ 'profile.label_first_name'|trans }}
+                    </label>
+                    <input type="text" id="first_name" name="first_name"
+                           value="{{ customer.firstName }}"
+                           required
+                           class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                  focus:border-alma-gold focus:outline-none transition-colors">
+                </div>
+                <div>
+                    <label for="last_name" class="block text-sm font-sans text-alma-text-muted mb-1">
+                        {{ 'profile.label_last_name'|trans }}
+                    </label>
+                    <input type="text" id="last_name" name="last_name"
+                           value="{{ customer.lastName }}"
+                           required
+                           class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                  focus:border-alma-gold focus:outline-none transition-colors">
+                </div>
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'profile.label_email'|trans }}
+                </label>
+                <input type="email" id="email" name="email"
+                       value="{{ customer.email }}"
+                       required
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+
+            <button type="submit"
+                    class="bg-alma-gold text-white font-sans text-sm uppercase tracking-widest
+                           px-8 py-3 hover:bg-alma-gold-dark transition-colors">
+                {{ 'profile.submit_info'|trans }}
+            </button>
+        </form>
+    </section>
+
+    {# Change password #}
+    <section class="border border-alma-hover bg-white p-6">
+        <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'profile.section_password'|trans }}</h2>
+
+        <form method="post" class="max-w-lg space-y-5">
+            <input type="hidden" name="_action" value="change_password">
+
+            <div>
+                <label for="current_password" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'profile.label_current_password'|trans }}
+                </label>
+                <input type="password" id="current_password" name="current_password"
+                       required
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+
+            <div>
+                <label for="new_password" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'profile.label_new_password'|trans }}
+                </label>
+                <input type="password" id="new_password" name="new_password"
+                       required minlength="8"
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+                <p class="text-xs text-alma-text-muted mt-1">{{ 'profile.password_hint'|trans }}</p>
+            </div>
+
+            <div>
+                <label for="new_password_confirm" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'profile.label_new_password_confirm'|trans }}
+                </label>
+                <input type="password" id="new_password_confirm" name="new_password_confirm"
+                       required minlength="8"
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+
+            <button type="submit"
+                    class="bg-alma-gold text-white font-sans text-sm uppercase tracking-widest
+                           px-8 py-3 hover:bg-alma-gold-dark transition-colors">
+                {{ 'profile.submit_password'|trans }}
+            </button>
+        </form>
+    </section>
+{% endblock %}

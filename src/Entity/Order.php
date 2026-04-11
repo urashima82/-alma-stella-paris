@@ -27,6 +27,10 @@ class Order
     #[ORM\Column(length: 20, enumType: OrderStatus::class)]
     private OrderStatus $status = OrderStatus::Pending;
 
+    #[ORM\ManyToOne(targetEntity: Customer::class, inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Customer $customer = null;
+
     #[ORM\Column(length: 255)]
     private string $customerEmail = '';
 
@@ -140,6 +144,18 @@ class Order
     public function setStatus(OrderStatus $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getCustomer(): ?Customer
+    {
+        return $this->customer;
+    }
+
+    public function setCustomer(?Customer $customer): static
+    {
+        $this->customer = $customer;
 
         return $this;
     }

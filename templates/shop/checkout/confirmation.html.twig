@@ -67,6 +67,19 @@
             <p class="text-sm text-alma-text">{{ 'confirmation.delivery_note'|trans }}</p>
         </div>
 
+        {# Post-purchase account creation prompt — only for guests #}
+        {% if not is_granted('ROLE_CUSTOMER') %}
+            <div class="bg-white border border-alma-gold/30 p-6 max-w-md mx-auto mb-10 text-left">
+                <p class="font-serif text-lg text-alma-text mb-2">{{ 'confirmation.create_account_heading'|trans }}</p>
+                <p class="text-sm text-alma-text-muted mb-4">{{ 'confirmation.create_account_text'|trans }}</p>
+                <a href="{{ path('shop_register', {'_locale': app.request.locale, 'email': order.customerEmail}) }}"
+                   class="inline-block bg-alma-gold text-white font-sans text-xs uppercase tracking-widest
+                          px-6 py-2.5 hover:bg-alma-gold-dark transition-colors">
+                    {{ 'confirmation.create_account_button'|trans }}
+                </a>
+            </div>
+        {% endif %}
+
         <a href="{{ path('shop_catalog') }}"
            class="inline-block border border-alma-gold text-alma-gold px-8 py-3 font-sans text-sm
                   hover:bg-alma-gold hover:text-white transition-colors">

@@ -274,7 +274,114 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 8 — Social publishing
+## Milestone 8 — Customer accounts
+*Estimated effort: 6-8h*
+
+> **Strategy:** Guest checkout remains available (no account required to buy).
+> Customer accounts are optional and provide convenience features (order history,
+> saved addresses, pre-filled checkout). Account creation is encouraged
+> post-purchase on the confirmation page. Authentication uses classic
+> email + password (not Magic Link — different UX needs than admin).
+
+### Tasks
+
+#### Entity & security
+- [x] Create `Customer` entity implementing `UserInterface`:
+  - `email` (unique, identifier)
+  - `password` (hashed)
+  - `firstName`, `lastName`
+  - `createdAt`, `updatedAt`
+- [x] Create `CustomerAddress` entity:
+  - FK to `Customer`
+  - `label` (e.g. "Home", "Office")
+  - `addressLine1`, `addressLine2`, `city`, `state`, `postalCode`, `country`
+  - `isDefault` (boolean)
+- [x] Add optional `customer` FK on `Order` entity (nullable — guest orders have no customer)
+- [x] Configure second Symfony firewall (`shop`) for customer authentication:
+  - Separate from `admin` firewall
+  - `form_login` authenticator with email + password
+  - Remember me cookie (30 days)
+  - Custom entry point (redirect to login page)
+- [x] Install `symfonycasts/reset-password-bundle` for password reset flow
+- [x] Update initial migration with all new tables/columns
+
+#### Registration & authentication
+- [x] Registration page (`/{_locale}/register` / `/{_locale}/inscription`):
+  - Form: email, password, password confirmation, first name, last name
+  - Email validation (unique check)
+  - Password strength requirement (min 8 chars)
+  - Auto-login after successful registration
+- [x] Login page (`/{_locale}/login` / `/{_locale}/connexion`):
+  - Email + password form
+  - "Forgot password?" link
+  - Link to registration page
+  - Brand-styled (consistent with site design)
+- [x] Logout route (`/{_locale}/logout` / `/{_locale}/deconnexion`)
+- [x] Password reset flow:
+  - Request form (enter email)
+  - Email with reset link (Symfony Mailer, branded template)
+  - Reset form (new password + confirmation)
+  - Link expires after 1 hour, single-use
+
+#### Account pages (authenticated)
+- [x] Account dashboard (`/{_locale}/account` / `/{_locale}/mon-compte`):
+  - Welcome message with first name
+  - Quick links: orders, addresses, profile
+  - Summary: number of orders, member since
+- [x] Order history page (`/{_locale}/account/orders` / `/{_locale}/mon-compte/commandes`):
+  - List of past orders (paginated) with reference, date, status, total
+  - Order detail view with items, tracking info, shipping address
+- [x] Address book page (`/{_locale}/account/addresses` / `/{_locale}/mon-compte/adresses`):
+  - List saved addresses
+  - Add / edit / delete addresses
+  - Set default address
+- [x] Profile page (`/{_locale}/account/profile` / `/{_locale}/mon-compte/profil`):
+  - Edit first name, last name, email
+  - Change password (current password + new password)
+
+#### Checkout integration
+- [x] If logged in at checkout: pre-fill shipping form from default address
+- [x] Address selector dropdown if customer has multiple saved addresses
+- [x] After payment: link `Order` to `Customer` if authenticated
+- [x] Post-purchase account creation prompt on confirmation page:
+  *"Create your account to track your order and enjoy exclusive offers"*
+  — only email pre-filled (from order), customer sets password
+- [x] Guest order linking: when creating an account, automatically link past
+  guest orders matching the same email address
+
+#### Header & navigation
+- [x] Add account icon in header (user silhouette):
+  - Not logged in → links to login page
+  - Logged in → dropdown with: My account, My orders, Logout
+- [x] Mobile: account link in hamburger menu
+
+#### EasyAdmin
+- [x] EasyAdmin CRUD for `Customer` (read-only for admin):
+  - List: email, name, number of orders, member since
+  - Detail: profile info + linked orders
+- [x] Update `Order` CRUD to show linked customer (if any) with link to customer detail
+
+#### DataFixtures
+- [x] Sample customer accounts (2-3) with addresses and linked orders
+
+### Definition of Done
+- Register with email + password → account created, auto-logged in
+- Login → redirected to account dashboard
+- Forgot password → reset email received → password changed successfully
+- Account dashboard shows order history with correct data
+- Add/edit/delete addresses in address book, set default
+- Checkout as logged-in user → shipping form pre-filled from default address
+- Checkout as guest → still works exactly as before (no regression)
+- Post-purchase: account creation prompt on confirmation page
+- Create account after guest purchase → past orders linked automatically
+- Header shows account icon with dropdown when logged in
+- Customer visible in EasyAdmin (read-only)
+- All pages bilingual (FR/EN), French accents correct
+- Pages mobile-responsive (375px, 768px)
+
+---
+
+## Milestone 9 — Social publishing
 *Estimated effort: 4-5h*
 
 ### Tasks
@@ -297,7 +404,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 9 — Automated emails & reviews
+## Milestone 10 — Automated emails & reviews
 *Estimated effort: 3-4h*
 
 ### Tasks
@@ -316,7 +423,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 10 — SEO & performance
+## Milestone 11 — SEO & performance
 *Estimated effort: 3h*
 
 ### Tasks
@@ -338,7 +445,8 @@ Shall I proceed to Milestone Y?"
 
 ## V2 backlog (post-launch, not in current scope)
 
-- Customer accounts (order history, saved addresses, wishlist persistence)
+- Wishlist persistence (tied to customer account)
+- Promotion & discount codes (cart-level and product-level)
 - Multi-currency Stripe charges (vs current cosmetic conversion)
 - Lookbook / editorial seasonal pages
 - Referral program ("Give $10, Get $10")

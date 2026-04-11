@@ -16,6 +16,15 @@
     --font-sans: Inter, system-ui, sans-serif;
 }
 
+/* ── Scrollbar-none utility ── */
+.scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+
 /* ── Lightbox ── */
 
 .alma-lightbox {

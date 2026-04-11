@@ -2,10 +2,18 @@ security:
     role_hierarchy:
         ROLE_SUPER_ADMIN: [ROLE_ADMIN]
 
+    password_hashers:
+        App\Entity\Customer:
+            algorithm: auto
+
     providers:
         admin_provider:
             entity:
                 class: App\Entity\Admin
+                property: email
+        customer_provider:
+            entity:
+                class: App\Entity\Customer
                 property: email
 
     firewalls:
@@ -28,10 +36,28 @@ security:
                 target: admin_login
         main:
             lazy: true
+            provider: customer_provider
+            entry_point: App\Security\CustomerAuthenticationEntryPoint
+            form_login:
+                login_path: shop_login
+                check_path: shop_login
+                username_parameter: _email
+                password_parameter: _password
+                default_target_path: shop_account
+                enable_csrf: true
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000 # 30 days
+                path: /
+            logout:
+                path: shop_logout
+                target: shop_home
 
     access_control:
         - { path: ^/admin/login, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: '^/[a-z]{2}/account', roles: ROLE_CUSTOMER }
+        - { path: '^/[a-z]{2}/mon-compte', roles: ROLE_CUSTOMER }
 
 when@test:
     security:

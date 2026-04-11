@@ -4,10 +4,12 @@
     "@symfony\/stimulus-bundle",
     "@hotwired\/stimulus",
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js",
+    "\/assets\/controllers\/address_selector_controller.js",
     "\/assets\/controllers\/hello_controller.js",
     "\/assets\/controllers\/lightbox_controller.js",
     "\/assets\/controllers\/stripe_payment_controller.js",
     "\/assets\/controllers\/mobile_menu_controller.js",
     "\/assets\/controllers\/cart_drawer_controller.js",
-    "\/assets\/controllers\/currency_selector_controller.js"
+    "\/assets\/controllers\/currency_selector_controller.js",
+    "\/assets\/controllers\/account_dropdown_controller.js"
 ]

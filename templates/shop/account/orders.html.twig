@@ -1,0 +1,60 @@
+{% extends 'shop/account/_layout.html.twig' %}
+
+{% block title %}{{ 'orders.title'|trans }}{% endblock %}
+
+{% block account_content %}
+    <h1 class="font-serif text-3xl font-light text-alma-text mb-8">
+        {{ 'orders.heading'|trans }}
+    </h1>
+
+    {% if pagination.totalItemCount == 0 %}
+        <div class="text-center py-16">
+            <p class="text-alma-text-muted mb-6">{{ 'orders.empty'|trans }}</p>
+            <a href="{{ path('shop_catalog') }}"
+               class="inline-block bg-alma-gold text-white font-sans text-sm uppercase tracking-widest
+                      px-8 py-3 hover:bg-alma-gold-dark transition-colors">
+                {{ 'orders.shop_now'|trans }}
+            </a>
+        </div>
+    {% else %}
+        <div class="space-y-4">
+            {% for order in pagination %}
+                <a href="{{ path('shop_account_order_detail', {'reference': order.reference}) }}"
+                   class="block border border-alma-hover bg-white p-5 hover:border-alma-gold transition-colors">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div>
+                            <p class="font-sans text-sm font-medium text-alma-text">
+                                {{ 'orders.reference'|trans }} {{ order.reference }}
+                            </p>
+                            <p class="text-xs text-alma-text-muted mt-1">
+                                {{ order.createdAt|date('d/m/Y') }}
+                                &mdash; {{ order.itemCount }} {{ order.itemCount > 1 ? 'articles' : 'article' }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="inline-block px-3 py-1 text-xs uppercase tracking-wider font-medium border"
+                                  style="color: {{ order.status.badgeColor() }}; border-color: {{ order.status.badgeColor() }};">
+                                {{ order.status.label() }}
+                            </span>
+                            <span class="font-sans text-sm font-medium text-alma-text">
+                                ${{ order.totalUsd|number_format(2) }}
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+
+        {% if pagination.pageCount > 1 %}
+            <div class="flex justify-center gap-2 mt-8">
+                {% for page in 1..pagination.pageCount %}
+                    <a href="{{ path(app.request.attributes.get('_route'), {'page': page}) }}"
+                       class="w-10 h-10 flex items-center justify-center text-sm border transition-colors
+                              {{ pagination.currentPageNumber == page ? 'border-alma-gold text-alma-gold bg-alma-gold/5' : 'border-alma-hover text-alma-text-muted hover:border-alma-gold hover:text-alma-gold' }}">
+                        {{ page }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

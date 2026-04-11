@@ -84,6 +84,55 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        {# Account icon — visible on all screen sizes #}
+                        {% if is_granted('ROLE_CUSTOMER') %}
+                            {% set customer = app.user %}
+                            <div class="relative flex items-center" data-controller="account-dropdown">
+                                <button type="button"
+                                        class="flex items-center justify-center w-7 h-7 rounded-full bg-alma-gold text-white text-xs font-sans font-medium
+                                               hover:bg-alma-gold-dark transition-colors"
+                                        data-action="click->account-dropdown#toggle"
+                                        aria-label="{{ 'nav.account'|trans }}">
+                                    {{ customer.firstName|first|upper }}
+                                </button>
+                                <div class="absolute right-0 top-full mt-2 bg-white border border-alma-gold-muted rounded shadow-lg py-1 z-50 hidden min-w-[180px]"
+                                     data-account-dropdown-target="dropdown">
+                                    <div class="px-4 py-2.5 border-b border-alma-hover/50">
+                                        <p class="text-xs font-sans font-medium text-alma-text">{{ 'account.dropdown.greeting'|trans({'%name%': customer.firstName}) }}</p>
+                                        <p class="text-[11px] font-sans text-alma-text-muted truncate">{{ customer.email }}</p>
+                                    </div>
+                                    <a href="{{ path('shop_account') }}"
+                                       class="block px-4 py-2 text-xs font-sans text-alma-text hover:text-alma-gold hover:bg-alma-surface transition-colors">
+                                        {{ 'account.nav.dashboard'|trans }}
+                                    </a>
+                                    <a href="{{ path('shop_account_orders') }}"
+                                       class="block px-4 py-2 text-xs font-sans text-alma-text hover:text-alma-gold hover:bg-alma-surface transition-colors">
+                                        {{ 'account.nav.orders'|trans }}
+                                    </a>
+                                    <a href="{{ path('shop_account_addresses') }}"
+                                       class="block px-4 py-2 text-xs font-sans text-alma-text hover:text-alma-gold hover:bg-alma-surface transition-colors">
+                                        {{ 'account.nav.addresses'|trans }}
+                                    </a>
+                                    <a href="{{ path('shop_account_profile') }}"
+                                       class="block px-4 py-2 text-xs font-sans text-alma-text hover:text-alma-gold hover:bg-alma-surface transition-colors">
+                                        {{ 'account.nav.profile'|trans }}
+                                    </a>
+                                    <div class="h-px bg-alma-hover/50 my-1"></div>
+                                    <a href="{{ path('shop_logout') }}"
+                                       class="block px-4 py-2 text-xs font-sans text-alma-text-muted hover:text-red-600 hover:bg-alma-surface transition-colors">
+                                        {{ 'account.nav.logout'|trans }}
+                                    </a>
+                                </div>
+                            </div>
+                        {% else %}
+                            <a href="{{ path('shop_login', {'_locale': app.request.locale}) }}"
+                               class="flex items-center text-alma-text hover:text-alma-gold transition-colors"
+                               aria-label="{{ 'nav.account'|trans }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                            </a>
+                        {% endif %}
                         {# Cart button #}
                         <button class="relative text-sm hover:text-alma-gold transition-colors"
                                 data-action="click->cart-drawer#open"
@@ -117,6 +166,12 @@
                         <a href="{{ path('shop_home') }}" class="font-serif text-xl text-alma-text hover:text-alma-gold transition-colors">{{ 'nav.home'|trans }}</a>
                         <a href="{{ path('shop_catalog') }}" class="font-serif text-xl text-alma-text hover:text-alma-gold transition-colors">{{ 'nav.shop'|trans }}</a>
                         <a href="{{ path('shop_about') }}" class="font-serif text-xl text-alma-text hover:text-alma-gold transition-colors">{{ 'nav.about'|trans }}</a>
+                        {# Account — mobile #}
+                        {% if is_granted('ROLE_CUSTOMER') %}
+                            <a href="{{ path('shop_account') }}" class="font-serif text-xl text-alma-gold hover:text-alma-gold-dark transition-colors">{{ 'account.nav.dashboard'|trans }}</a>
+                        {% else %}
+                            <a href="{{ path('shop_login', {'_locale': app.request.locale}) }}" class="font-serif text-xl text-alma-text hover:text-alma-gold transition-colors">{{ 'nav.account'|trans }}</a>
+                        {% endif %}
                         <div class="h-px bg-alma-gold-muted my-2"></div>
                         {# Currency #}
                         <div>

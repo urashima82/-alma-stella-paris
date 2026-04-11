@@ -1,0 +1,63 @@
+{% extends 'shop/account/_layout.html.twig' %}
+
+{% block title %}{{ 'addresses.title'|trans }}{% endblock %}
+
+{% block account_content %}
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="font-serif text-3xl font-light text-alma-text">
+            {{ 'addresses.heading'|trans }}
+        </h1>
+        <a href="{{ path('shop_account_address_add') }}"
+           class="inline-block bg-alma-gold text-white font-sans text-xs uppercase tracking-widest
+                  px-5 py-2.5 hover:bg-alma-gold-dark transition-colors">
+            {{ 'addresses.add'|trans }}
+        </a>
+    </div>
+
+    {% if addresses is empty %}
+        <div class="text-center py-16">
+            <p class="text-alma-text-muted">{{ 'addresses.empty'|trans }}</p>
+        </div>
+    {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for address in addresses %}
+                <div class="border {{ address.default ? 'border-alma-gold' : 'border-alma-hover' }} bg-white p-5 relative">
+                    {% if address.default %}
+                        <span class="absolute top-3 right-3 text-xs uppercase tracking-wider text-alma-gold font-medium">
+                            {{ 'addresses.default_badge'|trans }}
+                        </span>
+                    {% endif %}
+
+                    <p class="font-sans text-sm font-medium text-alma-text mb-2">{{ address.label }}</p>
+                    <p class="text-sm text-alma-text-muted leading-relaxed mb-4">
+                        {{ address.addressLine1 }}<br>
+                        {% if address.addressLine2 %}{{ address.addressLine2 }}<br>{% endif %}
+                        {{ address.postalCode }} {{ address.city }}<br>
+                        {% if address.state %}{{ address.state }}<br>{% endif %}
+                        {{ address.country }}
+                    </p>
+
+                    <div class="flex items-center gap-4 text-xs">
+                        <a href="{{ path('shop_account_address_edit', {'id': address.id}) }}"
+                           class="text-alma-gold hover:text-alma-gold-dark transition-colors">
+                            {{ 'addresses.edit'|trans }}
+                        </a>
+                        {% if not address.default %}
+                            <form method="post" action="{{ path('shop_account_address_set_default', {'id': address.id}) }}" class="inline">
+                                <button type="submit" class="text-alma-text-muted hover:text-alma-gold transition-colors">
+                                    {{ 'addresses.set_default'|trans }}
+                                </button>
+                            </form>
+                        {% endif %}
+                        <form method="post" action="{{ path('shop_account_address_delete', {'id': address.id}) }}" class="inline"
+                              onsubmit="return confirm('{{ 'addresses.confirm_delete'|trans }}')">
+                            <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
+                                {{ 'addresses.delete'|trans }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

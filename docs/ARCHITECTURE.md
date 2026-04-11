@@ -15,7 +15,8 @@ alma-stella/
 │   └── controllers/          # Stimulus controllers
 │       ├── currency_selector_controller.js  # Dropdown toggle for currency selector
 │       ├── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
-│       └── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
+│       ├── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
+│       └── account_dropdown_controller.js   # Account menu dropdown toggle (header)
 ├── config/
 ├── docs/
 │   └── design/
@@ -32,7 +33,8 @@ alma-stella/
 │   │   │   ├── AdminLoginController.php  # Magic link login flow
 │   │   │   ├── AdminCrudController.php   # Admin user management (Super Admin only)
 │   │   │   ├── OrderCrudController.php   # Order management with status workflow
-│   │   │   └── OrderItemCrudController.php # OrderItem sub-form (read-only)
+│   │   │   ├── OrderItemCrudController.php # OrderItem sub-form (read-only)
+│   │   │   └── CustomerCrudController.php  # Customer list (read-only for admin)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
 │   │   └── Shop/             # Public-facing controllers (locale-prefixed)
 │   │       ├── HomeController.php
@@ -40,7 +42,10 @@ alma-stella/
 │   │       ├── ProductController.php
 │   │       ├── CurrencyController.php  # POST /currency/switch — changes active currency
 │   │       ├── CartController.php      # Cart API: add/remove/content (JSON responses)
-│   │       └── AboutController.php
+│   │       ├── AboutController.php
+│   │       ├── SecurityController.php  # Customer login, register, logout
+│   │       ├── ResetPasswordController.php  # Forgot password + reset flow
+│   │       └── AccountController.php   # Dashboard, orders, addresses, profile
 │   ├── Entity/
 │   ├── Enum/
 │   ├── Repository/
@@ -77,7 +82,8 @@ alma-stella/
 │   ├── email/
 │   │   ├── order_confirmation.html.twig  # Bilingual order confirmation email
 │   │   ├── order_shipped.html.twig       # Bilingual shipped notification with tracking
-│   │   └── admin_login_link.html.twig    # Magic link email template
+│   │   ├── admin_login_link.html.twig    # Magic link email template
+│   │   └── reset_password.html.twig      # Bilingual password reset email
 │   └── shop/
 │       ├── base.html.twig
 │       ├── home/
@@ -85,7 +91,8 @@ alma-stella/
 │       ├── product/
 │       ├── about/
 │       ├── cart/
-│       └── account/
+│       ├── security/            # Login, register, forgot/reset password
+│       └── account/             # Dashboard, orders, addresses, profile (authenticated)
 │   └── bundles/
 │       └── EasyAdminBundle/
 │           └── flash_messages.html.twig  # Override: toast markup instead of default alerts
@@ -226,6 +233,52 @@ class Admin implements UserInterface
 > (read-only access to admin list). Super Admin accounts cannot be deleted.
 > `receivesAdminEmails` controls who gets notified on new orders.
 
+### Customer
+
+```php
+// src/Entity/Customer.php
+class Customer implements UserInterface, PasswordAuthenticatedUserInterface
+{
+    private int $id;
+    private string $email;              // Unique, user identifier
+    private string $password;           // Hashed (bcrypt/argon2)
+    private string $firstName;
+    private string $lastName;
+    private array $roles;               // ROLE_CUSTOMER always included
+    private Collection $addresses;      // OneToMany → CustomerAddress
+    private Collection $orders;         // OneToMany → Order
+    private \DateTimeImmutable $createdAt;
+    private \DateTimeImmutable $updatedAt;
+}
+```
+
+> **Authentication:** Classic email + password via Symfony `form_login` on the
+> `main` firewall. Separate from admin's Magic Link auth. Remember-me cookie
+> (30 days). Password reset via `symfonycasts/reset-password-bundle` (1h expiry).
+>
+> **Guest checkout preserved:** `Order.customer` FK is nullable. Guest orders
+> have no linked customer. When a customer creates an account, past guest orders
+> matching the same email are automatically linked.
+
+### CustomerAddress
+
+```php
+// src/Entity/CustomerAddress.php
+class CustomerAddress
+{
+    private int $id;
+    private Customer $customer;         // ManyToOne, CASCADE delete
+    private string $label;              // "Home", "Office", etc.
+    private string $addressLine1;
+    private ?string $addressLine2;
+    private string $city;
+    private ?string $state;
+    private string $postalCode;
+    private string $country;            // ISO 3166-1 alpha-2
+    private bool $isDefault;
+}
+```
+
 ### Other entities (summary)
 
 | Entity | Purpose |
@@ -234,6 +287,9 @@ class Admin implements UserInterface
 | ~~`ProductImage`~~ | **Removed** — replaced by 3 VichUploader fields on `Product`: `thumbnail`, `wornPhoto`, `contextPhoto` |
 | `OrderItem` | Snapshot of product + price at order time |
 | `Admin` | Admin users — passwordless auth via magic link |
+| `Customer` | Customer accounts — email + password auth, order history, saved addresses |
+| `CustomerAddress` | Customer shipping addresses with default flag |
+| `ResetPasswordRequest` | Token storage for password reset flow (symfonycasts bundle) |
 | `WishlistItem` | Guest (email) or user + product + notification flag |
 | `ProductReview` | Rating 1-5, text, country, verified purchase flag |
 | `NewsletterSubscriber` | Email + consent + source (popup/footer/checkout) |
@@ -317,6 +373,19 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 - API keys (Stripe, TikTok, Pinterest) stored in `.env.local` only —
   never committed, never hardcoded
 - Rate limiting on checkout and login endpoints via Symfony RateLimiter
+
+### Two firewalls
+
+| Firewall | Pattern | Provider | Auth method | Purpose |
+|---|---|---|---|---|
+| `admin` | `^/admin` | `Admin` entity | Magic Link (login_link) | EasyAdmin access |
+| `main` | everything else | `Customer` entity | Email + password (form_login) | Customer accounts |
+
+- `ROLE_ADMIN` / `ROLE_SUPER_ADMIN` — admin panel access
+- `ROLE_CUSTOMER` — customer account pages (`/account`, `/mon-compte`)
+- Guest checkout remains available — no role required for cart/checkout
+- Remember-me cookie: 30 days on `main` firewall
+- Password reset via `symfonycasts/reset-password-bundle` (1h token, single-use)
 
 ---
 

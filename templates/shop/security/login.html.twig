@@ -1,0 +1,85 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'login.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-md mx-auto px-6 py-16 md:py-24">
+        <div class="text-center mb-10">
+            <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                {{ 'login.heading'|trans }}
+            </h1>
+            <p class="text-sm text-alma-text-muted">
+                {{ 'login.subtitle'|trans }}
+            </p>
+        </div>
+
+        {% if error %}
+            <div class="border border-red-300 bg-red-50 text-red-700 text-sm px-4 py-3 mb-6">
+                {{ 'login.error.invalid_credentials'|trans }}
+            </div>
+        {% endif %}
+
+        {% if app.request.get('registered') %}
+            <div class="border border-green-300 bg-green-50 text-green-700 text-sm px-4 py-3 mb-6">
+                {{ 'login.success.registered'|trans }}
+            </div>
+        {% endif %}
+
+        {% if app.request.get('reset') %}
+            <div class="border border-green-300 bg-green-50 text-green-700 text-sm px-4 py-3 mb-6">
+                {{ 'login.success.password_reset'|trans }}
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-5">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <div>
+                <label for="email" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'login.label_email'|trans }} <span class="text-red-500">*</span>
+                </label>
+                <input type="email" id="email" name="_email"
+                       value="{{ last_email }}"
+                       required autofocus
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'login.label_password'|trans }} <span class="text-red-500">*</span>
+                </label>
+                <input type="password" id="password" name="_password"
+                       required
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="_remember_me"
+                           class="accent-alma-gold w-4 h-4">
+                    <span class="text-sm text-alma-text-muted">{{ 'login.remember_me'|trans }}</span>
+                </label>
+                <a href="{{ path('shop_forgot_password', {'_locale': app.request.locale}) }}"
+                   class="text-sm text-alma-gold hover:text-alma-gold-dark transition-colors">
+                    {{ 'login.forgot_password'|trans }}
+                </a>
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-alma-gold text-white font-sans text-sm uppercase tracking-widest
+                           py-3.5 hover:bg-alma-gold-dark transition-colors">
+                {{ 'login.submit'|trans }}
+            </button>
+        </form>
+
+        <p class="text-center text-sm text-alma-text-muted mt-8">
+            {{ 'login.no_account'|trans }}
+            <a href="{{ path('shop_register', {'_locale': app.request.locale}) }}"
+               class="text-alma-gold hover:text-alma-gold-dark transition-colors font-medium">
+                {{ 'login.create_account'|trans }}
+            </a>
+        </p>
+    </div>
+{% endblock %}
