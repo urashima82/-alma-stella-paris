@@ -5,13 +5,14 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
-/var/
+/var/cache/
+/var/log/
+/var/tailwind/v*/
 /vendor/
 ###< symfony/framework-bundle ###
 
 ###> symfony/asset-mapper ###
-/public/assets/
-/assets/vendor/
+# Compiled assets tracked in git (no build tools on production)
 ###< symfony/asset-mapper ###
 
 ###> php-cs-fixer ###
