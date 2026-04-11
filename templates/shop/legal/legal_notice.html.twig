@@ -1,0 +1,64 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'legal.title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'legal.meta_description'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="max-w-3xl mx-auto px-6 py-20 md:py-28">
+        <p class="text-alma-gold text-2xl mb-6 text-center">✦</p>
+        <h1 class="font-serif text-4xl md:text-5xl font-light text-alma-text leading-tight mb-12 text-center">
+            {{ 'legal.heading'|trans }}
+        </h1>
+
+        <div class="space-y-10 text-sm text-alma-text-muted leading-relaxed">
+            {# ── Site publisher ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'legal.publisher_heading'|trans }}</h2>
+                <ul class="space-y-1">
+                    <li>{{ 'legal.publisher_name'|trans }}</li>
+                    <li>{{ 'legal.publisher_status'|trans }}</li>
+                    <li>{{ 'legal.publisher_siret'|trans }}</li>
+                    <li>{{ 'legal.publisher_address'|trans }}</li>
+                    <li>{{ 'legal.publisher_contact'|trans }}</li>
+                </ul>
+            </div>
+
+            {# ── Publication director ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'legal.director_heading'|trans }}</h2>
+                <p>{{ 'legal.director_name'|trans }}</p>
+            </div>
+
+            {# ── Hosting ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'legal.hosting_heading'|trans }}</h2>
+                <ul class="space-y-1">
+                    <li>{{ 'legal.hosting_name'|trans }}</li>
+                    <li>{{ 'legal.hosting_address'|trans }}</li>
+                    <li>{{ 'legal.hosting_website'|trans }}</li>
+                </ul>
+            </div>
+
+            {# ── Intellectual property ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'legal.ip_heading'|trans }}</h2>
+                <p>{{ 'legal.ip_text'|trans }}</p>
+            </div>
+
+            {# ── Personal data ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'legal.data_heading'|trans }}</h2>
+                <p class="mb-3">{{ 'legal.data_text_1'|trans }}</p>
+                <p>{{ 'legal.data_text_2'|trans }}</p>
+            </div>
+
+            {# ── Cookies ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'legal.cookies_heading'|trans }}</h2>
+                <p>{{ 'legal.cookies_text'|trans }}</p>
+            </div>
+        </div>
+
+        <p class="text-alma-gold text-2xl mt-12 text-center">✦</p>
+    </section>
+{% endblock %}

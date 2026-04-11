@@ -95,6 +95,9 @@ footer:
     shipping_returns: "Livraison et retours"
     contact: "Contact"
     connect: "Connecter"
+    legal: "Légal"
+    legal_notice: "Mentions légales"
+    terms: "CGV"
     copyright: "© %year% Alma Stella Paris. Tous droits réservés."
     motto: '« Porter le monde. » ✦'
 
@@ -184,6 +187,62 @@ tracking:
 currency:
     label: "Devise"
     disclaimer: "Les prix affichés en %currency% sont indicatifs. Vous serez débité(e) en USD lors du paiement."
+
+# ── Mentions légales ──
+legal:
+    title: "Mentions légales | Alma Stella Paris"
+    meta_description: "Mentions légales du site Alma Stella Paris. Informations sur l'éditeur, l'hébergeur et la protection des données."
+    heading: "Mentions légales"
+    publisher_heading: "Éditeur du site"
+    publisher_name: "Estelle Bédé"
+    publisher_status: "Statut : Entrepreneur individuel (auto-entrepreneur)"
+    publisher_siret: "SIRET : 917 539 751"
+    publisher_address: "Adresse : 11 rue Guy de Maupassant, 31200 Toulouse, France"
+    publisher_contact: "Contact : via le formulaire de contact du site"
+    director_heading: "Directrice de la publication"
+    director_name: "Estelle Bédé"
+    hosting_heading: "Hébergement"
+    hosting_name: "o2switch"
+    hosting_address: "222-224 Boulevard Gustave Flaubert, 63000 Clermont-Ferrand, France"
+    hosting_website: "www.o2switch.fr"
+    ip_heading: "Propriété intellectuelle"
+    ip_text: "L'ensemble du contenu de ce site (textes, images, photographies, logos, marques) est la propriété exclusive d'Alma Stella Paris ou de ses partenaires. Toute reproduction, représentation ou diffusion, en tout ou partie, sans autorisation écrite préalable, est interdite et constituerait une contrefaçon sanctionnée par les articles L.335-2 et suivants du Code de la propriété intellectuelle."
+    data_heading: "Données personnelles"
+    data_text_1: "Les informations collectées lors de votre commande (nom, adresse, e-mail) sont nécessaires au traitement de celle-ci et à la livraison de vos bijoux. Elles ne sont jamais transmises à des tiers à des fins commerciales."
+    data_text_2: "Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ce droit, contactez-nous via le formulaire de contact du site."
+    cookies_heading: "Cookies"
+    cookies_text: "Ce site utilise des cookies strictement nécessaires à son fonctionnement (session, préférence de devise et de langue). Aucun cookie de traçage publicitaire n'est utilisé."
+
+# ── CGV ──
+terms:
+    title: "Conditions générales de vente | Alma Stella Paris"
+    meta_description: "Conditions générales de vente d'Alma Stella Paris. Informations sur les commandes, paiements, livraisons et retours."
+    heading: "Conditions générales de vente"
+    preamble_heading: "Préambule"
+    preamble_text: "Les présentes conditions générales de vente (CGV) régissent l'ensemble des ventes réalisées sur le site almastellaparis.com, édité par Estelle Bédé, entrepreneur individuel. Toute commande implique l'acceptation pleine et entière des présentes CGV."
+    products_heading: "Produits"
+    products_text_1: "Alma Stella Paris propose des bijoux en acier inoxydable avec pierres naturelles. Chaque pièce est unique et disponible en un seul exemplaire. Les photographies sont aussi fidèles que possible, mais de légères variations de couleur ou de texture peuvent exister en raison du caractère naturel des pierres."
+    products_text_2: "Lorsqu'une pièce est vendue, elle est retirée de la vente et ne peut être commandée à nouveau."
+    prices_heading: "Prix"
+    prices_text_1: "Tous les prix sont indiqués en dollars américains (USD), devise de référence. Les prix affichés dans d'autres devises (EUR, CAD, GBP, MXN) sont donnés à titre indicatif et calculés sur la base de taux de change actualisés."
+    prices_text_2: "Les frais de livraison sont inclus dans le prix affiché. Le montant débité correspond au prix en USD au moment de la commande."
+    orders_heading: "Commandes"
+    orders_text: "La commande est validée après confirmation du paiement. Un e-mail de confirmation est envoyé à l'adresse indiquée lors de la commande. Alma Stella Paris se réserve le droit d'annuler toute commande en cas de problème de paiement ou de suspicion de fraude."
+    payment_heading: "Paiement"
+    payment_text: "Le paiement s'effectue en ligne par carte bancaire via la plateforme sécurisée Stripe. Le débit est effectué en dollars américains (USD) au moment de la validation de la commande. Alma Stella Paris ne stocke aucune donnée bancaire."
+    shipping_heading: "Livraison"
+    shipping_text_1: "Les commandes sont expédiées depuis la France ou le Mexique selon la disponibilité. Le délai de livraison estimé est de 7 à 14 jours ouvrés à l'international."
+    shipping_text_2: "Alma Stella Paris ne peut être tenue responsable des retards de livraison imputables au transporteur ou aux formalités douanières."
+    returns_heading: "Droit de rétractation et retours"
+    returns_text_1: "Conformément à la législation en vigueur, vous disposez d'un délai de 14 jours à compter de la réception de votre commande pour exercer votre droit de rétractation."
+    returns_text_2: "Tout retour doit être précédé d'une prise de contact via le formulaire de contact du site afin de recevoir l'adresse postale de retour. Aucun retour ne sera accepté sans cette étape préalable."
+    returns_text_3: "À réception du bijou retourné (dans son état d'origine, non porté), vous pourrez choisir entre un remboursement intégral ou un échange contre un bijou de valeur équivalente. Les frais de retour sont à la charge du client."
+    warranty_heading: "Garanties"
+    warranty_text: "Tous les bijoux bénéficient de la garantie légale de conformité (articles L.217-4 et suivants du Code de la consommation) et de la garantie des vices cachés (articles 1641 et suivants du Code civil). En cas de défaut de fabrication constaté, contactez-nous via le formulaire de contact du site."
+    liability_heading: "Responsabilité"
+    liability_text: "Alma Stella Paris ne saurait être tenue responsable des dommages résultant d'une mauvaise utilisation des produits. Les bijoux en acier inoxydable sont résistants à l'eau, mais un entretien régulier est recommandé pour préserver leur éclat."
+    law_heading: "Droit applicable"
+    law_text: "Les présentes CGV sont soumises au droit français. En cas de litige, une solution amiable sera recherchée avant toute action judiciaire. À défaut, les tribunaux compétents de Toulouse seront seuls compétents."
 
 # ── Language switcher ──
 locale:

@@ -160,7 +160,7 @@
         {% block footer %}
             <footer class="bg-alma-text text-alma-bg">
                 <div class="max-w-7xl mx-auto px-6 py-16">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
                         <div>
                             <img src="{{ asset('images/logo.png') }}" alt="Alma Stella Paris"
                                  class="h-20 md:h-24 invert sepia-[.1] brightness-[.85] opacity-90 mb-4">
@@ -174,7 +174,7 @@
                             <ul class="space-y-2 text-sm">
                                 <li><a href="{{ path('shop_catalog') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'nav.shop'|trans }}</a></li>
                                 <li><a href="{{ path('shop_about') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.our_story'|trans }}</a></li>
-                                <li><a href="#" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.shipping_returns'|trans }}</a></li>
+                                <li><a href="{{ path('shop_terms') }}#shipping" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.shipping_returns'|trans }}</a></li>
                                 <li><a href="#" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.contact'|trans }}</a></li>
                             </ul>
                         </div>
@@ -186,10 +186,16 @@
                                 <li><a href="mailto:hello@almastellaparis.com" class="text-alma-hover hover:text-alma-gold transition-colors">hello@almastellaparis.com</a></li>
                             </ul>
                         </div>
+                        <div>
+                            <p class="text-xs uppercase tracking-widest mb-4 text-alma-hover">{{ 'footer.legal'|trans }}</p>
+                            <ul class="space-y-2 text-sm">
+                                <li><a href="{{ path('shop_legal_notice') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.legal_notice'|trans }}</a></li>
+                                <li><a href="{{ path('shop_terms') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.terms'|trans }}</a></li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="border-t border-alma-hover/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-alma-hover">
+                    <div class="border-t border-alma-hover/20 mt-12 pt-8 text-center text-xs text-alma-hover">
                         <p>{{ 'footer.copyright'|trans({'%year%': "now"|date("Y")}) }}</p>
-                        <p class="mt-2 md:mt-0 font-serif italic">{{ 'footer.motto'|trans }}</p>
                     </div>
                 </div>
             </footer>

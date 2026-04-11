@@ -95,6 +95,9 @@ footer:
     shipping_returns: "Shipping & Returns"
     contact: "Contact"
     connect: "Connect"
+    legal: "Legal"
+    legal_notice: "Legal Notice"
+    terms: "Terms of Sale"
     copyright: "© %year% Alma Stella Paris. All rights reserved."
     motto: '"Porter le monde." ✦'
 
@@ -184,6 +187,62 @@ tracking:
 currency:
     label: "Currency"
     disclaimer: "Prices shown in %currency% are indicative. You will be charged in USD at checkout."
+
+# ── Legal notice ──
+legal:
+    title: "Legal Notice | Alma Stella Paris"
+    meta_description: "Legal notice for the Alma Stella Paris website. Information about the publisher, hosting provider, and data protection."
+    heading: "Legal Notice"
+    publisher_heading: "Site publisher"
+    publisher_name: "Estelle Bédé"
+    publisher_status: "Status: Sole proprietor (auto-entrepreneur, France)"
+    publisher_siret: "SIRET: 917 539 751"
+    publisher_address: "Address: 11 rue Guy de Maupassant, 31200 Toulouse, France"
+    publisher_contact: "Contact: via the contact form on this website"
+    director_heading: "Publication director"
+    director_name: "Estelle Bédé"
+    hosting_heading: "Hosting provider"
+    hosting_name: "o2switch"
+    hosting_address: "222-224 Boulevard Gustave Flaubert, 63000 Clermont-Ferrand, France"
+    hosting_website: "www.o2switch.fr"
+    ip_heading: "Intellectual property"
+    ip_text: "All content on this website (text, images, photographs, logos, trademarks) is the exclusive property of Alma Stella Paris or its partners. Any reproduction, representation, or distribution, in whole or in part, without prior written authorization, is prohibited."
+    data_heading: "Personal data"
+    data_text_1: "Information collected during your order (name, address, email) is necessary for processing and delivering your jewelry. It is never shared with third parties for commercial purposes."
+    data_text_2: "In accordance with the General Data Protection Regulation (GDPR), you have the right to access, rectify, and delete your personal data. To exercise this right, contact us via the contact form on this website."
+    cookies_heading: "Cookies"
+    cookies_text: "This website uses only strictly necessary cookies for its operation (session, currency and language preferences). No advertising or tracking cookies are used."
+
+# ── Terms of sale ──
+terms:
+    title: "Terms of Sale | Alma Stella Paris"
+    meta_description: "Terms and conditions of sale for Alma Stella Paris. Information about orders, payments, shipping, and returns."
+    heading: "Terms of Sale"
+    preamble_heading: "Preamble"
+    preamble_text: "These terms and conditions of sale govern all purchases made on almastellaparis.com, operated by Estelle Bédé, sole proprietor. Placing an order implies full acceptance of these terms."
+    products_heading: "Products"
+    products_text_1: "Alma Stella Paris offers stainless steel jewelry with natural stones. Each piece is one of a kind and available as a single unit. Photographs are as accurate as possible, but slight variations in color or texture may occur due to the natural character of the stones."
+    products_text_2: "Once a piece is sold, it is removed from the shop and cannot be ordered again."
+    prices_heading: "Prices"
+    prices_text_1: "All prices are listed in US dollars (USD), our reference currency. Prices displayed in other currencies (EUR, CAD, GBP, MXN) are provided for informational purposes only and are based on regularly updated exchange rates."
+    prices_text_2: "Shipping costs are included in the displayed price. The amount charged corresponds to the USD price at the time of order."
+    orders_heading: "Orders"
+    orders_text: "An order is confirmed once payment has been successfully processed. A confirmation email is sent to the address provided during checkout. Alma Stella Paris reserves the right to cancel any order in case of payment issues or suspected fraud."
+    payment_heading: "Payment"
+    payment_text: "Payment is made online by credit or debit card through the secure Stripe platform. The charge is processed in US dollars (USD) at the time of order confirmation. Alma Stella Paris does not store any banking information."
+    shipping_heading: "Shipping"
+    shipping_text_1: "Orders are shipped from France or Mexico depending on availability. Estimated delivery time is 7 to 14 business days for international shipments."
+    shipping_text_2: "Alma Stella Paris cannot be held responsible for delivery delays caused by the carrier or customs procedures."
+    returns_heading: "Returns & withdrawal right"
+    returns_text_1: "In accordance with applicable law, you have 14 days from the date of delivery to exercise your right of withdrawal."
+    returns_text_2: "All returns must be initiated by contacting us through the contact form on this website in order to receive the return shipping address. No returns will be accepted without this prior step."
+    returns_text_3: "Upon receipt of the returned item (in its original condition, unworn), you may choose between a full refund or an exchange for a piece of equivalent value. Return shipping costs are the responsibility of the customer."
+    warranty_heading: "Warranties"
+    warranty_text: "All jewelry benefits from the legal warranty of conformity and the warranty against hidden defects under French consumer law. If a manufacturing defect is found, please contact us via the contact form on this website."
+    liability_heading: "Liability"
+    liability_text: "Alma Stella Paris shall not be held liable for damages resulting from improper use of the products. Stainless steel jewelry is water-resistant, but regular care is recommended to maintain its shine."
+    law_heading: "Applicable law"
+    law_text: "These terms are governed by French law. In the event of a dispute, an amicable resolution will be sought before any legal action. Failing that, the courts of Toulouse, France shall have exclusive jurisdiction."
 
 # ── Language switcher ──
 locale:

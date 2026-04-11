@@ -1,0 +1,82 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'terms.title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'terms.meta_description'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="max-w-3xl mx-auto px-6 py-20 md:py-28">
+        <p class="text-alma-gold text-2xl mb-6 text-center">✦</p>
+        <h1 class="font-serif text-4xl md:text-5xl font-light text-alma-text leading-tight mb-12 text-center">
+            {{ 'terms.heading'|trans }}
+        </h1>
+
+        <div class="space-y-10 text-sm text-alma-text-muted leading-relaxed">
+            {# ── Preamble ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.preamble_heading'|trans }}</h2>
+                <p>{{ 'terms.preamble_text'|trans }}</p>
+            </div>
+
+            {# ── Products ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.products_heading'|trans }}</h2>
+                <p class="mb-3">{{ 'terms.products_text_1'|trans }}</p>
+                <p>{{ 'terms.products_text_2'|trans }}</p>
+            </div>
+
+            {# ── Prices ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.prices_heading'|trans }}</h2>
+                <p class="mb-3">{{ 'terms.prices_text_1'|trans }}</p>
+                <p>{{ 'terms.prices_text_2'|trans }}</p>
+            </div>
+
+            {# ── Orders ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.orders_heading'|trans }}</h2>
+                <p>{{ 'terms.orders_text'|trans }}</p>
+            </div>
+
+            {# ── Payment ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.payment_heading'|trans }}</h2>
+                <p>{{ 'terms.payment_text'|trans }}</p>
+            </div>
+
+            {# ── Shipping ── #}
+            <div id="shipping" class="scroll-mt-16 md:scroll-mt-18">
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.shipping_heading'|trans }}</h2>
+                <p class="mb-3">{{ 'terms.shipping_text_1'|trans }}</p>
+                <p>{{ 'terms.shipping_text_2'|trans }}</p>
+            </div>
+
+            {# ── Returns & withdrawal ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.returns_heading'|trans }}</h2>
+                <p class="mb-3">{{ 'terms.returns_text_1'|trans }}</p>
+                <p class="mb-3">{{ 'terms.returns_text_2'|trans }}</p>
+                <p>{{ 'terms.returns_text_3'|trans }}</p>
+            </div>
+
+            {# ── Warranties ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.warranty_heading'|trans }}</h2>
+                <p>{{ 'terms.warranty_text'|trans }}</p>
+            </div>
+
+            {# ── Liability ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.liability_heading'|trans }}</h2>
+                <p>{{ 'terms.liability_text'|trans }}</p>
+            </div>
+
+            {# ── Applicable law ── #}
+            <div>
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.law_heading'|trans }}</h2>
+                <p>{{ 'terms.law_text'|trans }}</p>
+            </div>
+        </div>
+
+        <p class="text-alma-gold text-2xl mt-12 text-center">✦</p>
+    </section>
+{% endblock %}

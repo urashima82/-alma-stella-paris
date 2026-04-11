@@ -303,9 +303,7 @@ Shall I proceed to Milestone Y?"
 ### Tasks
 - [ ] Abandoned cart detection (session-based, Symfony Scheduler cron command)
 - [ ] Abandoned cart email with product images (Symfony Mailer + Twig template)
-- [ ] Post-purchase review request email (J+14 via Symfony Scheduler)
-- [ ] `ProductReview` entity + submission form (post-purchase email link only)
-- [ ] Reviews displayed on product detail page with country flag
+- [ ] Post-purchase follow-up email (J+14 via Symfony Scheduler)
 
 > **No newsletter, no Brevo.** Communication strategy relies on social media
 > (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
