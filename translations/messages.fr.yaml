@@ -1,5 +1,6 @@
 # ── Navigation ──
 nav:
+    home: "Accueil"
     shop: "Boutique"
     about: "À propos"
     language: "Langue"
@@ -74,8 +75,9 @@ about:
     title: "À propos | Alma Stella Paris"
     meta_description: "Alma Stella Paris est née de la passion d'Estelle pour la recherche de beaux bijoux résistants à l'eau entre Paris et Mexico."
     heading: "Une histoire entre deux mondes."
-    paragraph_1: "Alma Stella Paris est née de la passion d'Estelle pour les voyages et la découverte de la beauté dans des lieux inattendus. Entre l'élégance de Paris et l'énergie vibrante du Mexique, chaque pièce est personnellement sourcée et choisie avec intention."
-    paragraph_2: "Nos bijoux sont faits pour être portés tous les jours — au bord de la mer, en ville, au marché. Résistants à l'eau, durables, et toujours beaux."
+    paragraph_1: "Je suis Estelle, la « Stella » derrière cette marque inspirée par les astres, la lune et les énergies qui nous entourent. 🌙"
+    paragraph_2: "Entre la France, symbole d'élégance, et le Mexique, terre vibrante et spirituelle, j'ai sélectionné ces bijoux qui ne sont pas seulement beaux… mais profondément chargés de sens."
+    paragraph_3: "Chacun est pensé comme un talisman ✨ : un bijou qui vous accompagne, vous recentre et révèle votre lumière intérieure."
     philosophy_label: "Notre philosophie"
     philosophy_heading: "Ce en quoi nous croyons"
     value_1_title: "Sélectionnés personnellement"
@@ -83,8 +85,9 @@ about:
     value_2_title: "Matériaux naturels"
     value_2_text: "Turquoise, opale, quartz, pierre de lune, nacre — chaque pierre raconte sa propre histoire."
     value_3_title: "Conçus pour durer"
-    value_3_text: "Acier inoxydable résistant à l'eau avec placage or 18 carats. Portez-les partout, tous les jours."
-    banner_subtitle: "Là où l'énergie du monde rencontre l'artisanat intemporel."
+    value_3_text: "Acier inoxydable résistant à l'eau. Portez-les partout, tous les jours."
+    banner_country: "Mexique"
+    banner_subtitle: "Là où l'énergie du monde rencontre l'élégance française."
 
 # ── Footer ──
 footer:

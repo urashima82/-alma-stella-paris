@@ -1,5 +1,6 @@
 # ── Navigation ──
 nav:
+    home: Home
     shop: Shop
     about: About
     language: Language
@@ -13,7 +14,7 @@ meta:
 home:
     hero_heading: "Wear the world."
     hero_subheading: "Porter le monde."
-    hero_description: "Curated stainless steel jewelry with natural stones. Water-resistant. Sourced between Paris and Mexico City. Worn daily."
+    hero_description: "Curated stainless steel jewelry with natural stones. Water-resistant. Sourced between Paris and Mexico. Worn daily."
     hero_cta: "Shop the collection"
     icon_water: "Water resistant"
     icon_stones: "Natural stones"
@@ -72,10 +73,11 @@ product:
 # ── About page ──
 about:
     title: "About | Alma Stella Paris"
-    meta_description: "Alma Stella Paris was born from Estelle's passion for sourcing beautiful, water-resistant jewelry between Paris and Mexico City."
+    meta_description: "Alma Stella Paris was born from Estelle's passion for sourcing beautiful, water-resistant jewelry between Paris and Mexico."
     heading: "A story between two worlds."
-    paragraph_1: "Alma Stella Paris was born from Estelle's passion for traveling and finding beauty in unexpected places. Between the elegance of Paris and the vibrant energy of Mexico, each piece is personally sourced and chosen with intention."
-    paragraph_2: "Our jewelry is made to be worn every day — by the sea, in the city, at the market. Water-resistant, durable, and always beautiful."
+    paragraph_1: "I'm Estelle, the \"Stella\" behind this brand inspired by the stars, the moon, and the energies that surround us. 🌙"
+    paragraph_2: "Between France, a symbol of elegance, and Mexico, a vibrant and spiritual land, I curated these jewels that are not just beautiful… but deeply charged with meaning."
+    paragraph_3: "Each one is designed as a talisman ✨ — a piece of jewelry that walks with you, grounds you, and reveals your inner light."
     philosophy_label: "Our philosophy"
     philosophy_heading: "What we believe"
     value_1_title: "Personally sourced"
@@ -83,8 +85,9 @@ about:
     value_2_title: "Natural materials"
     value_2_text: "Turquoise, opal, quartz, moonstone, mother of pearl — each stone tells its own story."
     value_3_title: "Crafted to last"
-    value_3_text: "Water-resistant stainless steel with 18K gold plating. Wear it everywhere, every day."
-    banner_subtitle: "Where the world's energy meets timeless craft."
+    value_3_text: "Water-resistant stainless steel. Wear it everywhere, every day."
+    banner_country: "Mexico"
+    banner_subtitle: "Where the world's energy meets French elegance."
 
 # ── Footer ──
 footer:
