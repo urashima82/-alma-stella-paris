@@ -17,8 +17,11 @@ use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
 
 class AdminLoginController extends AbstractController
 {
-    private const SENDER_EMAIL = 'hello@almastellaparis.com';
-    private const SENDER_NAME = 'Alma Stella Paris';
+    public function __construct(
+        private readonly string $mailerFromEmail,
+        private readonly string $mailerFromName,
+    ) {
+    }
 
     #[Route('/admin/login', name: 'admin_login', methods: ['GET', 'POST'])]
     public function login(
@@ -42,7 +45,7 @@ class AdminLoginController extends AbstractController
                 $loginLinkDetails = $loginLinkHandler->createLoginLink($admin);
 
                 $message = (new TemplatedEmail())
-                    ->from(new Address(self::SENDER_EMAIL, self::SENDER_NAME))
+                    ->from(new Address($this->mailerFromEmail, $this->mailerFromName))
                     ->to(new Address($admin->getEmail()))
                     ->subject('Your login link — Alma Stella Paris')
                     ->htmlTemplate('email/admin_login_link.html.twig')

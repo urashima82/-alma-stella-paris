@@ -11,11 +11,10 @@ use Symfony\Component\Mime\Address;
 
 final class OrderMailer
 {
-    private const SENDER_EMAIL = 'hello@almastellaparis.com';
-    private const SENDER_NAME = 'Alma Stella Paris';
-
     public function __construct(
         private readonly MailerInterface $mailer,
+        private readonly string $mailerFromEmail,
+        private readonly string $mailerFromName,
     ) {
     }
 
@@ -26,7 +25,7 @@ final class OrderMailer
             : \sprintf('Order confirmation %s', $order->getReference());
 
         $email = (new TemplatedEmail())
-            ->from(new Address(self::SENDER_EMAIL, self::SENDER_NAME))
+            ->from(new Address($this->mailerFromEmail, $this->mailerFromName))
             ->to(new Address($order->getCustomerEmail(), $order->getCustomerName()))
             ->subject($subject)
             ->htmlTemplate('email/order_confirmation.html.twig')
@@ -45,7 +44,7 @@ final class OrderMailer
             : \sprintf('Your order %s has been delivered', $order->getReference());
 
         $email = (new TemplatedEmail())
-            ->from(new Address(self::SENDER_EMAIL, self::SENDER_NAME))
+            ->from(new Address($this->mailerFromEmail, $this->mailerFromName))
             ->to(new Address($order->getCustomerEmail(), $order->getCustomerName()))
             ->subject($subject)
             ->htmlTemplate('email/order_delivered.html.twig')
@@ -64,7 +63,7 @@ final class OrderMailer
             : \sprintf('Your order %s has been shipped', $order->getReference());
 
         $email = (new TemplatedEmail())
-            ->from(new Address(self::SENDER_EMAIL, self::SENDER_NAME))
+            ->from(new Address($this->mailerFromEmail, $this->mailerFromName))
             ->to(new Address($order->getCustomerEmail(), $order->getCustomerName()))
             ->subject($subject)
             ->htmlTemplate('email/order_shipped.html.twig')
