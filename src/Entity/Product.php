@@ -19,6 +19,9 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[Vich\Uploadable]
 class Product
 {
+    public const string COUNTRY_FRANCE = 'france';
+    public const string COUNTRY_MEXICO = 'mexico';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -60,6 +63,10 @@ class Product
 
     #[ORM\Column]
     private bool $isSoldOut = false;
+
+    /** @var string[] */
+    #[ORM\Column(type: Types::JSON)]
+    private array $availableIn = [self::COUNTRY_FRANCE, self::COUNTRY_MEXICO];
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $soldAt = null;
@@ -277,6 +284,20 @@ class Product
         if (!$isSoldOut) {
             $this->soldAt = null;
         }
+
+        return $this;
+    }
+
+    /** @return string[] */
+    public function getAvailableIn(): array
+    {
+        return $this->availableIn;
+    }
+
+    /** @param string[] $availableIn */
+    public function setAvailableIn(array $availableIn): static
+    {
+        $this->availableIn = $availableIn;
 
         return $this;
     }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
+use App\Admin\Filter\AvailableInFilter;
 use App\Entity\Product;
 use App\Enum\ShippingTier;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -38,6 +40,15 @@ class ProductCrudController extends AbstractCrudController
             ->setDefaultSort(['createdAt' => 'DESC']);
     }
 
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters
+            ->add('category')
+            ->add('isPublished')
+            ->add('isSoldOut')
+            ->add(AvailableInFilter::new('availableIn'));
+    }
+
     public function configureFields(string $pageName): iterable
     {
         // ── Index only ──
@@ -50,6 +61,16 @@ class ProductCrudController extends AbstractCrudController
                 ->setNumDecimals(2)
                 ->formatValue(static fn (float $value): string => '$'.\number_format($value, 2));
             yield AssociationField::new('category', 'Catégorie');
+            yield ChoiceField::new('availableIn', 'Disponible en')
+                ->setChoices([
+                    'France' => Product::COUNTRY_FRANCE,
+                    'Mexique' => Product::COUNTRY_MEXICO,
+                ])
+                ->allowMultipleChoices()
+                ->renderAsBadges([
+                    Product::COUNTRY_FRANCE => 'primary',
+                    Product::COUNTRY_MEXICO => 'success',
+                ]);
             yield BooleanField::new('isPublished', 'Publié');
             yield BooleanField::new('isSoldOut', 'Vendu');
             yield DateTimeField::new('soldAt', 'Vendu le');
@@ -116,6 +137,16 @@ class ProductCrudController extends AbstractCrudController
         yield BooleanField::new('isFeatured', 'Mis en avant');
         yield BooleanField::new('isSoldOut', 'Vendu');
         yield AssociationField::new('category', 'Catégorie');
+
+        yield FormField::addFieldset('Disponibilité', 'fa fa-globe');
+        yield ChoiceField::new('availableIn', 'Pays')
+            ->setChoices([
+                'France' => Product::COUNTRY_FRANCE,
+                'Mexique' => Product::COUNTRY_MEXICO,
+            ])
+            ->allowMultipleChoices()
+            ->renderExpanded()
+            ->setHelp('Cochez les pays où ce produit est disponible.');
 
         yield FormField::addFieldset('Tarification', 'fa fa-tag');
         yield MoneyField::new('basePrice', 'Prix de base (USD)')

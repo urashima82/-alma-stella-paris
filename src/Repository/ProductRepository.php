@@ -26,16 +26,21 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @return Product[]
      */
-    public function findFeatured(int $limit = 4): array
+    public function findFeatured(int $limit = 4, ?string $collection = null): array
     {
-        return $this->createQueryBuilder('p')
+        $qb = $this->createQueryBuilder('p')
             ->andWhere('p.isPublished = true')
             ->andWhere('p.isFeatured = true')
             ->andWhere('p.isSoldOut = false')
             ->orderBy('p.createdAt', 'DESC')
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($limit);
+
+        if (null !== $collection && 'all' !== $collection) {
+            $qb->andWhere('JSON_CONTAINS(p.availableIn, :collection) = 1')
+                ->setParameter('collection', \sprintf('"%s"', $collection));
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     public function countRecentlySold(int $days = 7): int
@@ -61,7 +66,7 @@ class ProductRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    public function findVisibleQuery(?ProductCategory $category = null): QueryBuilder
+    public function findVisibleQuery(?ProductCategory $category = null, ?string $collection = null): QueryBuilder
     {
         $soldOutCutoff = new \DateTimeImmutable('-14 days');
 
@@ -75,6 +80,11 @@ class ProductRepository extends ServiceEntityRepository
         if (null !== $category) {
             $qb->andWhere('p.category = :category')
                 ->setParameter('category', $category);
+        }
+
+        if (null !== $collection && 'all' !== $collection) {
+            $qb->andWhere('JSON_CONTAINS(p.availableIn, :collection) = 1')
+                ->setParameter('collection', \sprintf('"%s"', $collection));
         }
 
         return $qb;

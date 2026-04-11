@@ -6,6 +6,7 @@ namespace App\Controller\Shop;
 
 use App\Repository\ProductCategoryRepository;
 use App\Repository\ProductRepository;
+use App\Repository\SiteSettingsRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +24,7 @@ class CatalogController extends AbstractController
         Request $request,
         ProductRepository $productRepository,
         ProductCategoryRepository $categoryRepository,
+        SiteSettingsRepository $siteSettingsRepository,
         PaginatorInterface $paginator,
         ?string $categorySlug = null,
     ): Response {
@@ -38,7 +40,8 @@ class CatalogController extends AbstractController
             }
         }
 
-        $query = $productRepository->findVisibleQuery($activeCategory);
+        $activeCollection = $siteSettingsRepository->getActiveCollection();
+        $query = $productRepository->findVisibleQuery($activeCategory, $activeCollection);
 
         $pagination = $paginator->paginate(
             $query,
