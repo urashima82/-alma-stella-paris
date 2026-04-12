@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Shop;
 
 use App\Entity\Customer;
+use App\Entity\CustomerAddress;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Enum\OrderStatus;
@@ -40,13 +41,52 @@ class CheckoutController extends AbstractController
     }
 
     #[Route(
+        path: '/identify',
+        name: 'shop_checkout_identify',
+        methods: ['GET', 'POST'],
+        requirements: ['_locale' => 'en'],
+    )]
+    #[Route(
+        path: '/identification',
+        name: 'shop_checkout_identify_fr',
+        methods: ['GET', 'POST'],
+        requirements: ['_locale' => 'fr'],
+    )]
+    public function identify(Request $request): Response
+    {
+        $products = $this->cartManager->getProducts();
+
+        if ([] === $products) {
+            return $this->redirectToRoute('shop_catalog', ['_locale' => $request->getLocale()]);
+        }
+
+        // Logged-in customers skip identification
+        if ($this->getUser() instanceof Customer) {
+            return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
+        }
+
+        // Guest continues without account — store email in session
+        if ($request->isMethod('POST') && $request->request->has('guest_email')) {
+            $email = \trim((string) $request->request->get('guest_email', ''));
+
+            if ('' !== $email && false !== \filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+                $request->getSession()->set('_checkout_email', $email);
+
+                return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
+            }
+        }
+
+        return $this->render('shop/checkout/identify.html.twig');
+    }
+
+    #[Route(
         path: '/checkout',
         name: 'shop_checkout',
         methods: ['GET', 'POST'],
         requirements: ['_locale' => 'en'],
     )]
     #[Route(
-        path: '/paiement',
+        path: '/livraison',
         name: 'shop_checkout_fr',
         methods: ['GET', 'POST'],
         requirements: ['_locale' => 'fr'],
@@ -59,6 +99,11 @@ class CheckoutController extends AbstractController
             return $this->redirectToRoute('shop_catalog', ['_locale' => $request->getLocale()]);
         }
 
+        // Guests must go through identification first
+        if (!$this->getUser() instanceof Customer && !$request->getSession()->has('_checkout_email')) {
+            return $this->redirectToRoute('shop_checkout_identify', ['_locale' => $request->getLocale()]);
+        }
+
         $subtotalUsd = $this->cartManager->getSubtotalUsd();
         $currency = $request->getSession()->get('_currency', CurrencyConverter::BASE_CURRENCY);
         $locale = $request->getLocale();
@@ -69,10 +114,23 @@ class CheckoutController extends AbstractController
             $errors = $this->validateCheckoutForm($request);
 
             if ([] === $errors) {
-                $order = $this->createOrder($request, $products, $subtotalUsd);
+                // Reuse existing Pending order if available, otherwise create new
+                $pendingRef = $request->getSession()->get('_pending_order');
+                $existingOrder = null !== $pendingRef
+                    ? $this->orderRepository->findByReference($pendingRef)
+                    : null;
 
-                $this->entityManager->persist($order);
+                if (null !== $existingOrder && OrderStatus::Pending === $existingOrder->getStatus()) {
+                    $order = $this->updateExistingOrder($existingOrder, $request, $products, $subtotalUsd);
+                } else {
+                    $order = $this->createOrder($request, $products, $subtotalUsd);
+                    $this->entityManager->persist($order);
+                }
+
                 $this->entityManager->flush();
+
+                // Save shipping address to address book for logged-in customers
+                $this->saveNewAddressIfNeeded($request);
 
                 // Store order reference in session for payment step
                 $request->getSession()->set('_pending_order', $order->getReference());
@@ -99,6 +157,7 @@ class CheckoutController extends AbstractController
                 $customerAddresses[] = [
                     'id' => $address->getId(),
                     'label' => $address->getLabel(),
+                    'recipientName' => $address->getRecipientName() ?? '',
                     'addressLine1' => $address->getAddressLine1(),
                     'addressLine2' => $address->getAddressLine2() ?? '',
                     'city' => $address->getCity(),
@@ -244,9 +303,10 @@ class CheckoutController extends AbstractController
             $this->logger->error('Admin notification email failed: {message}', ['message' => $e->getMessage()]);
         }
 
-        // Clear cart and pending order from session
+        // Clear cart and checkout session data
         $this->cartManager->clear();
         $request->getSession()->remove('_pending_order');
+        $request->getSession()->remove('_checkout_email');
         $confirmationRoute = 'fr' === $locale ? 'shop_order_confirmation_fr' : 'shop_order_confirmation';
 
         return new JsonResponse([
@@ -339,19 +399,19 @@ class CheckoutController extends AbstractController
     {
         $errors = [];
 
-        $name = \trim((string) $request->request->get('customer_name', ''));
         $email = \trim((string) $request->request->get('customer_email', ''));
+        $shippingRecipient = \trim((string) $request->request->get('shipping_recipient_name', ''));
         $line1 = \trim((string) $request->request->get('address_line1', ''));
         $city = \trim((string) $request->request->get('city', ''));
         $postalCode = \trim((string) $request->request->get('postal_code', ''));
         $country = \trim((string) $request->request->get('country', ''));
 
-        if ('' === $name) {
-            $errors['customer_name'] = 'checkout.error.name_required';
-        }
-
         if ('' === $email || false === \filter_var($email, \FILTER_VALIDATE_EMAIL)) {
             $errors['customer_email'] = 'checkout.error.email_invalid';
+        }
+
+        if ('' === $shippingRecipient) {
+            $errors['shipping_recipient_name'] = 'checkout.error.shipping_recipient_required';
         }
 
         if ('' === $line1) {
@@ -370,25 +430,73 @@ class CheckoutController extends AbstractController
             $errors['country'] = 'checkout.error.country_required';
         }
 
+        // Validate billing address if different from shipping
+        if ($request->request->has('billing_different')) {
+            $billingRecipient = \trim((string) $request->request->get('billing_recipient_name', ''));
+            $billingLine1 = \trim((string) $request->request->get('billing_address_line1', ''));
+            $billingCity = \trim((string) $request->request->get('billing_city', ''));
+            $billingPostalCode = \trim((string) $request->request->get('billing_postal_code', ''));
+            $billingCountry = \trim((string) $request->request->get('billing_country', ''));
+
+            if ('' === $billingRecipient) {
+                $errors['billing_recipient_name'] = 'checkout.error.billing_recipient_required';
+            }
+
+            if ('' === $billingLine1) {
+                $errors['billing_address_line1'] = 'checkout.error.billing_address_required';
+            }
+
+            if ('' === $billingCity) {
+                $errors['billing_city'] = 'checkout.error.billing_city_required';
+            }
+
+            if ('' === $billingPostalCode) {
+                $errors['billing_postal_code'] = 'checkout.error.billing_postal_code_required';
+            }
+
+            if ('' === $billingCountry || 2 !== \strlen($billingCountry)) {
+                $errors['billing_country'] = 'checkout.error.billing_country_required';
+            }
+        }
+
         return $errors;
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, mixed>
      */
     private function getFormData(Request $request): array
     {
+        $billingDefaults = [
+            'billing_different' => false,
+            'billing_recipient_name' => '',
+            'billing_address_line1' => '',
+            'billing_address_line2' => '',
+            'billing_city' => '',
+            'billing_state' => '',
+            'billing_postal_code' => '',
+            'billing_country' => '',
+        ];
+
         // On POST, use submitted data
         if ($request->isMethod('POST')) {
             return [
-                'customer_name' => \trim((string) $request->request->get('customer_name', '')),
                 'customer_email' => \trim((string) $request->request->get('customer_email', '')),
+                'shipping_recipient_name' => \trim((string) $request->request->get('shipping_recipient_name', '')),
                 'address_line1' => \trim((string) $request->request->get('address_line1', '')),
                 'address_line2' => \trim((string) $request->request->get('address_line2', '')),
                 'city' => \trim((string) $request->request->get('city', '')),
                 'state' => \trim((string) $request->request->get('state', '')),
                 'postal_code' => \trim((string) $request->request->get('postal_code', '')),
                 'country' => \trim((string) $request->request->get('country', '')),
+                'billing_different' => $request->request->has('billing_different'),
+                'billing_recipient_name' => \trim((string) $request->request->get('billing_recipient_name', '')),
+                'billing_address_line1' => \trim((string) $request->request->get('billing_address_line1', '')),
+                'billing_address_line2' => \trim((string) $request->request->get('billing_address_line2', '')),
+                'billing_city' => \trim((string) $request->request->get('billing_city', '')),
+                'billing_state' => \trim((string) $request->request->get('billing_state', '')),
+                'billing_postal_code' => \trim((string) $request->request->get('billing_postal_code', '')),
+                'billing_country' => \trim((string) $request->request->get('billing_country', '')),
             ];
         }
 
@@ -398,27 +506,61 @@ class CheckoutController extends AbstractController
             $address = $user->getDefaultAddress();
 
             return [
-                'customer_name' => $user->getFullName(),
                 'customer_email' => $user->getEmail(),
+                'shipping_recipient_name' => $address?->getRecipientName() ?? $user->getFullName(),
                 'address_line1' => $address?->getAddressLine1() ?? '',
                 'address_line2' => $address?->getAddressLine2() ?? '',
                 'city' => $address?->getCity() ?? '',
                 'state' => $address?->getState() ?? '',
                 'postal_code' => $address?->getPostalCode() ?? '',
                 'country' => $address?->getCountry() ?? '',
+                ...$billingDefaults,
             ];
         }
 
+        // Pre-fill guest email from identification step
+        $guestEmail = (string) $request->getSession()->get('_checkout_email', '');
+
         return [
-            'customer_name' => '',
-            'customer_email' => '',
+            'customer_email' => $guestEmail,
+            'shipping_recipient_name' => '',
             'address_line1' => '',
             'address_line2' => '',
             'city' => '',
             'state' => '',
             'postal_code' => '',
             'country' => '',
+            ...$billingDefaults,
         ];
+    }
+
+    /**
+     * @param \App\Entity\Product[] $products
+     */
+    private function updateExistingOrder(Order $order, Request $request, array $products, float $subtotalUsd): Order
+    {
+        $this->fillOrderFromRequest($order, $request);
+
+        // Replace items if cart changed
+        $oldTotal = $order->getTotalUsd();
+        $order->setTotalUsd($subtotalUsd);
+
+        foreach ($order->getItems()->toArray() as $oldItem) {
+            $order->removeItem($oldItem);
+        }
+
+        foreach ($products as $product) {
+            $shippingCost = $this->shippingCostProvider->getCost($product->getShippingTier());
+            $item = OrderItem::fromProduct($product, $shippingCost);
+            $order->addItem($item);
+        }
+
+        // Reset Stripe PaymentIntent if total changed (new PI will be created at payment step)
+        if ($oldTotal !== $subtotalUsd && null !== $order->getStripePaymentIntentId()) {
+            $order->setStripePaymentIntentId(null);
+        }
+
+        return $order;
     }
 
     /**
@@ -428,22 +570,8 @@ class CheckoutController extends AbstractController
     {
         $order = new Order();
         $order->setReference(Order::generateReference());
-        $order->setCustomerLocale($request->getLocale());
-        $order->setCustomerName(\trim((string) $request->request->get('customer_name', '')));
-        $order->setCustomerEmail(\trim((string) $request->request->get('customer_email', '')));
-        $order->setShippingAddressLine1(\trim((string) $request->request->get('address_line1', '')));
-        $order->setShippingAddressLine2(\trim((string) $request->request->get('address_line2', '')) ?: null);
-        $order->setShippingCity(\trim((string) $request->request->get('city', '')));
-        $order->setShippingState(\trim((string) $request->request->get('state', '')) ?: null);
-        $order->setShippingPostalCode(\trim((string) $request->request->get('postal_code', '')));
-        $order->setShippingCountry(\trim((string) $request->request->get('country', '')));
+        $this->fillOrderFromRequest($order, $request);
         $order->setTotalUsd($subtotalUsd);
-
-        // Link order to customer if logged in
-        $user = $this->getUser();
-        if ($user instanceof Customer) {
-            $order->setCustomer($user);
-        }
 
         foreach ($products as $product) {
             $shippingCost = $this->shippingCostProvider->getCost($product->getShippingTier());
@@ -452,6 +580,103 @@ class CheckoutController extends AbstractController
         }
 
         return $order;
+    }
+
+    private function fillOrderFromRequest(Order $order, Request $request): void
+    {
+        $shippingRecipient = \trim((string) $request->request->get('shipping_recipient_name', ''));
+
+        $order->setCustomerLocale($request->getLocale());
+        $order->setCustomerEmail(\trim((string) $request->request->get('customer_email', '')));
+        $order->setShippingRecipientName($shippingRecipient);
+        $order->setShippingAddressLine1(\trim((string) $request->request->get('address_line1', '')));
+        $order->setShippingAddressLine2(\trim((string) $request->request->get('address_line2', '')) ?: null);
+        $order->setShippingCity(\trim((string) $request->request->get('city', '')));
+        $order->setShippingState(\trim((string) $request->request->get('state', '')) ?: null);
+        $order->setShippingPostalCode(\trim((string) $request->request->get('postal_code', '')));
+        $order->setShippingCountry(\trim((string) $request->request->get('country', '')));
+
+        // Billing address (null if same as shipping)
+        if ($request->request->has('billing_different')) {
+            $order->setBillingRecipientName(\trim((string) $request->request->get('billing_recipient_name', '')));
+            $order->setBillingAddressLine1(\trim((string) $request->request->get('billing_address_line1', '')));
+            $order->setBillingAddressLine2(\trim((string) $request->request->get('billing_address_line2', '')) ?: null);
+            $order->setBillingCity(\trim((string) $request->request->get('billing_city', '')));
+            $order->setBillingState(\trim((string) $request->request->get('billing_state', '')) ?: null);
+            $order->setBillingPostalCode(\trim((string) $request->request->get('billing_postal_code', '')));
+            $order->setBillingCountry(\trim((string) $request->request->get('billing_country', '')));
+        } else {
+            $order->setBillingRecipientName(null);
+            $order->setBillingAddressLine1(null);
+            $order->setBillingAddressLine2(null);
+            $order->setBillingCity(null);
+            $order->setBillingState(null);
+            $order->setBillingPostalCode(null);
+            $order->setBillingCountry(null);
+        }
+
+        // Link order to customer if logged in, and derive customerName
+        $user = $this->getUser();
+        if ($user instanceof Customer) {
+            $order->setCustomer($user);
+            $order->setCustomerName($user->getFullName());
+        } else {
+            $order->setCustomerName($shippingRecipient);
+        }
+    }
+
+    private function saveNewAddressIfNeeded(Request $request): void
+    {
+        $user = $this->getUser();
+
+        if (!$user instanceof Customer) {
+            return;
+        }
+
+        $line1 = \trim((string) $request->request->get('address_line1', ''));
+        $postalCode = \trim((string) $request->request->get('postal_code', ''));
+        $country = \trim((string) $request->request->get('country', ''));
+
+        // Check if this address already exists in the customer's address book
+        foreach ($user->getAddresses() as $existing) {
+            if ($existing->getAddressLine1() === $line1
+                && $existing->getPostalCode() === $postalCode
+                && \strtoupper($existing->getCountry()) === \strtoupper($country)
+            ) {
+                return;
+            }
+        }
+
+        // Save as new address
+        $address = new CustomerAddress();
+        $address->setCustomer($user);
+        $address->setLabel($this->generateAddressLabel($user));
+        $address->setRecipientName(\trim((string) $request->request->get('shipping_recipient_name', '')) ?: null);
+        $address->setAddressLine1($line1);
+        $address->setAddressLine2(\trim((string) $request->request->get('address_line2', '')) ?: null);
+        $address->setCity(\trim((string) $request->request->get('city', '')));
+        $address->setState(\trim((string) $request->request->get('state', '')) ?: null);
+        $address->setPostalCode($postalCode);
+        $address->setCountry($country);
+
+        // Set as default if customer has no addresses yet
+        if ($user->getAddresses()->isEmpty()) {
+            $address->setIsDefault(true);
+        }
+
+        $this->entityManager->persist($address);
+        $this->entityManager->flush();
+    }
+
+    private function generateAddressLabel(Customer $customer): string
+    {
+        $count = $customer->getAddresses()->count();
+
+        if (0 === $count) {
+            return 'Home';
+        }
+
+        return 'Address '.($count + 1);
     }
 
     private const SHIPPING_COUNTRY_CODES = [

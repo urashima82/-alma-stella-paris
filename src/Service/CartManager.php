@@ -4,18 +4,29 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Entity\Cart;
+use App\Entity\Customer;
 use App\Entity\Product;
+use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartManager
 {
     private const SESSION_KEY = '_cart';
+    private const COOKIE_NAME = 'alma_cart';
+    private const COOKIE_LIFETIME_DAYS = 30;
 
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly ProductRepository $productRepository,
         private readonly ShippingCostProvider $shippingCostProvider,
+        private readonly Security $security,
+        private readonly CartRepository $cartRepository,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -28,14 +39,30 @@ class CartManager
             return false;
         }
 
-        $cart = $this->getProductIds();
+        $customer = $this->getCustomer();
 
-        if (\in_array($product->getId(), $cart, true)) {
+        if (null !== $customer) {
+            $cart = $this->getOrCreateDbCart($customer);
+
+            if ($cart->containsProduct($product->getId())) {
+                return false;
+            }
+
+            $cart->addProduct($product);
+            $this->entityManager->flush();
+
+            return true;
+        }
+
+        // Guest: session + cookie
+        $ids = $this->getGuestProductIds();
+
+        if (\in_array($product->getId(), $ids, true)) {
             return false;
         }
 
-        $cart[] = $product->getId();
-        $this->save($cart);
+        $ids[] = $product->getId();
+        $this->saveGuest($ids);
 
         return true;
     }
@@ -45,9 +72,19 @@ class CartManager
      */
     public function remove(int $productId): void
     {
-        $cart = $this->getProductIds();
-        $cart = \array_values(\array_filter($cart, static fn (int $id): bool => $id !== $productId));
-        $this->save($cart);
+        $customer = $this->getCustomer();
+
+        if (null !== $customer) {
+            $cart = $this->cartRepository->findByCustomer($customer);
+            $cart?->removeProduct($productId);
+            $this->entityManager->flush();
+
+            return;
+        }
+
+        $ids = $this->getGuestProductIds();
+        $ids = \array_values(\array_filter($ids, static fn (int $id): bool => $id !== $productId));
+        $this->saveGuest($ids);
     }
 
     /**
@@ -55,7 +92,16 @@ class CartManager
      */
     public function clear(): void
     {
-        $this->save([]);
+        $customer = $this->getCustomer();
+
+        if (null !== $customer) {
+            $cart = $this->cartRepository->findByCustomer($customer);
+            $cart?->clear();
+            $this->entityManager->flush();
+        }
+
+        // Always clear guest storage (session + cookie) to avoid stale data after logout
+        $this->saveGuest([]);
     }
 
     /**
@@ -65,12 +111,15 @@ class CartManager
      */
     public function getProductIds(): array
     {
-        $session = $this->requestStack->getSession();
+        $customer = $this->getCustomer();
 
-        /** @var int[] $cart */
-        $cart = $session->get(self::SESSION_KEY, []);
+        if (null !== $customer) {
+            $cart = $this->cartRepository->findByCustomer($customer);
 
-        return $cart;
+            return $cart?->getProductIds() ?? [];
+        }
+
+        return $this->getGuestProductIds();
     }
 
     /**
@@ -102,7 +151,7 @@ class CartManager
 
         // If the cart had stale entries, clean it up
         if (\count($validIds) !== \count($ids)) {
-            $this->save($validIds);
+            $this->syncIds($validIds);
         }
 
         return $validProducts;
@@ -139,10 +188,157 @@ class CartManager
     }
 
     /**
+     * Merge guest cart (cookie/session) into the logged-in customer's DB cart.
+     * Called on login to preserve items added before authentication.
+     */
+    public function mergeGuestCartIntoCustomer(Customer $customer): void
+    {
+        $guestIds = $this->getGuestProductIds();
+
+        if ([] === $guestIds) {
+            return;
+        }
+
+        $cart = $this->getOrCreateDbCart($customer);
+        $products = $this->productRepository->findBy(['id' => $guestIds]);
+
+        foreach ($products as $product) {
+            if (!$product->isSoldOut()) {
+                $cart->addProduct($product);
+            }
+        }
+
+        $this->entityManager->flush();
+
+        // Clear guest storage
+        $this->saveGuest([]);
+    }
+
+    private function getCustomer(): ?Customer
+    {
+        $user = $this->security->getUser();
+
+        return $user instanceof Customer ? $user : null;
+    }
+
+    private function getOrCreateDbCart(Customer $customer): Cart
+    {
+        $cart = $this->cartRepository->findByCustomer($customer);
+
+        if (null === $cart) {
+            $cart = new Cart();
+            $cart->setCustomer($customer);
+            $this->entityManager->persist($cart);
+        }
+
+        return $cart;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function getGuestProductIds(): array
+    {
+        // Try session first
+        $session = $this->requestStack->getSession();
+        /** @var int[] $sessionIds */
+        $sessionIds = $session->get(self::SESSION_KEY, []);
+
+        if ([] !== $sessionIds) {
+            return $sessionIds;
+        }
+
+        // Fall back to cookie
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request) {
+            return [];
+        }
+
+        $cookieValue = $request->cookies->get(self::COOKIE_NAME);
+
+        if (null === $cookieValue || '' === $cookieValue) {
+            return [];
+        }
+
+        $decoded = \json_decode($cookieValue, true);
+
+        if (!\is_array($decoded)) {
+            return [];
+        }
+
+        $ids = \array_values(\array_filter(\array_map('\intval', $decoded), static fn (int $id): bool => $id > 0));
+
+        // Restore into session from cookie
+        if ([] !== $ids) {
+            $session->set(self::SESSION_KEY, $ids);
+        }
+
+        return $ids;
+    }
+
+    /**
      * @param int[] $ids
      */
-    private function save(array $ids): void
+    private function saveGuest(array $ids): void
     {
         $this->requestStack->getSession()->set(self::SESSION_KEY, $ids);
+        $this->setCookieOnResponse($ids);
+    }
+
+    /**
+     * @param int[] $ids
+     */
+    private function syncIds(array $ids): void
+    {
+        $customer = $this->getCustomer();
+
+        if (null !== $customer) {
+            $cart = $this->cartRepository->findByCustomer($customer);
+
+            if (null !== $cart) {
+                $cart->clear();
+                $products = $this->productRepository->findBy(['id' => $ids]);
+
+                foreach ($products as $product) {
+                    $cart->addProduct($product);
+                }
+
+                $this->entityManager->flush();
+            }
+
+            return;
+        }
+
+        $this->saveGuest($ids);
+    }
+
+    /**
+     * @param int[] $ids
+     */
+    private function setCookieOnResponse(array $ids): void
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (null === $request) {
+            return;
+        }
+
+        $cookieValue = [] === $ids ? '' : \json_encode($ids, \JSON_THROW_ON_ERROR);
+        $expire = [] === $ids ? 1 : \time() + (self::COOKIE_LIFETIME_DAYS * 86400);
+
+        $cookie = Cookie::create(self::COOKIE_NAME)
+            ->withValue($cookieValue)
+            ->withExpires($expire)
+            ->withPath('/')
+            ->withSameSite('lax')
+            ->withHttpOnly(false)
+        ;
+
+        // Store cookie in request attributes for the response listener to pick up
+        /** @var Cookie[] $pendingCookies */
+        $pendingCookies = $request->attributes->get('_pending_cookies', []);
+        $pendingCookies[] = $cookie;
+        $request->attributes->set('_pending_cookies', $pendingCookies);
     }
 }

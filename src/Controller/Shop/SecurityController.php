@@ -86,6 +86,11 @@ class SecurityController extends AbstractController
                 $session->set('_registration_otp_expires', \time() + 600);
                 $session->set('_registration_otp_attempts', 0);
 
+                // Preserve checkout redirect through OTP flow
+                if ('checkout' === $request->query->get('redirect')) {
+                    $session->set('_registration_redirect', 'checkout');
+                }
+
                 $subject = 'fr' === $locale
                     ? 'Votre code de vérification — Alma Stella Paris'
                     : 'Your verification code — Alma Stella Paris';
@@ -181,9 +186,14 @@ class SecurityController extends AbstractController
 
                 $entityManager->flush();
 
+                $redirect = $session->get('_registration_redirect');
                 $this->clearRegistrationSession($session);
 
                 $security->login($customer, 'form_login', 'main');
+
+                if ('checkout' === $redirect) {
+                    return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
+                }
 
                 return $this->redirectToRoute('shop_account');
             }
@@ -259,6 +269,7 @@ class SecurityController extends AbstractController
         $session->remove('_registration_otp');
         $session->remove('_registration_otp_expires');
         $session->remove('_registration_otp_attempts');
+        $session->remove('_registration_redirect');
     }
 
     /**

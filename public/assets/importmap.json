@@ -8,11 +8,19 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-KMGHEb5.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-6Aw_4ui.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/checkout_identify_controller.js": {
+        "path": "\/assets\/controllers\/checkout_identify_controller-avHn3TZ.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/billing_toggle_controller.js": {
+        "path": "\/assets\/controllers\/billing_toggle_controller-CLhha_R.js",
         "type": "js"
     },
     "\/assets\/controllers\/address_selector_controller.js": {
-        "path": "\/assets\/controllers\/address_selector_controller-l5fEkRR.js",
+        "path": "\/assets\/controllers\/address_selector_controller-_t0rh4g.js",
         "type": "js"
     },
     "\/assets\/controllers\/email_check_controller.js": {
@@ -52,7 +60,7 @@
         "type": "js"
     },
     "\/assets\/styles\/app.css": {
-        "path": "\/assets\/styles\/app-w5K6j-T.css",
+        "path": "\/assets\/styles\/app-E2CAXtv.css",
         "type": "css"
     },
     "@hotwired\/stimulus": {

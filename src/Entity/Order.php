@@ -38,6 +38,9 @@ class Order
     private string $customerName = '';
 
     #[ORM\Column(length: 255)]
+    private string $shippingRecipientName = '';
+
+    #[ORM\Column(length: 255)]
     private string $shippingAddressLine1 = '';
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -54,6 +57,27 @@ class Order
 
     #[ORM\Column(length: 2)]
     private string $shippingCountry = '';
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $billingRecipientName = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $billingAddressLine1 = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $billingAddressLine2 = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $billingCity = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $billingState = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $billingPostalCode = null;
+
+    #[ORM\Column(length: 2, nullable: true)]
+    private ?string $billingCountry = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private string $totalUsd = '0.00';
@@ -189,6 +213,18 @@ class Order
         return $this->shippingAddressLine1;
     }
 
+    public function getShippingRecipientName(): string
+    {
+        return $this->shippingRecipientName;
+    }
+
+    public function setShippingRecipientName(string $shippingRecipientName): static
+    {
+        $this->shippingRecipientName = $shippingRecipientName;
+
+        return $this;
+    }
+
     public function setShippingAddressLine1(string $shippingAddressLine1): static
     {
         $this->shippingAddressLine1 = $shippingAddressLine1;
@@ -254,6 +290,110 @@ class Order
         $this->shippingCountry = \strtoupper($shippingCountry);
 
         return $this;
+    }
+
+    public function getBillingRecipientName(): ?string
+    {
+        return $this->billingRecipientName;
+    }
+
+    public function setBillingRecipientName(?string $billingRecipientName): static
+    {
+        $this->billingRecipientName = $billingRecipientName;
+
+        return $this;
+    }
+
+    public function getBillingAddressLine1(): ?string
+    {
+        return $this->billingAddressLine1;
+    }
+
+    public function setBillingAddressLine1(?string $billingAddressLine1): static
+    {
+        $this->billingAddressLine1 = $billingAddressLine1;
+
+        return $this;
+    }
+
+    public function getBillingAddressLine2(): ?string
+    {
+        return $this->billingAddressLine2;
+    }
+
+    public function setBillingAddressLine2(?string $billingAddressLine2): static
+    {
+        $this->billingAddressLine2 = $billingAddressLine2;
+
+        return $this;
+    }
+
+    public function getBillingCity(): ?string
+    {
+        return $this->billingCity;
+    }
+
+    public function setBillingCity(?string $billingCity): static
+    {
+        $this->billingCity = $billingCity;
+
+        return $this;
+    }
+
+    public function getBillingState(): ?string
+    {
+        return $this->billingState;
+    }
+
+    public function setBillingState(?string $billingState): static
+    {
+        $this->billingState = $billingState;
+
+        return $this;
+    }
+
+    public function getBillingPostalCode(): ?string
+    {
+        return $this->billingPostalCode;
+    }
+
+    public function setBillingPostalCode(?string $billingPostalCode): static
+    {
+        $this->billingPostalCode = $billingPostalCode;
+
+        return $this;
+    }
+
+    public function getBillingCountry(): ?string
+    {
+        return $this->billingCountry;
+    }
+
+    public function setBillingCountry(?string $billingCountry): static
+    {
+        $this->billingCountry = null !== $billingCountry ? \strtoupper($billingCountry) : null;
+
+        return $this;
+    }
+
+    public function hasSeparateBillingAddress(): bool
+    {
+        return null !== $this->billingAddressLine1;
+    }
+
+    public function getFullBillingAddress(): string
+    {
+        if (!$this->hasSeparateBillingAddress()) {
+            return $this->getFullShippingAddress();
+        }
+
+        return \implode(', ', \array_filter([
+            $this->billingAddressLine1,
+            $this->billingAddressLine2,
+            $this->billingPostalCode.' '.$this->billingCity,
+            $this->billingState,
+            $this->billingCountry,
+        ]));
     }
 
     public function getTotalUsd(): float

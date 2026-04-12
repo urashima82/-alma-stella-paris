@@ -130,14 +130,39 @@ cart:
     shipping_note: "Livraison incluse dans les prix affichés."
     checkout: "Passer la commande"
 
+# ── Identification ──
+identify:
+    title: "Identification | Alma Stella Paris"
+    heading: "Identification"
+    subtitle: "Entrez votre adresse e-mail pour commencer."
+    label_email: "Adresse e-mail"
+    label_password: "Mot de passe"
+    continue: "Continuer"
+    account_found: "Un compte existe avec cette adresse e-mail. Connectez-vous pour un paiement plus rapide et retrouver vos commandes."
+    no_account_found: "Aucun compte associé à cette adresse. Vous pouvez continuer en tant qu'invité ou créer un compte."
+    sign_in: "Se connecter et continuer"
+    continue_as_guest: "Continuer sans compte"
+    create_account: "Créer un compte"
+    use_different_email: "Utiliser une autre adresse e-mail"
+    error:
+        email_invalid: "Veuillez entrer une adresse e-mail valide."
+
+# ── Checkout stepper ──
+stepper:
+    identification: "Identification"
+    shipping: "Livraison"
+    payment: "Paiement"
+    confirmation: "Confirmation"
+
 # ── Checkout ──
 checkout:
-    title: "Paiement | Alma Stella Paris"
-    heading: "Paiement"
+    title: "Livraison | Alma Stella Paris"
+    heading: "Livraison"
     customer_info: "Vos informations"
     label_name: "Nom complet"
     label_email: "Adresse e-mail"
     shipping_address: "Adresse de livraison"
+    label_recipient_name: "Nom du destinataire"
     label_address: "Adresse"
     label_address2: "Appartement, suite, etc. (optionnel)"
     label_city: "Ville"
@@ -156,6 +181,10 @@ checkout:
     shipping_label: "Livraison"
     shipping_included: "Incluse"
     total: "Total"
+    billing_address: "Adresse de facturation"
+    billing_same_as_shipping: "Même adresse que la livraison"
+    billing_different: "Utiliser une adresse de facturation différente"
+    billing_label_recipient_name: "Nom pour la facturation"
     continue_to_payment: "Continuer vers le paiement"
     payment_title: "Paiement | Alma Stella Paris"
     payment_heading: "Paiement"
@@ -164,7 +193,7 @@ checkout:
     order_reference: "Référence de commande"
     charged_in_usd: "Vous serez débité(e) de %amount% (USD)."
     pay_now: "Payer %amount%"
-    back_to_checkout: "Retour au paiement"
+    back_to_checkout: "Retour à la livraison"
     payment_error: "Une erreur est survenue lors de la préparation de votre paiement. Veuillez réessayer."
     error:
         name_required: "Veuillez entrer votre nom."
@@ -173,6 +202,12 @@ checkout:
         city_required: "Veuillez entrer votre ville."
         postal_code_required: "Veuillez entrer votre code postal."
         country_required: "Veuillez sélectionner votre pays."
+        shipping_recipient_required: "Veuillez entrer le nom du destinataire."
+        billing_recipient_required: "Veuillez entrer le nom pour la facturation."
+        billing_address_required: "Veuillez entrer l'adresse de facturation."
+        billing_city_required: "Veuillez entrer la ville de facturation."
+        billing_postal_code_required: "Veuillez entrer le code postal de facturation."
+        billing_country_required: "Veuillez sélectionner le pays de facturation."
 
 # ── Confirmation de commande ──
 confirmation:
@@ -373,6 +408,7 @@ orders:
         line_total: "Sous-total"
         order_total: "Total"
         shipping_address: "Adresse de livraison"
+        billing_address: "Adresse de facturation"
         tracking: "Suivi"
         tracking_number: "Numéro de suivi"
         track_package: "Suivre votre colis"
@@ -393,6 +429,8 @@ addresses:
         title_edit: "Modifier l'adresse"
         label_label: "Nom de l'adresse"
         label_label_hint: "ex. Domicile, Bureau"
+        label_recipient_name: "Nom du destinataire"
+        label_recipient_name_hint: "Si différent du titulaire du compte"
         label_address_line1: "Adresse"
         label_address_line2: "Complément d'adresse"
         label_city: "Ville"

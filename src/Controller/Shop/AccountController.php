@@ -13,6 +13,7 @@ use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Intl\Countries;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -139,6 +140,7 @@ class AccountController extends AbstractController
             'form_data' => $formData,
             'errors' => $errors,
             'is_edit' => false,
+            'countries' => self::getShippingCountries($request->getLocale()),
         ]);
     }
 
@@ -164,6 +166,7 @@ class AccountController extends AbstractController
         $errors = [];
         $formData = [
             'label' => $address->getLabel(),
+            'recipient_name' => $address->getRecipientName() ?? '',
             'address_line1' => $address->getAddressLine1(),
             'address_line2' => $address->getAddressLine2() ?? '',
             'city' => $address->getCity(),
@@ -195,6 +198,7 @@ class AccountController extends AbstractController
             'errors' => $errors,
             'is_edit' => true,
             'address_id' => $id,
+            'countries' => self::getShippingCountries($request->getLocale()),
         ]);
     }
 
@@ -303,12 +307,13 @@ class AccountController extends AbstractController
     }
 
     /**
-     * @return array{label: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool}
+     * @return array{label: string, recipient_name: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool}
      */
     private function getEmptyAddressFormData(): array
     {
         return [
             'label' => '',
+            'recipient_name' => '',
             'address_line1' => '',
             'address_line2' => '',
             'city' => '',
@@ -320,12 +325,13 @@ class AccountController extends AbstractController
     }
 
     /**
-     * @return array{label: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool}
+     * @return array{label: string, recipient_name: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool}
      */
     private function extractAddressFormData(Request $request): array
     {
         return [
             'label' => \trim((string) $request->request->get('label', '')),
+            'recipient_name' => \trim((string) $request->request->get('recipient_name', '')),
             'address_line1' => \trim((string) $request->request->get('address_line1', '')),
             'address_line2' => \trim((string) $request->request->get('address_line2', '')),
             'city' => \trim((string) $request->request->get('city', '')),
@@ -337,7 +343,7 @@ class AccountController extends AbstractController
     }
 
     /**
-     * @param array{label: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool} $formData
+     * @param array{label: string, recipient_name: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool} $formData
      *
      * @return list<string>
      */
@@ -369,7 +375,7 @@ class AccountController extends AbstractController
     }
 
     /**
-     * @param array{label: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool} $formData
+     * @param array{label: string, recipient_name: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool} $formData
      */
     private function createAddressFromFormData(array $formData, Customer $customer): CustomerAddress
     {
@@ -381,11 +387,12 @@ class AccountController extends AbstractController
     }
 
     /**
-     * @param array{label: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool} $formData
+     * @param array{label: string, recipient_name: string, address_line1: string, address_line2: string, city: string, state: string, postal_code: string, country: string, is_default: bool} $formData
      */
     private function updateAddressFromFormData(array $formData, CustomerAddress $address): void
     {
         $address->setLabel($formData['label']);
+        $address->setRecipientName('' !== $formData['recipient_name'] ? $formData['recipient_name'] : null);
         $address->setAddressLine1($formData['address_line1']);
         $address->setAddressLine2('' !== $formData['address_line2'] ? $formData['address_line2'] : null);
         $address->setCity($formData['city']);
@@ -402,5 +409,27 @@ class AccountController extends AbstractController
                 $addr->setIsDefault(false);
             }
         }
+    }
+
+    private const SHIPPING_COUNTRY_CODES = [
+        'US', 'CA', 'FR', 'GB', 'MX', 'DE', 'ES', 'IT', 'NL', 'BE',
+        'CH', 'AT', 'PT', 'IE', 'AU', 'NZ', 'JP', 'KR', 'SG', 'AE',
+        'BR', 'CO', 'CL', 'AR', 'SE', 'DK', 'NO', 'FI', 'PL', 'CZ',
+        'GR', 'IL', 'TH', 'MY', 'PH', 'IN',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    private static function getShippingCountries(string $locale): array
+    {
+        $countries = [];
+        foreach (self::SHIPPING_COUNTRY_CODES as $code) {
+            $countries[$code] = Countries::getName($code, $locale);
+        }
+
+        \asort($countries, \SORT_LOCALE_STRING);
+
+        return $countries;
     }
 }

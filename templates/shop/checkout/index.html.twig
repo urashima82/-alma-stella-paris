@@ -14,97 +14,33 @@
 
 {% block body %}
     <div class="max-w-7xl mx-auto px-6 py-10 md:py-16">
-        <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-10">
+        {% include 'shop/checkout/_stepper.html.twig' with { current_step: is_granted('ROLE_CUSTOMER') ? 1 : 2 } %}
+
+        <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-10 mt-8">
             {{ 'checkout.heading'|trans }}
         </h1>
 
-        {# ── Account prompt for guests ── #}
-        {% if not is_granted('ROLE_CUSTOMER') %}
-            <div class="border border-alma-hover bg-white p-5 mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                    <p class="font-sans text-sm text-alma-text">{{ 'checkout.account_prompt'|trans }}</p>
-                    <p class="font-sans text-xs text-alma-text-muted mt-1">{{ 'checkout.account_prompt_sub'|trans }}</p>
-                </div>
-                <div class="flex items-center gap-3 shrink-0">
-                    <a href="{{ path('shop_login', {'_locale': app.request.locale}) }}"
-                       class="border border-alma-gold text-alma-gold px-5 py-2 font-sans text-xs uppercase tracking-widest
-                              hover:bg-alma-gold hover:text-white transition-colors">
-                        {{ 'checkout.sign_in'|trans }}
-                    </a>
-                    <a href="{{ path('shop_register', {'_locale': app.request.locale}) }}"
-                       class="text-xs text-alma-text-muted hover:text-alma-gold transition-colors">
-                        {{ 'checkout.create_account'|trans }}
-                    </a>
-                </div>
-            </div>
-        {% endif %}
-
         <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
 
-            {# ── Left: Customer & shipping forms (2 cols) ── #}
+            {# ── Left: Shipping & billing forms (2 cols) ── #}
             <div class="lg:col-span-2 space-y-10">
-
-                {# Customer info #}
-                <section>
-                    <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'checkout.customer_info'|trans }}</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <label for="customer_name" class="block text-sm font-sans text-alma-text-muted mb-1">
-                                {{ 'checkout.label_name'|trans }} <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="customer_name" name="customer_name"
-                                   value="{{ formData.customer_name }}"
-                                   required
-                                   class="w-full border {{ errors.customer_name is defined ? 'border-red-400' : 'border-alma-hover' }}
-                                          bg-white px-4 py-3 text-sm font-sans text-alma-text
-                                          focus:border-alma-gold focus:outline-none transition-colors">
-                            {% if errors.customer_name is defined %}
-                                <p class="text-red-500 text-xs mt-1">{{ errors.customer_name|trans }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="md:col-span-2"
-                             {% if not is_granted('ROLE_CUSTOMER') %}
-                                 data-controller="email-check"
-                                 data-email-check-url-value="{{ path('shop_checkout_email_check') }}"
-                             {% endif %}>
-                            <label for="customer_email" class="block text-sm font-sans text-alma-text-muted mb-1">
-                                {{ 'checkout.label_email'|trans }} <span class="text-red-500">*</span>
-                            </label>
-                            {% if is_granted('ROLE_CUSTOMER') %}
-                                <input type="email" id="customer_email" name="customer_email"
-                                       value="{{ formData.customer_email }}"
-                                       readonly
-                                       class="w-full border border-alma-hover bg-alma-surface px-4 py-3 text-sm font-sans text-alma-text-muted
-                                              cursor-not-allowed">
-                            {% else %}
-                                <input type="email" id="customer_email" name="customer_email"
-                                       value="{{ formData.customer_email }}"
-                                       required
-                                       data-email-check-target="input"
-                                       data-action="focusout->email-check#check"
-                                       class="w-full border {{ errors.customer_email is defined ? 'border-red-400' : 'border-alma-hover' }}
-                                              bg-white px-4 py-3 text-sm font-sans text-alma-text
-                                              focus:border-alma-gold focus:outline-none transition-colors">
-                                <div data-email-check-target="banner"
-                                     class="hidden mt-2 border border-alma-gold/30 bg-alma-gold/5 px-4 py-3 text-sm font-sans text-alma-text">
-                                    <p>{{ 'checkout.email_exists_prompt'|trans }}</p>
-                                    <a href="{{ path('shop_login', {'_locale': app.request.locale}) }}"
-                                       class="text-alma-gold hover:text-alma-gold-dark font-medium transition-colors">
-                                        {{ 'checkout.sign_in'|trans }}
-                                    </a>
-                                </div>
-                            {% endif %}
-                            {% if errors.customer_email is defined %}
-                                <p class="text-red-500 text-xs mt-1">{{ errors.customer_email|trans }}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </section>
 
                 {# Shipping address #}
                 <section data-controller="address-selector"
                          data-address-selector-addresses-value="{{ customerAddresses|json_encode }}">
                     <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'checkout.shipping_address'|trans }}</h2>
+
+                    {# Email (readonly, from identification step or account) #}
+                    <div class="mb-4">
+                        <label for="customer_email" class="block text-sm font-sans text-alma-text-muted mb-1">
+                            {{ 'checkout.label_email'|trans }}
+                        </label>
+                        <input type="email" id="customer_email" name="customer_email"
+                               value="{{ formData.customer_email }}"
+                               readonly
+                               class="w-full border border-alma-hover bg-alma-surface px-4 py-3 text-sm font-sans text-alma-text-muted
+                                      cursor-not-allowed">
+                    </div>
 
                     {# Address selector for logged-in customers with saved addresses #}
                     {% if customerAddresses is not empty %}
@@ -128,6 +64,21 @@
                     {% endif %}
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="shipping_recipient_name" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'checkout.label_recipient_name'|trans }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="shipping_recipient_name" name="shipping_recipient_name"
+                                   value="{{ formData.shipping_recipient_name }}"
+                                   required
+                                   data-address-selector-target="recipientName"
+                                   class="w-full border {{ errors.shipping_recipient_name is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                          bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                            {% if errors.shipping_recipient_name is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.shipping_recipient_name|trans }}</p>
+                            {% endif %}
+                        </div>
                         <div class="md:col-span-2">
                             <label for="address_line1" class="block text-sm font-sans text-alma-text-muted mb-1">
                                 {{ 'checkout.label_address'|trans }} <span class="text-red-500">*</span>
@@ -215,6 +166,118 @@
                     </div>
                 </section>
 
+                {# Billing address #}
+                <section data-controller="billing-toggle">
+                    <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'checkout.billing_address'|trans }}</h2>
+
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="billing_different" value="1"
+                               {{ formData.billing_different ? 'checked' : '' }}
+                               data-billing-toggle-target="checkbox"
+                               data-action="change->billing-toggle#toggle"
+                               class="w-4 h-4 accent-alma-gold">
+                        <span class="font-sans text-sm text-alma-text">{{ 'checkout.billing_different'|trans }}</span>
+                    </label>
+
+                    <div data-billing-toggle-target="fields"
+                         class="{{ not formData.billing_different ? 'hidden' : '' }} mt-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="billing_recipient_name" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                    {{ 'checkout.billing_label_recipient_name'|trans }} <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="billing_recipient_name" name="billing_recipient_name"
+                                       value="{{ formData.billing_recipient_name }}"
+                                       data-billing-required
+                                       class="w-full border {{ errors.billing_recipient_name is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                              bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                              focus:border-alma-gold focus:outline-none transition-colors">
+                                {% if errors.billing_recipient_name is defined %}
+                                    <p class="text-red-500 text-xs mt-1">{{ errors.billing_recipient_name|trans }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="billing_address_line1" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                    {{ 'checkout.label_address'|trans }} <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="billing_address_line1" name="billing_address_line1"
+                                       value="{{ formData.billing_address_line1 }}"
+                                       data-billing-required
+                                       class="w-full border {{ errors.billing_address_line1 is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                              bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                              focus:border-alma-gold focus:outline-none transition-colors">
+                                {% if errors.billing_address_line1 is defined %}
+                                    <p class="text-red-500 text-xs mt-1">{{ errors.billing_address_line1|trans }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="billing_address_line2" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                    {{ 'checkout.label_address2'|trans }}
+                                </label>
+                                <input type="text" id="billing_address_line2" name="billing_address_line2"
+                                       value="{{ formData.billing_address_line2 }}"
+                                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                              focus:border-alma-gold focus:outline-none transition-colors">
+                            </div>
+                            <div>
+                                <label for="billing_city" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                    {{ 'checkout.label_city'|trans }} <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="billing_city" name="billing_city"
+                                       value="{{ formData.billing_city }}"
+                                       data-billing-required
+                                       class="w-full border {{ errors.billing_city is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                              bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                              focus:border-alma-gold focus:outline-none transition-colors">
+                                {% if errors.billing_city is defined %}
+                                    <p class="text-red-500 text-xs mt-1">{{ errors.billing_city|trans }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label for="billing_state" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                    {{ 'checkout.label_state'|trans }}
+                                </label>
+                                <input type="text" id="billing_state" name="billing_state"
+                                       value="{{ formData.billing_state }}"
+                                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                              focus:border-alma-gold focus:outline-none transition-colors">
+                            </div>
+                            <div>
+                                <label for="billing_postal_code" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                    {{ 'checkout.label_postal_code'|trans }} <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="billing_postal_code" name="billing_postal_code"
+                                       value="{{ formData.billing_postal_code }}"
+                                       data-billing-required
+                                       class="w-full border {{ errors.billing_postal_code is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                              bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                              focus:border-alma-gold focus:outline-none transition-colors">
+                                {% if errors.billing_postal_code is defined %}
+                                    <p class="text-red-500 text-xs mt-1">{{ errors.billing_postal_code|trans }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label for="billing_country" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                    {{ 'checkout.label_country'|trans }} <span class="text-red-500">*</span>
+                                </label>
+                                <select id="billing_country" name="billing_country"
+                                        data-billing-required
+                                        class="w-full border {{ errors.billing_country is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                               bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                               focus:border-alma-gold focus:outline-none transition-colors">
+                                    <option value="">{{ 'checkout.select_country'|trans }}</option>
+                                    {% for code, name in countries %}
+                                        <option value="{{ code }}" {{ formData.billing_country == code ? 'selected' : '' }}>{{ name }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if errors.billing_country is defined %}
+                                    <p class="text-red-500 text-xs mt-1">{{ errors.billing_country|trans }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {# Submit (mobile) #}
                 <div class="lg:hidden">
                     <button type="submit"
@@ -227,7 +290,7 @@
 
             {# ── Right: Order summary (1 col) ── #}
             <aside class="lg:col-span-1">
-                <div class="bg-alma-surface border border-alma-hover p-6 sticky top-6">
+                <div class="bg-alma-surface border border-alma-hover p-6 sticky top-16 md:top-[4.5rem]">
                     <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'checkout.order_summary'|trans }}</h2>
 
                     <div class="space-y-4 mb-6">

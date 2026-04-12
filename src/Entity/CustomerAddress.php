@@ -22,6 +22,9 @@ class CustomerAddress
     #[ORM\Column(length: 50)]
     private string $label = '';
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $recipientName = null;
+
     #[ORM\Column(length: 255)]
     private string $addressLine1 = '';
 
@@ -68,6 +71,18 @@ class CustomerAddress
     public function setLabel(string $label): static
     {
         $this->label = $label;
+
+        return $this;
+    }
+
+    public function getRecipientName(): ?string
+    {
+        return $this->recipientName;
+    }
+
+    public function setRecipientName(?string $recipientName): static
+    {
+        $this->recipientName = $recipientName;
 
         return $this;
     }

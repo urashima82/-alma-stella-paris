@@ -38,6 +38,17 @@
         </div>
 
         <div>
+            <label for="recipient_name" class="block text-sm font-sans text-alma-text-muted mb-1">
+                {{ 'addresses.form.label_recipient_name'|trans }}
+            </label>
+            <input type="text" id="recipient_name" name="recipient_name"
+                   value="{{ form_data.recipient_name }}"
+                   placeholder="{{ 'addresses.form.label_recipient_name_hint'|trans }}"
+                   class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                          focus:border-alma-gold focus:outline-none transition-colors">
+        </div>
+
+        <div>
             <label for="address_line1" class="block text-sm font-sans text-alma-text-muted mb-1">
                 {{ 'addresses.form.label_address_line1'|trans }} <span class="text-red-500">*</span>
             </label>
@@ -95,12 +106,15 @@
                 <label for="country" class="block text-sm font-sans text-alma-text-muted mb-1">
                     {{ 'addresses.form.label_country'|trans }} <span class="text-red-500">*</span>
                 </label>
-                <input type="text" id="country" name="country"
-                       value="{{ form_data.country }}"
-                       required maxlength="2" pattern="[A-Za-z]{2}"
-                       placeholder="US"
-                       class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
-                              focus:border-alma-gold focus:outline-none transition-colors uppercase">
+                <select id="country" name="country"
+                        required
+                        class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                               focus:border-alma-gold focus:outline-none transition-colors">
+                    <option value="">{{ 'checkout.select_country'|trans }}</option>
+                    {% for code, name in countries %}
+                        <option value="{{ code }}" {{ form_data.country == code ? 'selected' : '' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
 

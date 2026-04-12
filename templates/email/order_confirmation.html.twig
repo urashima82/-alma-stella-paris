@@ -124,7 +124,7 @@
                                 {% if locale == 'fr' %}Adresse de livraison{% else %}Shipping address{% endif %}
                             </h3>
                             <p style="margin: 0; font-size: 13px; color: #2C2418; line-height: 1.6;">
-                                {{ order.customerName }}<br>
+                                {{ order.shippingRecipientName }}<br>
                                 {{ order.shippingAddressLine1 }}<br>
                                 {% if order.shippingAddressLine2 %}{{ order.shippingAddressLine2 }}<br>{% endif %}
                                 {{ order.shippingCity }}{% if order.shippingState %}, {{ order.shippingState }}{% endif %} {{ order.shippingPostalCode }}<br>

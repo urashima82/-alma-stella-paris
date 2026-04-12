@@ -61,7 +61,7 @@
         <section class="border border-alma-hover bg-white p-5">
             <h2 class="font-serif text-lg text-alma-text mb-3">{{ 'orders.detail.shipping_address'|trans }}</h2>
             <p class="text-sm text-alma-text-muted leading-relaxed">
-                {{ order.customerName }}<br>
+                <span class="font-medium text-alma-text">{{ order.shippingRecipientName }}</span><br>
                 {{ order.shippingAddressLine1 }}<br>
                 {% if order.shippingAddressLine2 %}{{ order.shippingAddressLine2 }}<br>{% endif %}
                 {{ order.shippingPostalCode }} {{ order.shippingCity }}<br>
@@ -69,6 +69,21 @@
                 {{ order.shippingCountry }}
             </p>
         </section>
+
+        {# Billing address (if different) #}
+        {% if order.hasSeparateBillingAddress %}
+            <section class="border border-alma-hover bg-white p-5">
+                <h2 class="font-serif text-lg text-alma-text mb-3">{{ 'orders.detail.billing_address'|trans }}</h2>
+                <p class="text-sm text-alma-text-muted leading-relaxed">
+                    <span class="font-medium text-alma-text">{{ order.billingRecipientName }}</span><br>
+                    {{ order.billingAddressLine1 }}<br>
+                    {% if order.billingAddressLine2 %}{{ order.billingAddressLine2 }}<br>{% endif %}
+                    {{ order.billingPostalCode }} {{ order.billingCity }}<br>
+                    {% if order.billingState %}{{ order.billingState }}<br>{% endif %}
+                    {{ order.billingCountry }}
+                </p>
+            </section>
+        {% endif %}
 
         {# Tracking #}
         {% if order.trackingNumber %}

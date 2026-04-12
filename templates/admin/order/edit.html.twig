@@ -81,6 +81,7 @@
                 </div>
                 <div class="content-panel-body">
                     <address class="mb-0" style="line-height: 1.8;">
+                        <strong>{{ order.shippingRecipientName }}</strong><br>
                         {{ order.shippingAddressLine1 }}<br>
                         {% if order.shippingAddressLine2 %}
                             {{ order.shippingAddressLine2 }}<br>
@@ -91,6 +92,26 @@
                         {% endif %}
                         {{ order.shippingCountry|country_name('fr') }}
                     </address>
+
+                    {% if order.hasSeparateBillingAddress %}
+                        <div class="mt-3 pt-3 border-top">
+                            <div class="text-body-secondary mb-1" style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Facturation
+                            </div>
+                            <address class="mb-0" style="line-height: 1.8;">
+                                <strong>{{ order.billingRecipientName }}</strong><br>
+                                {{ order.billingAddressLine1 }}<br>
+                                {% if order.billingAddressLine2 %}
+                                    {{ order.billingAddressLine2 }}<br>
+                                {% endif %}
+                                {{ order.billingPostalCode }} {{ order.billingCity }}<br>
+                                {% if order.billingState %}
+                                    {{ order.billingState }}<br>
+                                {% endif %}
+                                {{ order.billingCountry|country_name('fr') }}
+                            </address>
+                        </div>
+                    {% endif %}
 
                     {% if order.trackingNumber %}
                         <div class="mt-3 pt-3 border-top d-flex gap-3 flex-wrap">

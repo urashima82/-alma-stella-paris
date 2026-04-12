@@ -28,13 +28,16 @@
                         </span>
                     {% endif %}
 
-                    <p class="font-sans text-sm font-medium text-alma-text mb-2">{{ address.label }}</p>
+                    <p class="font-sans text-sm font-medium text-alma-text mb-1">{{ address.label }}</p>
+                    {% if address.recipientName %}
+                        <p class="text-sm text-alma-text mb-1">{{ address.recipientName }}</p>
+                    {% endif %}
                     <p class="text-sm text-alma-text-muted leading-relaxed mb-4">
                         {{ address.addressLine1 }}<br>
                         {% if address.addressLine2 %}{{ address.addressLine2 }}<br>{% endif %}
                         {{ address.postalCode }} {{ address.city }}<br>
                         {% if address.state %}{{ address.state }}<br>{% endif %}
-                        {{ address.country }}
+                        {{ address.country|country_name(app.request.locale) }}
                     </p>
 
                     <div class="flex items-center gap-4 text-xs">

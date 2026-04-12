@@ -1,0 +1,149 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'identify.title'|trans }}{% endblock %}
+
+{% block hreflang %}
+    <link rel="alternate" hreflang="en" href="{{ url('shop_checkout_identify', {'_locale': 'en'}) }}">
+    <link rel="alternate" hreflang="fr" href="{{ url('shop_checkout_identify_fr', {'_locale': 'fr'}) }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url('shop_checkout_identify', {'_locale': 'en'}) }}">
+{% endblock %}
+
+{% block language_switch_href %}
+    {{ app.request.locale == 'en' ? path('shop_checkout_identify_fr', {'_locale': 'fr'}) : path('shop_checkout_identify', {'_locale': 'en'}) }}
+{% endblock %}
+
+{% block body %}
+    <div class="max-w-7xl mx-auto px-6 py-10 md:py-16">
+        {% include 'shop/checkout/_stepper.html.twig' with { current_step: 1 } %}
+
+        <div class="max-w-md mx-auto mt-10">
+            <div class="text-center mb-10">
+                <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                    {{ 'identify.heading'|trans }}
+                </h1>
+                <p class="text-sm text-alma-text-muted">
+                    {{ 'identify.subtitle'|trans }}
+                </p>
+            </div>
+
+            <div data-controller="checkout-identify"
+                 data-checkout-identify-check-url-value="{{ path('shop_checkout_email_check') }}">
+
+                {# ── Step 1: Email input ── #}
+                <div data-checkout-identify-target="emailStep">
+                    <div class="mb-5">
+                        <label for="identify_email" class="block text-sm font-sans text-alma-text-muted mb-1">
+                            {{ 'identify.label_email'|trans }} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" id="identify_email"
+                               data-checkout-identify-target="emailInput"
+                               data-action="keydown.enter->checkout-identify#continue"
+                               required autofocus
+                               class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                      focus:border-alma-gold focus:outline-none transition-colors">
+                        <p data-checkout-identify-target="errorMessage"
+                           class="hidden text-red-500 text-xs mt-1">
+                            {{ 'identify.error.email_invalid'|trans }}
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            data-action="click->checkout-identify#continue"
+                            class="w-full bg-alma-gold text-white px-8 py-4 font-sans text-sm font-medium
+                                   hover:bg-alma-gold/90 transition-colors cursor-pointer">
+                        {{ 'identify.continue'|trans }}
+                    </button>
+                </div>
+
+                {# ── Step 2a: Login form (account exists) ── #}
+                <div data-checkout-identify-target="loginStep" class="hidden">
+                    <div class="border border-alma-gold/30 bg-alma-gold/5 px-5 py-4 mb-6">
+                        <p class="text-sm font-sans text-alma-text">
+                            {{ 'identify.account_found'|trans }}
+                        </p>
+                    </div>
+
+                    <form method="post" action="{{ path('shop_login', {'_locale': app.request.locale}) }}" class="space-y-5">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                        <input type="hidden" name="_target_path" value="{{ path('shop_checkout', {'_locale': app.request.locale}) }}">
+
+                        <div>
+                            <label class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'identify.label_email'|trans }}
+                            </label>
+                            <input type="email" name="_email"
+                                   data-checkout-identify-target="loginEmail"
+                                   readonly
+                                   class="w-full border border-alma-hover bg-alma-surface px-4 py-3 text-sm font-sans text-alma-text-muted cursor-not-allowed">
+                        </div>
+
+                        <div>
+                            <label for="identify_password" class="block text-sm font-sans text-alma-text-muted mb-1">
+                                {{ 'identify.label_password'|trans }} <span class="text-red-500">*</span>
+                            </label>
+                            <input type="password" id="identify_password" name="_password"
+                                   required autofocus
+                                   class="w-full border border-alma-hover bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                          focus:border-alma-gold focus:outline-none transition-colors">
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="_remember_me" class="accent-alma-gold w-4 h-4">
+                                <span class="text-sm text-alma-text-muted">{{ 'login.remember_me'|trans }}</span>
+                            </label>
+                            <a href="{{ path('shop_forgot_password', {'_locale': app.request.locale}) }}"
+                               class="text-sm text-alma-gold hover:text-alma-gold-dark transition-colors">
+                                {{ 'login.forgot_password'|trans }}
+                            </a>
+                        </div>
+
+                        <button type="submit"
+                                class="w-full bg-alma-gold text-white px-8 py-4 font-sans text-sm font-medium
+                                       hover:bg-alma-gold/90 transition-colors cursor-pointer">
+                            {{ 'identify.sign_in'|trans }}
+                        </button>
+                    </form>
+
+                    <button type="button"
+                            data-action="click->checkout-identify#back"
+                            class="block w-full text-center mt-4 text-sm font-sans text-alma-text-muted hover:text-alma-gold transition-colors cursor-pointer">
+                        {{ 'identify.use_different_email'|trans }}
+                    </button>
+                </div>
+
+                {# ── Step 2b: Guest / Register choice (no account) ── #}
+                <div data-checkout-identify-target="choiceStep" class="hidden">
+                    <div class="border border-alma-hover bg-alma-surface px-5 py-4 mb-6">
+                        <p class="text-sm font-sans text-alma-text">
+                            {{ 'identify.no_account_found'|trans }}
+                        </p>
+                    </div>
+
+                    {# Continue as guest #}
+                    <form method="post" class="mb-4">
+                        <input type="hidden" name="guest_email" data-checkout-identify-target="guestEmail" value="">
+                        <button type="submit"
+                                class="w-full bg-alma-gold text-white px-8 py-4 font-sans text-sm font-medium
+                                       hover:bg-alma-gold/90 transition-colors cursor-pointer">
+                            {{ 'identify.continue_as_guest'|trans }}
+                        </button>
+                    </form>
+
+                    {# Create account #}
+                    <a href="{{ path('shop_register', {'_locale': app.request.locale, 'redirect': 'checkout'}) }}"
+                       class="block w-full text-center border border-alma-gold text-alma-gold px-8 py-4 font-sans text-sm font-medium
+                              hover:bg-alma-gold hover:text-white transition-colors">
+                        {{ 'identify.create_account'|trans }}
+                    </a>
+
+                    <button type="button"
+                            data-action="click->checkout-identify#back"
+                            class="block w-full text-center mt-4 text-sm font-sans text-alma-text-muted hover:text-alma-gold transition-colors cursor-pointer">
+                        {{ 'identify.use_different_email'|trans }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

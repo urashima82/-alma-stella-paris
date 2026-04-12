@@ -8,7 +8,11 @@
 {% endblock %}
 
 {% block body %}
-    <div class="max-w-2xl mx-auto px-6 py-10 md:py-20 text-center">
+    <div class="max-w-2xl mx-auto px-6 py-10 md:py-16">
+        {% include 'shop/checkout/_stepper.html.twig' with { current_step: is_granted('ROLE_CUSTOMER') ? 3 : 4 } %}
+    </div>
+
+    <div class="max-w-2xl mx-auto px-6 pb-10 md:pb-20 text-center">
         {# Success icon #}
         <p class="text-alma-gold text-5xl mb-6">✦</p>
 

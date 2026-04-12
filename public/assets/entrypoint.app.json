@@ -4,6 +4,8 @@
     "@symfony\/stimulus-bundle",
     "@hotwired\/stimulus",
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js",
+    "\/assets\/controllers\/checkout_identify_controller.js",
+    "\/assets\/controllers\/billing_toggle_controller.js",
     "\/assets\/controllers\/address_selector_controller.js",
     "\/assets\/controllers\/email_check_controller.js",
     "\/assets\/controllers\/hello_controller.js",

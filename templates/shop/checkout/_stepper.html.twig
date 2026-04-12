@@ -1,0 +1,82 @@
+{#
+    Checkout stepper — progress bar for the checkout tunnel.
+
+    Usage: {% include 'shop/checkout/_stepper.html.twig' with { current_step: 2 } %}
+
+    Steps (for guests):      1=Identification, 2=Livraison, 3=Paiement, 4=Confirmation
+    Steps (for logged-in):   1=Livraison, 2=Paiement, 3=Confirmation  (identification skipped)
+#}
+
+{% set is_logged_in = is_granted('ROLE_CUSTOMER') %}
+
+{% if is_logged_in %}
+    {% set steps = [
+        { label: 'stepper.shipping'|trans, route: 'shop_checkout' },
+        { label: 'stepper.payment'|trans, route: null },
+        { label: 'stepper.confirmation'|trans, route: null },
+    ] %}
+{% else %}
+    {% set steps = [
+        { label: 'stepper.identification'|trans, route: 'shop_checkout_identify' },
+        { label: 'stepper.shipping'|trans, route: 'shop_checkout' },
+        { label: 'stepper.payment'|trans, route: null },
+        { label: 'stepper.confirmation'|trans, route: null },
+    ] %}
+{% endif %}
+
+<nav aria-label="Checkout progress" class="max-w-2xl mx-auto">
+    <ol class="flex items-center w-full">
+        {% for step in steps %}
+            {% set step_number = loop.index %}
+            {% set is_done = step_number < current_step %}
+            {% set is_current = step_number == current_step %}
+            {% set is_future = step_number > current_step %}
+
+            <li class="flex items-center {{ not loop.last ? 'flex-1' : '' }}">
+                {# Step circle + label #}
+                {% if is_done and step.route %}
+                    <a href="{{ path(step.route, {'_locale': app.request.locale}) }}"
+                       class="flex items-center gap-2 group">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-alma-gold text-white text-xs font-sans font-medium
+                                     group-hover:bg-alma-gold/80 transition-colors shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </span>
+                        <span class="hidden sm:inline text-xs font-sans text-alma-gold font-medium group-hover:text-alma-gold/80 transition-colors">
+                            {{ step.label }}
+                        </span>
+                    </a>
+                {% elseif is_done %}
+                    <span class="flex items-center gap-2">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full bg-alma-gold text-white text-xs font-sans font-medium shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </span>
+                        <span class="hidden sm:inline text-xs font-sans text-alma-text-muted">{{ step.label }}</span>
+                    </span>
+                {% elseif is_current %}
+                    <span class="flex items-center gap-2">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-alma-gold text-alma-gold text-xs font-sans font-semibold shrink-0">
+                            {{ step_number }}
+                        </span>
+                        <span class="hidden sm:inline text-xs font-sans text-alma-text font-medium">{{ step.label }}</span>
+                    </span>
+                {% else %}
+                    <span class="flex items-center gap-2">
+                        <span class="flex items-center justify-center w-8 h-8 rounded-full border border-alma-hover text-alma-text-muted text-xs font-sans shrink-0">
+                            {{ step_number }}
+                        </span>
+                        <span class="hidden sm:inline text-xs font-sans text-alma-text-muted">{{ step.label }}</span>
+                    </span>
+                {% endif %}
+
+                {# Connector line #}
+                {% if not loop.last %}
+                    <div class="flex-1 h-px mx-3 {{ is_done ? 'bg-alma-gold' : 'bg-alma-hover' }}"></div>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+</nav>
