@@ -145,6 +145,7 @@ checkout:
     label_postal_code: "Postal code"
     label_country: "Country"
     select_country: "Select a country…"
+    email_exists_prompt: "An account exists with this email. Sign in for a faster checkout and to view your orders."
     account_prompt: "Already have an account? Sign in for a faster checkout."
     account_prompt_sub: "Your saved addresses will be pre-filled automatically."
     sign_in: "Sign in"

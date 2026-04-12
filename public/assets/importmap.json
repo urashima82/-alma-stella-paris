@@ -8,11 +8,15 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-ZFG-jN8.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-KMGHEb5.js",
         "type": "js"
     },
     "\/assets\/controllers\/address_selector_controller.js": {
         "path": "\/assets\/controllers\/address_selector_controller-l5fEkRR.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/email_check_controller.js": {
+        "path": "\/assets\/controllers\/email_check_controller-AagrtcB.js",
         "type": "js"
     },
     "\/assets\/controllers\/hello_controller.js": {

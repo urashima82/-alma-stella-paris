@@ -1,5 +1,5 @@
 {
-    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-ZFG-jN8.js",
+    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-KMGHEb5.js",
     "@symfony\/stimulus-bundle\/loader.js": "\/assets\/@symfony\/stimulus-bundle\/loader-IOzBDLu.js",
     "app.js": "\/assets\/app--q683F4.js",
     "bundles\/easyadmin\/app.912702e5.css": "\/assets\/bundles\/easyadmin\/app.912702e5-e-OEP2a.css",
@@ -35,6 +35,7 @@
     "controllers\/cart_drawer_controller.js": "\/assets\/controllers\/cart_drawer_controller-OxS_Woc.js",
     "controllers\/csrf_protection_controller.js": "\/assets\/controllers\/csrf_protection_controller-6ynUAeX.js",
     "controllers\/currency_selector_controller.js": "\/assets\/controllers\/currency_selector_controller-kq9ihR0.js",
+    "controllers\/email_check_controller.js": "\/assets\/controllers\/email_check_controller-AagrtcB.js",
     "controllers\/hello_controller.js": "\/assets\/controllers\/hello_controller-VYgvytJ.js",
     "controllers\/lightbox_controller.js": "\/assets\/controllers\/lightbox_controller-6McrgZ0.js",
     "controllers\/mobile_menu_controller.js": "\/assets\/controllers\/mobile_menu_controller-VSVfHX_.js",

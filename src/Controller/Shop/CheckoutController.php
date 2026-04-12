@@ -8,6 +8,7 @@ use App\Entity\Customer;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Enum\OrderStatus;
+use App\Repository\CustomerRepository;
 use App\Repository\OrderRepository;
 use App\Service\CartManager;
 use App\Service\CurrencyConverter;
@@ -313,6 +314,22 @@ class CheckoutController extends AbstractController
             'totalConverted' => $this->currencyConverter->convert($order->getTotalUsd(), $currency),
             'currency' => $currency,
         ]);
+    }
+
+    #[Route(
+        path: '/checkout/email-check',
+        name: 'shop_checkout_email_check',
+        methods: ['POST'],
+    )]
+    public function emailCheck(Request $request, CustomerRepository $customerRepository): JsonResponse
+    {
+        $email = \trim((string) $request->getPayload()->get('email', ''));
+
+        if ('' === $email || false === \filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+            return new JsonResponse(['exists' => false]);
+        }
+
+        return new JsonResponse(['exists' => null !== $customerRepository->findByEmail($email)]);
     }
 
     /**

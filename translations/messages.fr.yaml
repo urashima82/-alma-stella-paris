@@ -145,6 +145,7 @@ checkout:
     label_postal_code: "Code postal"
     label_country: "Pays"
     select_country: "Sélectionnez un pays…"
+    email_exists_prompt: "Un compte existe avec cette adresse. Connectez-vous pour un paiement plus rapide et retrouver vos commandes."
     account_prompt: "Vous avez déjà un compte ? Connectez-vous pour un paiement plus rapide."
     account_prompt_sub: "Vos adresses enregistrées seront pré-remplies automatiquement."
     sign_in: "Se connecter"

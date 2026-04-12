@@ -62,16 +62,38 @@
                                 <p class="text-red-500 text-xs mt-1">{{ errors.customer_name|trans }}</p>
                             {% endif %}
                         </div>
-                        <div class="md:col-span-2">
+                        <div class="md:col-span-2"
+                             {% if not is_granted('ROLE_CUSTOMER') %}
+                                 data-controller="email-check"
+                                 data-email-check-url-value="{{ path('shop_checkout_email_check') }}"
+                             {% endif %}>
                             <label for="customer_email" class="block text-sm font-sans text-alma-text-muted mb-1">
                                 {{ 'checkout.label_email'|trans }} <span class="text-red-500">*</span>
                             </label>
-                            <input type="email" id="customer_email" name="customer_email"
-                                   value="{{ formData.customer_email }}"
-                                   required
-                                   class="w-full border {{ errors.customer_email is defined ? 'border-red-400' : 'border-alma-hover' }}
-                                          bg-white px-4 py-3 text-sm font-sans text-alma-text
-                                          focus:border-alma-gold focus:outline-none transition-colors">
+                            {% if is_granted('ROLE_CUSTOMER') %}
+                                <input type="email" id="customer_email" name="customer_email"
+                                       value="{{ formData.customer_email }}"
+                                       readonly
+                                       class="w-full border border-alma-hover bg-alma-surface px-4 py-3 text-sm font-sans text-alma-text-muted
+                                              cursor-not-allowed">
+                            {% else %}
+                                <input type="email" id="customer_email" name="customer_email"
+                                       value="{{ formData.customer_email }}"
+                                       required
+                                       data-email-check-target="input"
+                                       data-action="focusout->email-check#check"
+                                       class="w-full border {{ errors.customer_email is defined ? 'border-red-400' : 'border-alma-hover' }}
+                                              bg-white px-4 py-3 text-sm font-sans text-alma-text
+                                              focus:border-alma-gold focus:outline-none transition-colors">
+                                <div data-email-check-target="banner"
+                                     class="hidden mt-2 border border-alma-gold/30 bg-alma-gold/5 px-4 py-3 text-sm font-sans text-alma-text">
+                                    <p>{{ 'checkout.email_exists_prompt'|trans }}</p>
+                                    <a href="{{ path('shop_login', {'_locale': app.request.locale}) }}"
+                                       class="text-alma-gold hover:text-alma-gold-dark font-medium transition-colors">
+                                        {{ 'checkout.sign_in'|trans }}
+                                    </a>
+                                </div>
+                            {% endif %}
                             {% if errors.customer_email is defined %}
                                 <p class="text-red-500 text-xs mt-1">{{ errors.customer_email|trans }}</p>
                             {% endif %}
