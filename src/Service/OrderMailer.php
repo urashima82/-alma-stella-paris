@@ -80,6 +80,25 @@ final class OrderMailer
         $this->mailer->send($email);
     }
 
+    public function sendCancelledNotification(Order $order, string $locale = 'en'): void
+    {
+        $subject = 'fr' === $locale
+            ? \sprintf('Votre commande %s a été annulée', $order->getReference())
+            : \sprintf('Your order %s has been cancelled', $order->getReference());
+
+        $email = (new TemplatedEmail())
+            ->from(new Address($this->mailerFromEmail, $this->mailerFromName))
+            ->to(new Address($order->getCustomerEmail(), $order->getCustomerName()))
+            ->subject($subject)
+            ->htmlTemplate('email/order_cancelled.html.twig')
+            ->context([
+                'order' => $order,
+                'locale' => $locale,
+            ]);
+
+        $this->mailer->send($email);
+    }
+
     /**
      * @return list<Admin>
      */

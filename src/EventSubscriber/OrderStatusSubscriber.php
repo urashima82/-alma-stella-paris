@@ -75,6 +75,10 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
         if (OrderStatus::Delivered === $newStatus) {
             $this->sendNotification($entity, 'delivered');
         }
+
+        if (OrderStatus::Cancelled === $newStatus) {
+            $this->sendNotification($entity, 'cancelled');
+        }
     }
 
     private function sendNotification(Order $order, string $type): void
@@ -83,6 +87,7 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
         $labels = [
             'shipped' => ['method' => 'sendShippedNotification', 'label' => 'expédition'],
             'delivered' => ['method' => 'sendDeliveredNotification', 'label' => 'livraison'],
+            'cancelled' => ['method' => 'sendCancelledNotification', 'label' => 'annulation'],
         ];
 
         $method = $labels[$type]['method'];
