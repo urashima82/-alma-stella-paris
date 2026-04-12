@@ -21,9 +21,9 @@
 
         {# Status progress #}
         {% set steps = [
-            { status: 'processing', label_en: 'Confirmed', label_fr: 'Confirmee' },
-            { status: 'shipped', label_en: 'Shipped', label_fr: 'Expediee' },
-            { status: 'delivered', label_en: 'Delivered', label_fr: 'Livree' },
+            { status: 'processing', label_en: 'Confirmed', label_fr: 'Confirmée' },
+            { status: 'shipped', label_en: 'Shipped', label_fr: 'Expédiée' },
+            { status: 'delivered', label_en: 'Delivered', label_fr: 'Livrée' },
         ] %}
         {% set status_order = { 'pending': 0, 'processing': 1, 'shipped': 2, 'delivered': 3, 'cancelled': -1 } %}
         {% set current_step = status_order[order.status.value] ?? 0 %}

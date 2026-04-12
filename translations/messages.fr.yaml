@@ -297,6 +297,19 @@ register:
         password_too_short: "Le mot de passe doit contenir au moins 8 caractères."
         password_mismatch: "Les mots de passe ne correspondent pas."
 
+verify_email:
+    title: "Vérification e-mail | Alma Stella Paris"
+    heading: "Vérifiez votre e-mail"
+    subtitle: "Un code à 6 chiffres a été envoyé à %email%."
+    label_code: "Code de vérification"
+    submit: "Vérifier"
+    no_code: "Vous n'avez pas reçu le code ?"
+    resend: "Renvoyer le code"
+    back_to_register: "Retour à l'inscription"
+    error:
+        code_invalid: "Le code saisi est incorrect. Veuillez réessayer."
+        code_expired: "Ce code a expiré. Veuillez en demander un nouveau."
+
 forgot_password:
     title: "Mot de passe oublié | Alma Stella Paris"
     heading: "Réinitialiser votre mot de passe"

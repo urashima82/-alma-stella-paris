@@ -1,0 +1,63 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'verify_email.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="max-w-md mx-auto px-6 py-16 md:py-24">
+        <div class="text-center mb-10">
+            <p class="text-alma-gold text-5xl mb-6">&#10022;</p>
+            <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                {{ 'verify_email.heading'|trans }}
+            </h1>
+            <p class="text-sm text-alma-text-muted">
+                {{ 'verify_email.subtitle'|trans({'%email%': email}) }}
+            </p>
+        </div>
+
+        {% if errors is not empty %}
+            <div class="border border-red-300 bg-red-50 text-red-700 text-sm px-4 py-3 mb-6">
+                <ul class="list-disc list-inside space-y-1">
+                    {% for error in errors %}
+                        <li>{{ error|trans }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-6">
+            <div>
+                <label for="code" class="block text-sm font-sans text-alma-text-muted mb-1">
+                    {{ 'verify_email.label_code'|trans }}
+                </label>
+                <input type="text" id="code" name="code"
+                       required maxlength="6" pattern="\d{6}" inputmode="numeric" autocomplete="one-time-code"
+                       placeholder="000000"
+                       class="w-full border border-alma-hover bg-white px-4 py-3 text-center text-2xl font-mono font-semibold
+                              tracking-[0.5em] text-alma-text
+                              focus:border-alma-gold focus:outline-none transition-colors">
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-alma-gold text-white font-sans text-sm uppercase tracking-widest
+                           py-3.5 hover:bg-alma-gold-dark transition-colors">
+                {{ 'verify_email.submit'|trans }}
+            </button>
+        </form>
+
+        <div class="text-center mt-8 space-y-3">
+            <p class="text-sm text-alma-text-muted">
+                {{ 'verify_email.no_code'|trans }}
+                <a href="{{ path('shop_verify_email_resend', {'_locale': app.request.locale}) }}"
+                   class="text-alma-gold hover:text-alma-gold-dark transition-colors font-medium">
+                    {{ 'verify_email.resend'|trans }}
+                </a>
+            </p>
+            <p class="text-sm text-alma-text-muted">
+                <a href="{{ path('shop_register', {'_locale': app.request.locale}) }}"
+                   class="text-alma-gold hover:text-alma-gold-dark transition-colors font-medium">
+                    {{ 'verify_email.back_to_register'|trans }}
+                </a>
+            </p>
+        </div>
+    </div>
+{% endblock %}

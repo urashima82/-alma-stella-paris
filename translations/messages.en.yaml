@@ -297,6 +297,19 @@ register:
         password_too_short: "Password must be at least 8 characters."
         password_mismatch: "Passwords do not match."
 
+verify_email:
+    title: "Verify email | Alma Stella Paris"
+    heading: "Verify your email"
+    subtitle: "A 6-digit code has been sent to %email%."
+    label_code: "Verification code"
+    submit: "Verify"
+    no_code: "Didn't receive the code?"
+    resend: "Resend code"
+    back_to_register: "Back to registration"
+    error:
+        code_invalid: "The code you entered is incorrect. Please try again."
+        code_expired: "This code has expired. Please request a new one."
+
 forgot_password:
     title: "Forgot password | Alma Stella Paris"
     heading: "Reset your password"
