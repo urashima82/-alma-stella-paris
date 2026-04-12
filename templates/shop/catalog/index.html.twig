@@ -103,12 +103,16 @@
                                 {# Badges #}
                                 <div class="absolute top-2 left-2 flex flex-row gap-1">
                                     {% if product.isSoldOut %}
-                                        <span class="px-2 py-0.5 bg-alma-text text-alma-bg text-[10px] font-sans font-medium">{{ 'badge.sold'|trans }}</span>
+                                        <span class="px-2 py-1 bg-alma-text text-alma-bg text-[10px] font-sans font-medium leading-none">{{ 'badge.sold'|trans }}</span>
                                     {% else %}
-                                        <span class="px-2 py-0.5 bg-alma-gold text-white text-[10px] font-sans font-medium">{{ 'badge.unique'|trans }}</span>
+                                        <span class="px-2 py-1 bg-alma-gold text-white text-[10px] font-sans font-medium leading-none">{{ 'badge.unique'|trans }}</span>
                                     {% endif %}
                                     {% if product.isNew() %}
-                                        <span class="px-2 py-0.5 bg-alma-surface text-alma-text text-[10px] font-sans font-medium border border-alma-hover">{{ 'badge.new'|trans }}</span>
+                                        <span class="px-2 py-1 bg-alma-surface text-alma-text text-[10px] font-sans font-medium leading-none border border-alma-hover">{{ 'badge.new'|trans }}</span>
+                                    {% endif %}
+                                    {% set discount = discount_percent(product) %}
+                                    {% if discount and not product.isSoldOut %}
+                                        <span class="px-2 py-1 bg-red-600 text-white text-[10px] font-sans font-medium leading-none">-{{ discount }}%</span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -122,11 +126,7 @@
                                     </p>
                                 </div>
                                 <p class="font-sans font-semibold text-alma-text whitespace-nowrap">
-                                    {% if product.isSoldOut %}
-                                        <span class="text-alma-text-muted text-xs">{{ 'catalog.sold_label'|trans }}</span>
-                                    {% else %}
-                                        {{ display_price(product) | price }}
-                                    {% endif %}
+                                    {{ include('shop/_price_badge.html.twig', {product: product}) }}
                                 </p>
                             </div>
                         </a>

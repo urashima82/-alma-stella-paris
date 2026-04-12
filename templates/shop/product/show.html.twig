@@ -108,21 +108,26 @@
                 </div>
 
                 {# Name #}
-                <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-1">
+                <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-6">
                     {{ product|localized_name }}
                 </h1>
-                <p class="font-serif text-lg text-alma-text-muted italic mb-6">
-                    {% if app.request.locale == 'en' %}
-                        {{ product.nameFr }}
-                    {% else %}
-                        {{ product.name }}
-                    {% endif %}
-                </p>
 
                 {# Price #}
-                <p class="font-sans text-2xl font-semibold text-alma-text mb-8">
-                    {{ display_price(product) | price }}
-                </p>
+                {% set compareAt = display_compare_at_price(product) %}
+                {% set discount = discount_percent(product) %}
+                <div class="flex items-center gap-3 mb-8">
+                    <p class="font-sans text-2xl font-semibold text-alma-text">
+                        {{ display_price(product) | price }}
+                    </p>
+                    {% if compareAt %}
+                        <p class="font-sans text-lg text-alma-text-muted line-through">
+                            {{ compareAt | price }}
+                        </p>
+                        <span class="px-2 py-0.5 bg-red-600 text-white text-xs font-sans font-medium">
+                            -{{ discount }}%
+                        </span>
+                    {% endif %}
+                </div>
 
                 {# Description #}
                 <div class="font-sans text-sm text-alma-text leading-relaxed mb-8 space-y-3">
@@ -265,11 +270,7 @@
                                         </p>
                                     </div>
                                     <p class="font-sans font-semibold text-alma-text whitespace-nowrap">
-                                        {% if related.isSoldOut %}
-                                            <span class="text-alma-text-muted text-xs">{{ 'catalog.sold_label'|trans }}</span>
-                                        {% else %}
-                                            {{ display_price(related) | price }}
-                                        {% endif %}
+                                        {{ include('shop/_price_badge.html.twig', {product: related}) }}
                                     </p>
                                 </div>
                             </a>

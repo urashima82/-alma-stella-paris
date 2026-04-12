@@ -48,6 +48,9 @@ class Product
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
     private string $basePrice = '0.00';
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2, nullable: true)]
+    private ?string $compareAtPrice = null;
+
     #[ORM\Column(length: 20, enumType: ShippingTier::class)]
     private ShippingTier $shippingTier = ShippingTier::Standard;
 
@@ -215,9 +218,32 @@ class Product
         return $this;
     }
 
+    public function getCompareAtPrice(): ?float
+    {
+        return null !== $this->compareAtPrice ? (float) $this->compareAtPrice : null;
+    }
+
+    public function setCompareAtPrice(?float $compareAtPrice): static
+    {
+        $this->compareAtPrice = null !== $compareAtPrice
+            ? \number_format($compareAtPrice, 2, '.', '')
+            : null;
+
+        return $this;
+    }
+
     public function getDisplayPrice(): float
     {
         return $this->getBasePrice() + $this->shippingTier->shippingCostUsd();
+    }
+
+    public function getDiscountPercent(): ?int
+    {
+        if (null === $this->compareAtPrice || (float) $this->compareAtPrice <= $this->getBasePrice()) {
+            return null;
+        }
+
+        return (int) \round(100 - ($this->getBasePrice() / (float) $this->compareAtPrice * 100));
     }
 
     public function getShippingTier(): ShippingTier

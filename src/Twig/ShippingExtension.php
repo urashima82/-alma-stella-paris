@@ -23,6 +23,8 @@ class ShippingExtension extends AbstractExtension
             new TwigFunction('shipping_cost', $this->getShippingCost(...)),
             new TwigFunction('shipping_label', $this->getShippingLabel(...)),
             new TwigFunction('display_price', $this->getDisplayPrice(...)),
+            new TwigFunction('display_compare_at_price', $this->getDisplayCompareAtPrice(...)),
+            new TwigFunction('discount_percent', $this->getDiscountPercent(...)),
         ];
     }
 
@@ -42,5 +44,24 @@ class ShippingExtension extends AbstractExtension
             $product->getBasePrice(),
             $product->getShippingTier(),
         );
+    }
+
+    public function getDisplayCompareAtPrice(Product $product): ?float
+    {
+        $compareAtPrice = $product->getCompareAtPrice();
+
+        if (null === $compareAtPrice) {
+            return null;
+        }
+
+        return $this->shippingCostProvider->getDisplayPrice(
+            $compareAtPrice,
+            $product->getShippingTier(),
+        );
+    }
+
+    public function getDiscountPercent(Product $product): ?int
+    {
+        return $product->getDiscountPercent();
     }
 }

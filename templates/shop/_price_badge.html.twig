@@ -1,0 +1,15 @@
+{# @var product \App\Entity\Product #}
+{% if product.isSoldOut %}
+    <span class="text-alma-text-muted text-xs">{{ 'catalog.sold_label'|trans }}</span>
+{% else %}
+    {% set compareAt = display_compare_at_price(product) %}
+    {% set discount = discount_percent(product) %}
+    {% if compareAt %}
+        <span class="flex flex-col items-end gap-0.5">
+            <span class="text-xs text-alma-text-muted line-through">{{ compareAt | price }}</span>
+            <span>{{ display_price(product) | price }}</span>
+        </span>
+    {% else %}
+        {{ display_price(product) | price }}
+    {% endif %}
+{% endif %}

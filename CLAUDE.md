@@ -98,8 +98,10 @@ background context.
 - **Roadmap tracking:** After completing each task or sub-task, immediately
   check it off in `docs/ROADMAP.md` (`- [ ]` → `- [x]`). This keeps the
   roadmap as the single source of truth for project progress.
-- **Tailwind rebuild:** Run `ddev exec php bin/console tailwind:build` after
-  every template or CSS change.
+- **Tailwind rebuild + asset compile:** After every template or CSS change, run
+  both commands: `ddev exec php bin/console tailwind:build` then
+  `ddev exec php bin/console asset-map:compile`. The CSS rebuild alone is not
+  enough — assets must be recompiled for changes to be visible.
 - **Architecture updates:** Update `docs/ARCHITECTURE.md` when adding entities,
   controllers, routes, or Stimulus controllers.
 - **TEMPORARY (remove when in production):** Do NOT create new migration files.
@@ -122,8 +124,8 @@ ddev exec php bin/console doctrine:migrations:migrate
 ddev exec php bin/console doctrine:fixtures:load
 
 # Assets (NO npm — uses Symfony TailwindCSS Bundle)
-ddev exec php bin/console tailwind:build   # Rebuild CSS (dev)
-ddev exec php bin/console asset-map:compile # Production only
+ddev exec php bin/console tailwind:build   # Rebuild CSS
+ddev exec php bin/console asset-map:compile # Compile assets (always run after tailwind:build)
 
 # Scheduler (Symfony Scheduler + Messenger)
 ddev exec php bin/console messenger:consume scheduler_default  # Run scheduled tasks

@@ -153,6 +153,12 @@ class ProductCrudController extends AbstractCrudController
             ->setCurrency('USD')
             ->setStoredAsCents(false)
             ->setNumDecimals(2);
+        yield MoneyField::new('compareAtPrice', 'Ancien prix (USD)')
+            ->setCurrency('USD')
+            ->setStoredAsCents(false)
+            ->setNumDecimals(2)
+            ->setRequired(false)
+            ->setHelp('Laisser vide si pas de réduction. Le % sera calculé automatiquement.');
         yield ChoiceField::new('shippingTier', 'Tranche d\'expédition')
             ->setChoices([
                 ShippingTier::Standard->label() => ShippingTier::Standard,
