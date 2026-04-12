@@ -223,18 +223,21 @@
                             </div>
                         </div>
                         {# Language toggle #}
-                        {% set current_locale = app.request.locale %}
                         <div>
                             <p class="text-xs uppercase tracking-widest text-alma-text-muted mb-3">{{ 'nav.language'|trans }}</p>
                             <div class="inline-flex border border-alma-hover rounded-full overflow-hidden">
                                 {% for locale_code, locale_label in { 'en': 'English', 'fr': 'Français' } %}
-                                    <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': locale_code})) }}"
-                                       class="px-4 py-2 text-xs font-sans uppercase tracking-widest transition-colors
-                                              {{ current_locale == locale_code
-                                                  ? 'bg-alma-gold text-white'
-                                                  : 'text-alma-text-muted hover:bg-alma-surface' }}">
-                                        {{ locale_label }}
-                                    </a>
+                                    {% if current_locale == locale_code %}
+                                        <span class="px-4 py-2 text-xs font-sans uppercase tracking-widest bg-alma-gold text-white">
+                                            {{ locale_label }}
+                                        </span>
+                                    {% else %}
+                                        <a href="{{ block('language_switch_href') }}"
+                                           class="px-4 py-2 text-xs font-sans uppercase tracking-widest transition-colors
+                                                  text-alma-text-muted hover:bg-alma-surface">
+                                            {{ locale_label }}
+                                        </a>
+                                    {% endif %}
                                 {% endfor %}
                             </div>
                         </div>
