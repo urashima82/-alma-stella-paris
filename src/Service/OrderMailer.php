@@ -11,6 +11,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class OrderMailer
 {
@@ -18,6 +19,7 @@ final class OrderMailer
         private readonly MailerInterface $mailer,
         private readonly AdminRepository $adminRepository,
         private readonly AdminUrlGenerator $adminUrlGenerator,
+        private readonly UrlGeneratorInterface $urlGenerator,
         private readonly string $mailerFromEmail,
         private readonly string $mailerFromName,
     ) {
@@ -48,6 +50,11 @@ final class OrderMailer
             ? \sprintf('Votre commande %s a été livrée', $order->getReference())
             : \sprintf('Your order %s has been delivered', $order->getReference());
 
+        $invoiceUrl = $this->urlGenerator->generate('shop_invoice_download', [
+            'reference' => $order->getReference(),
+            'token' => $order->getInvoiceToken(),
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+
         $email = (new TemplatedEmail())
             ->from(new Address($this->mailerFromEmail, $this->mailerFromName))
             ->to(new Address($order->getCustomerEmail(), $order->getCustomerName()))
@@ -56,6 +63,7 @@ final class OrderMailer
             ->context([
                 'order' => $order,
                 'locale' => $locale,
+                'invoiceUrl' => $invoiceUrl,
             ]);
 
         $this->mailer->send($email);

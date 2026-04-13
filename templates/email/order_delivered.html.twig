@@ -100,6 +100,22 @@
                         </td>
                     </tr>
 
+                    {# Invoice download #}
+                    {% if invoiceUrl is defined and invoiceUrl %}
+                    <tr>
+                        <td align="center" style="padding: 0 0 30px;">
+                            <a href="{{ invoiceUrl }}" target="_blank" rel="noopener"
+                               style="display: inline-block; padding: 12px 32px; background-color: #2C2418; color: #FFFFFF; font-size: 13px; font-weight: 600; text-decoration: none; letter-spacing: 1px; text-transform: uppercase;">
+                                {% if locale == 'fr' %}
+                                    T&Eacute;L&Eacute;CHARGER LA FACTURE
+                                {% else %}
+                                    DOWNLOAD INVOICE
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endif %}
+
                     {# Care note #}
                     <tr>
                         <td style="padding: 20px; background-color: #F0EBE1; border: 1px solid #E8DDD0;">

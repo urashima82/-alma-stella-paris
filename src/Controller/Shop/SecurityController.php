@@ -56,6 +56,7 @@ class SecurityController extends AbstractController
         }
 
         $errors = [];
+        $redirect = $request->query->get('redirect', $request->request->get('redirect', ''));
         $formData = [
             'first_name' => '',
             'last_name' => '',
@@ -86,11 +87,6 @@ class SecurityController extends AbstractController
                 $session->set('_registration_otp_expires', \time() + 600);
                 $session->set('_registration_otp_attempts', 0);
 
-                // Preserve checkout redirect through OTP flow
-                if ('checkout' === $request->query->get('redirect')) {
-                    $session->set('_registration_redirect', 'checkout');
-                }
-
                 $subject = 'fr' === $locale
                     ? 'Votre code de vérification — Alma Stella Paris'
                     : 'Your verification code — Alma Stella Paris';
@@ -108,13 +104,19 @@ class SecurityController extends AbstractController
 
                 $mailer->send($email);
 
-                return $this->redirectToRoute('shop_verify_email');
+                $verifyParams = ['_locale' => $locale];
+                if ('checkout' === $redirect) {
+                    $verifyParams['redirect'] = 'checkout';
+                }
+
+                return $this->redirectToRoute('shop_verify_email', $verifyParams);
             }
         }
 
         return $this->render('shop/security/register.html.twig', [
             'errors' => $errors,
             'form_data' => $formData,
+            'redirect' => $redirect,
         ]);
     }
 
@@ -143,6 +145,7 @@ class SecurityController extends AbstractController
         }
 
         $errors = [];
+        $redirect = $request->query->get('redirect', $request->request->get('redirect', ''));
 
         if ($request->isMethod('POST')) {
             $submittedCode = \trim((string) $request->request->get('code', ''));
@@ -186,13 +189,14 @@ class SecurityController extends AbstractController
 
                 $entityManager->flush();
 
-                $redirect = $session->get('_registration_redirect');
                 $this->clearRegistrationSession($session);
 
                 $security->login($customer, 'form_login', 'main');
 
                 if ('checkout' === $redirect) {
-                    return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
+                    $checkoutRoute = 'fr' === $request->getLocale() ? 'shop_checkout_fr' : 'shop_checkout';
+
+                    return $this->redirectToRoute($checkoutRoute, ['_locale' => $request->getLocale()]);
                 }
 
                 return $this->redirectToRoute('shop_account');
@@ -202,6 +206,7 @@ class SecurityController extends AbstractController
         return $this->render('shop/security/verify_email.html.twig', [
             'email' => $registrationData['email'],
             'errors' => $errors,
+            'redirect' => $redirect,
         ]);
     }
 
@@ -269,7 +274,6 @@ class SecurityController extends AbstractController
         $session->remove('_registration_otp');
         $session->remove('_registration_otp_expires');
         $session->remove('_registration_otp_attempts');
-        $session->remove('_registration_redirect');
     }
 
     /**

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice {{ order.reference }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            color: #2C2418;
+            line-height: 1.5;
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #C9A84C;
+            padding-bottom: 20px;
+        }
+
+        .brand {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 22px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #2C2418;
+        }
+
+        .invoice-title {
+            font-size: 24px;
+            font-weight: 300;
+            color: #C9A84C;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: right;
+        }
+
+        .meta-table {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .meta-table td {
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8C8070;
+            margin-bottom: 6px;
+        }
+
+        .address-block {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .info-block {
+            text-align: right;
+        }
+
+        .info-row {
+            margin-bottom: 4px;
+        }
+
+        .info-label {
+            font-size: 10px;
+            color: #8C8070;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .items-table thead th {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8C8070;
+            border-bottom: 1px solid #E8DDD0;
+            padding: 8px 0;
+            text-align: left;
+        }
+
+        .items-table thead th.right {
+            text-align: right;
+        }
+
+        .items-table tbody td {
+            padding: 10px 0;
+            border-bottom: 1px solid #F0EBE1;
+        }
+
+        .items-table tbody td.right {
+            text-align: right;
+        }
+
+        .items-table tbody td.product-name {
+            font-family: Georgia, 'Times New Roman', serif;
+        }
+
+        .totals-table {
+            width: 300px;
+            margin-left: auto;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        .totals-table td {
+            padding: 6px 0;
+        }
+
+        .totals-table .total-label {
+            text-align: right;
+            padding-right: 20px;
+            color: #8C8070;
+            font-size: 11px;
+        }
+
+        .totals-table .total-value {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .totals-table .grand-total td {
+            border-top: 2px solid #C9A84C;
+            padding-top: 10px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .legal {
+            border-top: 1px solid #E8DDD0;
+            padding-top: 20px;
+            font-size: 9px;
+            color: #8C8070;
+            line-height: 1.6;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 12px;
+            color: #C9A84C;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    {# Header #}
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px; border-bottom: 2px solid #C9A84C; padding-bottom: 20px;">
+        <tr>
+            <td style="vertical-align: bottom;">
+                <span class="brand">ALMA STELLA PARIS</span>
+            </td>
+            <td style="text-align: right; vertical-align: bottom;">
+                <span class="invoice-title">Invoice</span>
+            </td>
+        </tr>
+    </table>
+
+    {# Order info + billing address #}
+    <table class="meta-table">
+        <tr>
+            <td>
+                <p class="section-title">Bill to</p>
+                <div class="address-block">
+                    <strong>{% if order.hasSeparateBillingAddress %}{{ order.billingRecipientName }}{% else %}{{ order.shippingRecipientName }}{% endif %}</strong><br>
+                    {% if order.hasSeparateBillingAddress %}
+                        {{ order.billingAddressLine1 }}<br>
+                        {% if order.billingAddressLine2 %}{{ order.billingAddressLine2 }}<br>{% endif %}
+                        {{ order.billingPostalCode }} {{ order.billingCity }}<br>
+                        {% if order.billingState %}{{ order.billingState }}<br>{% endif %}
+                        {{ order.billingCountry }}
+                    {% else %}
+                        {{ order.shippingAddressLine1 }}<br>
+                        {% if order.shippingAddressLine2 %}{{ order.shippingAddressLine2 }}<br>{% endif %}
+                        {{ order.shippingPostalCode }} {{ order.shippingCity }}<br>
+                        {% if order.shippingState %}{{ order.shippingState }}<br>{% endif %}
+                        {{ order.shippingCountry }}
+                    {% endif %}
+                    <br>{{ order.customerEmail }}
+                </div>
+            </td>
+            <td>
+                <div class="info-block">
+                    <div class="info-row">
+                        <span class="info-label">Invoice number</span><br>
+                        <span class="info-value">{{ order.reference }}</span>
+                    </div>
+                    <br>
+                    <div class="info-row">
+                        <span class="info-label">Date</span><br>
+                        <span class="info-value">{{ order.createdAt|date('d/m/Y') }}</span>
+                    </div>
+                    <br>
+                    <div class="info-row">
+                        <span class="info-label">Payment</span><br>
+                        <span class="info-value">Stripe (Card)</span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    {# Items table #}
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th class="right">Unit price</th>
+                <th class="right">Shipping</th>
+                <th class="right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items %}
+                <tr>
+                    <td class="product-name">{{ item.productName }}</td>
+                    <td class="right">${{ '%.2f'|format(item.productPrice) }}</td>
+                    <td class="right">
+                        {% if item.shippingCost > 0 %}
+                            ${{ '%.2f'|format(item.shippingCost) }}
+                        {% else %}
+                            Free
+                        {% endif %}
+                    </td>
+                    <td class="right">${{ '%.2f'|format(item.lineTotal) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {# Totals #}
+    <table class="totals-table">
+        {% set subtotal = 0 %}
+        {% set shipping_total = 0 %}
+        {% for item in order.items %}
+            {% set subtotal = subtotal + item.productPrice %}
+            {% set shipping_total = shipping_total + item.shippingCost %}
+        {% endfor %}
+        <tr>
+            <td class="total-label">Subtotal</td>
+            <td class="total-value">${{ '%.2f'|format(subtotal) }}</td>
+        </tr>
+        <tr>
+            <td class="total-label">Shipping</td>
+            <td class="total-value">
+                {% if shipping_total > 0 %}
+                    ${{ '%.2f'|format(shipping_total) }}
+                {% else %}
+                    Free
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td class="total-label">VAT</td>
+            <td class="total-value">$0.00</td>
+        </tr>
+        <tr class="grand-total">
+            <td class="total-label">Total (USD)</td>
+            <td class="total-value">${{ '%.2f'|format(order.totalUsd) }}</td>
+        </tr>
+    </table>
+
+    {# Legal mentions #}
+    <div class="legal">
+        <p><strong>Alma Stella Paris</strong></p>
+        <p>TVA non applicable, art. 293 B du CGI.</p>
+        <p>Payment processed by Stripe in USD. Charged amount: ${{ '%.2f'|format(order.totalUsd) }}.</p>
+    </div>
+
+    {# Footer #}
+    <div class="footer">
+        ALMA STELLA PARIS
+    </div>
+</body>
+</html>

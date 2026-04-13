@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -97,6 +98,9 @@ class Order
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $internalNotes = null;
 
+    #[ORM\Column(length: 36, unique: true)]
+    private string $invoiceToken = '';
+
     /** @var Collection<int, OrderItem> */
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'order', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $items;
@@ -112,6 +116,7 @@ class Order
         $this->items = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->invoiceToken = Uuid::v4()->toRfc4122();
     }
 
     public function __toString(): string
@@ -543,6 +548,11 @@ class Order
     public function getPublicTrackingPage(): string
     {
         return $this->reference;
+    }
+
+    public function getInvoiceToken(): string
+    {
+        return $this->invoiceToken;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

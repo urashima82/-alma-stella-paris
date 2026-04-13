@@ -410,6 +410,14 @@ Shall I proceed to Milestone Y?"
   - Detail: profile info + linked orders
 - [x] Update `Order` CRUD to show linked customer (if any) with link to customer detail
 
+#### Invoice download
+- [x] Add `invoiceToken` (UUID v4) field on `Order` entity, auto-generated at creation
+- [x] Install `dompdf/dompdf` for PDF generation
+- [x] `InvoiceGenerator` service: renders Twig template (`pdf/invoice.html.twig`) to PDF
+- [x] `InvoiceController` with route `GET /invoice/{reference}/{token}` — token-verified access
+- [x] Invoice download button on order detail page (for Processing/Shipped/Delivered orders)
+- [x] Invoice download link in delivered email (`order_delivered.html.twig`)
+
 #### DataFixtures
 - [x] Sample customer accounts (2-3) with addresses and linked orders
 

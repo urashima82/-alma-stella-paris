@@ -274,6 +274,7 @@ class Order
     private ?string $stripePaymentStatus;       // Tracks Stripe PI status
     private ?string $trackingNumber;
     private ?string $internalNotes;             // Admin-only notes
+    private string $invoiceToken;               // UUID v4 — generated at order creation, used for invoice download link
     private Collection $items;                  // OrderItem
     private \DateTimeImmutable $createdAt;
     private \DateTimeImmutable $updatedAt;
@@ -583,7 +584,7 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 |---|---|
 | Order confirmed | `email/order_confirmation.html.twig` — bilingual (FR/EN), order summary with items |
 | Order shipped | `email/order_shipped.html.twig` — bilingual, clickable tracking link (La Poste/17track), link to tracking page |
-| Order delivered | `email/order_delivered.html.twig` — bilingual, care instructions + Instagram CTA |
+| Order delivered | `email/order_delivered.html.twig` — bilingual, care instructions + Instagram CTA + invoice download link |
 | Order cancelled | `email/order_cancelled.html.twig` — bilingual cancellation notification |
 | Order → Processing (admin) | `email/admin_new_order.html.twig` — FR only, full summary + link to EasyAdmin order |
 | Admin login link | `email/admin_login_link.html.twig` — magic link with 10min expiry |
@@ -592,6 +593,20 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 
 - Sender: `hello@almastellaparis.com`
 - Email failure does not block the payment flow (caught and logged)
+
+### InvoiceGenerator
+
+PDF invoice generation via dompdf (`dompdf/dompdf`):
+
+- **Service:** `App\Service\InvoiceGenerator` — renders Twig template to PDF on the fly
+- **Template:** `templates/pdf/invoice.html.twig` — A4 portrait, brand-styled
+- **Route:** `GET /invoice/{reference}/{token}` (`shop_invoice_download`)
+- **Access control:** token-based (UUID v4 stored as `invoiceToken` on Order entity, generated at order creation)
+- **Available for:** orders with status `Processing`, `Shipped`, or `Delivered`
+- **Access points:**
+  - Delivered email: download button included in `order_delivered.html.twig`
+  - Customer account: download button on order detail page for eligible orders
+- **Content:** billing address, items with prices, subtotal/shipping/VAT/total, legal mention (art. 293 B CGI)
 
 ---
 

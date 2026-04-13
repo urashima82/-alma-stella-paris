@@ -423,6 +423,7 @@ orders:
         tracking: "Suivi"
         tracking_number: "Numéro de suivi"
         track_package: "Suivre votre colis"
+        download_invoice: "Télécharger la facture"
         back: "Retour aux commandes"
 
 addresses:

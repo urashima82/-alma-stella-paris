@@ -90,4 +90,21 @@ class ReservationRepository extends ServiceEntityRepository
             ->getQuery()
             ->execute();
     }
+
+    /**
+     * Transfer all active reservations from one session to another.
+     */
+    public function transferBySessionId(string $fromSessionId, string $toSessionId): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->update()
+            ->set('r.sessionId', ':toSessionId')
+            ->where('r.sessionId = :fromSessionId')
+            ->andWhere('r.expiresAt > :now')
+            ->setParameter('fromSessionId', $fromSessionId)
+            ->setParameter('toSessionId', $toSessionId)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->execute();
+    }
 }

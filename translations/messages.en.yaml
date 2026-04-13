@@ -423,6 +423,7 @@ orders:
         tracking: "Tracking"
         tracking_number: "Tracking number"
         track_package: "Track your package"
+        download_invoice: "Download invoice"
         back: "Back to orders"
 
 addresses:

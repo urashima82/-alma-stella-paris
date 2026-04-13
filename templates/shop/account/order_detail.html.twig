@@ -21,6 +21,14 @@
               style="color: {{ order.status.badgeColor() }}; border-color: {{ order.status.badgeColor() }};">
             {{ order.status.label() }}
         </span>
+        {% if order.status.value in ['processing', 'shipped', 'delivered'] %}
+            <a href="{{ path('shop_invoice_download', {'reference': order.reference, 'token': order.invoiceToken}) }}"
+               target="_blank" rel="noopener"
+               class="inline-block px-4 py-1.5 text-xs uppercase tracking-wider font-medium
+                      bg-alma-text text-white hover:bg-alma-text/80 transition-colors">
+                {{ 'orders.detail.download_invoice'|trans }}
+            </a>
+        {% endif %}
     </div>
 
     {# Items #}

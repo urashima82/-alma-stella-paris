@@ -25,6 +25,9 @@
         {% endif %}
 
         <form method="post" class="space-y-6">
+            {% if redirect %}
+                <input type="hidden" name="redirect" value="{{ redirect }}">
+            {% endif %}
             <div>
                 <label for="code" class="block text-sm font-sans text-alma-text-muted mb-1">
                     {{ 'verify_email.label_code'|trans }}

@@ -175,6 +175,29 @@ final class ReservationManager
         return $count;
     }
 
+    /**
+     * Transfer all active reservations from a previous session to the current one.
+     * Used during login to preserve reservations across session ID migration.
+     */
+    public function transferReservations(string $fromSessionId): void
+    {
+        $toSessionId = $this->getSessionId();
+
+        if ($fromSessionId === $toSessionId) {
+            return;
+        }
+
+        $count = $this->reservationRepository->transferBySessionId($fromSessionId, $toSessionId);
+
+        if ($count > 0) {
+            $this->logger->info('Transferred {count} reservation(s) from session {from} to {to}.', [
+                'count' => $count,
+                'from' => \substr($fromSessionId, 0, 8).'...',
+                'to' => \substr($toSessionId, 0, 8).'...',
+            ]);
+        }
+    }
+
     private function getSessionId(): string
     {
         return $this->requestStack->getSession()->getId();

@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['emailInput', 'emailStep', 'loginStep', 'choiceStep', 'loginEmail', 'guestEmail', 'errorMessage', 'registerLink'];
+    static targets = ['emailInput', 'emailStep', 'loginStep', 'choiceStep', 'loginEmail', 'guestEmail', 'errorMessage'];
     static values = { checkUrl: String };
 
     async continue() {
@@ -30,11 +30,6 @@ export default class extends Controller {
                 this.loginStepTarget.classList.remove('hidden');
             } else {
                 this.guestEmailTarget.value = email;
-                if (this.hasRegisterLinkTarget) {
-                    const url = new URL(this.registerLinkTarget.href);
-                    url.searchParams.set('email', email);
-                    this.registerLinkTarget.href = url.toString();
-                }
                 this.choiceStepTarget.classList.remove('hidden');
             }
         } catch {

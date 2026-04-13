@@ -134,6 +134,7 @@
 
                     {# Create account #}
                     <a href="{{ path('shop_register', {'_locale': app.request.locale, 'redirect': 'checkout'}) }}"
+                       data-checkout-identify-target="registerLink"
                        class="block w-full text-center border border-alma-gold text-alma-gold px-8 py-4 font-sans text-sm font-medium
                               hover:bg-alma-gold hover:text-white transition-colors">
                         {{ 'identify.create_account'|trans }}
