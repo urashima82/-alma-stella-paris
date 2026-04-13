@@ -66,6 +66,20 @@
             </p>
         </div>
 
+        {# CGV acceptance #}
+        <label class="flex items-start gap-3 mb-6 cursor-pointer select-none">
+            <input type="checkbox"
+                   data-stripe-payment-target="terms"
+                   data-action="change->stripe-payment#toggleTerms"
+                   class="mt-0.5 w-4 h-4 accent-alma-gold cursor-pointer">
+            <span class="text-sm text-alma-text-muted leading-snug">
+                {{ 'checkout.accept_terms'|trans({
+                    '%link_start%': '<a href="' ~ path('shop_terms') ~ '" target="_blank" rel="noopener" class="text-alma-gold hover:underline">',
+                    '%link_end%': '</a>'
+                })|raw }}
+            </span>
+        </label>
+
         <button data-stripe-payment-target="submit"
                 data-action="click->stripe-payment#submit"
                 type="button"
