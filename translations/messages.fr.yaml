@@ -48,6 +48,7 @@ badge:
     sold: "Vendu"
     unique: "Pièce unique"
     new: "Nouveau"
+    reserved: "Réservé"
 
 # ── Product detail page ──
 product:
@@ -56,6 +57,8 @@ product:
     add_to_cart: "Ajouter au panier"
     in_cart: "Dans votre panier"
     sold_out: "Épuisée"
+    reserved: "Réservé"
+    reserved_hint: "Cette pièce est en cours d'achat par un autre client."
     shipping_heading: "Informations de livraison"
     shipping_tier: "Catégorie d'expédition : <strong class=\"text-alma-text\">%tier%</strong>"
     shipping_included: "Frais de livraison inclus dans le prix affiché (%cost% $)."
@@ -232,6 +235,12 @@ tracking:
     track_package: "Suivre mon colis"
     items: "Articles de cette commande"
     cancelled: "Cette commande a été annulée."
+
+# ── Réservation ──
+reservation:
+    timer_label: "Vos articles sont réservés pendant"
+    expired_notice: "Votre réservation a expiré. Les articles ont été retirés de votre panier."
+    back_to_shop: "Retour à la boutique"
 
 # ── Currency ──
 currency:

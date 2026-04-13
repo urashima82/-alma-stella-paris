@@ -27,15 +27,16 @@ class CartManager
         private readonly Security $security,
         private readonly CartRepository $cartRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly ReservationManager $reservationManager,
     ) {
     }
 
     /**
-     * Add a product to the cart. Returns false if the product is sold out or already in cart.
+     * Add a product to the cart. Returns false if the product is sold out, reserved by another, or already in cart.
      */
     public function add(Product $product): bool
     {
-        if ($product->isSoldOut()) {
+        if ($product->isSoldOut() || $this->reservationManager->isReservedByOther($product)) {
             return false;
         }
 
@@ -124,7 +125,7 @@ class CartManager
 
     /**
      * Get hydrated Product entities for all items in the cart.
-     * Automatically removes products that no longer exist or are sold out.
+     * Automatically removes products that are sold out or reserved by another session.
      *
      * @return Product[]
      */
@@ -137,13 +138,14 @@ class CartManager
         }
 
         $products = $this->productRepository->findBy(['id' => $ids]);
+        $reservedByOthers = $this->reservationManager->getReservedProductIdsByOthers();
 
-        // Filter out sold-out products and rebuild cart with valid IDs
+        // Filter out sold-out and reserved-by-others products
         $validProducts = [];
         $validIds = [];
 
         foreach ($products as $product) {
-            if (!$product->isSoldOut()) {
+            if (!$product->isSoldOut() && !\in_array($product->getId(), $reservedByOthers, true)) {
                 $validProducts[] = $product;
                 $validIds[] = $product->getId();
             }
@@ -203,7 +205,7 @@ class CartManager
         $products = $this->productRepository->findBy(['id' => $guestIds]);
 
         foreach ($products as $product) {
-            if (!$product->isSoldOut()) {
+            if (!$product->isSoldOut() && !$this->reservationManager->isReservedByOther($product)) {
                 $cart->addProduct($product);
             }
         }

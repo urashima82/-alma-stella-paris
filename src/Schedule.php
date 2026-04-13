@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Message\CleanExpiredReservationsMessage;
 use App\Message\VerifyPendingOrdersMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
@@ -24,6 +25,7 @@ class Schedule implements ScheduleProviderInterface
         return (new SymfonySchedule())
             ->stateful($this->cache)
             ->processOnlyLastMissedRun(true)
-            ->add(RecurringMessage::every('5 minutes', new VerifyPendingOrdersMessage()));
+            ->add(RecurringMessage::every('5 minutes', new VerifyPendingOrdersMessage()))
+            ->add(RecurringMessage::every('5 minutes', new CleanExpiredReservationsMessage()));
     }
 }

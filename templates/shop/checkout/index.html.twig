@@ -16,9 +16,12 @@
     <div class="max-w-7xl mx-auto px-6 py-10 md:py-16">
         {% include 'shop/checkout/_stepper.html.twig' with { current_step: is_granted('ROLE_CUSTOMER') ? 1 : 2 } %}
 
-        <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-10 mt-8">
-            {{ 'checkout.heading'|trans }}
-        </h1>
+        <div class="mt-8 mb-10">
+            {% include 'shop/checkout/_reservation_timer.html.twig' %}
+            <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text">
+                {{ 'checkout.heading'|trans }}
+            </h1>
+        </div>
 
         <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
 

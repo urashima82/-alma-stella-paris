@@ -23,6 +23,7 @@ alma-stella/
 │       ├── email_check_controller.js        # Async email existence check on registration form
 │       ├── lightbox_controller.js           # Image lightbox / gallery view on product detail
 │       ├── mobile_menu_controller.js        # Mobile hamburger menu toggle
+│       ├── reservation_timer_controller.js  # Checkout countdown timer (mm:ss, auto-reload on expiry)
 │       └── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
 ├── config/
 ├── docs/
@@ -76,6 +77,7 @@ alma-stella/
 │   │   ├── ImageProcessor.php       # Resizes and converts images to WebP (GD driver)
 │   │   ├── OrderMailer.php          # Order emails (confirmation, shipped, delivered, cancelled, admin)
 │   │   ├── PendingOrderVerifier.php # Verifies pending orders against Stripe API
+│   │   ├── ReservationManager.php   # Product reservation: reserve, release, expiry check (15 min)
 │   │   ├── ShippingCostProvider.php # Shipping cost resolution (DB settings → enum fallback)
 │   │   └── StripeService.php        # PaymentIntent creation & retrieval
 │   ├── Twig/
@@ -96,8 +98,10 @@ alma-stella/
 │   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
 │   │   └── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
 │   ├── Message/
+│   │   ├── CleanExpiredReservationsMessage.php
 │   │   └── VerifyPendingOrdersMessage.php
 │   ├── MessageHandler/
+│   │   ├── CleanExpiredReservationsHandler.php
 │   │   └── VerifyPendingOrdersHandler.php
 │   ├── Command/
 │   │   └── VerifyPendingOrdersCommand.php  # CLI: app:verify-pending-orders
@@ -447,6 +451,31 @@ class ContactMessage
 > **Admin notification:** Plain text email with Reply-To set to sender's email
 > for easy direct response.
 
+### Reservation
+
+```php
+// src/Entity/Reservation.php
+class Reservation
+{
+    private int $id;
+    private Product $product;              // OneToOne — one reservation per product
+    private string $sessionId;             // PHP session ID of the reserving visitor
+    private \DateTimeImmutable $expiresAt; // now + 15 minutes
+    private \DateTimeImmutable $createdAt;
+
+    public static function create(Product $product, string $sessionId, int $durationMinutes = 15): self
+    public function isExpired(): bool
+    public function isOwnedBy(string $sessionId): bool
+    public function getRemainingSeconds(): int
+}
+```
+
+> **Purpose:** Prevents double-selling of unique pieces. A product is reserved
+> when the customer enters checkout (identification step). Reservation lasts 15
+> minutes. Other visitors see "Réservé" / "Reserved" on the product and cannot
+> add it to their cart. Expired reservations are cleaned up lazily (on each
+> product access) and in batch (scheduler every 5 minutes).
+
 ### Other entities (summary)
 
 | Entity | Purpose |
@@ -459,6 +488,7 @@ class ContactMessage
 | `CustomerAddress` | Customer shipping addresses with default flag + optional recipient name |
 | `Cart` | Persistent cart for logged-in customers (OneToOne with Customer) |
 | `CartItem` | Individual cart item (ManyToOne to Cart + Product) |
+| `Reservation` | Temporary product lock during checkout (15 min, OneToOne with Product) |
 | `ContactMessage` | Contact form submissions — name, email, subject, message, read flag |
 | `ResetPasswordRequest` | Token storage for password reset flow (symfonycasts bundle) |
 | `ShippingSettings` | Admin-editable shipping tier costs (overrides enum defaults) |
@@ -483,6 +513,20 @@ class ContactMessage
 - Customer: products stored in `Cart` + `CartItem` entities (database)
 - Automatically detects auth state and routes to correct storage
 - `mergeGuestCartIntoCustomer()` — called by `CartMergeSubscriber` on login
+- **Reservation-aware:** `add()` rejects products reserved by other sessions;
+  `getProducts()` filters them out and syncs the cart
+
+### ReservationManager
+
+- Manages temporary product holds during checkout (prevents double-selling)
+- `reserve(Product)` — creates a 15-minute reservation for the current session
+- `release(Product)` — removes reservation (called after successful payment)
+- `isReservedByOther(Product)` — lazy check with auto-expiry cleanup
+- `getReservedProductIdsByOthers()` — used by catalog/product pages for badge display
+- `getRemainingSeconds()` — feeds the countdown timer in checkout templates
+- `releaseExpired()` — batch cleanup called by `CleanExpiredReservationsHandler` (scheduler)
+- Reservations are created at checkout entry (identification step) and released
+  on successful payment or automatic expiry
 
 ### ShippingCostProvider
 
@@ -513,6 +557,7 @@ class ContactMessage
   1. Immediate: Stimulus controller calls `POST /payment/confirm` after payment
   2. On-return: payment page detects 3DS redirect return and auto-confirms
   3. Scheduler: `VerifyPendingOrdersMessage` runs every 5 min via Symfony Scheduler
+  4. Scheduler: `CleanExpiredReservationsMessage` runs every 5 min (releases expired holds)
 
 ### SocialPublisher
 
@@ -587,6 +632,9 @@ The checkout follows a 3-step funnel: **Identify → Checkout → Payment**.
   - If account found → prompts to log in (preserves cart)
   - If new email → proceeds as guest, email stored in session (`_checkout_email`)
 - Email is **readonly** in subsequent steps (cannot be changed)
+- **Reservation activated:** all cart products are reserved for 15 minutes on entry
+  - `reservation_timer_controller` displays a countdown timer on all checkout pages
+  - Other visitors see "Reserved" badge and cannot add reserved products to their cart
 
 ### Step 2 — Checkout (`/checkout` | `/livraison`)
 - Shipping address form (pre-filled from default `CustomerAddress` if logged in)
@@ -608,9 +656,31 @@ The checkout follows a 3-step funnel: **Identify → Checkout → Payment**.
 
 ### Post-payment
 - Order status → `Processing`, confirmation email sent
-- Products marked `isSoldOut`, cart cleared
+- Products marked `isSoldOut`, reservations released, cart cleared
 - Confirmation page + branded tracking page (`/order/{reference}/tracking`)
 - Post-purchase account creation prompt (guest only)
+
+### Reservation system (anti-double-sell)
+
+Since every piece is unique (`isSoldOut` boolean), a reservation mechanism
+prevents two customers from purchasing the same item simultaneously.
+
+| Aspect | Implementation |
+|---|---|
+| **Trigger** | Checkout entry (identification step) |
+| **Duration** | 15 minutes (configurable via `Reservation::DEFAULT_DURATION_MINUTES`) |
+| **Storage** | `Reservation` entity (OneToOne with `Product`, unique constraint) |
+| **Cleanup** | Lazy check on each product access + scheduler batch every 5 minutes |
+| **Client UX** | `reservation_timer_controller` — visible countdown (mm:ss), turns red under 2 min |
+| **Expiry** | Auto-remove from cart + notification, page reloads after 3s |
+| **Catalog** | "Reserved" badge on product card + product detail page |
+| **Cart** | `CartManager.add()` rejects reserved products; `getProducts()` filters them |
+
+Flow:
+1. Client A enters checkout → products reserved for 15 min
+2. Client B sees "Reserved" badge → cannot add to cart
+3. If A pays → products marked `isSoldOut`, reservations deleted
+4. If 15 min expire → reservations deleted, products available again, A's cart cleared
 
 ---
 

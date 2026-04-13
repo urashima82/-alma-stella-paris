@@ -44,9 +44,11 @@ class CartController extends AbstractController
         $added = $this->cartManager->add($product);
 
         if (!$added) {
+            $reason = $product->isSoldOut() ? 'sold_out' : 'reserved';
+
             return $this->json([
                 'success' => false,
-                'message' => 'sold_out',
+                'message' => $reason,
                 'count' => $this->cartManager->count(),
             ]);
         }

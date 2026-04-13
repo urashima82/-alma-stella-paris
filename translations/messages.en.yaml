@@ -48,6 +48,7 @@ badge:
     sold: "Sold"
     unique: "One of a kind"
     new: "New"
+    reserved: "Reserved"
 
 # ── Product detail page ──
 product:
@@ -56,6 +57,8 @@ product:
     add_to_cart: "Add to cart"
     in_cart: "In your cart"
     sold_out: "Sold out"
+    reserved: "Reserved"
+    reserved_hint: "This piece is currently being purchased by another customer."
     shipping_heading: "Shipping information"
     shipping_tier: "Shipping tier: <strong class=\"text-alma-text\">%tier%</strong>"
     shipping_included: "Shipping cost included in the displayed price ($%cost%)."
@@ -232,6 +235,12 @@ tracking:
     track_package: "Track my package"
     items: "Items in this order"
     cancelled: "This order has been cancelled."
+
+# ── Reservation ──
+reservation:
+    timer_label: "Your items are reserved for"
+    expired_notice: "Your reservation has expired. Items have been removed from your cart."
+    back_to_shop: "Back to shop"
 
 # ── Currency ──
 currency:

@@ -84,10 +84,11 @@
                 {% for product in pagination %}
                     <article class="group">
                         <a href="{{ path('shop_product', {slug: product|localized_slug}) }}" class="block cursor-pointer">
+                            {% set isProductReserved = product.id in reservedProductIds %}
                             <div class="relative aspect-[4/5] bg-alma-surface overflow-hidden
                                         border border-transparent group-hover:border-alma-gold
                                         transition-colors duration-300 flex items-center justify-center
-                                        {{ product.isSoldOut ? 'opacity-60 grayscale' : '' }}">
+                                        {{ product.isSoldOut ? 'opacity-60 grayscale' : (isProductReserved ? 'opacity-70' : '') }}">
                                 {% if product.thumbnail %}
                                     <img src="{{ asset('uploads/products/' ~ product.thumbnail) }}"
                                          alt="{{ product|localized_name }}"
@@ -104,6 +105,8 @@
                                 <div class="absolute top-2 left-2 flex flex-row gap-1">
                                     {% if product.isSoldOut %}
                                         <span class="px-2 py-1 bg-alma-text text-alma-bg text-[10px] font-sans font-medium leading-none">{{ 'badge.sold'|trans }}</span>
+                                    {% elseif isProductReserved %}
+                                        <span class="px-2 py-1 bg-alma-hover text-alma-text text-[10px] font-sans font-medium leading-none">{{ 'badge.reserved'|trans }}</span>
                                     {% else %}
                                         <span class="px-2 py-1 bg-alma-gold text-white text-[10px] font-sans font-medium leading-none">{{ 'badge.unique'|trans }}</span>
                                     {% endif %}

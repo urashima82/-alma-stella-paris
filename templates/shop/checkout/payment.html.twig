@@ -25,6 +25,8 @@
          data-stripe-payment-return-url-value="{{ url(app.request.locale == 'fr' ? 'shop_payment_fr' : 'shop_payment', {'_locale': app.request.locale}) }}"
          data-stripe-payment-locale-value="{{ app.request.locale }}">
 
+        {% include 'shop/checkout/_reservation_timer.html.twig' %}
+
         <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-2">
             {{ 'checkout.payment_heading'|trans }}
         </h1>

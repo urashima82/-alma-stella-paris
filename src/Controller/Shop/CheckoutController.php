@@ -8,12 +8,14 @@ use App\Entity\Customer;
 use App\Entity\CustomerAddress;
 use App\Entity\Order;
 use App\Entity\OrderItem;
+use App\Entity\Product;
 use App\Enum\OrderStatus;
 use App\Repository\CustomerRepository;
 use App\Repository\OrderRepository;
 use App\Service\CartManager;
 use App\Service\CurrencyConverter;
 use App\Service\OrderMailer;
+use App\Service\ReservationManager;
 use App\Service\ShippingCostProvider;
 use App\Service\StripeService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,6 +37,7 @@ class CheckoutController extends AbstractController
         private readonly ShippingCostProvider $shippingCostProvider,
         private readonly StripeService $stripeService,
         private readonly OrderMailer $orderMailer,
+        private readonly ReservationManager $reservationManager,
         private readonly LoggerInterface $logger,
         private readonly string $stripePublicKey,
     ) {
@@ -60,6 +63,9 @@ class CheckoutController extends AbstractController
             return $this->redirectToRoute('shop_catalog', ['_locale' => $request->getLocale()]);
         }
 
+        // Reserve all cart products on checkout entry
+        $this->reserveCartProducts($products);
+
         // Logged-in customers skip identification
         if ($this->getUser() instanceof Customer) {
             return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
@@ -76,7 +82,9 @@ class CheckoutController extends AbstractController
             }
         }
 
-        return $this->render('shop/checkout/identify.html.twig');
+        return $this->render('shop/checkout/identify.html.twig', [
+            'reservationSeconds' => $this->reservationManager->getRemainingSeconds(),
+        ]);
     }
 
     #[Route(
@@ -103,6 +111,9 @@ class CheckoutController extends AbstractController
         if (!$this->getUser() instanceof Customer && !$request->getSession()->has('_checkout_email')) {
             return $this->redirectToRoute('shop_checkout_identify', ['_locale' => $request->getLocale()]);
         }
+
+        // Reserve all cart products (extends existing reservations on re-entry)
+        $this->reserveCartProducts($products);
 
         $subtotalUsd = $this->cartManager->getSubtotalUsd();
         $currency = $request->getSession()->get('_currency', CurrencyConverter::BASE_CURRENCY);
@@ -178,6 +189,7 @@ class CheckoutController extends AbstractController
             'formData' => $this->getFormData($request),
             'countries' => self::getShippingCountries($request->getLocale()),
             'customerAddresses' => $customerAddresses,
+            'reservationSeconds' => $this->reservationManager->getRemainingSeconds(),
         ]);
     }
 
@@ -233,6 +245,7 @@ class CheckoutController extends AbstractController
             'currency' => $currency,
             'stripePublicKey' => $this->stripePublicKey,
             'clientSecret' => $paymentIntent->client_secret,
+            'reservationSeconds' => $this->reservationManager->getRemainingSeconds(),
         ]);
     }
 
@@ -301,6 +314,14 @@ class CheckoutController extends AbstractController
             $this->orderMailer->sendNewOrderAdminNotification($order);
         } catch (\Exception $e) {
             $this->logger->error('Admin notification email failed: {message}', ['message' => $e->getMessage()]);
+        }
+
+        // Release reservations for purchased products
+        foreach ($order->getItems() as $item) {
+            $product = $item->getProduct();
+            if (null !== $product) {
+                $this->reservationManager->release($product);
+            }
         }
 
         // Clear cart and checkout session data
@@ -535,7 +556,7 @@ class CheckoutController extends AbstractController
     }
 
     /**
-     * @param \App\Entity\Product[] $products
+     * @param Product[] $products
      */
     private function updateExistingOrder(Order $order, Request $request, array $products, float $subtotalUsd): Order
     {
@@ -564,7 +585,7 @@ class CheckoutController extends AbstractController
     }
 
     /**
-     * @param \App\Entity\Product[] $products
+     * @param Product[] $products
      */
     private function createOrder(Request $request, array $products, float $subtotalUsd): Order
     {
@@ -699,5 +720,15 @@ class CheckoutController extends AbstractController
         \asort($countries, \SORT_LOCALE_STRING);
 
         return $countries;
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    private function reserveCartProducts(array $products): void
+    {
+        foreach ($products as $product) {
+            $this->reservationManager->reserve($product);
+        }
     }
 }

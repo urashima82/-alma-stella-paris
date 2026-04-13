@@ -7,6 +7,7 @@ namespace App\Controller\Shop;
 use App\Repository\ProductCategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\SiteSettingsRepository;
+use App\Service\ReservationManager;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +27,7 @@ class CatalogController extends AbstractController
         ProductCategoryRepository $categoryRepository,
         SiteSettingsRepository $siteSettingsRepository,
         PaginatorInterface $paginator,
+        ReservationManager $reservationManager,
         ?string $categorySlug = null,
     ): Response {
         $categories = $categoryRepository->findAllOrdered();
@@ -53,6 +55,7 @@ class CatalogController extends AbstractController
             'categories' => $categories,
             'activeCategory' => $activeCategory,
             'pagination' => $pagination,
+            'reservedProductIds' => $reservationManager->getReservedProductIdsByOthers(),
         ]);
     }
 }

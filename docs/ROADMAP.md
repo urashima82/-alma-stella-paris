@@ -238,6 +238,15 @@ Shall I proceed to Milestone Y?"
 - [x] Payment verification on return (3D Secure redirect handling)
 - [x] `app:verify-pending-orders` console command + Symfony Scheduler (every 5 min) —
   verifies Stripe status for pending orders, confirms or cancels them automatically
+- [x] **Product reservation system** (anti-double-sell for pièce unique):
+  - [x] `Reservation` entity (OneToOne with Product, sessionId, expiresAt)
+  - [x] `ReservationManager` service (reserve, release, lazy expiry check)
+  - [x] Reservation triggered at checkout entry (identification step), 15-minute hold
+  - [x] "Reserved" badge on catalog + product detail for other visitors
+  - [x] `reservation_timer_controller` — visible countdown on all checkout pages
+  - [x] `CartManager` blocks adding reserved products + filters them from cart
+  - [x] `CleanExpiredReservationsMessage` — scheduler batch cleanup every 5 min
+  - [x] Auto-release on successful payment or expiry
 
 > **No Stripe webhooks.** Payment verification uses 3 layers: immediate
 > (Stimulus controller), on-return (3DS redirect), and Symfony Scheduler.
