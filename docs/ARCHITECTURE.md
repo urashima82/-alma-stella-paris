@@ -13,10 +13,17 @@ alma-stella/
 │   ├── styles/
 │   │   └── app.css          # Tailwind entry point
 │   └── controllers/          # Stimulus controllers
-│       ├── currency_selector_controller.js  # Dropdown toggle for currency selector
+│       ├── account_dropdown_controller.js   # Account menu dropdown toggle (header)
+│       ├── address_selector_controller.js   # Fills checkout form from saved customer address
+│       ├── billing_toggle_controller.js     # Shows/hides billing address fields (checkbox toggle)
 │       ├── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
-│       ├── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
-│       └── account_dropdown_controller.js   # Account menu dropdown toggle (header)
+│       ├── checkout_identify_controller.js  # Email detection: existing account → login, new → guest
+│       ├── csrf_protection_controller.js    # CSRF token handling on forms
+│       ├── currency_selector_controller.js  # Dropdown toggle for currency selector
+│       ├── email_check_controller.js        # Async email existence check on registration form
+│       ├── lightbox_controller.js           # Image lightbox / gallery view on product detail
+│       ├── mobile_menu_controller.js        # Mobile hamburger menu toggle
+│       └── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
 ├── config/
 ├── docs/
 │   └── design/
@@ -30,47 +37,64 @@ alma-stella/
 ├── src/
 │   ├── Controller/
 │   │   ├── Admin/            # EasyAdmin CRUD controllers
-│   │   │   ├── AdminLoginController.php  # Magic link login flow
-│   │   │   ├── AdminCrudController.php   # Admin user management (Super Admin only)
-│   │   │   ├── OrderCrudController.php   # Order management with status workflow
-│   │   │   ├── OrderItemCrudController.php # OrderItem sub-form (read-only)
-│   │   │   ├── CustomerCrudController.php  # Customer list (read-only for admin)
-│   │   └── ContactMessageCrudController.php # Contact messages (read/delete)
+│   │   │   ├── AdminLoginController.php          # Magic link login flow
+│   │   │   ├── AdminCrudController.php           # Admin user management (Super Admin only)
+│   │   │   ├── ContactMessageCrudController.php  # Contact messages (read/delete)
+│   │   │   ├── CustomerCrudController.php        # Customer list (read-only for admin)
+│   │   │   ├── DashboardController.php           # EasyAdmin dashboard with stats widgets
+│   │   │   ├── OrderCrudController.php           # Order management with status workflow
+│   │   │   ├── OrderItemCrudController.php       # OrderItem sub-form (read-only)
+│   │   │   ├── ProductCategoryCrudController.php # Category management
+│   │   │   ├── ProductCrudController.php         # Product management with image uploads
+│   │   │   ├── ShippingSettingsCrudController.php # Shipping tier cost overrides
+│   │   │   └── SiteSettingsCrudController.php    # Site-wide settings (active collection)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
 │   │   └── Shop/             # Public-facing controllers (locale-prefixed)
-│   │       ├── HomeController.php
-│   │       ├── CatalogController.php
-│   │       ├── ProductController.php
-│   │       ├── CurrencyController.php  # POST /currency/switch — changes active currency
-│   │       ├── CartController.php      # Cart API: add/remove/content (JSON responses)
 │   │       ├── AboutController.php
-│   │       ├── ContactController.php   # Contact form with honeypot + rate limiter
-│   │       ├── SecurityController.php  # Customer login, register, logout
-│   │       ├── ResetPasswordController.php  # Forgot password + reset flow
-│   │       └── AccountController.php   # Dashboard, orders, addresses, profile
+│   │       ├── AccountController.php       # Dashboard, orders, addresses, profile
+│   │       ├── CartController.php          # Cart API: add/remove/content (JSON responses)
+│   │       ├── CatalogController.php
+│   │       ├── CheckoutController.php      # 3-step tunnel: identify → checkout → payment + tracking
+│   │       ├── ContactController.php       # Contact form with honeypot + rate limiter
+│   │       ├── CurrencyController.php      # POST /currency/switch — changes active currency
+│   │       ├── HomeController.php
+│   │       ├── LegalController.php         # Legal notice + terms of sale
+│   │       ├── ProductController.php
+│   │       ├── ResetPasswordController.php # Forgot password + reset flow
+│   │       └── SecurityController.php      # Customer login, register (OTP), logout
 │   ├── Entity/
 │   ├── Enum/
+│   │   ├── AdminRole.php         # SuperAdmin / Admin
+│   │   ├── ContactSubject.php    # General / Order / Return / Collaboration / Other
+│   │   ├── OrderStatus.php       # Pending / Processing / Shipped / Delivered / Cancelled
+│   │   └── ShippingTier.php      # Standard / Heavy / Set
 │   ├── Repository/
 │   ├── Service/
-│   │   ├── CurrencyConverter.php
-│   │   ├── CartManager.php          # Session-based cart (add/remove/get products)
-│   │   ├── SocialPublisher.php
-│   │   ├── ContactMailer.php             # Contact form notification (plain text to admins, reply-to sender)
-│   │   ├── OrderMailer.php              # Order emails (confirmation, shipped, delivered, admin notification)
-│   │   ├── PendingOrderVerifier.php    # Verifies pending orders against Stripe API
-│   │   └── ShippingCalculator.php
+│   │   ├── CartManager.php          # Hybrid cart: session+cookie (guests) / DB (customers)
+│   │   ├── ContactMailer.php        # Contact form notification (plain text to admins, reply-to sender)
+│   │   ├── CurrencyConverter.php    # Exchange rates from open.er-api.com, cached 6h
+│   │   ├── ImageProcessor.php       # Resizes and converts images to WebP (GD driver)
+│   │   ├── OrderMailer.php          # Order emails (confirmation, shipped, delivered, cancelled, admin)
+│   │   ├── PendingOrderVerifier.php # Verifies pending orders against Stripe API
+│   │   ├── ShippingCostProvider.php # Shipping cost resolution (DB settings → enum fallback)
+│   │   └── StripeService.php        # PaymentIntent creation & retrieval
 │   ├── Twig/
-│   │   ├── CurrencyExtension.php
+│   │   ├── CurrencyExtension.php         # |price filter — formats amount in selected currency
 │   │   ├── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
+│   │   ├── ShippingExtension.php         # Shipping-related Twig helpers
 │   │   └── TrackingExtension.php         # tracking_url() — generates 17track URL from tracking number
 │   ├── Security/
-│   │   └── AdminAuthenticationEntryPoint.php  # Redirects unauthenticated to /admin/login
+│   │   ├── AdminAuthenticationEntryPoint.php     # Redirects unauthenticated to /admin/login
+│   │   └── CustomerAuthenticationEntryPoint.php  # Redirects unauthenticated to /{locale}/login
 │   ├── EventSubscriber/
-│   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
-│   │   ├── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
 │   │   ├── AdminLoginSubscriber.php      # Updates lastLoggedInAt on login (invalidates link)
+│   │   ├── CartCookieSubscriber.php      # Applies pending cart cookies to HTTP response (guest persistence)
+│   │   ├── CartMergeSubscriber.php       # Merges guest cart into customer DB cart on login
+│   │   ├── CurrencySubscriber.php        # Persists currency in session + cookie (30 days)
 │   │   ├── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
-│   │   └── OrderStatusSubscriber.php     # Handles status changes: admin email on Processing, shipped/delivered emails to customer
+│   │   ├── ImageUploadSubscriber.php     # Processes product images after EasyAdmin persist/update
+│   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
+│   │   └── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
 │   ├── Message/
 │   │   └── VerifyPendingOrdersMessage.php
 │   ├── MessageHandler/
@@ -83,9 +107,13 @@ alma-stella/
 │   │   ├── dashboard.html.twig
 │   │   └── login.html.twig              # Magic link login page (brand-styled)
 │   ├── email/
-│   │   ├── order_confirmation.html.twig  # Bilingual order confirmation email
-│   │   ├── order_shipped.html.twig       # Bilingual shipped notification with tracking
 │   │   ├── admin_login_link.html.twig    # Magic link email template
+│   │   ├── admin_new_order.html.twig     # New order notification (FR only, to admin)
+│   │   ├── order_cancelled.html.twig     # Bilingual cancellation notification
+│   │   ├── order_confirmation.html.twig  # Bilingual order confirmation email
+│   │   ├── order_delivered.html.twig     # Bilingual delivery notification + care instructions
+│   │   ├── order_shipped.html.twig       # Bilingual shipped notification with tracking
+│   │   ├── registration_otp.html.twig    # OTP verification code for registration
 │   │   └── reset_password.html.twig      # Bilingual password reset email
 │   └── shop/
 │       ├── base.html.twig
@@ -95,7 +123,9 @@ alma-stella/
 │       ├── about/
 │       ├── contact/
 │       ├── cart/
-│       ├── security/            # Login, register, forgot/reset password
+│       ├── checkout/            # Identify, checkout form, payment, confirmation, tracking
+│       ├── legal/               # Legal notice, terms of sale
+│       ├── security/            # Login, register, OTP verification, forgot/reset password
 │       └── account/             # Dashboard, orders, addresses, profile (authenticated)
 │   └── bundles/
 │       └── EasyAdminBundle/
@@ -125,27 +155,38 @@ class Product
     private string $name;                    // English name for SEO
     private string $nameFr;                  // French name (with accents)
     private string $slug;                    // URL-friendly, auto-generated
+    private string $slugFr;                  // French URL slug
     private string $description;             // English
     private string $descriptionFr;           // French (with accents)
     private float $basePrice;               // USD — internal, never displayed raw
+    private ?float $compareAtPrice;         // USD — original price for discount display (nullable)
     private ShippingTier $shippingTier;     // Determines shipping cost baked in
     private ProductCategory $category;
     private bool $isPublished;
     private bool $isFeatured;
-    private int $stock;
+    private bool $isSoldOut;                // Pièce unique — replaces integer stock
+    private ?array $availableIn;            // JSON — countries where piece is available ['france','mexico']
+    private ?\DateTimeImmutable $soldAt;    // Set when isSoldOut toggled to true
     private ?string $thumbnail;               // VichUploader — card/catalog image (4:5, 600×750)
     private ?string $wornPhoto;                // VichUploader — worn photo, hero on detail page (4:5, 800×1000)
     private ?string $contextPhoto;             // VichUploader — lifestyle/context photo (4:5, 800×1000)
     private Collection $relatedProducts;     // "Wear it with" — ManyToMany self-ref
-    private Collection $wishlistItems;
     private \DateTimeImmutable $createdAt;
     private \DateTimeImmutable $updatedAt;
+
+    // Constants
+    const COUNTRY_FRANCE = 'france';
+    const COUNTRY_MEXICO = 'mexico';
 
     // Computed — never stored
     public function getDisplayPrice(): float
     {
         return $this->basePrice + $this->shippingTier->shippingCostUsd();
     }
+
+    public function getDiscountPercent(): ?int  // null if no compare-at price
+    public function isNew(): bool               // true if created < 14 days ago
+    public function isVisibleInCatalog(): bool  // published + (not sold or sold < 14 days)
 }
 ```
 
@@ -198,18 +239,44 @@ enum ShippingTier: string
 class Order
 {
     private int $id;
-    private string $reference;           // e.g. ASP-2024-00042
-    private OrderStatus $status;
+    private string $reference;                  // e.g. ASP-2024-00042
+    private OrderStatus $status;                // Pending / Processing / Shipped / Delivered / Cancelled
+    private ?Customer $customer;                // Nullable — guest orders have no customer
     private string $customerEmail;
     private string $customerName;
-    private Address $shippingAddress;
-    private string $shippingCountry;     // ISO 3166-1 alpha-2
-    private string $originCountry;       // 'FR' or 'MX' — set by Estelle at dispatch
+    private ?string $customerLocale;            // 'en' or 'fr' — for bilingual emails
+
+    // Shipping address
+    private ?string $shippingRecipientName;     // Can differ from customerName
+    private string $shippingAddressLine1;
+    private ?string $shippingAddressLine2;
+    private string $shippingCity;
+    private ?string $shippingState;
+    private string $shippingPostalCode;
+    private string $shippingCountry;            // ISO 3166-1 alpha-2
+
+    // Billing address (optional — only if different from shipping)
+    private ?string $billingRecipientName;
+    private ?string $billingAddressLine1;
+    private ?string $billingAddressLine2;
+    private ?string $billingCity;
+    private ?string $billingState;
+    private ?string $billingPostalCode;
+    private ?string $billingCountry;
+
+    private string $originCountry;              // 'FR' or 'MX' — set by Estelle at dispatch
     private float $totalUsd;
-    private string $stripePiId;          // Stripe PaymentIntent ID
-    private string $trackingNumber;
-    private Collection $items;           // OrderItem
+    private string $stripePaymentIntentId;      // Stripe PaymentIntent ID
+    private ?string $stripePaymentStatus;       // Tracks Stripe PI status
+    private ?string $trackingNumber;
+    private ?string $internalNotes;             // Admin-only notes
+    private Collection $items;                  // OrderItem
     private \DateTimeImmutable $createdAt;
+    private \DateTimeImmutable $updatedAt;
+
+    public function hasSeparateBillingAddress(): bool  // true if billing fields populated
+    public function getFullBillingAddress(): string    // falls back to shipping if no billing
+    public function getFullShippingAddress(): string
 }
 ```
 
@@ -273,6 +340,7 @@ class CustomerAddress
     private int $id;
     private Customer $customer;         // ManyToOne, CASCADE delete
     private string $label;              // "Home", "Office", etc.
+    private ?string $recipientName;     // Allows "ship to different name"
     private string $addressLine1;
     private ?string $addressLine2;
     private string $city;
@@ -282,6 +350,81 @@ class CustomerAddress
     private bool $isDefault;
 }
 ```
+
+### Cart
+
+```php
+// src/Entity/Cart.php
+class Cart
+{
+    private int $id;
+    private Customer $customer;            // OneToOne — each customer has one persistent cart
+    private Collection $items;             // OneToMany → CartItem
+    private \DateTimeImmutable $updatedAt;
+
+    public function addProduct(Product $product): void
+    public function removeProduct(Product $product): void
+    public function containsProduct(Product $product): bool
+    public function getProductIds(): array
+    public function clear(): void
+}
+```
+
+### CartItem
+
+```php
+// src/Entity/CartItem.php
+class CartItem
+{
+    private int $id;
+    private Cart $cart;                    // ManyToOne
+    private Product $product;              // ManyToOne
+    private \DateTimeImmutable $addedAt;
+}
+```
+
+> **Hybrid cart system:** Guests use session + cookie (`alma_cart`, 30-day expiry,
+> JSON-encoded product IDs). Logged-in customers use a database-backed `Cart` entity.
+> On login, `CartMergeSubscriber` merges the guest session cart into the customer's
+> DB cart automatically.
+
+### ShippingSettings
+
+```php
+// src/Entity/ShippingSettings.php
+class ShippingSettings
+{
+    private int $id;
+    private ShippingTier $tier;            // Standard / Heavy / Set
+    private string $label;
+    private float $shippingCostUsd;
+    private int $maxWeightGrams;
+
+    public static function createFromTier(ShippingTier $tier): self
+}
+```
+
+> **Purpose:** Allows admin to override shipping costs from EasyAdmin instead of
+> editing the `ShippingTier` enum directly. `ShippingCostProvider` checks DB settings
+> first, falls back to the enum defaults.
+
+### SiteSettings
+
+```php
+// src/Entity/SiteSettings.php
+class SiteSettings
+{
+    private int $id;
+    private string $activeCollection = 'all';  // 'all' | 'france' | 'mexico'
+
+    const COLLECTION_ALL = 'all';
+    const COLLECTION_FRANCE = 'france';
+    const COLLECTION_MEXICO = 'mexico';
+}
+```
+
+> **Purpose:** Singleton entity — controls which products are visible on the storefront
+> based on Estelle's current location (France or Mexico collection, or all).
 
 ### ContactMessage
 
@@ -313,12 +456,13 @@ class ContactMessage
 | `OrderItem` | Snapshot of product + price at order time |
 | `Admin` | Admin users — passwordless auth via magic link |
 | `Customer` | Customer accounts — email + password auth, order history, saved addresses |
-| `CustomerAddress` | Customer shipping addresses with default flag |
+| `CustomerAddress` | Customer shipping addresses with default flag + optional recipient name |
+| `Cart` | Persistent cart for logged-in customers (OneToOne with Customer) |
+| `CartItem` | Individual cart item (ManyToOne to Cart + Product) |
 | `ContactMessage` | Contact form submissions — name, email, subject, message, read flag |
 | `ResetPasswordRequest` | Token storage for password reset flow (symfonycasts bundle) |
-| `WishlistItem` | Guest (email) or user + product + notification flag |
-| `ProductReview` | Rating 1-5, text, country, verified purchase flag |
-| `NewsletterSubscriber` | Email + consent + source (popup/footer/checkout) |
+| `ShippingSettings` | Admin-editable shipping tier costs (overrides enum defaults) |
+| `SiteSettings` | Singleton — active collection filter (all / france / mexico) |
 
 ---
 
@@ -331,6 +475,20 @@ class ContactMessage
 - Supported currencies: `USD`, `EUR`, `CAD`, `GBP`, `MXN`
 - Falls back to USD silently if the external API is unavailable
 - Formats output using PHP `NumberFormatter` with correct locale per currency
+
+### CartManager
+
+- **Hybrid cart system:** guests use session + cookie, customers use DB (`Cart` entity)
+- Guest: products stored in session (`_cart` key) + cookie (`alma_cart`, 30-day expiry)
+- Customer: products stored in `Cart` + `CartItem` entities (database)
+- Automatically detects auth state and routes to correct storage
+- `mergeGuestCartIntoCustomer()` — called by `CartMergeSubscriber` on login
+
+### ShippingCostProvider
+
+- Resolves shipping cost for a `ShippingTier`: checks `ShippingSettings` in DB first
+- Falls back to `ShippingTier::shippingCostUsd()` enum default if no DB override
+- Used by `Product::getDisplayPrice()` and checkout total calculation
 
 ### ImageProcessor
 
@@ -381,8 +539,11 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 | Order confirmed | `email/order_confirmation.html.twig` — bilingual (FR/EN), order summary with items |
 | Order shipped | `email/order_shipped.html.twig` — bilingual, clickable tracking link (La Poste/17track), link to tracking page |
 | Order delivered | `email/order_delivered.html.twig` — bilingual, care instructions + Instagram CTA |
+| Order cancelled | `email/order_cancelled.html.twig` — bilingual cancellation notification |
 | Order → Processing (admin) | `email/admin_new_order.html.twig` — FR only, full summary + link to EasyAdmin order |
 | Admin login link | `email/admin_login_link.html.twig` — magic link with 10min expiry |
+| Registration OTP | `email/registration_otp.html.twig` — 6-digit verification code (10min expiry) |
+| Password reset | `email/reset_password.html.twig` — bilingual reset link (1h expiry) |
 
 - Sender: `hello@almastellaparis.com`
 - Email failure does not block the payment flow (caught and logged)
@@ -391,7 +552,6 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 
 ## Security notes
 
-- Stripe webhook signature verified on every webhook call
 - All admin routes protected by `ROLE_ADMIN`
 - CSRF protection on all forms (Symfony default)
 - Product images stored in `public/uploads/products/` with hashed filenames
@@ -412,6 +572,65 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 - Guest checkout remains available — no role required for cart/checkout
 - Remember-me cookie: 30 days on `main` firewall
 - Password reset via `symfonycasts/reset-password-bundle` (1h token, single-use)
+- Registration requires OTP email verification before account creation
+
+---
+
+## Checkout tunnel (3 steps)
+
+The checkout follows a 3-step funnel: **Identify → Checkout → Payment**.
+
+### Step 1 — Identify (`/identify` | `/identification`)
+- **Logged-in customer:** automatically redirected to step 2
+- **Guest:** enters email address
+  - `checkout_identify_controller` checks if email matches an existing account
+  - If account found → prompts to log in (preserves cart)
+  - If new email → proceeds as guest, email stored in session (`_checkout_email`)
+- Email is **readonly** in subsequent steps (cannot be changed)
+
+### Step 2 — Checkout (`/checkout` | `/livraison`)
+- Shipping address form (pre-filled from default `CustomerAddress` if logged in)
+- `address_selector_controller` — dropdown to pick from saved addresses
+- Optional billing address toggle (`billing_toggle_controller`)
+  - If checked: shows separate billing address fields
+  - If unchecked: billing = shipping
+- Order summary with items and totals
+
+### Step 3 — Payment (Stripe Elements)
+- Stripe Payment Element (card + Apple Pay + Google Pay)
+- `stripe_payment_controller` handles mount and confirm
+- 3D Secure redirect handling on return
+
+### Order deduplication
+- Pending orders are reused: if `_pending_order` exists in session and status is
+  still `Pending`, the existing order is **updated** rather than creating a duplicate.
+- Prevents orphaned orders from abandoned checkout attempts.
+
+### Post-payment
+- Order status → `Processing`, confirmation email sent
+- Products marked `isSoldOut`, cart cleared
+- Confirmation page + branded tracking page (`/order/{reference}/tracking`)
+- Post-purchase account creation prompt (guest only)
+
+---
+
+## Registration flow (OTP verification)
+
+Registration uses a **2-step email verification** flow:
+
+1. User fills registration form (email, password, first name, last name)
+2. Server generates a **6-digit OTP code**, stores registration data in session:
+   - `_registration_otp` — the code
+   - `_registration_otp_expires` — `time() + 600` (10 minutes)
+   - `_registration_otp_attempts` — max 5 attempts
+   - `_registration_data` — form data (not yet persisted)
+3. OTP email sent via `registration_otp.html.twig`
+4. User enters code on `/verify-email` (`/verification-email`)
+5. On valid code: `Customer` entity created, auto-login, guest orders linked by email
+6. Resend available at `/verify-email/resend` (`/verification-email/renvoyer`)
+
+> **Why OTP instead of link?** Keeps the user in the same browser tab/flow,
+> especially important when registration is triggered mid-checkout.
 
 ---
 

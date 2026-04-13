@@ -59,7 +59,9 @@ Shall I proceed to Milestone Y?"
   - All fields editable
   - `ShippingTier` displayed as colored badge (green/orange/blue)
   - `basePrice` and computed `displayPrice` both visible in index
-  - Image upload with preview
+  - `compareAtPrice` (optional) — original price for discount display
+  - `availableIn` — JSON array for collection filtering (france / mexico)
+  - Image upload with preview (auto WebP conversion via `ImageProcessor`)
   - `relatedProducts` via `AssociationField` (ManyToMany self-referencing)
   - `isSoldOut` toggle (boolean) — replaces integer `stock` field
   - `soldAt` datetime (nullable) — set when `isSoldOut` toggled to `true`
@@ -97,8 +99,9 @@ Shall I proceed to Milestone Y?"
   - Badges on product cards: "Pièce unique", "Vendue" (greyed out), "Nouvelle" (< 14 days)
   - Sold pieces visible for 14 days after sale, then hidden from catalog
 - [x] Product detail page (`/product/{slug}`):
-  - Large image + thumbnail strip
+  - Large image + thumbnail strip (with `lightbox_controller` for gallery)
   - Name, display price in selected currency
+  - Compare-at price with discount percentage badge (when `compareAtPrice` set)
   - Material badges (Acier inoxydable / Pierre naturelle / Résistant à l'eau)
   - "Pièce unique" badge + "Vendue" state (greyed, "Add to cart" disabled)
   - Shipping info accordion
@@ -106,6 +109,9 @@ Shall I proceed to Milestone Y?"
 - [x] About page (`/about`):
   - Brand story with correct French accents
   - 3 values cards
+- [x] Legal pages:
+  - Legal notice (`/legal-notice` | `/mentions-legales`)
+  - Terms of sale (`/terms-of-sale` | `/conditions-generales-de-vente`)
 - [x] 404 and 500 error pages styled with brand identity
 
 ### Definition of Done
@@ -192,23 +198,40 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 6-8h*
 
 ### Tasks
-- [x] Cart stored in session (no login required at launch)
+- [x] Cart stored in session (guests) + database (logged-in customers):
+  - Guest: session + cookie (`alma_cart`, 30-day expiry)
+  - Customer: `Cart` + `CartItem` entities in database
+  - `CartMergeSubscriber` merges guest cart into customer on login
 - [x] Cart drawer (slide-in, Stimulus controller):
   - Item list with thumbnails
   - No quantity selector (pièce unique = always 1)
   - Item removal
   - Subtotal in selected currency
-- [x] Checkout page (`/checkout`):
-  - Customer info form (name, email)
-  - Shipping address form with country selector
-  - Order summary
-  - Stripe Elements payment form (card + Apple Pay + Google Pay)
+- [x] Checkout tunnel (3-step funnel):
+  - **Step 1 — Identify** (`/identify` | `/identification`):
+    - Logged-in customer: auto-redirect to step 2
+    - Guest: email entry with account detection (`checkout_identify_controller`)
+    - Existing account found → prompt to log in
+    - New email → proceed as guest, email stored in session
+    - Email readonly in subsequent steps
+  - **Step 2 — Checkout** (`/checkout` | `/livraison`):
+    - Shipping address form with country selector
+    - Address selector for logged-in customers (`address_selector_controller`)
+    - Optional separate billing address (`billing_toggle_controller`)
+    - Order summary
+  - **Step 3 — Payment**:
+    - Stripe Elements payment form (card + Apple Pay + Google Pay)
 - [x] Stripe PaymentIntent creation (server-side)
+- [x] Order deduplication: reuse pending order in session instead of creating duplicates
 - [x] Order entity created on successful payment
 - [x] Confirmation page (`/order/{reference}/confirmation`):
   - "Merci ! ✦ Your order is confirmed." message
   - Order summary
   - Estimated delivery note
+- [x] Branded tracking page (`/order/{reference}/tracking`):
+  - Order status progress indicator (Confirmed → Shipped → Delivered)
+  - Tracking number with 17track link
+  - Special handling for Cancelled status (red badge)
 - [x] Order confirmation email sent automatically (Symfony Mailer + Twig template, Mailpit in dev)
 - [x] On successful payment: set `isSoldOut = true` + `soldAt = now()` on purchased products
 - [x] Prevent adding sold-out product to cart (server-side check)
@@ -259,18 +282,27 @@ Shall I proceed to Milestone Y?"
 
 ### Tasks
 - [x] EasyAdmin CRUD for `Order`:
-  - Status workflow: `pending → processing → shipped → delivered`
+  - Status workflow: `pending → processing → shipped → delivered → cancelled`
   - Tracking number field
   - Origin country field (France / Mexico) — affects shipping display only
-  - Customer details visible
+  - Internal notes field (admin-only)
+  - Customer details visible (with link to customer if account exists)
   - Order items list with product snapshots
-- [x] Order status change triggers email via Symfony Mailer (shipped → sends tracking number)
+  - Billing address displayed when different from shipping
+- [x] Order status change triggers email via Symfony Mailer:
+  - Shipped → sends tracking number to customer
+  - Delivered → sends care instructions + Instagram CTA
+  - Cancelled → sends cancellation notification to customer
 - [x] Dashboard stats widget: orders today, revenue this week, low stock alert
+- [x] `ShippingSettingsCrudController` — admin-editable shipping tier costs
+- [x] `SiteSettingsCrudController` — active collection filter (all / france / mexico)
 
 ### Definition of Done
 - Change order status to "shipped" + add tracking number → customer receives email
+- Change order status to "cancelled" → customer receives cancellation email
 - Dashboard stats display correctly
 - Origin country (FR/MX) saved without affecting customer-facing prices
+- Shipping costs editable from EasyAdmin
 
 ---
 
@@ -294,6 +326,7 @@ Shall I proceed to Milestone Y?"
 - [x] Create `CustomerAddress` entity:
   - FK to `Customer`
   - `label` (e.g. "Home", "Office")
+  - `recipientName` (optional — allows "ship to different name")
   - `addressLine1`, `addressLine2`, `city`, `state`, `postalCode`, `country`
   - `isDefault` (boolean)
 - [x] Add optional `customer` FK on `Order` entity (nullable — guest orders have no customer)
@@ -308,9 +341,15 @@ Shall I proceed to Milestone Y?"
 #### Registration & authentication
 - [x] Registration page (`/{_locale}/register` / `/{_locale}/inscription`):
   - Form: email, password, password confirmation, first name, last name
-  - Email validation (unique check)
+  - Email validation (unique check + async `email_check_controller`)
   - Password strength requirement (min 8 chars)
-  - Auto-login after successful registration
+  - **OTP email verification** before account creation:
+    - 6-digit code sent to email (`registration_otp.html.twig`)
+    - Verification page (`/{_locale}/verify-email` / `/{_locale}/verification-email`)
+    - 10-minute expiry, max 5 attempts
+    - Resend option at `/{_locale}/verify-email/resend`
+  - Auto-login after successful OTP verification
+  - Guest orders linked automatically by email on account creation
 - [x] Login page (`/{_locale}/login` / `/{_locale}/connexion`):
   - Email + password form
   - "Forgot password?" link
@@ -341,7 +380,8 @@ Shall I proceed to Milestone Y?"
 
 #### Checkout integration
 - [x] If logged in at checkout: pre-fill shipping form from default address
-- [x] Address selector dropdown if customer has multiple saved addresses
+- [x] Address selector dropdown if customer has multiple saved addresses (`address_selector_controller`)
+- [x] Readonly email field at checkout (from account or identify step)
 - [x] After payment: link `Order` to `Customer` if authenticated
 - [x] Post-purchase account creation prompt on confirmation page:
   *"Create your account to track your order and enjoy exclusive offers"*
