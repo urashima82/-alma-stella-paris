@@ -287,10 +287,11 @@ class CheckoutController extends AbstractController
             return new JsonResponse(['error' => 'payment_not_completed', 'status' => $paymentIntent->status], Response::HTTP_BAD_REQUEST);
         }
 
-        // Mark order as processing
+        // Mark order as processing and assign invoice number
         $order->setStripePaymentStatus($paymentIntent->status);
         $order->setStatus(OrderStatus::Processing);
         $order->setPaidAt(new \DateTimeImmutable());
+        $order->setInvoiceNumber($this->orderRepository->nextInvoiceNumber((int) \date('Y')));
 
         // Mark purchased products as sold (setIsSoldOut auto-sets soldAt)
         foreach ($order->getItems() as $item) {

@@ -98,6 +98,9 @@ class Order
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $internalNotes = null;
 
+    #[ORM\Column(length: 20, unique: true, nullable: true)]
+    private ?string $invoiceNumber = null;
+
     #[ORM\Column(length: 36, unique: true)]
     private string $invoiceToken = '';
 
@@ -551,6 +554,18 @@ class Order
     public function getPublicTrackingPage(): string
     {
         return $this->reference;
+    }
+
+    public function getInvoiceNumber(): ?string
+    {
+        return $this->invoiceNumber;
+    }
+
+    public function setInvoiceNumber(string $invoiceNumber): static
+    {
+        $this->invoiceNumber = $invoiceNumber;
+
+        return $this;
     }
 
     public function getInvoiceToken(): string

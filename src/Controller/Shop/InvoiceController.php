@@ -43,7 +43,7 @@ class InvoiceController extends AbstractController
 
         return new Response($pdf, Response::HTTP_OK, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => \sprintf('inline; filename="invoice-%s.pdf"', $order->getReference()),
+            'Content-Disposition' => \sprintf('inline; filename="invoice-%s.pdf"', $order->getInvoiceNumber() ?? $order->getReference()),
         ]);
     }
 }

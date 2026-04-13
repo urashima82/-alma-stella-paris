@@ -416,6 +416,8 @@ class AppFixtures extends Fixture
             ],
         ];
 
+        $invoiceSequence = 0;
+
         foreach ($orders as $data) {
             $order = new Order();
             $order->setReference($data['reference']);
@@ -439,6 +441,8 @@ class AppFixtures extends Fixture
 
             if ('succeeded' === $data['stripe_status']) {
                 $order->setPaidAt($order->getCreatedAt());
+                ++$invoiceSequence;
+                $order->setInvoiceNumber(\sprintf('FA-%s-%05d', \date('Y'), $invoiceSequence));
             }
 
             $total = 0.0;

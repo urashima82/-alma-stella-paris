@@ -2,7 +2,7 @@
 <html lang="{{ locale }}">
 <head>
     <meta charset="UTF-8">
-    <title>{% if locale == 'fr' %}Facture{% else %}Invoice{% endif %} {{ order.reference }}</title>
+    <title>{% if locale == 'fr' %}Facture{% else %}Invoice{% endif %} {{ order.invoiceNumber ?? order.reference }}</title>
     <style>
         * {
             margin: 0;
@@ -209,7 +209,7 @@
                 <div class="info-block">
                     <div class="info-row">
                         <span class="info-label">{% if locale == 'fr' %}Numéro de facture{% else %}Invoice number{% endif %}</span><br>
-                        <span class="info-value">{{ order.reference }}</span>
+                        <span class="info-value">{{ order.invoiceNumber ?? order.reference }}</span>
                     </div>
                     <br>
                     <div class="info-row">

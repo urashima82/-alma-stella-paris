@@ -169,6 +169,21 @@
                         <dt class="col-5 text-body-secondary fw-normal">Statut</dt>
                         <dd class="col-7">{{ order.stripePaymentStatus ?? '&mdash;' }}</dd>
 
+                        <dt class="col-5 text-body-secondary fw-normal">Payé le</dt>
+                        <dd class="col-7">{{ order.paidAt ? order.paidAt|date('d/m/Y H:i') : '—' }}</dd>
+
+                        {% if order.invoiceNumber %}
+                            <dt class="col-5 text-body-secondary fw-normal">Facture</dt>
+                            <dd class="col-7">
+                                {{ order.invoiceNumber }}
+                                {% set locale = order.customerLocale ?? 'en' %}
+                                <a href="{{ path('shop_invoice_download', {_locale: locale, reference: order.reference, token: order.invoiceToken}) }}"
+                                   target="_blank" rel="noopener" style="color: #C9A84C;" class="ms-1">
+                                    <i class="fa fa-download"></i> Télécharger
+                                </a>
+                            </dd>
+                        {% endif %}
+
                         {% if order.stripePaymentIntentId %}
                             <dt class="col-5 text-body-secondary fw-normal mb-0">Stripe</dt>
                             <dd class="col-7 mb-0">
@@ -191,10 +206,15 @@
                 </div>
                 <div class="content-panel-body">
                     <dl class="row mb-0">
-                        <dt class="col-5 text-body-secondary fw-normal">Cr&eacute;&eacute;e le</dt>
+                        <dt class="col-5 text-body-secondary fw-normal">Créée le</dt>
                         <dd class="col-7">{{ order.createdAt|date('d/m/Y H:i') }}</dd>
 
-                        <dt class="col-5 text-body-secondary fw-normal mb-0">Modifi&eacute;e le</dt>
+                        {% if order.paidAt %}
+                            <dt class="col-5 text-body-secondary fw-normal">Payée le</dt>
+                            <dd class="col-7">{{ order.paidAt|date('d/m/Y H:i') }}</dd>
+                        {% endif %}
+
+                        <dt class="col-5 text-body-secondary fw-normal mb-0">Modifiée le</dt>
                         <dd class="col-7 mb-0">{{ order.updatedAt|date('d/m/Y H:i') }}</dd>
                     </dl>
                 </div>

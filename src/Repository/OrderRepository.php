@@ -68,6 +68,31 @@ class OrderRepository extends ServiceEntityRepository
         return (float) ($result ?? 0);
     }
 
+    /**
+     * Generate the next sequential invoice number for the given year: FA-YYYY-XXXXX.
+     */
+    public function nextInvoiceNumber(int $year): string
+    {
+        $prefix = \sprintf('FA-%d-', $year);
+
+        $lastNumber = $this->createQueryBuilder('o')
+            ->select('o.invoiceNumber')
+            ->where('o.invoiceNumber LIKE :prefix')
+            ->setParameter('prefix', $prefix.'%')
+            ->orderBy('o.invoiceNumber', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if (null === $lastNumber) {
+            return $prefix.'00001';
+        }
+
+        $sequence = (int) \substr((string) $lastNumber, \strlen($prefix));
+
+        return \sprintf('%s%05d', $prefix, $sequence + 1);
+    }
+
     public function countByStatus(OrderStatus $status): int
     {
         return (int) $this->createQueryBuilder('o')

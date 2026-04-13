@@ -49,6 +49,7 @@ final class PendingOrderVerifier
             if ('succeeded' === $paymentIntent->status) {
                 $order->setStatus(OrderStatus::Processing);
                 $order->setPaidAt(new \DateTimeImmutable());
+                $order->setInvoiceNumber($this->orderRepository->nextInvoiceNumber((int) \date('Y')));
 
                 foreach ($order->getItems() as $item) {
                     $product = $item->getProduct();
