@@ -418,6 +418,28 @@ Shall I proceed to Milestone Y?"
 - [x] Invoice download button on order detail page (for Processing/Shipped/Delivered orders)
 - [x] Invoice download link in delivered email (`order_delivered.html.twig`)
 
+#### Invoice improvements
+- [x] Invoice PDF localized FR/EN (labels, legal mentions, product names)
+- [x] Brand logo embedded in invoice header (base64-encoded)
+- [x] Legal footer fixed at bottom of every page (SIRET, address, TVA art. 293 B)
+- [x] `paidAt` field on `Order` — invoice shows payment date instead of creation date
+- [x] Shipping hidden from invoice (free shipping included in product price)
+- [x] `productNameFr` on `OrderItem` — bilingual product name snapshots
+- [x] Localized product names in all email templates and account order detail
+- [x] Localized invoice URL in delivery notification email
+- [x] Free shipping line in customer order detail recap
+
+#### Sequential numbering (French legislation compliant)
+- [x] Invoice numbering: `FA-YYYY-XXXXX` — sequential, gap-free, assigned on payment confirmation
+- [x] Order references: `ASP-YYYY-XXXXX` — sequential via `OrderRepository::nextOrderReference()`
+- [x] `invoiceNumber` field on `Order` (nullable, unique) — separate from order reference
+- [x] Invoice PDF and filename use `invoiceNumber` instead of order reference
+
+#### Admin invoice integration
+- [x] Admin order edit: payment date and invoice number in "Paiement" panel
+- [x] Admin order edit: invoice download link (opens PDF in customer's locale)
+- [x] Admin order edit: payment date in "Dates" panel
+
 #### DataFixtures
 - [x] Sample customer accounts (2-3) with addresses and linked orders
 

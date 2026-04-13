@@ -59,6 +59,7 @@ alma-stella/
 │   │       ├── ContactController.php       # Contact form with honeypot + rate limiter
 │   │       ├── CurrencyController.php      # POST /currency/switch — changes active currency
 │   │       ├── HomeController.php
+│   │       ├── InvoiceController.php       # PDF invoice download (token-verified, locale-aware)
 │   │       ├── LegalController.php         # Legal notice + terms of sale
 │   │       ├── ProductController.php
 │   │       ├── ResetPasswordController.php # Forgot password + reset flow
@@ -75,6 +76,7 @@ alma-stella/
 │   │   ├── ContactMailer.php        # Contact form notification (plain text to admins, reply-to sender)
 │   │   ├── CurrencyConverter.php    # Exchange rates from open.er-api.com, cached 6h
 │   │   ├── ImageProcessor.php       # Resizes and converts images to WebP (GD driver)
+│   │   ├── InvoiceGenerator.php      # PDF invoice generation (dompdf, bilingual, logo + legal footer)
 │   │   ├── OrderMailer.php          # Order emails (confirmation, shipped, delivered, cancelled, admin)
 │   │   ├── PendingOrderVerifier.php # Verifies pending orders against Stripe API
 │   │   ├── ReservationManager.php   # Product reservation: reserve, release, expiry check (15 min)
@@ -109,7 +111,9 @@ alma-stella/
 ├── templates/
 │   ├── admin/
 │   │   ├── dashboard.html.twig
-│   │   └── login.html.twig              # Magic link login page (brand-styled)
+│   │   ├── login.html.twig              # Magic link login page (brand-styled)
+│   │   └── order/
+│   │       └── edit.html.twig           # Custom order edit: info panels + payment/invoice/dates
 │   ├── email/
 │   │   ├── admin_login_link.html.twig    # Magic link email template
 │   │   ├── admin_new_order.html.twig     # New order notification (FR only, to admin)
@@ -119,6 +123,8 @@ alma-stella/
 │   │   ├── order_shipped.html.twig       # Bilingual shipped notification with tracking
 │   │   ├── registration_otp.html.twig    # OTP verification code for registration
 │   │   └── reset_password.html.twig      # Bilingual password reset email
+│   ├── pdf/
+│   │   └── invoice.html.twig           # Invoice PDF template (bilingual, logo, legal footer)
 │   └── shop/
 │       ├── base.html.twig
 │       ├── home/
@@ -243,7 +249,7 @@ enum ShippingTier: string
 class Order
 {
     private int $id;
-    private string $reference;                  // e.g. ASP-2024-00042
+    private string $reference;                  // e.g. ASP-2026-00042 — sequential per year
     private OrderStatus $status;                // Pending / Processing / Shipped / Delivered / Cancelled
     private ?Customer $customer;                // Nullable — guest orders have no customer
     private string $customerEmail;
@@ -274,7 +280,9 @@ class Order
     private ?string $stripePaymentStatus;       // Tracks Stripe PI status
     private ?string $trackingNumber;
     private ?string $internalNotes;             // Admin-only notes
+    private ?string $invoiceNumber;             // e.g. FA-2026-00001 — sequential, assigned on payment confirmation
     private string $invoiceToken;               // UUID v4 — generated at order creation, used for invoice download link
+    private ?\DateTimeImmutable $paidAt;        // Set when Stripe payment confirmed (used as invoice date)
     private Collection $items;                  // OrderItem
     private \DateTimeImmutable $createdAt;
     private \DateTimeImmutable $updatedAt;
@@ -283,6 +291,13 @@ class Order
     public function getFullBillingAddress(): string    // falls back to shipping if no billing
     public function getFullShippingAddress(): string
 }
+```
+
+> **Numbering:** Order references (`ASP-YYYY-XXXXX`) and invoice numbers
+> (`FA-YYYY-XXXXX`) are both sequential, gap-free, generated per year via
+> `OrderRepository`. Invoice numbers are assigned only on payment confirmation
+> (French legislation: art. 242 nonies A du CGI). Reference is assigned at
+> order creation, invoice number at payment.
 ```
 
 ### Admin
@@ -483,7 +498,7 @@ class Reservation
 |---|---|
 | `ProductCategory` | Necklaces, Earrings, Bracelets, Rings, Anklets, Sets |
 | ~~`ProductImage`~~ | **Removed** — replaced by 3 VichUploader fields on `Product`: `thumbnail`, `wornPhoto`, `contextPhoto` |
-| `OrderItem` | Snapshot of product + price at order time |
+| `OrderItem` | Snapshot of product + price + bilingual name at order time |
 | `Admin` | Admin users — passwordless auth via magic link |
 | `Customer` | Customer accounts — email + password auth, order history, saved addresses |
 | `CustomerAddress` | Customer shipping addresses with default flag + optional recipient name |
@@ -599,14 +614,20 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 PDF invoice generation via dompdf (`dompdf/dompdf`):
 
 - **Service:** `App\Service\InvoiceGenerator` — renders Twig template to PDF on the fly
-- **Template:** `templates/pdf/invoice.html.twig` — A4 portrait, brand-styled
-- **Route:** `GET /invoice/{reference}/{token}` (`shop_invoice_download`)
+- **Template:** `templates/pdf/invoice.html.twig` — A4 portrait, brand-styled, fully bilingual FR/EN
+- **Route:** `GET /{_locale}/invoice/{reference}/{token}` (`shop_invoice_download`)
 - **Access control:** token-based (UUID v4 stored as `invoiceToken` on Order entity, generated at order creation)
 - **Available for:** orders with status `Processing`, `Shipped`, or `Delivered`
 - **Access points:**
-  - Delivered email: download button included in `order_delivered.html.twig`
+  - Delivered email: download button with localized URL
   - Customer account: download button on order detail page for eligible orders
-- **Content:** billing address, items with prices, subtotal/shipping/VAT/total, legal mention (art. 293 B CGI)
+  - Admin: download link in order edit "Paiement" panel (in customer's locale)
+- **Content:**
+  - Brand logo (base64-encoded PNG in header)
+  - Invoice number (`FA-YYYY-XXXXX`), payment date, billing address
+  - Items with localized product names and prices (shipping included in unit price)
+  - Shipping: "Offerte" / "Free", TVA $0.00, Total (USD)
+  - Fixed page footer on every page: legal mentions (Estelle Bédé, EI, SIRET 917 539 751, address, TVA art. 293 B CGI)
 
 ---
 
