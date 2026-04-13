@@ -318,15 +318,67 @@
                         {% endfor %}
                     </div>
 
+                    {# ── Coupon code ── #}
+                    <div class="border-t border-alma-hover pt-4 mb-4"
+                         data-controller="coupon-code"
+                         data-coupon-code-validate-url-value="{{ path('shop_coupon_validate', {'_locale': app.request.locale}) }}">
+                        {% if appliedCoupon is defined and appliedCoupon %}
+                            <div class="flex items-center justify-between bg-green-50 border border-green-200 px-3 py-2 text-sm"
+                                 data-coupon-code-target="applied">
+                                <div>
+                                    <span class="font-sans text-green-700 font-medium">{{ appliedCoupon.code }}</span>
+                                    <span class="text-green-600 ml-1">({{ appliedCoupon.label }})</span>
+                                </div>
+                                <button type="button"
+                                        data-action="coupon-code#remove"
+                                        class="text-green-600 hover:text-red-500 text-xs underline cursor-pointer">
+                                    {{ 'checkout.coupon_remove'|trans }}
+                                </button>
+                            </div>
+                            <input type="hidden" name="coupon_code" value="{{ appliedCoupon.code }}" data-coupon-code-target="hiddenInput">
+                        {% else %}
+                            <div data-coupon-code-target="form">
+                                <label class="block text-sm font-sans text-alma-text-muted mb-1">
+                                    {{ 'checkout.coupon_label'|trans }}
+                                </label>
+                                <div class="flex gap-2">
+                                    <input type="text" name="coupon_code"
+                                           value="{{ appliedCouponCode|default('') }}"
+                                           placeholder="{{ 'checkout.coupon_placeholder'|trans }}"
+                                           data-coupon-code-target="input"
+                                           class="flex-1 border border-alma-hover bg-white px-3 py-2 text-sm font-sans text-alma-text
+                                                  focus:border-alma-gold focus:outline-none transition-colors uppercase">
+                                    <button type="button"
+                                            data-action="coupon-code#validate"
+                                            class="bg-alma-text text-white px-4 py-2 text-sm font-sans font-medium
+                                                   hover:bg-alma-text/80 transition-colors cursor-pointer">
+                                        {{ 'checkout.coupon_apply'|trans }}
+                                    </button>
+                                </div>
+                                <p data-coupon-code-target="error" class="text-red-500 text-xs mt-1 hidden"></p>
+                                <p data-coupon-code-target="success" class="text-green-600 text-xs mt-1 hidden"></p>
+                            </div>
+                            <input type="hidden" name="coupon_code" value="" data-coupon-code-target="hiddenInput">
+                        {% endif %}
+                    </div>
+
                     <div class="border-t border-alma-hover pt-4 space-y-2">
                         <div class="flex justify-between text-sm font-sans">
                             <span class="text-alma-text-muted">{{ 'checkout.shipping_label'|trans }}</span>
                             <span class="text-alma-text">{{ 'checkout.shipping_included'|trans }}</span>
                         </div>
+                        {% if discountAmountUsd is defined and discountAmountUsd > 0 %}
+                            <div class="flex justify-between text-sm font-sans">
+                                <span class="text-green-600">{{ 'checkout.discount'|trans }}</span>
+                                <span class="text-green-600 font-medium">
+                                    -{{ discountConverted|price_format(currency) }}
+                                </span>
+                            </div>
+                        {% endif %}
                         <div class="flex justify-between font-sans">
                             <span class="text-alma-text font-medium">{{ 'checkout.total'|trans }}</span>
                             <span class="text-lg font-semibold text-alma-text">
-                                {{ subtotalConverted|price_format(currency) }}
+                                {{ finalTotalConverted|default(subtotalConverted)|price_format(currency) }}
                             </span>
                         </div>
                     </div>

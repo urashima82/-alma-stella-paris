@@ -18,6 +18,7 @@ alma-stella/
 │       ├── billing_toggle_controller.js     # Shows/hides billing address fields (checkbox toggle)
 │       ├── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
 │       ├── checkout_identify_controller.js  # Email detection: existing account → login, new → guest
+│       ├── coupon_code_controller.js        # Async coupon code validation at checkout
 │       ├── csrf_protection_controller.js    # CSRF token handling on forms
 │       ├── currency_selector_controller.js  # Dropdown toggle for currency selector
 │       ├── email_check_controller.js        # Async email existence check on registration form
@@ -47,6 +48,7 @@ alma-stella/
 │   │   │   ├── OrderItemCrudController.php       # OrderItem sub-form (read-only)
 │   │   │   ├── ProductCategoryCrudController.php # Category management
 │   │   │   ├── ProductCrudController.php         # Product management with image uploads
+│   │   │   ├── PromotionCrudController.php      # Promotion management with targeting + stats
 │   │   │   ├── ShippingSettingsCrudController.php # Shipping tier cost overrides
 │   │   │   └── SiteSettingsCrudController.php    # Site-wide settings (active collection)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
@@ -68,7 +70,9 @@ alma-stella/
 │   ├── Enum/
 │   │   ├── AdminRole.php         # SuperAdmin / Admin
 │   │   ├── ContactSubject.php    # General / Order / Return / Collaboration / Other
+│   │   ├── DiscountType.php      # Percentage / FixedAmount
 │   │   ├── OrderStatus.php       # Pending / Processing / Shipped / Delivered / Cancelled
+│   │   ├── PromotionType.php     # ProductAutomatic / CartAutomatic / CartCode / PrivateLink
 │   │   └── ShippingTier.php      # Standard / Heavy / Set
 │   ├── Repository/
 │   ├── Service/
@@ -79,13 +83,15 @@ alma-stella/
 │   │   ├── InvoiceGenerator.php      # PDF invoice generation (dompdf, bilingual, logo + legal footer)
 │   │   ├── OrderMailer.php          # Order emails (confirmation, shipped, delivered, cancelled, admin)
 │   │   ├── PendingOrderVerifier.php # Verifies pending orders against Stripe API
+│   │   ├── PromotionEngine.php      # Promotion calculation: product/cart promos, coupon validation, usage tracking
 │   │   ├── ReservationManager.php   # Product reservation: reserve, release, expiry check (15 min)
 │   │   ├── ShippingCostProvider.php # Shipping cost resolution (DB settings → enum fallback)
 │   │   └── StripeService.php        # PaymentIntent creation & retrieval
 │   ├── Twig/
 │   │   ├── CurrencyExtension.php         # |price filter — formats amount in selected currency
 │   │   ├── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
-│   │   ├── ShippingExtension.php         # Shipping-related Twig helpers
+│   │   ├── PromotionExtension.php        # product_promo(), product_promo_price(), product_compare_at_price()
+│   │   ├── ShippingExtension.php         # Shipping-related Twig helpers (promo-aware display_price)
 │   │   └── TrackingExtension.php         # tracking_url() — generates 17track URL from tracking number
 │   ├── Security/
 │   │   ├── AdminAuthenticationEntryPoint.php     # Redirects unauthenticated to /admin/login
@@ -98,7 +104,8 @@ alma-stella/
 │   │   ├── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
 │   │   ├── ImageUploadSubscriber.php     # Processes product images after EasyAdmin persist/update
 │   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
-│   │   └── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
+│   │   ├── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
+│   │   └── PromoBannerSubscriber.php     # Captures ?promo=CODE, stores in session/cookie, shows gold banner
 │   ├── Message/
 │   │   ├── CleanExpiredReservationsMessage.php
 │   │   └── VerifyPendingOrdersMessage.php
@@ -509,6 +516,57 @@ class Reservation
 | `ResetPasswordRequest` | Token storage for password reset flow (symfonycasts bundle) |
 | `ShippingSettings` | Admin-editable shipping tier costs (overrides enum defaults) |
 | `SiteSettings` | Singleton — active collection filter (all / france / mexico) |
+| `Promotion` | Promotions & coupons — product auto, cart auto, code, private link |
+| `PromotionUsage` | Tracks promotion usage per order (discount amount, email, timestamp) |
+
+---
+
+### Promotion
+
+```php
+// src/Entity/Promotion.php
+class Promotion
+{
+    private int $id;
+    private string $name;                       // Admin label
+    private ?string $code;                      // Null for auto promos, e.g. "BIENVENUE10" for codes
+    private PromotionType $type;                // ProductAutomatic / CartAutomatic / CartCode / PrivateLink
+    private DiscountType $discountType;         // Percentage / FixedAmount
+    private float $discountValue;               // 10 = 10% or $10
+    private bool $isActive;
+    private bool $isCumulable;                  // Can stack with other promos
+    private bool $overridesCompareAtPrice;      // If false, skip products with existing compareAtPrice
+    private ?\DateTimeImmutable $startsAt;
+    private ?\DateTimeImmutable $endsAt;
+    private ?int $maxUsages;                    // Total usage limit
+    private ?int $maxUsagesPerEmail;            // Per-customer limit
+    private ?float $minimumAmountUsd;           // Minimum cart amount
+    private Collection $products;               // ManyToMany → Product (targeted)
+    private Collection $categories;             // ManyToMany → ProductCategory (targeted)
+    private Collection $usages;                 // OneToMany → PromotionUsage
+    private int $usageCount;                    // Auto-incremented counter
+    private float $revenueGeneratedUsd;         // Revenue tracked
+    private ?\DateTimeImmutable $lastUsedAt;
+
+    public function isCurrentlyValid(): bool    // Active + within date range
+    public function hasReachedMaxUsages(): bool
+    public function appliesToProduct(Product $product): bool  // Empty lists = applies to all
+    public function canApplyToProductWithCompareAtPrice(Product $product): bool
+    public function calculateDiscount(float $price): float
+    public function getDiscountLabel(): string  // e.g. "-10%" or "-$5.00"
+}
+```
+
+> **Promotion types:**
+> - `ProductAutomatic`: applies to individual products, generates dynamic strikethrough prices
+> - `CartAutomatic`: applies to cart subtotal when conditions are met, no code required
+> - `CartCode`: requires customer to enter a code at checkout step 2
+> - `PrivateLink`: same as CartCode but pre-applied via `?promo=CODE` URL param + gold banner
+>
+> **Cumul logic:** `isCumulable = false` → best single offer wins. `isCumulable = true` → stacks.
+>
+> **CompareAtPrice interaction:** if `overridesCompareAtPrice = false`, the promo does not apply
+> to products that already have a manual `compareAtPrice` set.
 
 ---
 

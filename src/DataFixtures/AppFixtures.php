@@ -11,10 +11,13 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
+use App\Entity\Promotion;
 use App\Entity\ShippingSettings;
 use App\Entity\SiteSettings;
 use App\Enum\AdminRole;
+use App\Enum\DiscountType;
 use App\Enum\OrderStatus;
+use App\Enum\PromotionType;
 use App\Enum\ShippingTier;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -37,6 +40,7 @@ class AppFixtures extends Fixture
         $products = $this->loadProducts($manager, $categories);
         $this->linkRelatedProducts($products);
         $this->loadOrders($manager, $products, $customers);
+        $this->loadPromotions($manager, $products, $categories);
 
         $manager->flush();
     }
@@ -509,5 +513,64 @@ class AppFixtures extends Fixture
             $order->setTotalUsd($total);
             $manager->persist($order);
         }
+    }
+
+    /**
+     * @param Product[]         $products
+     * @param ProductCategory[] $categories
+     */
+    private function loadPromotions(ObjectManager $manager, array $products, array $categories): void
+    {
+        // 1. Product automatic: -15% on necklaces
+        $necklacePromo = new Promotion();
+        $necklacePromo->setName('Promo colliers -15%');
+        $necklacePromo->setType(PromotionType::ProductAutomatic);
+        $necklacePromo->setDiscountType(DiscountType::Percentage);
+        $necklacePromo->setDiscountValue(15.00);
+        $necklacePromo->setIsActive(true);
+        $necklacePromo->setOverridesCompareAtPrice(false);
+        $necklacePromo->setStartsAt(new \DateTimeImmutable('-7 days'));
+        $necklacePromo->setEndsAt(new \DateTimeImmutable('+30 days'));
+        foreach ($categories as $cat) {
+            if ('necklaces' === $cat->getSlug()) {
+                $necklacePromo->addCategory($cat);
+            }
+        }
+        $manager->persist($necklacePromo);
+
+        // 2. Cart automatic: -$5 over $80
+        $cartAutoPromo = new Promotion();
+        $cartAutoPromo->setName('$5 offerts dès $80');
+        $cartAutoPromo->setType(PromotionType::CartAutomatic);
+        $cartAutoPromo->setDiscountType(DiscountType::FixedAmount);
+        $cartAutoPromo->setDiscountValue(5.00);
+        $cartAutoPromo->setIsActive(true);
+        $cartAutoPromo->setIsCumulable(true);
+        $cartAutoPromo->setMinimumAmountUsd(80.00);
+        $manager->persist($cartAutoPromo);
+
+        // 3. Cart code: BIENVENUE10 — 10% off
+        $codePromo = new Promotion();
+        $codePromo->setName('Code bienvenue 10%');
+        $codePromo->setCode('BIENVENUE10');
+        $codePromo->setType(PromotionType::CartCode);
+        $codePromo->setDiscountType(DiscountType::Percentage);
+        $codePromo->setDiscountValue(10.00);
+        $codePromo->setIsActive(true);
+        $codePromo->setMaxUsagesPerEmail(1);
+        $manager->persist($codePromo);
+
+        // 4. Private link: FLASH20 — 20% off, limited to 50 uses
+        $privateLinkPromo = new Promotion();
+        $privateLinkPromo->setName('Vente flash Instagram -20%');
+        $privateLinkPromo->setCode('FLASH20');
+        $privateLinkPromo->setType(PromotionType::PrivateLink);
+        $privateLinkPromo->setDiscountType(DiscountType::Percentage);
+        $privateLinkPromo->setDiscountValue(20.00);
+        $privateLinkPromo->setIsActive(true);
+        $privateLinkPromo->setMaxUsages(50);
+        $privateLinkPromo->setStartsAt(new \DateTimeImmutable('-1 day'));
+        $privateLinkPromo->setEndsAt(new \DateTimeImmutable('+14 days'));
+        $manager->persist($privateLinkPromo);
     }
 }

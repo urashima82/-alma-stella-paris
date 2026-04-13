@@ -15,6 +15,7 @@ use App\Repository\OrderRepository;
 use App\Service\CartManager;
 use App\Service\CurrencyConverter;
 use App\Service\OrderMailer;
+use App\Service\PromotionEngine;
 use App\Service\ReservationManager;
 use App\Service\ShippingCostProvider;
 use App\Service\StripeService;
@@ -38,6 +39,7 @@ class CheckoutController extends AbstractController
         private readonly StripeService $stripeService,
         private readonly OrderMailer $orderMailer,
         private readonly ReservationManager $reservationManager,
+        private readonly PromotionEngine $promotionEngine,
         private readonly LoggerInterface $logger,
         private readonly string $stripePublicKey,
     ) {
@@ -125,6 +127,13 @@ class CheckoutController extends AbstractController
             $errors = $this->validateCheckoutForm($request);
 
             if ([] === $errors) {
+                // Evaluate promotions for the order
+                $couponCodeForOrder = (string) $request->request->get('coupon_code', '') ?: $request->getSession()->get('_promo_code');
+                $emailForOrder = $this->getCheckoutEmail($request);
+                $promoResult = $this->promotionEngine->evaluateCartPromotions($products, $subtotalUsd, $couponCodeForOrder, $emailForOrder);
+                $orderDiscountUsd = $promoResult['totalDiscount'];
+                $orderFinalTotal = \max(0.0, $subtotalUsd - $orderDiscountUsd);
+
                 // Reuse existing Pending order if available, otherwise create new
                 $pendingRef = $request->getSession()->get('_pending_order');
                 $existingOrder = null !== $pendingRef
@@ -132,11 +141,21 @@ class CheckoutController extends AbstractController
                     : null;
 
                 if (null !== $existingOrder && OrderStatus::Pending === $existingOrder->getStatus()) {
-                    $order = $this->updateExistingOrder($existingOrder, $request, $products, $subtotalUsd);
+                    $order = $this->updateExistingOrder($existingOrder, $request, $products, $orderFinalTotal);
                 } else {
-                    $order = $this->createOrder($request, $products, $subtotalUsd);
+                    $order = $this->createOrder($request, $products, $orderFinalTotal);
                     $this->entityManager->persist($order);
                 }
+
+                // Store discount info on order
+                $order->setDiscountAmountUsd($orderDiscountUsd);
+                $order->setPromotionCode(\is_string($couponCodeForOrder) && '' !== $couponCodeForOrder ? \strtoupper($couponCodeForOrder) : null);
+
+                // Store promo result in session for tracking on payment confirmation
+                $request->getSession()->set('_order_promotions', \array_map(
+                    static fn (array $entry) => ['id' => $entry['promotion']->getId(), 'discount' => $entry['discount']],
+                    $promoResult['promotions'],
+                ));
 
                 $this->entityManager->flush();
 
@@ -180,16 +199,39 @@ class CheckoutController extends AbstractController
             }
         }
 
+        // Evaluate coupon code (from session/banner or form submission)
+        $couponCode = $request->getSession()->get('_promo_code');
+        $customerEmail = $this->getCheckoutEmail($request);
+        $cartPromoResult = $this->promotionEngine->evaluateCartPromotions($products, $subtotalUsd, $couponCode, $customerEmail);
+        $discountAmountUsd = $cartPromoResult['totalDiscount'];
+        $finalTotalUsd = \max(0.0, $subtotalUsd - $discountAmountUsd);
+
+        // Build applied coupon info for template
+        $appliedCoupon = null;
+        if (null !== $couponCode && '' !== $couponCode) {
+            $promo = $this->promotionEngine->validateCouponCode($couponCode, $subtotalUsd, $customerEmail);
+            if (null !== $promo) {
+                $appliedCoupon = [
+                    'code' => $couponCode,
+                    'label' => $promo->getDiscountLabel(),
+                ];
+            }
+        }
+
         return $this->render('shop/checkout/index.html.twig', [
             'items' => $items,
             'subtotalUsd' => $subtotalUsd,
             'subtotalConverted' => $this->currencyConverter->convert($subtotalUsd, $currency),
+            'discountAmountUsd' => $discountAmountUsd,
+            'discountConverted' => $this->currencyConverter->convert($discountAmountUsd, $currency),
+            'finalTotalConverted' => $this->currencyConverter->convert($finalTotalUsd, $currency),
             'currency' => $currency,
             'errors' => $errors,
             'formData' => $this->getFormData($request),
             'countries' => self::getShippingCountries($request->getLocale()),
             'customerAddresses' => $customerAddresses,
             'reservationSeconds' => $this->reservationManager->getRemainingSeconds(),
+            'appliedCoupon' => $appliedCoupon,
         ]);
     }
 
@@ -318,6 +360,22 @@ class CheckoutController extends AbstractController
             $this->logger->error('Admin notification email failed: {message}', ['message' => $e->getMessage()]);
         }
 
+        // Track promotion usage
+        $sessionPromos = $request->getSession()->get('_order_promotions', []);
+        if (\is_array($sessionPromos) && [] !== $sessionPromos) {
+            $promoRepo = $this->entityManager->getRepository(\App\Entity\Promotion::class);
+            $appliedPromotions = [];
+            foreach ($sessionPromos as $entry) {
+                $promo = $promoRepo->find($entry['id']);
+                if (null !== $promo) {
+                    $appliedPromotions[] = ['promotion' => $promo, 'discount' => (float) $entry['discount']];
+                }
+            }
+            if ([] !== $appliedPromotions) {
+                $this->promotionEngine->recordUsage($order, $appliedPromotions);
+            }
+        }
+
         // Release reservations for purchased products
         foreach ($order->getItems() as $item) {
             $product = $item->getProduct();
@@ -330,6 +388,10 @@ class CheckoutController extends AbstractController
         $this->cartManager->clear();
         $request->getSession()->remove('_pending_order');
         $request->getSession()->remove('_checkout_email');
+        $request->getSession()->remove('_order_promotions');
+        $request->getSession()->remove('_promo_code');
+        $request->getSession()->remove('_promo_banner_label');
+        $request->getSession()->remove('_promo_banner_name');
         $confirmationRoute = 'fr' === $locale ? 'shop_order_confirmation_fr' : 'shop_order_confirmation';
 
         return new JsonResponse([
@@ -722,6 +784,52 @@ class CheckoutController extends AbstractController
         \asort($countries, \SORT_LOCALE_STRING);
 
         return $countries;
+    }
+
+    #[Route(
+        path: '/coupon/validate',
+        name: 'shop_coupon_validate',
+        methods: ['POST'],
+    )]
+    public function validateCoupon(Request $request): JsonResponse
+    {
+        $data = \json_decode($request->getContent(), true);
+        $code = \strtoupper(\trim((string) ($data['code'] ?? '')));
+
+        if ('' === $code) {
+            return $this->json(['valid' => false, 'message' => 'checkout.coupon_invalid']);
+        }
+
+        $subtotalUsd = $this->cartManager->getSubtotalUsd();
+        $email = $this->getCheckoutEmail($request);
+
+        $promo = $this->promotionEngine->validateCouponCode($code, $subtotalUsd, $email);
+
+        if (null === $promo) {
+            return $this->json(['valid' => false, 'message' => 'checkout.coupon_invalid']);
+        }
+
+        // Store validated code in session
+        $request->getSession()->set('_promo_code', $code);
+        $request->getSession()->set('_promo_banner_label', $promo->getDiscountLabel());
+        $request->getSession()->set('_promo_banner_name', $promo->getName());
+
+        return $this->json([
+            'valid' => true,
+            'message' => 'checkout.coupon_applied',
+            'label' => $promo->getDiscountLabel(),
+        ]);
+    }
+
+    private function getCheckoutEmail(Request $request): ?string
+    {
+        $user = $this->getUser();
+
+        if ($user instanceof Customer) {
+            return $user->getEmail();
+        }
+
+        return $request->getSession()->get('_checkout_email');
     }
 
     /**

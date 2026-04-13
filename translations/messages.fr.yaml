@@ -187,6 +187,16 @@ checkout:
     billing_same_as_shipping: "Même adresse que la livraison"
     billing_different: "Utiliser une adresse de facturation différente"
     billing_label_recipient_name: "Nom pour la facturation"
+    coupon_label: "Code promo"
+    coupon_placeholder: "Entrez votre code"
+    coupon_apply: "Appliquer"
+    coupon_remove: "Supprimer"
+    coupon_invalid: "Ce code n'est pas valide."
+    coupon_expired: "Ce code a expiré."
+    coupon_max_reached: "Ce code a atteint sa limite d'utilisation."
+    coupon_minimum: "Montant minimum de commande non atteint."
+    coupon_applied: "Code appliqué !"
+    discount: "Réduction"
     continue_to_payment: "Continuer vers le paiement"
     payment_title: "Paiement | Alma Stella Paris"
     payment_heading: "Paiement"
@@ -506,6 +516,10 @@ contact:
         message_required: "Veuillez saisir votre message."
         message_too_short: "Votre message doit contenir au moins 10 caractères."
         rate_limited: "Vous avez envoyé trop de messages. Veuillez réessayer plus tard."
+
+# ── Promotions ──
+promo:
+    banner_text: "Code %code% appliqué — %discount% sur votre commande"
 
 # ── Language switcher ──
 locale:

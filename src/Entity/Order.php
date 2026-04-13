@@ -83,6 +83,12 @@ class Order
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private string $totalUsd = '0.00';
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private string $discountAmountUsd = '0.00';
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $promotionCode = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripePaymentIntentId = null;
 
@@ -407,6 +413,30 @@ class Order
     public function setTotalUsd(float $totalUsd): static
     {
         $this->totalUsd = \number_format($totalUsd, 2, '.', '');
+
+        return $this;
+    }
+
+    public function getDiscountAmountUsd(): float
+    {
+        return (float) $this->discountAmountUsd;
+    }
+
+    public function setDiscountAmountUsd(float $discountAmountUsd): static
+    {
+        $this->discountAmountUsd = \number_format($discountAmountUsd, 2, '.', '');
+
+        return $this;
+    }
+
+    public function getPromotionCode(): ?string
+    {
+        return $this->promotionCode;
+    }
+
+    public function setPromotionCode(?string $promotionCode): static
+    {
+        $this->promotionCode = $promotionCode;
 
         return $this;
     }

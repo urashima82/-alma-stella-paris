@@ -6,6 +6,7 @@ namespace App\Twig;
 
 use App\Entity\Product;
 use App\Enum\ShippingTier;
+use App\Service\PromotionEngine;
 use App\Service\ShippingCostProvider;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -14,6 +15,7 @@ class ShippingExtension extends AbstractExtension
 {
     public function __construct(
         private readonly ShippingCostProvider $shippingCostProvider,
+        private readonly PromotionEngine $promotionEngine,
     ) {
     }
 
@@ -40,6 +42,13 @@ class ShippingExtension extends AbstractExtension
 
     public function getDisplayPrice(Product $product): float
     {
+        // If there's an active product promotion, return the discounted price
+        $promoPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
+
+        if (null !== $promoPrice) {
+            return $promoPrice;
+        }
+
         return $this->shippingCostProvider->getDisplayPrice(
             $product->getBasePrice(),
             $product->getShippingTier(),
@@ -48,20 +57,11 @@ class ShippingExtension extends AbstractExtension
 
     public function getDisplayCompareAtPrice(Product $product): ?float
     {
-        $compareAtPrice = $product->getCompareAtPrice();
-
-        if (null === $compareAtPrice) {
-            return null;
-        }
-
-        return $this->shippingCostProvider->getDisplayPrice(
-            $compareAtPrice,
-            $product->getShippingTier(),
-        );
+        return $this->promotionEngine->getEffectiveCompareAtPrice($product);
     }
 
     public function getDiscountPercent(Product $product): ?int
     {
-        return $product->getDiscountPercent();
+        return $this->promotionEngine->getEffectiveDiscountPercent($product);
     }
 }

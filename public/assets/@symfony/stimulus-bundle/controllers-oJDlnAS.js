@@ -1,0 +1,16 @@
+import controller_0 from "../../controllers/checkout_identify_controller.js";
+import controller_1 from "../../controllers/billing_toggle_controller.js";
+import controller_2 from "../../controllers/address_selector_controller.js";
+import controller_3 from "../../controllers/email_check_controller.js";
+import controller_4 from "../../controllers/coupon_code_controller.js";
+import controller_5 from "../../controllers/hello_controller.js";
+import controller_6 from "../../controllers/lightbox_controller.js";
+import controller_7 from "../../controllers/stripe_payment_controller.js";
+import controller_8 from "../../controllers/mobile_menu_controller.js";
+import controller_9 from "../../controllers/cart_drawer_controller.js";
+import controller_10 from "../../controllers/currency_selector_controller.js";
+import controller_11 from "../../controllers/reservation_timer_controller.js";
+import controller_12 from "../../controllers/account_dropdown_controller.js";
+export const eagerControllers = {"checkout-identify": controller_0, "billing-toggle": controller_1, "address-selector": controller_2, "email-check": controller_3, "coupon-code": controller_4, "hello": controller_5, "lightbox": controller_6, "stripe-payment": controller_7, "mobile-menu": controller_8, "cart-drawer": controller_9, "currency-selector": controller_10, "reservation-timer": controller_11, "account-dropdown": controller_12};
+export const lazyControllers = {"csrf-protection": () => import("../../controllers/csrf_protection_controller.js")};
+export const isApplicationDebug = true;

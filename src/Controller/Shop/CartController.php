@@ -7,6 +7,7 @@ namespace App\Controller\Shop;
 use App\Repository\ProductRepository;
 use App\Service\CartManager;
 use App\Service\CurrencyConverter;
+use App\Service\PromotionEngine;
 use App\Service\ShippingCostProvider;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,6 +22,7 @@ class CartController extends AbstractController
         private readonly ProductRepository $productRepository,
         private readonly CurrencyConverter $currencyConverter,
         private readonly ShippingCostProvider $shippingCostProvider,
+        private readonly PromotionEngine $promotionEngine,
     ) {
     }
 
@@ -80,9 +82,11 @@ class CartController extends AbstractController
         $items = [];
         foreach ($products as $product) {
             $displayPrice = $this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier());
-            $convertedPrice = $this->currencyConverter->convert($displayPrice, $currency);
+            $promoPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
+            $effectivePrice = $promoPrice ?? $displayPrice;
+            $convertedPrice = $this->currencyConverter->convert($effectivePrice, $currency);
 
-            $items[] = [
+            $item = [
                 'id' => $product->getId(),
                 'name' => 'fr' === $locale ? $product->getNameFr() : $product->getName(),
                 'priceFormatted' => $this->formatPrice($convertedPrice, $currency),
@@ -90,7 +94,17 @@ class CartController extends AbstractController
                     ? '/uploads/products/'.$product->getThumbnail()
                     : null,
                 'slug' => 'fr' === $locale ? $product->getSlugFr() : $product->getSlug(),
+                'hasDiscount' => null !== $promoPrice,
             ];
+
+            if (null !== $promoPrice) {
+                $item['originalPriceFormatted'] = $this->formatPrice(
+                    $this->currencyConverter->convert($displayPrice, $currency),
+                    $currency,
+                );
+            }
+
+            $items[] = $item;
         }
 
         $subtotalUsd = $this->cartManager->getSubtotalUsd();

@@ -23,6 +23,27 @@
           data-controller="cart-drawer"
           data-cart-drawer-content-url-value="{{ path('cart_content') }}"
           data-cart-drawer-locale-value="{{ app.request.locale }}">
+        {# ── Promo banner (private link / pre-applied coupon) ── #}
+        {% if app.session.get('_promo_code') %}
+            <div class="bg-alma-gold text-white text-center py-2 px-6 text-xs font-sans tracking-wide relative z-30"
+                 id="promo-banner">
+                <span>
+                    {{ 'promo.banner_text'|trans({
+                        '%code%': app.session.get('_promo_code'),
+                        '%discount%': app.session.get('_promo_banner_label', '')
+                    }) }}
+                </span>
+                <button type="button"
+                        onclick="this.parentElement.remove()"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors cursor-pointer"
+                        aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        {% endif %}
+
         {% block header %}
             <header class="sticky top-0 z-20 bg-alma-bg border-b border-alma-gold-muted" data-controller="mobile-menu" data-action="keydown@document->mobile-menu#closeOnKeydown">
                 <nav class="relative max-w-7xl mx-auto px-6 h-12 md:h-14 flex items-center justify-between">

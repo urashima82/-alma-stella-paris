@@ -522,13 +522,142 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+## Milestone 9 — Promotions & discount codes
+*Estimated effort: 8-10h*
+
+> **Full-featured promotion system**: automatic product discounts, automatic cart
+> discounts, manual coupon codes, and private links with pre-applied codes.
+> Highly configurable from EasyAdmin with usage tracking and analytics.
+
+### Tasks
+
+#### Entities & enums
+- [x] `PromotionType` enum: `ProductAutomatic` / `CartAutomatic` / `CartCode` / `PrivateLink`
+- [x] `DiscountType` enum: `Percentage` / `FixedAmount`
+- [x] `Promotion` entity with full configuration fields
+- [x] `PromotionUsage` entity for usage tracking
+- [x] Add `discountAmountUsd` + `promotionCode` on `Order`
+- [x] Add `discountAmountUsd` on `OrderItem`
+- [x] `PromotionRepository` with active promo queries
+- [x] Update initial migration with all new tables/columns
+
+#### PromotionEngine service
+- [x] `PromotionEngine` service — central discount calculation logic
+- [x] Product-level auto promotions: find applicable promos, calculate discounted price
+- [x] Cart-level auto promotions: evaluate conditions, apply best discount
+- [x] Code validation: check code validity, usage limits, email limits, minimum amount
+- [x] Cumul logic: `isCumulable` flag determines stacking behavior
+- [x] `compareAtPrice` interaction: `overridesCompareAtPrice` flag per promotion
+
+#### EasyAdmin
+- [x] `PromotionCrudController` with full form (all configurable fields)
+- [x] Product/category restriction via `AssociationField`
+- [x] Stats display on promotion detail: usage count, revenue, last used
+- [x] Menu entry "Promotions" in admin sidebar
+
+#### Checkout integration
+- [x] Coupon code input field at checkout step 2 (order summary)
+- [x] `coupon_code_controller` Stimulus controller for async validation
+- [x] Apply discount to order total before Stripe PaymentIntent creation
+- [x] Track promotion usage on successful payment (`PromotionUsage` created)
+- [x] Update `PromotionEngine` stats (usage count, revenue, lastUsedAt)
+
+#### Catalog & product display (prix barrés)
+- [x] Auto product promotions generate dynamic strikethrough prices on catalog
+- [x] Product detail page shows original price barré + discounted price + badge
+- [x] `compareAtPrice` coexists: promo takes priority if `overridesCompareAtPrice = true`
+- [x] Cart drawer shows per-item discount when applicable
+
+#### Private link & banner
+- [x] `?promo=CODE` query param stores code in session + cookie
+- [x] `PromoBannerSubscriber` injects persistent gold banner when promo code is active
+- [x] Banner text: "Code {CODE} appliqué — {discount label} sur votre commande"
+- [x] Banner dismissible but code stays in session
+
+#### DataFixtures
+- [x] Sample promotions (1 product auto, 1 cart auto, 1 code, 1 private link)
+
+### Definition of Done
+- Create promotion in EasyAdmin with all configuration options
+- Product auto promo → prix barré visible on catalog + product detail
+- Cart auto promo → discount line visible in checkout recap
+- Enter valid code at checkout → discount applied, total updated
+- Enter expired/maxed-out code → clear error message
+- `?promo=FLASH20` URL → gold banner + code pre-applied at checkout
+- `isCumulable = false` → best single offer retained
+- `overridesCompareAtPrice = false` → promo skips products with existing compareAtPrice
+- Promotion usage tracked per order, stats visible in EasyAdmin
+- All pages bilingual (FR/EN), French accents correct
+
+---
+
+## Milestone 10 — Social publishing
+*Estimated effort: 4-5h*
+
+### Tasks
+- [ ] Pinterest API client (`PinterestApiClient` service)
+- [ ] TikTok Shop API client (`TikTokShopApiClient` service)
+- [ ] Instagram deep link generator
+- [ ] `SocialPublisher` service orchestrating all three
+- [ ] EasyAdmin action button "Publish to social media" on product detail + index
+- [ ] Modal with checkboxes (Pinterest ☑ / TikTok Shop ☑ / Instagram ☑)
+- [ ] Flash messages per channel (success/error)
+- [ ] `social_publish_log` table tracking publish history per product per channel
+
+### Definition of Done
+- Click "Publish to social media" on a product → modal appears
+- Deselect Pinterest → only TikTok and Instagram are processed
+- Pinterest: Pin appears in the connected Pinterest Business account
+- TikTok Shop: product appears in the TikTok Seller catalog
+- Instagram: deep link opens the Instagram app with pre-filled caption
+- Publish history visible on product detail page in EasyAdmin
+
+---
+
+## Milestone 11 — Automated emails & reviews
+*Estimated effort: 3-4h*
+
+### Tasks
+- [ ] Abandoned cart detection (session-based, Symfony Scheduler cron command)
+- [ ] Abandoned cart email with product images (Symfony Mailer + Twig template)
+- [ ] Post-purchase follow-up email (J+14 via Symfony Scheduler)
+
+> **No newsletter, no Brevo.** Communication strategy relies on social media
+> (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
+> Symfony Mailer + SMTP.
+
+### Definition of Done
+- Add to cart, wait for simulated 1h timeout → abandoned cart email received in Mailpit
+- Submit a review via post-purchase email link → review appears on product page
+- Scheduler cron commands run correctly via `php bin/console messenger:consume`
+
+---
+
+## Milestone 12 — SEO & performance
+*Estimated effort: 3h*
+
+### Tasks
+- [ ] Dynamic `<title>` and `<meta description>` on all public pages
+- [ ] Schema.org `Product` structured data on product detail pages
+- [ ] Schema.org `BreadcrumbList` on catalog and product pages
+- [ ] Auto-generated XML sitemap (`/sitemap.xml`)
+- [ ] Open Graph tags for social sharing
+- [ ] Image optimization (WebP conversion via Liip Imagine)
+- [ ] Lighthouse score ≥ 90 on mobile for homepage
+
+### Definition of Done
+- Google Rich Results Test validates product structured data
+- `/sitemap.xml` lists all published products and static pages
+- Sharing a product URL on social media shows correct OG image and title
+- Lighthouse mobile score ≥ 90 for homepage
+
+---
+
 ## V2 backlog (post-launch, not in current scope)
 
 - Wishlist persistence (tied to customer account)
-- Promotion & discount codes (cart-level and product-level)
 - Multi-currency Stripe charges (vs current cosmetic conversion)
 - Lookbook / editorial seasonal pages
 - Referral program ("Give $10, Get $10")
 - Loyalty program (3 orders → automatic discount)
-- Branded order tracking page
 - Faire/Ankorstore B2B wholesale channel

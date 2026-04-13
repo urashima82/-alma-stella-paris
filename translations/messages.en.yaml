@@ -187,6 +187,16 @@ checkout:
     billing_same_as_shipping: "Same as shipping address"
     billing_different: "Use a different billing address"
     billing_label_recipient_name: "Billing name"
+    coupon_label: "Promo code"
+    coupon_placeholder: "Enter your code"
+    coupon_apply: "Apply"
+    coupon_remove: "Remove"
+    coupon_invalid: "This code is not valid."
+    coupon_expired: "This code has expired."
+    coupon_max_reached: "This code has reached its usage limit."
+    coupon_minimum: "Minimum order amount not reached."
+    coupon_applied: "Code applied!"
+    discount: "Discount"
     continue_to_payment: "Continue to payment"
     payment_title: "Payment | Alma Stella Paris"
     payment_heading: "Payment"
@@ -506,6 +516,10 @@ contact:
         message_required: "Please enter your message."
         message_too_short: "Your message must be at least 10 characters."
         rate_limited: "You've sent too many messages. Please try again later."
+
+# ── Promotions ──
+promo:
+    banner_text: "Code %code% applied — %discount% on your order"
 
 # ── Language switcher ──
 locale:

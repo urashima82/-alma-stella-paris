@@ -36,6 +36,9 @@ class OrderItem
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
     private string $shippingCost = '0.00';
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
+    private string $discountAmountUsd = '0.00';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -122,12 +125,24 @@ class OrderItem
         return $this;
     }
 
+    public function getDiscountAmountUsd(): float
+    {
+        return (float) $this->discountAmountUsd;
+    }
+
+    public function setDiscountAmountUsd(float $discountAmountUsd): static
+    {
+        $this->discountAmountUsd = \number_format($discountAmountUsd, 2, '.', '');
+
+        return $this;
+    }
+
     /**
-     * Total line price (product price + shipping cost) in USD.
+     * Total line price (product price + shipping cost - discount) in USD.
      */
     public function getLineTotal(): float
     {
-        return $this->getProductPrice() + $this->getShippingCost();
+        return $this->getProductPrice() + $this->getShippingCost() - $this->getDiscountAmountUsd();
     }
 
     /**
