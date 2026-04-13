@@ -8,7 +8,7 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-6Aw_4ui.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-1QxpTjW.js",
         "type": "js"
     },
     "\/assets\/controllers\/checkout_identify_controller.js": {
@@ -51,6 +51,10 @@
         "path": "\/assets\/controllers\/currency_selector_controller-kq9ihR0.js",
         "type": "js"
     },
+    "\/assets\/controllers\/reservation_timer_controller.js": {
+        "path": "\/assets\/controllers\/reservation_timer_controller-yoKpY6O.js",
+        "type": "js"
+    },
     "\/assets\/controllers\/account_dropdown_controller.js": {
         "path": "\/assets\/controllers\/account_dropdown_controller-oeOGf29.js",
         "type": "js"
@@ -60,7 +64,7 @@
         "type": "js"
     },
     "\/assets\/styles\/app.css": {
-        "path": "\/assets\/styles\/app-E2CAXtv.css",
+        "path": "\/assets\/styles\/app-qOaoEdI.css",
         "type": "css"
     },
     "@hotwired\/stimulus": {

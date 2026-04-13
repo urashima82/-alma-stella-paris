@@ -33,23 +33,19 @@
                 <tr class="border-b border-alma-hover text-alma-text-muted">
                     <th class="text-left px-5 py-3 font-normal">{{ 'orders.detail.product'|trans }}</th>
                     <th class="text-right px-5 py-3 font-normal">{{ 'orders.detail.price'|trans }}</th>
-                    <th class="text-right px-5 py-3 font-normal">{{ 'orders.detail.shipping'|trans }}</th>
-                    <th class="text-right px-5 py-3 font-normal">{{ 'orders.detail.line_total'|trans }}</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in order.items %}
                     <tr class="border-b border-alma-hover/50">
                         <td class="px-5 py-3 text-alma-text">{{ item.productName }}</td>
-                        <td class="px-5 py-3 text-right text-alma-text">${{ item.productPrice|number_format(2) }}</td>
-                        <td class="px-5 py-3 text-right text-alma-text-muted">${{ item.shippingCost|number_format(2) }}</td>
                         <td class="px-5 py-3 text-right font-medium text-alma-text">${{ item.lineTotal|number_format(2) }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="3" class="px-5 py-4 text-right font-medium text-alma-text">{{ 'orders.detail.order_total'|trans }}</td>
+                    <td class="px-5 py-4 text-right font-medium text-alma-text">{{ 'orders.detail.order_total'|trans }}</td>
                     <td class="px-5 py-4 text-right font-medium text-alma-text text-base">${{ order.totalUsd|number_format(2) }}</td>
                 </tr>
             </tfoot>

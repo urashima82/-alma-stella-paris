@@ -218,8 +218,7 @@
                             </svg>
                         </summary>
                         <div class="pb-4 text-sm text-alma-text-muted leading-relaxed space-y-2">
-                            <p>{{ 'product.shipping_tier'|trans({'%tier%': shipping_label(product.shippingTier)})|raw }}</p>
-                            <p>{{ 'product.shipping_included'|trans({'%cost%': shipping_cost(product.shippingTier)|number_format(0)}) }}</p>
+                            <p>{{ 'product.shipping_free'|trans }}</p>
                             <p>{{ 'product.shipping_delivery'|trans }}</p>
                             <p>{{ 'product.shipping_origin'|trans }}</p>
                         </div>
