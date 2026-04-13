@@ -592,7 +592,7 @@ class CheckoutController extends AbstractController
     private function createOrder(Request $request, array $products, float $subtotalUsd): Order
     {
         $order = new Order();
-        $order->setReference(Order::generateReference());
+        $order->setReference($this->orderRepository->nextOrderReference((int) \date('Y')));
         $this->fillOrderFromRequest($order, $request);
         $order->setTotalUsd($subtotalUsd);
 

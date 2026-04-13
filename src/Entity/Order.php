@@ -153,14 +153,6 @@ class Order
         return $this;
     }
 
-    /**
-     * Generate a unique order reference: ASP-YYYY-XXXXX.
-     */
-    public static function generateReference(): string
-    {
-        return \sprintf('ASP-%s-%05d', \date('Y'), \random_int(1, 99999));
-    }
-
     public function getStatus(): OrderStatus
     {
         return $this->status;

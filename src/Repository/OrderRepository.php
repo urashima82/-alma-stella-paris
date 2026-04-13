@@ -69,6 +69,31 @@ class OrderRepository extends ServiceEntityRepository
     }
 
     /**
+     * Generate the next sequential order reference for the given year: ASP-YYYY-XXXXX.
+     */
+    public function nextOrderReference(int $year): string
+    {
+        $prefix = \sprintf('ASP-%d-', $year);
+
+        $lastReference = $this->createQueryBuilder('o')
+            ->select('o.reference')
+            ->where('o.reference LIKE :prefix')
+            ->setParameter('prefix', $prefix.'%')
+            ->orderBy('o.reference', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if (null === $lastReference) {
+            return $prefix.'00001';
+        }
+
+        $sequence = (int) \substr((string) $lastReference, \strlen($prefix));
+
+        return \sprintf('%s%05d', $prefix, $sequence + 1);
+    }
+
+    /**
      * Generate the next sequential invoice number for the given year: FA-YYYY-XXXXX.
      */
     public function nextInvoiceNumber(int $year): string
