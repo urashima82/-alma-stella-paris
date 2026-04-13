@@ -51,6 +51,7 @@ final class OrderMailer
             : \sprintf('Your order %s has been delivered', $order->getReference());
 
         $invoiceUrl = $this->urlGenerator->generate('shop_invoice_download', [
+            '_locale' => $locale,
             'reference' => $order->getReference(),
             'token' => $order->getInvoiceToken(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);

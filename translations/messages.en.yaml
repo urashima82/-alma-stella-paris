@@ -417,6 +417,7 @@ orders:
         price: "Price"
         shipping: "Shipping"
         line_total: "Subtotal"
+        free_shipping: "Free"
         order_total: "Total"
         shipping_address: "Shipping address"
         billing_address: "Billing address"

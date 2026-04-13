@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller\Shop;
 
-use App\Entity\Order;
 use App\Enum\OrderStatus;
+use App\Repository\OrderRepository;
 use App\Service\InvoiceGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,11 +20,15 @@ class InvoiceController extends AbstractController
         methods: ['GET'],
     )]
     public function download(
-        Order $order,
+        string $reference,
         string $token,
+        string $_locale,
+        OrderRepository $orderRepository,
         InvoiceGenerator $invoiceGenerator,
     ): Response {
-        if ($order->getInvoiceToken() !== $token) {
+        $order = $orderRepository->findByReference($reference);
+
+        if (null === $order || $order->getInvoiceToken() !== $token) {
             throw new NotFoundHttpException();
         }
 
@@ -35,7 +39,7 @@ class InvoiceController extends AbstractController
             throw new NotFoundHttpException();
         }
 
-        $pdf = $invoiceGenerator->generate($order);
+        $pdf = $invoiceGenerator->generate($order, $_locale);
 
         return new Response($pdf, Response::HTTP_OK, [
             'Content-Type' => 'application/pdf',

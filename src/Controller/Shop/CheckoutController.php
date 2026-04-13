@@ -290,6 +290,7 @@ class CheckoutController extends AbstractController
         // Mark order as processing
         $order->setStripePaymentStatus($paymentIntent->status);
         $order->setStatus(OrderStatus::Processing);
+        $order->setPaidAt(new \DateTimeImmutable());
 
         // Mark purchased products as sold (setIsSoldOut auto-sets soldAt)
         foreach ($order->getItems() as $item) {

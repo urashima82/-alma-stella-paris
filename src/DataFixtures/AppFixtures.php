@@ -437,11 +437,17 @@ class AppFixtures extends Fixture
             $order->setTrackingNumber($data['tracking']);
             $order->setStripePaymentStatus($data['stripe_status']);
 
+            if ('succeeded' === $data['stripe_status']) {
+                $order->setPaidAt($order->getCreatedAt());
+            }
+
             $total = 0.0;
             foreach ($data['items'] as [$productName, $price, $shipping]) {
+                $product = $products[$productName] ?? null;
                 $item = new OrderItem();
-                $item->setProduct($products[$productName] ?? null);
+                $item->setProduct($product);
                 $item->setProductName($productName);
+                $item->setProductNameFr(null !== $product ? $product->getNameFr() : $productName);
                 $item->setProductPrice($price);
                 $item->setShippingCost($shipping);
                 $order->addItem($item);

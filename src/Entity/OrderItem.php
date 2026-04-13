@@ -27,6 +27,9 @@ class OrderItem
     #[ORM\Column(length: 255)]
     private string $productName = '';
 
+    #[ORM\Column(length: 255)]
+    private string $productNameFr = '';
+
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
     private string $productPrice = '0.00';
 
@@ -74,6 +77,27 @@ class OrderItem
         return $this;
     }
 
+    public function getProductNameFr(): string
+    {
+        return $this->productNameFr;
+    }
+
+    public function setProductNameFr(string $productNameFr): static
+    {
+        $this->productNameFr = $productNameFr;
+
+        return $this;
+    }
+
+    public function getLocalizedProductName(string $locale = 'en'): string
+    {
+        if ('fr' === $locale && '' !== $this->productNameFr) {
+            return $this->productNameFr;
+        }
+
+        return $this->productName;
+    }
+
     public function getProductPrice(): float
     {
         return (float) $this->productPrice;
@@ -114,6 +138,7 @@ class OrderItem
         $item = new self();
         $item->setProduct($product);
         $item->setProductName($product->getName());
+        $item->setProductNameFr($product->getNameFr());
         $item->setProductPrice($product->getBasePrice());
         $item->setShippingCost($shippingCost);
 

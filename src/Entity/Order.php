@@ -105,6 +105,9 @@ class Order
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'order', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $items;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $paidAt = null;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -553,6 +556,18 @@ class Order
     public function getInvoiceToken(): string
     {
         return $this->invoiceToken;
+    }
+
+    public function getPaidAt(): ?\DateTimeImmutable
+    {
+        return $this->paidAt;
+    }
+
+    public function setPaidAt(?\DateTimeImmutable $paidAt): static
+    {
+        $this->paidAt = $paidAt;
+
+        return $this;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

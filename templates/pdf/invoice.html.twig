@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ locale }}">
 <head>
     <meta charset="UTF-8">
-    <title>Invoice {{ order.reference }}</title>
+    <title>{% if locale == 'fr' %}Facture{% else %}Invoice{% endif %} {{ order.reference }}</title>
     <style>
         * {
             margin: 0;
@@ -16,14 +16,6 @@
             color: #2C2418;
             line-height: 1.5;
             padding: 40px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #C9A84C;
-            padding-bottom: 20px;
         }
 
         .brand {
@@ -41,6 +33,11 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             text-align: right;
+        }
+
+        .logo {
+            height: 50px;
+            margin-bottom: 6px;
         }
 
         .meta-table {
@@ -151,33 +148,36 @@
             font-weight: 700;
         }
 
-        .legal {
-            border-top: 1px solid #E8DDD0;
-            padding-top: 20px;
-            font-size: 9px;
-            color: #8C8070;
-            line-height: 1.6;
+        @page {
+            margin-bottom: 100px;
         }
 
-        .footer {
-            margin-top: 30px;
+        .page-footer {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #E8DDD0;
+            padding-top: 10px;
+            font-size: 8px;
+            color: #8C8070;
+            line-height: 1.5;
             text-align: center;
-            font-family: Georgia, 'Times New Roman', serif;
-            font-size: 12px;
-            color: #C9A84C;
-            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
-    {# Header #}
+    {# Header with logo #}
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 40px; border-bottom: 2px solid #C9A84C; padding-bottom: 20px;">
         <tr>
             <td style="vertical-align: bottom;">
+                {% if logoBase64 %}
+                    <img src="{{ logoBase64 }}" alt="Alma Stella Paris" class="logo"><br>
+                {% endif %}
                 <span class="brand">ALMA STELLA PARIS</span>
             </td>
             <td style="text-align: right; vertical-align: bottom;">
-                <span class="invoice-title">Invoice</span>
+                <span class="invoice-title">{% if locale == 'fr' %}Facture{% else %}Invoice{% endif %}</span>
             </td>
         </tr>
     </table>
@@ -186,7 +186,7 @@
     <table class="meta-table">
         <tr>
             <td>
-                <p class="section-title">Bill to</p>
+                <p class="section-title">{% if locale == 'fr' %}Facturer à{% else %}Bill to{% endif %}</p>
                 <div class="address-block">
                     <strong>{% if order.hasSeparateBillingAddress %}{{ order.billingRecipientName }}{% else %}{{ order.shippingRecipientName }}{% endif %}</strong><br>
                     {% if order.hasSeparateBillingAddress %}
@@ -208,76 +208,50 @@
             <td>
                 <div class="info-block">
                     <div class="info-row">
-                        <span class="info-label">Invoice number</span><br>
+                        <span class="info-label">{% if locale == 'fr' %}Numéro de facture{% else %}Invoice number{% endif %}</span><br>
                         <span class="info-value">{{ order.reference }}</span>
                     </div>
                     <br>
                     <div class="info-row">
                         <span class="info-label">Date</span><br>
-                        <span class="info-value">{{ order.createdAt|date('d/m/Y') }}</span>
+                        <span class="info-value">{{ (order.paidAt ?? order.createdAt)|date('d/m/Y') }}</span>
                     </div>
                     <br>
                     <div class="info-row">
-                        <span class="info-label">Payment</span><br>
-                        <span class="info-value">Stripe (Card)</span>
+                        <span class="info-label">{% if locale == 'fr' %}Paiement{% else %}Payment{% endif %}</span><br>
+                        <span class="info-value">{% if locale == 'fr' %}Stripe (Carte bancaire){% else %}Stripe (Card){% endif %}</span>
                     </div>
                 </div>
             </td>
         </tr>
     </table>
 
-    {# Items table #}
+    {# Items table — no shipping column #}
     <table class="items-table">
         <thead>
             <tr>
-                <th>Product</th>
-                <th class="right">Unit price</th>
-                <th class="right">Shipping</th>
-                <th class="right">Total</th>
+                <th>{% if locale == 'fr' %}Produit{% else %}Product{% endif %}</th>
+                <th class="right">{% if locale == 'fr' %}Prix{% else %}Price{% endif %}</th>
             </tr>
         </thead>
         <tbody>
             {% for item in order.items %}
                 <tr>
-                    <td class="product-name">{{ item.productName }}</td>
-                    <td class="right">${{ '%.2f'|format(item.productPrice) }}</td>
-                    <td class="right">
-                        {% if item.shippingCost > 0 %}
-                            ${{ '%.2f'|format(item.shippingCost) }}
-                        {% else %}
-                            Free
-                        {% endif %}
-                    </td>
+                    <td class="product-name">{{ item.getLocalizedProductName(locale) }}</td>
                     <td class="right">${{ '%.2f'|format(item.lineTotal) }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    {# Totals #}
+    {# Totals — no shipping row #}
     <table class="totals-table">
-        {% set subtotal = 0 %}
-        {% set shipping_total = 0 %}
-        {% for item in order.items %}
-            {% set subtotal = subtotal + item.productPrice %}
-            {% set shipping_total = shipping_total + item.shippingCost %}
-        {% endfor %}
         <tr>
-            <td class="total-label">Subtotal</td>
-            <td class="total-value">${{ '%.2f'|format(subtotal) }}</td>
+            <td class="total-label">{% if locale == 'fr' %}Livraison{% else %}Shipping{% endif %}</td>
+            <td class="total-value">{% if locale == 'fr' %}Offerte{% else %}Free{% endif %}</td>
         </tr>
         <tr>
-            <td class="total-label">Shipping</td>
-            <td class="total-value">
-                {% if shipping_total > 0 %}
-                    ${{ '%.2f'|format(shipping_total) }}
-                {% else %}
-                    Free
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td class="total-label">VAT</td>
+            <td class="total-label">TVA</td>
             <td class="total-value">$0.00</td>
         </tr>
         <tr class="grand-total">
@@ -286,16 +260,16 @@
         </tr>
     </table>
 
-    {# Legal mentions #}
-    <div class="legal">
-        <p><strong>Alma Stella Paris</strong></p>
-        <p>TVA non applicable, art. 293 B du CGI.</p>
-        <p>Payment processed by Stripe in USD. Charged amount: ${{ '%.2f'|format(order.totalUsd) }}.</p>
-    </div>
-
-    {# Footer #}
-    <div class="footer">
-        ALMA STELLA PARIS
+    {# Page footer — fixed at the bottom of every page #}
+    <div class="page-footer">
+        <strong>Alma Stella Paris</strong> — Estelle Bédé — {% if locale == 'fr' %}Entrepreneur individuel{% else %}Sole proprietor{% endif %}<br>
+        SIRET : 917 539 751 — 11 rue Guy de Maupassant, 31200 Toulouse, France<br>
+        TVA non applicable, art. 293 B du CGI.
+        {% if locale == 'fr' %}
+            — Paiement traité par Stripe en USD.
+        {% else %}
+            — Payment processed by Stripe in USD.
+        {% endif %}
     </div>
 </body>
 </html>
