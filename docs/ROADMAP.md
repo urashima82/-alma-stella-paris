@@ -522,7 +522,34 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 11 — SEO & performance
+## Milestone 11 — Security audit & hardening
+*Estimated effort: 3-4h*
+
+> **Every fix requires developer approval before implementation.**
+> Claude audits and proposes — developer validates before any change is applied.
+
+### Tasks
+- [ ] OWASP Top 10 audit (XSS, CSRF, SQL injection, mass assignment, etc.)
+- [ ] Stripe webhook signature verification audit
+- [ ] Authentication & session security review (magic link, customer auth)
+- [ ] Rate limiting on sensitive endpoints (login, testimonial submission, checkout)
+- [ ] Input validation & sanitization audit (forms, query parameters)
+- [ ] CORS & security headers review (`X-Content-Type-Options`, `X-Frame-Options`, CSP, etc.)
+- [ ] Dependency vulnerability scan (`composer audit`)
+- [ ] File upload security review (image uploads, WebP conversion)
+- [ ] Environment secrets audit (`.env` not exposed, no hardcoded keys)
+- [ ] EasyAdmin access control review (admin routes properly protected)
+
+### Definition of Done
+- Full audit report delivered with findings classified by severity (critical / high / medium / low)
+- Each proposed fix reviewed and approved by developer before implementation
+- All critical and high severity issues resolved
+- `composer audit` returns no known vulnerabilities
+- Security headers verified via browser dev tools or online scanner
+
+---
+
+## Milestone 12 — SEO & performance
 *Estimated effort: 3h*
 
 ### Tasks
@@ -666,7 +693,34 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 12 — SEO & performance
+## Milestone 12 — Security audit & hardening
+*Estimated effort: 3-4h*
+
+> **Every fix requires developer approval before implementation.**
+> Claude audits and proposes — developer validates before any change is applied.
+
+### Tasks
+- [ ] OWASP Top 10 audit (XSS, CSRF, SQL injection, mass assignment, etc.)
+- [ ] Stripe webhook signature verification audit
+- [ ] Authentication & session security review (magic link, customer auth)
+- [ ] Rate limiting on sensitive endpoints (login, testimonial submission, checkout)
+- [ ] Input validation & sanitization audit (forms, query parameters)
+- [ ] CORS & security headers review (`X-Content-Type-Options`, `X-Frame-Options`, CSP, etc.)
+- [ ] Dependency vulnerability scan (`composer audit`)
+- [ ] File upload security review (image uploads, WebP conversion)
+- [ ] Environment secrets audit (`.env` not exposed, no hardcoded keys)
+- [ ] EasyAdmin access control review (admin routes properly protected)
+
+### Definition of Done
+- Full audit report delivered with findings classified by severity (critical / high / medium / low)
+- Each proposed fix reviewed and approved by developer before implementation
+- All critical and high severity issues resolved
+- `composer audit` returns no known vulnerabilities
+- Security headers verified via browser dev tools or online scanner
+
+---
+
+## Milestone 13 — SEO & performance
 *Estimated effort: 3h*
 
 ### Tasks
