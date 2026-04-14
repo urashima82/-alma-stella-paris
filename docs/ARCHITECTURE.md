@@ -51,7 +51,7 @@ alma-stella/
 │   │   │   ├── ProductCrudController.php         # Product management with image uploads
 │   │   │   ├── PromotionCrudController.php      # Promotion management with targeting + stats
 │   │   │   ├── ShippingSettingsCrudController.php # Shipping tier cost overrides
-│   │   │   └── SiteSettingsCrudController.php    # Site-wide settings (active collection)
+│   │   │   └── SiteSettingsCrudController.php    # Site-wide settings (active collection, maintenance mode)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
 │   │   └── Shop/             # Public-facing controllers (locale-prefixed)
 │   │       ├── AboutController.php
@@ -108,6 +108,7 @@ alma-stella/
 │   │   ├── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
 │   │   ├── ImageUploadSubscriber.php     # Processes product images after EasyAdmin persist/update
 │   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
+│   │   ├── MaintenanceModeSubscriber.php # Blocks public requests when maintenance mode is enabled (IP whitelist bypass)
 │   │   └── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
 │   ├── Message/
 │   │   ├── CleanExpiredReservationsMessage.php
@@ -464,6 +465,9 @@ class SiteSettings
 {
     private int $id;
     private string $activeCollection = 'all';  // 'all' | 'france' | 'mexico'
+    private bool $isMaintenanceMode = false;
+    private ?string $maintenanceMessage = null;
+    private array $maintenanceAllowedIps = [];  // JSON list of IP addresses
 
     const COLLECTION_ALL = 'all';
     const COLLECTION_FRANCE = 'france';
@@ -473,6 +477,7 @@ class SiteSettings
 
 > **Purpose:** Singleton entity — controls which products are visible on the storefront
 > based on Estelle's current location (France or Mexico collection, or all).
+> Also controls maintenance mode: toggle, custom message, and IP whitelist.
 
 ### ContactMessage
 
@@ -537,7 +542,7 @@ class Reservation
 | `ContactMessage` | Contact form submissions — name, email, subject, message, read flag |
 | `ResetPasswordRequest` | Token storage for password reset flow (symfonycasts bundle) |
 | `ShippingSettings` | Admin-editable shipping tier costs (overrides enum defaults) |
-| `SiteSettings` | Singleton — active collection filter (all / france / mexico) |
+| `SiteSettings` | Singleton — active collection filter + maintenance mode (toggle, message, IP whitelist) |
 | `Promotion` | Promotions & coupons — product auto, cart auto, code, private link |
 | `PromotionUsage` | Tracks promotion usage per order (discount amount, email, timestamp) |
 

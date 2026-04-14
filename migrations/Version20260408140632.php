@@ -31,7 +31,7 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('CREATE TABLE shipping_settings (id INT AUTO_INCREMENT NOT NULL, tier VARCHAR(20) NOT NULL, label VARCHAR(100) NOT NULL, shipping_cost_usd NUMERIC(8, 2) NOT NULL, max_weight_grams INT NOT NULL, UNIQUE INDEX UNIQ_SHIPPING_TIER (tier), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
 
         // Site settings table (single row)
-        $this->addSql('CREATE TABLE site_settings (id INT AUTO_INCREMENT NOT NULL, active_collection VARCHAR(20) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE site_settings (id INT AUTO_INCREMENT NOT NULL, active_collection VARCHAR(20) NOT NULL, is_maintenance_mode TINYINT NOT NULL DEFAULT 0, maintenance_message LONGTEXT DEFAULT NULL, maintenance_message_en LONGTEXT DEFAULT NULL, maintenance_allowed_ips JSON NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
 
         // Admin table
         $this->addSql('CREATE TABLE admin (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, role VARCHAR(20) NOT NULL DEFAULT \'admin\', receives_admin_emails TINYINT NOT NULL DEFAULT 1, last_logged_in_at DATETIME DEFAULT NULL, created_at DATETIME NOT NULL, UNIQUE INDEX UNIQ_880E0D76E7927C74 (email), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');

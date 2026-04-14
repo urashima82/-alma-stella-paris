@@ -18,10 +18,13 @@ class SiteSettingsRepository extends ServiceEntityRepository
         parent::__construct($registry, SiteSettings::class);
     }
 
+    public function getSettings(): SiteSettings
+    {
+        return $this->findOneBy([]) ?? new SiteSettings();
+    }
+
     public function getActiveCollection(): string
     {
-        $settings = $this->findOneBy([]);
-
-        return $settings?->getActiveCollection() ?? SiteSettings::COLLECTION_ALL;
+        return $this->getSettings()->getActiveCollection();
     }
 }

@@ -13,7 +13,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -71,6 +75,8 @@ class SiteSettingsCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
+        yield FormField::addTab('Général', 'fa fa-cog');
+
         yield ChoiceField::new('activeCollection', 'Collection affichée sur le site')
             ->setChoices([
                 'Toutes les collections' => SiteSettings::COLLECTION_ALL,
@@ -79,5 +85,24 @@ class SiteSettingsCrudController extends AbstractCrudController
             ])
             ->renderExpanded()
             ->setHelp('Choisissez quelle collection est visible pour les visiteurs du site.');
+
+        yield FormField::addTab('Mode maintenance', 'fa fa-wrench');
+
+        yield BooleanField::new('isMaintenanceMode', 'Activer le mode maintenance')
+            ->setHelp('Quand activé, les visiteurs voient une page de maintenance au lieu du site.');
+
+        yield TextareaField::new('maintenanceMessage', 'Message de maintenance (FR)')
+            ->setHelp('Message affiché aux visiteurs francophones. Laissez vide pour le message par défaut.')
+            ->setRequired(false)
+            ->setNumOfRows(4);
+
+        yield TextareaField::new('maintenanceMessageEn', 'Message de maintenance (EN)')
+            ->setHelp('Message displayed to English-speaking visitors. Leave empty for the default message.')
+            ->setRequired(false)
+            ->setNumOfRows(4);
+
+        yield TextField::new('maintenanceAllowedIpsAsString', 'IPs autorisées')
+            ->setHelp('Adresses IP autorisées à voir le site en maintenance, séparées par des virgules (ex: 82.120.45.12, 192.168.1.1).')
+            ->setRequired(false);
     }
 }
