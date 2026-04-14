@@ -14,11 +14,13 @@ use App\Entity\ProductCategory;
 use App\Entity\Promotion;
 use App\Entity\ShippingSettings;
 use App\Entity\SiteSettings;
+use App\Entity\Testimonial;
 use App\Enum\AdminRole;
 use App\Enum\DiscountType;
 use App\Enum\OrderStatus;
 use App\Enum\PromotionType;
 use App\Enum\ShippingTier;
+use App\Enum\TestimonialStatus;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -41,6 +43,7 @@ class AppFixtures extends Fixture
         $this->linkRelatedProducts($products);
         $this->loadOrders($manager, $products, $customers);
         $this->loadPromotions($manager, $products, $categories);
+        $this->loadTestimonials($manager);
 
         $manager->flush();
     }
@@ -466,6 +469,64 @@ class AppFixtures extends Fixture
                 'items' => [['Pearl & Gold Hoops', 36.00, 4.90]],
                 'days_ago' => 10,
             ],
+            // --- Testimonial test orders ---
+            // Delivered 18 days ago, NO testimonial → scheduler SHOULD send email (EN)
+            [
+                'reference' => 'ASP-2026-00008',
+                'status' => OrderStatus::Delivered,
+                'name' => 'Rachel Green',
+                'email' => 'rachel.green@example.com',
+                'locale' => 'en',
+                'line1' => '90 Bedford Street, Apt 19',
+                'city' => 'New York',
+                'state' => 'NY',
+                'postal' => '10014',
+                'country' => 'US',
+
+                'tracking' => 'US123456789EN',
+                'stripe_status' => 'succeeded',
+                'items' => [['Lapis Lazuli Stud Earrings', 24.00, 4.90]],
+                'days_ago' => 18,
+            ],
+            // Delivered 25 days ago, NO testimonial → scheduler SHOULD send email (FR)
+            [
+                'reference' => 'ASP-2026-00009',
+                'status' => OrderStatus::Delivered,
+                'name' => 'Lucie Moreau',
+                'email' => 'lucie.moreau@example.com',
+                'locale' => 'fr',
+                'line1' => '42 rue du Faubourg Saint-Honoré',
+                'city' => 'Paris',
+                'state' => null,
+                'postal' => '75008',
+                'country' => 'FR',
+
+                'tracking' => 'CF987654321FR',
+                'stripe_status' => 'succeeded',
+                'items' => [
+                    ['Coin Charm Necklace', 34.00, 4.90],
+                    ['Shell & Gold Anklet', 18.00, 4.90],
+                ],
+                'days_ago' => 25,
+            ],
+            // Delivered 10 days ago, NO testimonial → scheduler should NOT send (< 14 days)
+            [
+                'reference' => 'ASP-2026-00010',
+                'status' => OrderStatus::Delivered,
+                'name' => 'Karen Smith',
+                'email' => 'karen.smith@example.com',
+                'locale' => 'en',
+                'line1' => '55 Yonge Street',
+                'city' => 'Toronto',
+                'state' => 'ON',
+                'postal' => 'M5E 1J4',
+                'country' => 'CA',
+
+                'tracking' => 'CA555666777',
+                'stripe_status' => 'succeeded',
+                'items' => [['Moonstone Solitaire Ring', 48.00, 4.90]],
+                'days_ago' => 10,
+            ],
         ];
 
         $invoiceSequence = 0;
@@ -490,6 +551,15 @@ class AppFixtures extends Fixture
 
             $order->setTrackingNumber($data['tracking']);
             $order->setStripePaymentStatus($data['stripe_status']);
+
+            // Shift order dates to simulate past orders
+            if ($data['days_ago'] > 0) {
+                $pastDate = new \DateTimeImmutable(\sprintf('-%d days', $data['days_ago']));
+                $ref = new \ReflectionProperty(Order::class, 'createdAt');
+                $ref->setValue($order, $pastDate);
+                $ref = new \ReflectionProperty(Order::class, 'updatedAt');
+                $ref->setValue($order, $pastDate);
+            }
 
             if ($data['stripe_status'] === 'succeeded') {
                 $order->setPaidAt($order->getCreatedAt());
@@ -586,5 +656,74 @@ class AppFixtures extends Fixture
         $codePromo->setIsActive(true);
         $codePromo->setMaxUsagesPerEmail(1);
         $manager->persist($codePromo);
+    }
+
+    private function loadTestimonials(ObjectManager $manager): void
+    {
+        $testimonials = [
+            [
+                'email' => 'sarah.johnson@example.com',
+                'rating' => 5,
+                'text' => 'I absolutely love my Gold Star Pendant! The quality is outstanding and it truly is water-resistant. I wear it every day, even to the beach. The packaging was beautiful and delivery was faster than expected.',
+                'firstName' => 'Sarah',
+                'lastNameInitial' => 'J',
+                'city' => 'Portland, OR',
+                'status' => TestimonialStatus::Approved,
+                'daysAgo' => 7,
+            ],
+            [
+                'email' => 'claire.m@example.com',
+                'rating' => 5,
+                'text' => "J'ai offert le collier en turquoise à ma mère et elle ne le quitte plus ! La pierre est magnifique, chaque pièce est vraiment unique. Merci Estelle pour cette sélection avec tant de soin.",
+                'firstName' => 'Claire',
+                'lastNameInitial' => 'M',
+                'city' => 'Lyon',
+                'status' => TestimonialStatus::Approved,
+                'daysAgo' => 12,
+            ],
+            [
+                'email' => 'jessica.w@example.com',
+                'rating' => 4,
+                'text' => 'Beautiful craftsmanship and the natural stones are gorgeous. I ordered the Moonstone Ring and it arrived in perfect condition. The only reason for 4 stars is that shipping took a bit longer than expected, but it was worth the wait!',
+                'firstName' => 'Jessica',
+                'lastNameInitial' => 'W',
+                'city' => 'Toronto',
+                'status' => TestimonialStatus::Approved,
+                'daysAgo' => 3,
+            ],
+            [
+                'email' => 'amelie.d@example.com',
+                'rating' => 5,
+                'text' => "Des bijoux qui ont une âme ! J'ai craqué pour le bracelet en lapis-lazuli et les boucles d'oreilles en onyx. La qualité est irréprochable et le service client adorable.",
+                'firstName' => 'Amélie',
+                'lastNameInitial' => 'D',
+                'city' => 'Montréal',
+                'status' => TestimonialStatus::Approved,
+                'daysAgo' => 18,
+            ],
+            [
+                'email' => 'pending.reviewer@example.com',
+                'rating' => 5,
+                'text' => 'Wonderful jewelry, can\'t wait to order more!',
+                'firstName' => 'Emily',
+                'lastNameInitial' => 'C',
+                'city' => 'New York',
+                'status' => TestimonialStatus::Pending,
+                'daysAgo' => 1,
+            ],
+        ];
+
+        foreach ($testimonials as $data) {
+            $testimonial = new Testimonial();
+            $testimonial->setEmail($data['email']);
+            $testimonial->setRating($data['rating']);
+            $testimonial->setText($data['text']);
+            $testimonial->setFirstName($data['firstName']);
+            $testimonial->setLastNameInitial($data['lastNameInitial']);
+            $testimonial->setCity($data['city']);
+            $testimonial->setStatus($data['status']);
+            $testimonial->setSubmittedAt(new \DateTimeImmutable(\sprintf('-%d days', $data['daysAgo'])));
+            $manager->persist($testimonial);
+        }
     }
 }

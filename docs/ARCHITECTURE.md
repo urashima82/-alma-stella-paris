@@ -589,6 +589,38 @@ class Promotion
 > **CompareAtPrice interaction:** if `overridesCompareAtPrice = false`, the promo does not apply
 > to products that already have a manual `compareAtPrice` set.
 
+### Testimonial
+
+```php
+// src/Entity/Testimonial.php
+class Testimonial
+{
+    private int $id;
+    private string $email;                    // Customer email (from order)
+    private string $token;                    // UUID v4 for submission form URL
+    private ?int $rating;                     // 1-5 (filled on submission)
+    private ?string $text;                    // Testimonial body (filled on submission)
+    private ?string $firstName;               // e.g. "Sarah"
+    private ?string $lastNameInitial;         // e.g. "J"
+    private ?string $city;                    // e.g. "Portland, OR"
+    private TestimonialStatus $status;        // Pending / Approved / Rejected
+    private ?Order $relatedOrder;             // ManyToOne (nullable, ON DELETE SET NULL)
+    private \DateTimeImmutable $createdAt;    // When email was sent
+    private ?\DateTimeImmutable $submittedAt; // When customer submitted (null = not yet)
+}
+```
+
+> **Brand-level testimonials**, not product reviews. Since every piece is unique
+> and sold once, product reviews make no sense. Testimonials capture the overall
+> Alma Stella experience (quality, packaging, delivery, etc.).
+>
+> **Flow:** J+14 after payment → shell Testimonial created (email + token) →
+> email sent with unique link → customer fills form → status=Pending →
+> admin moderates in EasyAdmin → Approved testimonials appear on homepage + `/testimonials`.
+>
+> **Deduplication:** one testimonial per email address. If a Testimonial already
+> exists for that email, the scheduler skips sending.
+
 ---
 
 ## Services
@@ -653,6 +685,7 @@ class Promotion
   2. On-return: payment page detects 3DS redirect return and auto-confirms
   3. Scheduler: `VerifyPendingOrdersMessage` runs every 5 min via Symfony Scheduler
   4. Scheduler: `CleanExpiredReservationsMessage` runs every 5 min (releases expired holds)
+  5. Scheduler: `SendTestimonialRequestsMessage` runs every 6 hours (J+14 testimonial emails)
 
 ### SocialPublisher
 
@@ -681,12 +714,22 @@ Transactional emails via Symfony Mailer (Mailpit in dev, SMTP in production):
 | Order delivered | `email/order_delivered.html.twig` — bilingual, care instructions + Instagram CTA + invoice download link |
 | Order cancelled | `email/order_cancelled.html.twig` — bilingual cancellation notification |
 | Order → Processing (admin) | `email/admin_new_order.html.twig` — FR only, full summary + link to EasyAdmin order |
+| J+14 testimonial request | `email/testimonial_request.html.twig` — bilingual, CTA to testimonial form (unique token) |
 | Admin login link | `email/admin_login_link.html.twig` — magic link with 10min expiry |
 | Registration OTP | `email/registration_otp.html.twig` — 6-digit verification code (10min expiry) |
 | Password reset | `email/reset_password.html.twig` — bilingual reset link (1h expiry) |
 
 - Sender: `hello@almastellaparis.com`
 - Email failure does not block the payment flow (caught and logged)
+
+### TestimonialMailer
+
+- Scheduled via Symfony Scheduler (`SendTestimonialRequestsMessage`, every 6 hours)
+- Queries delivered orders with `paidAt` between 14 and 45 days ago
+- Deduplicates by email: skips if `Testimonial` already exists for that address
+- Creates a shell `Testimonial` entity (email + token + order link) and sends request email
+- Email template: `testimonial_request.html.twig` — bilingual, CTA button to submission form
+- Submission form at `/{_locale}/testimonial/{token}` / `/{_locale}/temoignage/{token}`
 
 ### InvoiceGenerator
 

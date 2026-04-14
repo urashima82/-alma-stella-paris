@@ -8,7 +8,7 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-lTmM04Q.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-dZjhFUZ.js",
         "type": "js"
     },
     "\/assets\/controllers\/wishlist_toggle_controller.js": {
@@ -37,6 +37,10 @@
     },
     "\/assets\/controllers\/hello_controller.js": {
         "path": "\/assets\/controllers\/hello_controller-VYgvytJ.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/star_rating_controller.js": {
+        "path": "\/assets\/controllers\/star_rating_controller-ZTm3wzB.js",
         "type": "js"
     },
     "\/assets\/controllers\/lightbox_controller.js": {
@@ -72,7 +76,7 @@
         "type": "js"
     },
     "\/assets\/styles\/app.css": {
-        "path": "\/assets\/styles\/app-mXX81t4.css",
+        "path": "\/assets\/styles\/app-NkfWE74.css",
         "type": "css"
     },
     "@hotwired\/stimulus": {

@@ -1,0 +1,20 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'testimonial.thanks_title'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="max-w-2xl mx-auto px-6 py-20 md:py-28 text-center">
+        <p class="text-alma-gold text-4xl mb-6">&#10022;</p>
+        <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-4">
+            {{ 'testimonial.thanks_heading'|trans }}
+        </h1>
+        <p class="font-sans text-sm text-alma-text-muted mb-10 leading-relaxed">
+            {{ 'testimonial.thanks_text'|trans }}
+        </p>
+        <a href="{{ path('shop_catalog') }}"
+           class="inline-block border border-alma-gold text-alma-gold px-8 py-3 font-sans text-sm uppercase tracking-[0.2em]
+                  hover:bg-alma-gold hover:text-white transition-colors">
+            {{ 'testimonial.thanks_cta'|trans }}
+        </a>
+    </section>
+{% endblock %}

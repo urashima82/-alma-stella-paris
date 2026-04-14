@@ -1,0 +1,9 @@
+{% set rating = field.value %}
+{% if rating %}
+    <span style="color: #C9A84C; font-size: 1.1em; letter-spacing: 2px;">
+        {% for i in 1..5 %}{{ i <= rating ? '★' : '☆' }}{% endfor %}
+    </span>
+    <span class="text-muted ms-1">({{ rating }}/5)</span>
+{% else %}
+    <span class="text-muted">—</span>
+{% endif %}

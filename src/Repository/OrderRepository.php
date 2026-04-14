@@ -118,6 +118,27 @@ class OrderRepository extends ServiceEntityRepository
         return \sprintf('%s%05d', $prefix, $sequence + 1);
     }
 
+    /**
+     * @return Order[]
+     */
+    public function findEligibleForTestimonialRequest(int $daysAfterPayment, int $maxDaysWindow): array
+    {
+        $since = new \DateTimeImmutable(\sprintf('-%d days', $maxDaysWindow));
+        $cutoff = new \DateTimeImmutable(\sprintf('-%d days', $daysAfterPayment));
+
+        return $this->createQueryBuilder('o')
+            ->where('o.status = :status')
+            ->andWhere('o.paidAt IS NOT NULL')
+            ->andWhere('o.paidAt >= :since')
+            ->andWhere('o.paidAt <= :cutoff')
+            ->setParameter('status', OrderStatus::Delivered)
+            ->setParameter('since', $since)
+            ->setParameter('cutoff', $cutoff)
+            ->orderBy('o.paidAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countByStatus(OrderStatus $status): int
     {
         return (int) $this->createQueryBuilder('o')

@@ -85,6 +85,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(PromotionCrudController::class, 'Promotions', 'fa fa-percent');
         yield MenuItem::section('Communication');
         yield MenuItem::linkTo(ContactMessageCrudController::class, 'Messages de contact', 'fa fa-envelope');
+        yield MenuItem::linkTo(TestimonialCrudController::class, 'Témoignages', 'fa fa-star');
         yield MenuItem::section('Réglages');
         yield MenuItem::linkTo(SiteSettingsCrudController::class, 'Paramètres du site', 'fa fa-cog');
         yield MenuItem::linkTo(AdminCrudController::class, 'Administrateurs', 'fa fa-users');

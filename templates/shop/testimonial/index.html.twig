@@ -1,0 +1,107 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'testimonial.index_title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'testimonial.index_meta'|trans }}{% endblock %}
+
+{% block language_switch_href %}{{ path('shop_testimonials', {_locale: app.request.locale == 'en' ? 'fr' : 'en'}) }}{% endblock %}
+
+{% block body %}
+    <section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+        <div class="text-center mb-14">
+            <p class="text-alma-gold text-3xl mb-6">&#10022;</p>
+            <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                {{ 'testimonial.index_heading'|trans }}
+            </h1>
+            <p class="font-sans text-sm text-alma-text-muted mb-4">
+                {{ 'testimonial.index_subtitle'|trans }}
+            </p>
+            {% if totalCount > 0 %}
+                <div class="flex items-center justify-center gap-2 mt-4">
+                    <span class="text-alma-gold text-lg tracking-wider">
+                        {% for i in 1..5 %}{{ i <= averageRating|round ? '&#9733;' : '&#9734;' }}{% endfor %}
+                    </span>
+                    <span class="text-sm text-alma-text-muted">
+                        {{ averageRating }}/5 — {{ 'testimonial.review_count'|trans({'%count%': totalCount}) }}
+                    </span>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if pagination|length > 0 %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                {% for testimonial in pagination %}
+                    <article class="bg-alma-surface border border-alma-hover p-6 md:p-8">
+                        <div class="text-alma-gold text-lg tracking-wider mb-4">
+                            {% for i in 1..5 %}{{ i <= testimonial.rating ? '&#9733;' : '&#9734;' }}{% endfor %}
+                        </div>
+                        <p class="font-sans text-sm text-alma-text leading-relaxed mb-6">
+                            &ldquo;{{ testimonial.text }}&rdquo;
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <span class="font-serif text-alma-text font-medium">
+                                {{ testimonial.displayName }}
+                            </span>
+                            {% if testimonial.city %}
+                                <span class="text-alma-text-muted text-xs">&mdash; {{ testimonial.city }}</span>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            {# Pagination #}
+            {% if pagination.pageCount > 1 %}
+                <nav class="flex items-center justify-center gap-2 mt-16">
+                    {% if pagination.currentPageNumber > 1 %}
+                        <a href="{{ path('shop_testimonials', {page: pagination.currentPageNumber - 1}) }}"
+                           class="px-4 py-2 border border-alma-hover text-alma-text-muted text-sm hover:border-alma-gold hover:text-alma-gold transition-colors">
+                            {{ 'catalog.pagination_previous'|trans|raw }}
+                        </a>
+                    {% endif %}
+
+                    {% for page in 1..pagination.pageCount %}
+                        {% if page == pagination.currentPageNumber %}
+                            <span class="px-4 py-2 bg-alma-text text-alma-bg text-sm">{{ page }}</span>
+                        {% else %}
+                            <a href="{{ path('shop_testimonials', {page: page}) }}"
+                               class="px-4 py-2 border border-alma-hover text-alma-text-muted text-sm hover:border-alma-gold hover:text-alma-gold transition-colors">
+                                {{ page }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if pagination.currentPageNumber < pagination.pageCount %}
+                        <a href="{{ path('shop_testimonials', {page: pagination.currentPageNumber + 1}) }}"
+                           class="px-4 py-2 border border-alma-hover text-alma-text-muted text-sm hover:border-alma-gold hover:text-alma-gold transition-colors">
+                            {{ 'catalog.pagination_next'|trans|raw }}
+                        </a>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-16">
+                <p class="text-alma-gold text-3xl mb-4">&#10022;</p>
+                <p class="font-serif text-xl text-alma-text-muted">{{ 'testimonial.empty'|trans }}</p>
+            </div>
+        {% endif %}
+    </section>
+
+    {# Schema.org AggregateRating #}
+    {% if totalCount > 0 %}
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Alma Stella Paris",
+            "url": "{{ url('shop_home') }}",
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "{{ averageRating }}",
+                "bestRating": "5",
+                "worstRating": "1",
+                "ratingCount": "{{ totalCount }}"
+            }
+        }
+        </script>
+    {% endif %}
+{% endblock %}

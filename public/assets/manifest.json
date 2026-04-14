@@ -1,5 +1,5 @@
 {
-    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-lTmM04Q.js",
+    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-dZjhFUZ.js",
     "@symfony\/stimulus-bundle\/loader.js": "\/assets\/@symfony\/stimulus-bundle\/loader-IOzBDLu.js",
     "app.js": "\/assets\/app--q683F4.js",
     "bundles\/easyadmin\/app.912702e5.css": "\/assets\/bundles\/easyadmin\/app.912702e5-e-OEP2a.css",
@@ -43,9 +43,10 @@
     "controllers\/lightbox_controller.js": "\/assets\/controllers\/lightbox_controller-6McrgZ0.js",
     "controllers\/mobile_menu_controller.js": "\/assets\/controllers\/mobile_menu_controller-VSVfHX_.js",
     "controllers\/reservation_timer_controller.js": "\/assets\/controllers\/reservation_timer_controller-NQsezN8.js",
+    "controllers\/star_rating_controller.js": "\/assets\/controllers\/star_rating_controller-ZTm3wzB.js",
     "controllers\/stripe_payment_controller.js": "\/assets\/controllers\/stripe_payment_controller-So7OGSe.js",
     "controllers\/wishlist_toggle_controller.js": "\/assets\/controllers\/wishlist_toggle_controller-pA6CvBy.js",
     "stimulus_bootstrap.js": "\/assets\/stimulus_bootstrap-xCO4u8H.js",
-    "styles\/app.css": "\/assets\/styles\/app-mXX81t4.css",
+    "styles\/app.css": "\/assets\/styles\/app-NkfWE74.css",
     "vendor\/@hotwired\/stimulus\/stimulus.index.js": "\/assets\/vendor\/@hotwired\/stimulus\/stimulus.index-S4zNcea.js"
 }

@@ -78,6 +78,10 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('CREATE TABLE reservation (id INT AUTO_INCREMENT NOT NULL, product_id INT NOT NULL, session_id VARCHAR(128) NOT NULL, expires_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', extension_count INT DEFAULT 0 NOT NULL, UNIQUE INDEX UNIQ_42C849554584665A (product_id), INDEX IDX_RESERVATION_EXPIRES (expires_at), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('ALTER TABLE reservation ADD CONSTRAINT FK_42C849554584665A FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE');
 
+        // Testimonial table
+        $this->addSql('CREATE TABLE testimonial (id INT AUTO_INCREMENT NOT NULL, related_order_id INT DEFAULT NULL, email VARCHAR(255) NOT NULL, token VARCHAR(36) NOT NULL, rating INT DEFAULT NULL, text LONGTEXT DEFAULT NULL, first_name VARCHAR(100) DEFAULT NULL, last_name_initial VARCHAR(1) DEFAULT NULL, city VARCHAR(255) DEFAULT NULL, status VARCHAR(20) NOT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', submitted_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', UNIQUE INDEX UNIQ_E6BDCCE75F37A13B (token), INDEX IDX_E6BDCCE7BFBEF4B8 (related_order_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('ALTER TABLE testimonial ADD CONSTRAINT FK_E6BDCCE7BFBEF4B8 FOREIGN KEY (related_order_id) REFERENCES `order` (id) ON DELETE SET NULL');
+
         // Wishlist table
         $this->addSql('CREATE TABLE wishlist_item (id INT AUTO_INCREMENT NOT NULL, customer_id INT NOT NULL, product_id INT NOT NULL, added_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_6424F4E99395C3F3 (customer_id), INDEX IDX_6424F4E94584665A (product_id), UNIQUE INDEX UNIQ_WISHLIST_CUSTOMER_PRODUCT (customer_id, product_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('ALTER TABLE wishlist_item ADD CONSTRAINT FK_6424F4E99395C3F3 FOREIGN KEY (customer_id) REFERENCES customer (id) ON DELETE CASCADE');
@@ -102,6 +106,8 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('ALTER TABLE wishlist_item DROP FOREIGN KEY FK_6424F4E99395C3F3');
         $this->addSql('ALTER TABLE wishlist_item DROP FOREIGN KEY FK_6424F4E94584665A');
         $this->addSql('DROP TABLE wishlist_item');
+        $this->addSql('ALTER TABLE testimonial DROP FOREIGN KEY FK_E6BDCCE7BFBEF4B8');
+        $this->addSql('DROP TABLE testimonial');
         $this->addSql('ALTER TABLE cart DROP FOREIGN KEY FK_BA388B79395C3F3');
         $this->addSql('ALTER TABLE promotion_product DROP FOREIGN KEY FK_D85E0B51139DF194');
         $this->addSql('ALTER TABLE promotion_product DROP FOREIGN KEY FK_D85E0B514584665A');

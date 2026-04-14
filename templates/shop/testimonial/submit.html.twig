@@ -1,0 +1,109 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block title %}{{ 'testimonial.submit_title'|trans }}{% endblock %}
+{% block meta_description %}{{ 'testimonial.submit_meta'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="max-w-2xl mx-auto px-6 py-20 md:py-28">
+        <div class="text-center mb-14">
+            <p class="text-alma-gold text-3xl mb-6">&#10022;</p>
+            <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                {{ 'testimonial.submit_heading'|trans }}
+            </h1>
+            <p class="font-sans text-sm text-alma-text-muted">
+                {{ 'testimonial.submit_subtitle'|trans }}
+            </p>
+        </div>
+
+        {{ form_start(form, {attr: {class: 'space-y-6'}}) }}
+
+            {# Rating #}
+            <div>
+                <label class="block text-xs uppercase tracking-widest text-alma-text-muted mb-3">
+                    {{ 'testimonial.label_rating'|trans }}
+                </label>
+                <div class="flex gap-2"
+                     data-controller="star-rating"
+                     data-action="mouseleave->star-rating#leave">
+                    {% for child in form.rating %}
+                        <label class="cursor-pointer"
+                               data-star-rating-target="star"
+                               data-star-value="{{ child.vars.value }}"
+                               data-action="click->star-rating#select mouseenter->star-rating#hover">
+                            <input type="radio" name="{{ child.vars.full_name }}" value="{{ child.vars.value }}"
+                                   class="sr-only"
+                                   {{ child.vars.checked ? 'checked' }}>
+                            <span class="inline-flex items-center justify-center w-12 h-12 text-2xl
+                                         border border-alma-hover rounded transition-colors
+                                         hover:border-alma-gold">
+                                &#9733;
+                            </span>
+                        </label>
+                    {% endfor %}
+                </div>
+                {{ form_errors(form.rating) }}
+                {% do form.rating.setRendered() %}
+            </div>
+
+            {# Text #}
+            <div>
+                <label class="block text-xs uppercase tracking-widest text-alma-text-muted mb-2">
+                    {{ 'testimonial.label_text'|trans }}
+                </label>
+                {{ form_widget(form.text, {attr: {
+                    class: 'w-full border border-alma-hover rounded px-4 py-3 text-sm text-alma-text bg-white placeholder-alma-text-muted/50 focus:border-alma-gold focus:ring-1 focus:ring-alma-gold outline-none transition-colors',
+                    placeholder: 'testimonial.placeholder_text'|trans,
+                    rows: 5
+                }}) }}
+                {{ form_errors(form.text) }}
+            </div>
+
+            {# Name fields #}
+            <div class="grid grid-cols-3 gap-4">
+                <div class="col-span-2">
+                    <label class="block text-xs uppercase tracking-widest text-alma-text-muted mb-2">
+                        {{ 'testimonial.label_first_name'|trans }}
+                    </label>
+                    {{ form_widget(form.firstName, {attr: {
+                        class: 'w-full border border-alma-hover rounded px-4 py-3 text-sm text-alma-text bg-white placeholder-alma-text-muted/50 focus:border-alma-gold focus:ring-1 focus:ring-alma-gold outline-none transition-colors',
+                        placeholder: 'testimonial.placeholder_first_name'|trans
+                    }}) }}
+                    {{ form_errors(form.firstName) }}
+                </div>
+                <div>
+                    <label class="block text-xs uppercase tracking-widest text-alma-text-muted mb-2">
+                        {{ 'testimonial.label_last_initial'|trans }}
+                    </label>
+                    {{ form_widget(form.lastNameInitial, {attr: {
+                        class: 'w-full border border-alma-hover rounded px-4 py-3 text-sm text-alma-text bg-white placeholder-alma-text-muted/50 focus:border-alma-gold focus:ring-1 focus:ring-alma-gold outline-none transition-colors uppercase text-center',
+                        maxlength: 1,
+                        placeholder: 'M'
+                    }}) }}
+                    {{ form_errors(form.lastNameInitial) }}
+                </div>
+            </div>
+
+            {# City #}
+            <div>
+                <label class="block text-xs uppercase tracking-widest text-alma-text-muted mb-2">
+                    {{ 'testimonial.label_city'|trans }}
+                </label>
+                {{ form_widget(form.city, {attr: {
+                    class: 'w-full border border-alma-hover rounded px-4 py-3 text-sm text-alma-text bg-white placeholder-alma-text-muted/50 focus:border-alma-gold focus:ring-1 focus:ring-alma-gold outline-none transition-colors',
+                    placeholder: 'testimonial.placeholder_city'|trans
+                }}) }}
+                {{ form_errors(form.city) }}
+            </div>
+
+            {# Submit #}
+            <div class="text-center pt-4">
+                <button type="submit"
+                        class="inline-block bg-alma-gold hover:bg-alma-gold-dark text-white px-10 py-3
+                               font-sans text-sm uppercase tracking-[0.15em] transition-colors">
+                    {{ 'testimonial.submit_button'|trans }}
+                </button>
+            </div>
+
+        {{ form_end(form) }}
+    </section>
+{% endblock %}

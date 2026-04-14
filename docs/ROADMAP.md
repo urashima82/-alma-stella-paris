@@ -464,17 +464,17 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 2-3h*
 
 ### Tasks
-- [ ] `Testimonial` entity (email, rating 1-5, text, firstName, lastNameInitial, city, status)
-- [ ] Post-purchase testimonial request email (J+14 via Symfony Scheduler)
+- [x] `Testimonial` entity (email, rating 1-5, text, firstName, lastNameInitial, city, status)
+- [x] Post-purchase testimonial request email (J+14 via Symfony Scheduler)
   - Deduplicate by email: if a `Testimonial` already exists for this email → skip
   - Email sourced from the `Order` (works for guests and logged-in customers)
-- [ ] Public testimonial submission form (accessible via unique token in email)
-- [ ] Testimonial moderation in EasyAdmin (pending → approved / rejected)
-- [ ] Display latest approved testimonials on homepage (section with "Voir tous les témoignages" link)
-- [ ] Dedicated `/testimonials` page (all approved testimonials)
-- [ ] Footer link to `/testimonials`
-- [ ] DataFixtures: sample testimonials (approved) for development display
-- [ ] Schema.org `AggregateRating` from approved testimonials
+- [x] Public testimonial submission form (accessible via unique token in email)
+- [x] Testimonial moderation in EasyAdmin (pending → approved / rejected)
+- [x] Display latest approved testimonials on homepage (section with "Voir tous les témoignages" link)
+- [x] Dedicated `/testimonials` page (all approved testimonials)
+- [x] Footer link to `/testimonials`
+- [x] DataFixtures: sample testimonials (approved) for development display
+- [x] Schema.org `AggregateRating` from approved testimonials
 
 > **Testimonials are brand-level, not product-level.** Since every piece is unique
 > and sold once, product reviews make no sense. Testimonials capture the overall
@@ -635,17 +635,17 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 2-3h*
 
 ### Tasks
-- [ ] `Testimonial` entity (email, rating 1-5, text, firstName, lastNameInitial, city, status)
-- [ ] Post-purchase testimonial request email (J+14 via Symfony Scheduler)
+- [x] `Testimonial` entity (email, rating 1-5, text, firstName, lastNameInitial, city, status)
+- [x] Post-purchase testimonial request email (J+14 via Symfony Scheduler)
   - Deduplicate by email: if a `Testimonial` already exists for this email → skip
   - Email sourced from the `Order` (works for guests and logged-in customers)
-- [ ] Public testimonial submission form (accessible via unique token in email)
-- [ ] Testimonial moderation in EasyAdmin (pending → approved / rejected)
-- [ ] Display latest approved testimonials on homepage (section with "Voir tous les témoignages" link)
-- [ ] Dedicated `/testimonials` page (all approved testimonials)
-- [ ] Footer link to `/testimonials`
-- [ ] DataFixtures: sample testimonials (approved) for development display
-- [ ] Schema.org `AggregateRating` from approved testimonials
+- [x] Public testimonial submission form (accessible via unique token in email)
+- [x] Testimonial moderation in EasyAdmin (pending → approved / rejected)
+- [x] Display latest approved testimonials on homepage (section with "Voir tous les témoignages" link)
+- [x] Dedicated `/testimonials` page (all approved testimonials)
+- [x] Footer link to `/testimonials`
+- [x] DataFixtures: sample testimonials (approved) for development display
+- [x] Schema.org `AggregateRating` from approved testimonials
 
 > **Testimonials are brand-level, not product-level.** Since every piece is unique
 > and sold once, product reviews make no sense. Testimonials capture the overall

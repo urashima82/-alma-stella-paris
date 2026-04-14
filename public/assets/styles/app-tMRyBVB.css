@@ -1561,6 +1561,21 @@
       }
     }
   }
+  .peer-checked\:border-alma-gold {
+    &:is(:where(.peer):checked ~ *) {
+      border-color: var(--color-alma-gold);
+    }
+  }
+  .peer-checked\:bg-alma-gold {
+    &:is(:where(.peer):checked ~ *) {
+      background-color: var(--color-alma-gold);
+    }
+  }
+  .peer-checked\:text-white {
+    &:is(:where(.peer):checked ~ *) {
+      color: var(--color-white);
+    }
+  }
   .hover\:border-alma-gold {
     &:hover {
       @media (hover: hover) {

@@ -124,6 +124,61 @@
         <div class="h-px bg-alma-gold-muted"></div>
     </div>
 
+    {# ── Testimonials ── #}
+    {% if testimonials is not empty %}
+        <section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+            <div class="text-center mb-14">
+                <h2 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                    {{ 'home.testimonials_heading'|trans }}
+                </h2>
+                <p class="font-sans text-sm text-alma-text-muted">{{ 'home.testimonials_subtitle'|trans }}</p>
+                {% if testimonialStats.totalCount > 0 %}
+                    <div class="flex items-center justify-center gap-2 mt-4">
+                        <span class="text-alma-gold text-lg tracking-wider">
+                            {% for i in 1..5 %}{{ i <= testimonialStats.averageRating|round ? '&#9733;' : '&#9734;' }}{% endfor %}
+                        </span>
+                        <span class="text-sm text-alma-text-muted">
+                            {{ testimonialStats.averageRating }}/5
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                {% for testimonial in testimonials %}
+                    <article class="bg-alma-surface border border-alma-hover p-6 md:p-8">
+                        <div class="text-alma-gold text-lg tracking-wider mb-4">
+                            {% for i in 1..5 %}{{ i <= testimonial.rating ? '&#9733;' : '&#9734;' }}{% endfor %}
+                        </div>
+                        <p class="font-sans text-sm text-alma-text leading-relaxed mb-6">
+                            &ldquo;{{ testimonial.text }}&rdquo;
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <span class="font-serif text-alma-text font-medium">
+                                {{ testimonial.displayName }}
+                            </span>
+                            {% if testimonial.city %}
+                                <span class="text-alma-text-muted text-xs">&mdash; {{ testimonial.city }}</span>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="{{ path('shop_testimonials') }}"
+                   class="inline-block border border-alma-gold text-alma-gold px-8 py-3 font-sans text-sm
+                          hover:bg-alma-gold hover:text-white transition-colors">
+                    {{ 'home.testimonials_view_all'|trans }}
+                </a>
+            </div>
+        </section>
+
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="h-px bg-alma-gold-muted"></div>
+        </div>
+    {% endif %}
+
     {# ── Instagram feed strip ── #}
     <section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
         <div class="text-center mb-14">
