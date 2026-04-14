@@ -131,6 +131,7 @@ cart:
     subtotal: "Sous-total"
     shipping_note: "Livraison offerte sur toutes les commandes."
     checkout: "Passer la commande"
+    items_removed_warning: "{1}Un article a été retiré de votre panier car il n'est plus disponible.|]1,Inf[%count% articles ont été retirés de votre panier car ils ne sont plus disponibles."
 
 # ── Identification ──
 identify:

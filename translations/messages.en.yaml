@@ -131,6 +131,7 @@ cart:
     subtotal: "Subtotal"
     shipping_note: "Free shipping on all orders."
     checkout: "Proceed to checkout"
+    items_removed_warning: "{1}One item was removed from your cart because it is no longer available.|]1,Inf[%count% items were removed from your cart because they are no longer available."
 
 # ── Identification ──
 identify:

@@ -20,6 +20,8 @@ class CartManager
     private const COOKIE_NAME = 'alma_cart';
     private const COOKIE_LIFETIME_DAYS = 30;
 
+    private int $lastRemovedCount = 0;
+
     public function __construct(
         private readonly RequestStack $requestStack,
         private readonly ProductRepository $productRepository,
@@ -134,6 +136,8 @@ class CartManager
         $ids = $this->getProductIds();
 
         if ($ids === []) {
+            $this->lastRemovedCount = 0;
+
             return [];
         }
 
@@ -151,12 +155,25 @@ class CartManager
             }
         }
 
-        // If the cart had stale entries, clean it up
-        if (\count($validIds) !== \count($ids)) {
+        // Track how many items were removed
+        $this->lastRemovedCount = \count($ids) - \count($validIds);
+
+        // If the cart had stale entries, clean it up and flag for notification
+        if ($this->lastRemovedCount > 0) {
             $this->syncIds($validIds);
+            $this->requestStack->getSession()->set('_cart_items_removed', $this->lastRemovedCount);
         }
 
         return $validProducts;
+    }
+
+    /**
+     * Number of items removed during the last getProducts() call
+     * (sold out or reserved by another customer).
+     */
+    public function getLastRemovedCount(): int
+    {
+        return $this->lastRemovedCount;
     }
 
     /**

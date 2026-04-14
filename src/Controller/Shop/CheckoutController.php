@@ -62,6 +62,7 @@ class CheckoutController extends AbstractController
     public function identify(Request $request): Response
     {
         $products = $this->cartManager->getProducts();
+        $this->flashRemovedItemsWarning($request);
 
         if ($products === []) {
             return $this->redirectToRoute('shop_catalog', ['_locale' => $request->getLocale()]);
@@ -107,6 +108,7 @@ class CheckoutController extends AbstractController
     public function checkout(Request $request): Response
     {
         $products = $this->cartManager->getProducts();
+        $this->flashRemovedItemsWarning($request);
 
         if ($products === []) {
             return $this->redirectToRoute('shop_catalog', ['_locale' => $request->getLocale()]);
@@ -906,6 +908,16 @@ class CheckoutController extends AbstractController
         }
 
         return $request->getSession()->get('_checkout_email');
+    }
+
+    private function flashRemovedItemsWarning(Request $request): void
+    {
+        $removed = $request->getSession()->get('_cart_items_removed', 0);
+
+        if ($removed > 0) {
+            $request->getSession()->remove('_cart_items_removed');
+            $this->addFlash('warning', $this->translator->trans('cart.items_removed_warning', ['%count%' => $removed]));
+        }
     }
 
     /**
