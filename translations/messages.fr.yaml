@@ -403,11 +403,13 @@ account:
     nav:
         dashboard: "Tableau de bord"
         orders: "Mes commandes"
+        wishlist: "Mes envies"
         addresses: "Carnet d'adresses"
         profile: "Mon profil"
         logout: "Se déconnecter"
     quick_links:
         orders: "Voir mes commandes"
+        wishlist: "Voir mes envies"
         addresses: "Gérer mes adresses"
         profile: "Modifier mon profil"
 
@@ -521,6 +523,19 @@ contact:
         message_too_short: "Votre message doit contenir au moins 10 caractères."
         rate_limited: "Vous avez envoyé trop de messages. Veuillez réessayer plus tard."
 
+
+# ── Wishlist ──
+wishlist:
+    title: "Mes envies | Alma Stella Paris"
+    heading: "Mes envies"
+    empty: "Votre liste d'envies est vide."
+    empty_hint: "Parcourez notre collection et appuyez sur le cœur pour sauvegarder vos pièces favorites."
+    browse: "Parcourir la collection"
+    items_sold: "Certaines pièces de vos envies ont trouvé preneur."
+    add_to_cart: "Ajouter au panier"
+    reserved: "Actuellement réservée"
+    remove: "Retirer"
+    added: "Ajoutée le %date%"
 
 # ── Language switcher ──
 locale:

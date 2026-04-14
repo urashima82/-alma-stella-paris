@@ -47,6 +47,10 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OrderBy(['createdAt' => 'DESC'])]
     private Collection $orders;
 
+    /** @var Collection<int, WishlistItem> */
+    #[ORM\OneToMany(targetEntity: WishlistItem::class, mappedBy: 'customer', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $wishlistItems;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -57,6 +61,7 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->addresses = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->wishlistItems = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -191,6 +196,12 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this->addresses->first() ?: null;
+    }
+
+    /** @return Collection<int, WishlistItem> */
+    public function getWishlistItems(): Collection
+    {
+        return $this->wishlistItems;
     }
 
     /** @return Collection<int, Order> */

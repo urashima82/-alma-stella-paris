@@ -403,11 +403,13 @@ account:
     nav:
         dashboard: "Dashboard"
         orders: "My orders"
+        wishlist: "My wishlist"
         addresses: "Address book"
         profile: "My profile"
         logout: "Sign out"
     quick_links:
         orders: "View my orders"
+        wishlist: "View my wishlist"
         addresses: "Manage addresses"
         profile: "Edit profile"
 
@@ -521,6 +523,19 @@ contact:
         message_too_short: "Your message must be at least 10 characters."
         rate_limited: "You've sent too many messages. Please try again later."
 
+
+# ── Wishlist ──
+wishlist:
+    title: "My wishlist | Alma Stella Paris"
+    heading: "My wishlist"
+    empty: "Your wishlist is empty."
+    empty_hint: "Browse our collection and tap the heart to save your favorite pieces."
+    browse: "Browse the collection"
+    items_sold: "Some pieces from your wishlist have found a new home."
+    add_to_cart: "Add to cart"
+    reserved: "Currently reserved"
+    remove: "Remove"
+    added: "Added on %date%"
 
 # ── Language switcher ──
 locale:

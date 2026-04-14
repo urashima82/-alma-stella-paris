@@ -17,6 +17,11 @@
                       {{ current_route in ['shop_account_orders', 'shop_account_order_detail'] ? 'text-alma-gold border-b-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold' }}">
                 {{ 'account.nav.orders'|trans }}
             </a>
+            <a href="{{ path('shop_account_wishlist') }}"
+               class="shrink-0 px-4 py-2 text-xs font-sans uppercase tracking-wider transition-colors
+                      {{ current_route == 'shop_account_wishlist' ? 'text-alma-gold border-b-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold' }}">
+                {{ 'account.nav.wishlist'|trans }}
+            </a>
             <a href="{{ path('shop_account_addresses') }}"
                class="shrink-0 px-4 py-2 text-xs font-sans uppercase tracking-wider transition-colors
                       {{ current_route starts with 'shop_account_address' ? 'text-alma-gold border-b-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold' }}">
@@ -43,6 +48,11 @@
                        class="block px-4 py-2.5 text-sm font-sans transition-colors
                               {{ current_route in ['shop_account_orders', 'shop_account_order_detail'] ? 'text-alma-gold bg-alma-gold/5 border-l-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold hover:bg-alma-surface' }}">
                         {{ 'account.nav.orders'|trans }}
+                    </a>
+                    <a href="{{ path('shop_account_wishlist') }}"
+                       class="block px-4 py-2.5 text-sm font-sans transition-colors
+                              {{ current_route == 'shop_account_wishlist' ? 'text-alma-gold bg-alma-gold/5 border-l-2 border-alma-gold' : 'text-alma-text-muted hover:text-alma-gold hover:bg-alma-surface' }}">
+                        {{ 'account.nav.wishlist'|trans }}
                     </a>
                     <a href="{{ path('shop_account_addresses') }}"
                        class="block px-4 py-2.5 text-sm font-sans transition-colors

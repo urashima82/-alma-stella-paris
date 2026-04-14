@@ -25,7 +25,8 @@ alma-stella/
 │       ├── lightbox_controller.js           # Image lightbox / gallery view on product detail
 │       ├── mobile_menu_controller.js        # Mobile hamburger menu toggle
 │       ├── reservation_timer_controller.js  # Checkout countdown timer (mm:ss, auto-reload on expiry)
-│       └── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
+│       ├── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
+│       └── wishlist_toggle_controller.js    # Heart toggle (AJAX POST, guest redirect to login)
 ├── config/
 ├── docs/
 │   └── design/
@@ -56,6 +57,7 @@ alma-stella/
 │   │       ├── AboutController.php
 │   │       ├── AccountController.php       # Dashboard, orders, addresses, profile
 │   │       ├── CartController.php          # Cart API: add/remove/content (JSON responses)
+│   │       ├── WishlistController.php     # Wishlist: toggle (AJAX) + account page
 │   │       ├── CatalogController.php
 │   │       ├── CheckoutController.php      # 3-step tunnel: identify → checkout → payment + tracking
 │   │       ├── ContactController.php       # Contact form with honeypot + rate limiter
@@ -77,6 +79,7 @@ alma-stella/
 │   ├── Repository/
 │   ├── Service/
 │   │   ├── CartManager.php          # Hybrid cart: session+cookie (guests) / DB (customers)
+│   │   ├── WishlistManager.php      # Wishlist: toggle, visibility filter, sold-item cleanup
 │   │   ├── ContactMailer.php        # Contact form notification (plain text to admins, reply-to sender)
 │   │   ├── CurrencyConverter.php    # Exchange rates from open.er-api.com, cached 6h
 │   │   ├── ImageProcessor.php       # Resizes and converts images to WebP (GD driver)
@@ -92,6 +95,7 @@ alma-stella/
 │   │   ├── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
 │   │   ├── PromotionExtension.php        # product_promo(), product_promo_price(), product_compare_at_price()
 │   │   ├── ShippingExtension.php         # Shipping-related Twig helpers (promo-aware display_price)
+│   │   ├── WishlistExtension.php        # wishlist_product_ids(), wishlist_count()
 │   │   └── TrackingExtension.php         # tracking_url() — generates 17track URL from tracking number
 │   ├── Security/
 │   │   ├── AdminAuthenticationEntryPoint.php     # Redirects unauthenticated to /admin/login
@@ -414,6 +418,24 @@ class CartItem
 > On login, `CartMergeSubscriber` merges the guest session cart into the customer's
 > DB cart automatically.
 
+### WishlistItem
+
+```php
+// src/Entity/WishlistItem.php
+class WishlistItem
+{
+    private int $id;
+    private Customer $customer;              // ManyToOne
+    private Product $product;                // ManyToOne
+    private \DateTimeImmutable $addedAt;
+}
+```
+
+> **Wishlist:** Only available to logged-in customers. Items are filtered by
+> `isSoldOut = false AND isPublished = true` — sold or unpublished products
+> disappear automatically. A flash message notifies the customer when items
+> have been sold between visits.
+
 ### ShippingSettings
 
 ```php
@@ -510,6 +532,7 @@ class Reservation
 | `CustomerAddress` | Customer shipping addresses with default flag + optional recipient name |
 | `Cart` | Persistent cart for logged-in customers (OneToOne with Customer) |
 | `CartItem` | Individual cart item (ManyToOne to Cart + Product) |
+| `WishlistItem` | Customer wishlist item (ManyToOne to Customer + Product, unique constraint) |
 | `Reservation` | Temporary product lock during checkout (15 min, OneToOne with Product) |
 | `ContactMessage` | Contact form submissions — name, email, subject, message, read flag |
 | `ResetPasswordRequest` | Token storage for password reset flow (symfonycasts bundle) |

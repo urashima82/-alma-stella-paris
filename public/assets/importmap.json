@@ -8,7 +8,11 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-oJDlnAS.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-lTmM04Q.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/wishlist_toggle_controller.js": {
+        "path": "\/assets\/controllers\/wishlist_toggle_controller-pA6CvBy.js",
         "type": "js"
     },
     "\/assets\/controllers\/checkout_identify_controller.js": {
@@ -68,7 +72,7 @@
         "type": "js"
     },
     "\/assets\/styles\/app.css": {
-        "path": "\/assets\/styles\/app-gscLrNQ.css",
+        "path": "\/assets\/styles\/app-mXX81t4.css",
         "type": "css"
     },
     "@hotwired\/stimulus": {

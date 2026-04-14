@@ -648,7 +648,7 @@ Shall I proceed to Milestone Y?"
 
 ## V2 backlog (post-launch, not in current scope)
 
-- Wishlist persistence (tied to customer account)
+- ~~Wishlist persistence (tied to customer account)~~ ✅ Implemented
 - Multi-currency Stripe charges (vs current cosmetic conversion)
 - Lookbook / editorial seasonal pages
 - Referral program ("Give $10, Get $10")
