@@ -34,6 +34,15 @@
                     <span class="text-alma-text-muted">{{ 'confirmation.items_count'|trans }}</span>
                     <span class="text-alma-text">{{ order.items|length }}</span>
                 </div>
+                {% for promo in order.appliedPromotions %}
+                    <div class="flex justify-between text-sm font-sans">
+                        <span class="text-green-600">
+                            {{ promo.name }}
+                            {% if promo.code %}({{ promo.code }}){% endif %}
+                        </span>
+                        <span class="text-green-600 font-medium">-${{ promo.discount|number_format(2) }}</span>
+                    </div>
+                {% endfor %}
                 <div class="border-t border-alma-hover pt-3 flex justify-between font-sans">
                     <span class="text-alma-text font-medium">{{ 'checkout.total'|trans }}</span>
                     <span class="text-lg font-semibold text-alma-text">

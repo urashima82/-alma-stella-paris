@@ -90,12 +90,26 @@
                                                         {{ item.productName }}
                                                     </td>
                                                     <td align="right" style="font-size: 14px; color: #2C2418;">
-                                                        ${{ '%.2f'|format(item.productPrice) }}
+                                                        ${{ '%.2f'|format(item.lineTotal) }}
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="2" style="font-size: 11px; color: #8C8070; padding-top: 2px;">
-                                                        Livraison : ${{ '%.2f'|format(item.shippingCost) }}
+                                                        Livraison offerte
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        {% endfor %}
+
+                                        {# Promotions #}
+                                        {% for promo in order.appliedPromotions %}
+                                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 8px;">
+                                                <tr>
+                                                    <td style="font-size: 13px; color: #16a34a;">
+                                                        {{ promo.name }}{% if promo.code %} ({{ promo.code }}){% endif %}
+                                                    </td>
+                                                    <td align="right" style="font-size: 13px; font-weight: 600; color: #16a34a;">
+                                                        -${{ '%.2f'|format(promo.discount) }}
                                                     </td>
                                                 </tr>
                                             </table>

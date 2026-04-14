@@ -78,6 +78,15 @@
                         {% endif %}
                     </span>
                 </div>
+                {% for promo in order.appliedPromotions %}
+                    <div class="flex justify-between text-sm font-sans">
+                        <span class="text-green-600">
+                            {{ promo.name }}
+                            {% if promo.code %}({{ promo.code }}){% endif %}
+                        </span>
+                        <span class="text-green-600 font-medium">-${{ promo.discount|number_format(2) }}</span>
+                    </div>
+                {% endfor %}
                 <div class="flex justify-between text-sm font-sans">
                     <span class="text-alma-text-muted">{{ 'checkout.total'|trans }}</span>
                     <span class="font-semibold text-alma-text">{{ totalConverted|price_format(currency) }}</span>

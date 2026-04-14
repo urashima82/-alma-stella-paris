@@ -137,6 +137,11 @@ class PromotionEngine
     /**
      * Evaluate cart-level promotions (automatic + code).
      *
+     * Auto promos and coupon codes are independent: they always stack.
+     * Within auto promos, cumulable ones stack; non-cumulable ones compete.
+     * Only one coupon code at a time; it applies only to full-price items
+     * (no product-level promo, no manual compareAtPrice).
+     *
      * @param Product[] $products
      *
      * @return array{promotions: list<array{promotion: Promotion, discount: float}>, totalDiscount: float}
@@ -144,11 +149,14 @@ class PromotionEngine
     public function evaluateCartPromotions(array $products, float $subtotalUsd, ?string $couponCode = null, ?string $customerEmail = null): array
     {
         $results = [];
-        $cumulableDiscount = 0.0;
-        $bestNonCumulable = null;
-        $bestNonCumulableDiscount = 0.0;
+        $totalDiscount = 0.0;
 
-        // Automatic cart promotions
+        // --- Phase 1: Automatic cart promotions (compete among themselves) ---
+        $autoResults = [];
+        $autoCumulableDiscount = 0.0;
+        $bestAutoNonCumulable = null;
+        $bestAutoNonCumulableDiscount = 0.0;
+
         foreach ($this->getActiveCartPromotions() as $promo) {
             $discount = $this->evaluateSingleCartPromotion($promo, $products, $subtotalUsd, $customerEmail);
 
@@ -157,47 +165,40 @@ class PromotionEngine
             }
 
             if ($promo->isCumulable()) {
-                $cumulableDiscount += $discount;
-                $results[] = ['promotion' => $promo, 'discount' => $discount];
-            } elseif ($discount > $bestNonCumulableDiscount) {
-                $bestNonCumulableDiscount = $discount;
-                $bestNonCumulable = $promo;
+                $autoCumulableDiscount += $discount;
+                $autoResults[] = ['promotion' => $promo, 'discount' => $discount];
+            } elseif ($discount > $bestAutoNonCumulableDiscount) {
+                $bestAutoNonCumulableDiscount = $discount;
+                $bestAutoNonCumulable = $promo;
             }
         }
 
-        // Coupon code (CartCode)
+        if ($bestAutoNonCumulable !== null && $bestAutoNonCumulableDiscount > $autoCumulableDiscount) {
+            $results[] = ['promotion' => $bestAutoNonCumulable, 'discount' => $bestAutoNonCumulableDiscount];
+            $totalDiscount += $bestAutoNonCumulableDiscount;
+        } else {
+            \array_push($results, ...$autoResults);
+            $totalDiscount += $autoCumulableDiscount;
+        }
+
+        // --- Phase 2: Coupon code (always stacks with auto promos, applies only to full-price items) ---
         if ($couponCode !== null && $couponCode !== '') {
             $codePromo = $this->validateCouponCode($couponCode, $subtotalUsd, $customerEmail);
 
             if ($codePromo !== null) {
-                $eligibleTotal = $this->getEligibleSubtotal($codePromo, $products, $subtotalUsd);
+                $eligibleTotal = $this->getCouponEligibleSubtotal($codePromo, $products);
                 $discount = $eligibleTotal > 0.0 ? $codePromo->calculateDiscount($eligibleTotal) : 0.0;
 
                 if ($discount > 0.0) {
-                    if ($codePromo->isCumulable()) {
-                        $cumulableDiscount += $discount;
-                        $results[] = ['promotion' => $codePromo, 'discount' => $discount];
-                    } elseif ($discount > $bestNonCumulableDiscount) {
-                        $bestNonCumulableDiscount = $discount;
-                        $bestNonCumulable = $codePromo;
-                    }
+                    $results[] = ['promotion' => $codePromo, 'discount' => $discount];
+                    $totalDiscount += $discount;
                 }
-            }
-        }
-
-        // Best non-cumulable vs sum of cumulables
-        if ($bestNonCumulable !== null) {
-            if ($bestNonCumulableDiscount > $cumulableDiscount) {
-                return [
-                    'promotions' => [['promotion' => $bestNonCumulable, 'discount' => $bestNonCumulableDiscount]],
-                    'totalDiscount' => $bestNonCumulableDiscount,
-                ];
             }
         }
 
         return [
             'promotions' => $results,
-            'totalDiscount' => $cumulableDiscount,
+            'totalDiscount' => $totalDiscount,
         ];
     }
 
@@ -300,9 +301,9 @@ class PromotionEngine
     }
 
     /**
-     * Calculate the subtotal eligible for a cart promotion.
-     * Non-cumulable promotions exclude products already discounted
-     * (active product promotion or manual compareAtPrice).
+     * Calculate the subtotal eligible for an automatic cart promotion.
+     * Cumulable auto promos without restrictions use the full subtotal.
+     * Non-cumulable auto promos exclude already-discounted products.
      *
      * @param Product[] $products
      */
@@ -321,7 +322,7 @@ class PromotionEngine
                 continue;
             }
 
-            if (!$promo->isCumulable() && !$this->isEligibleForNonCumulable($promo, $product)) {
+            if (!$promo->isCumulable() && $this->isAlreadyDiscounted($product, $promo)) {
                 continue;
             }
 
@@ -332,17 +333,44 @@ class PromotionEngine
         return $total;
     }
 
-    private function isEligibleForNonCumulable(Promotion $promo, Product $product): bool
+    /**
+     * Calculate the subtotal eligible for a coupon code.
+     * Coupons always apply only to full-price items (no product-level
+     * promotion and no manual compareAtPrice), regardless of cumulability.
+     *
+     * @param Product[] $products
+     */
+    private function getCouponEligibleSubtotal(Promotion $promo, array $products): float
+    {
+        $hasRestriction = !$promo->getProducts()->isEmpty() || !$promo->getCategories()->isEmpty();
+        $total = 0.0;
+
+        foreach ($products as $product) {
+            if ($hasRestriction && !$promo->appliesToProduct($product)) {
+                continue;
+            }
+
+            if ($this->isAlreadyDiscounted($product, $promo)) {
+                continue;
+            }
+
+            $total += $product->getDisplayPrice();
+        }
+
+        return $total;
+    }
+
+    private function isAlreadyDiscounted(Product $product, Promotion $promo): bool
     {
         if ($this->getBestProductPromotion($product) !== null) {
-            return false;
+            return true;
         }
 
         if ($product->getCompareAtPrice() !== null && !$promo->overridesCompareAtPrice()) {
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**

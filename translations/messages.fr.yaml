@@ -428,6 +428,7 @@ orders:
         shipping: "Livraison"
         line_total: "Sous-total"
         free_shipping: "Offerte"
+        discount: "Réduction"
         order_total: "Total"
         shipping_address: "Adresse de livraison"
         billing_address: "Adresse de facturation"

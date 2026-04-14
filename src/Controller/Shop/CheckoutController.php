@@ -152,6 +152,14 @@ class CheckoutController extends AbstractController
                 // Store discount info on order
                 $order->setDiscountAmountUsd($orderDiscountUsd);
                 $order->setPromotionCode($couponCodeForOrder !== '' ? \strtoupper($couponCodeForOrder) : null);
+                $order->setAppliedPromotions(\array_map(
+                    static fn (array $entry) => [
+                        'name' => $entry['promotion']->getName(),
+                        'discount' => $entry['discount'],
+                        'code' => $entry['promotion']->getCode(),
+                    ],
+                    $promoResult['promotions'],
+                ));
 
                 // Store promo result in session for tracking on payment confirmation
                 $request->getSession()->set('_order_promotions', \array_map(
@@ -663,6 +671,10 @@ class CheckoutController extends AbstractController
         foreach ($products as $product) {
             $shippingCost = $this->shippingCostProvider->getCost($product->getShippingTier());
             $item = OrderItem::fromProduct($product, $shippingCost);
+            $discountedPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
+            if ($discountedPrice !== null) {
+                $item->setDiscountAmountUsd($product->getDisplayPrice() - $discountedPrice);
+            }
             $order->addItem($item);
         }
 
@@ -687,6 +699,10 @@ class CheckoutController extends AbstractController
         foreach ($products as $product) {
             $shippingCost = $this->shippingCostProvider->getCost($product->getShippingTier());
             $item = OrderItem::fromProduct($product, $shippingCost);
+            $discountedPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
+            if ($discountedPrice !== null) {
+                $item->setDiscountAmountUsd($product->getDisplayPrice() - $discountedPrice);
+            }
             $order->addItem($item);
         }
 

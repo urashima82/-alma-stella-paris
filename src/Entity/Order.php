@@ -89,6 +89,10 @@ class Order
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $promotionCode = null;
 
+    /** @var list<array{name: string, discount: float, code: string|null}> */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $appliedPromotions = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $stripePaymentIntentId = null;
 
@@ -441,6 +445,24 @@ class Order
         return $this;
     }
 
+    /**
+     * @return list<array{name: string, discount: float, code: string|null}>
+     */
+    public function getAppliedPromotions(): array
+    {
+        return $this->appliedPromotions ?? [];
+    }
+
+    /**
+     * @param list<array{name: string, discount: float, code: string|null}> $appliedPromotions
+     */
+    public function setAppliedPromotions(array $appliedPromotions): static
+    {
+        $this->appliedPromotions = $appliedPromotions;
+
+        return $this;
+    }
+
     public function getStripePaymentIntentId(): ?string
     {
         return $this->stripePaymentIntentId;
@@ -561,9 +583,23 @@ class Order
             );
         }
 
+        $promoRows = '';
+        foreach ($this->getAppliedPromotions() as $promo) {
+            $label = \htmlspecialchars($promo['name']);
+            if (($promo['code'] ?? null) !== null) {
+                $label .= \sprintf(' <span class="text-body-secondary">(%s)</span>', \htmlspecialchars($promo['code']));
+            }
+            $promoRows .= \sprintf(
+                '<tr><td colspan="3" style="padding:4px 12px 4px 0;color:#16a34a;">%s</td><td style="padding:4px 0 4px 8px;text-align:right;font-weight:600;color:#16a34a;">-$%s</td></tr>',
+                $label,
+                \number_format((float) $promo['discount'], 2),
+            );
+        }
+
         return \sprintf(
-            '<table style="width:100%%;border-collapse:collapse;font-size:13px;"><thead><tr style="border-bottom:2px solid var(--bs-border-color);"><th class="text-body-secondary" style="padding:6px 12px 6px 0;text-align:left;font-weight:600;">Produit</th><th class="text-body-secondary" style="padding:6px 8px;text-align:right;font-weight:600;">Prix</th><th class="text-body-secondary" style="padding:6px 8px;text-align:right;font-weight:600;">Livraison</th><th class="text-body-secondary" style="padding:6px 0 6px 8px;text-align:right;font-weight:600;">Total</th></tr></thead><tbody>%s</tbody><tfoot><tr style="border-top:2px solid var(--bs-border-color);"><td style="padding:8px 12px 0 0;font-weight:700;">Total</td><td colspan="2"></td><td style="padding:8px 0 0 8px;text-align:right;font-weight:700;font-size:14px;">$%s</td></tr></tfoot></table>',
+            '<table style="width:100%%;border-collapse:collapse;font-size:13px;"><thead><tr style="border-bottom:2px solid var(--bs-border-color);"><th class="text-body-secondary" style="padding:6px 12px 6px 0;text-align:left;font-weight:600;">Produit</th><th class="text-body-secondary" style="padding:6px 8px;text-align:right;font-weight:600;">Prix</th><th class="text-body-secondary" style="padding:6px 8px;text-align:right;font-weight:600;">Livraison</th><th class="text-body-secondary" style="padding:6px 0 6px 8px;text-align:right;font-weight:600;">Total</th></tr></thead><tbody>%s</tbody><tfoot>%s<tr style="border-top:2px solid var(--bs-border-color);"><td style="padding:8px 12px 0 0;font-weight:700;">Total</td><td colspan="2"></td><td style="padding:8px 0 0 8px;text-align:right;font-weight:700;font-size:14px;">$%s</td></tr></tfoot></table>',
             $rows,
+            $promoRows,
             \number_format($this->getTotalUsd(), 2),
         );
     }

@@ -64,6 +64,16 @@
                                                     {{ order.reference }}
                                                 </td>
                                             </tr>
+                                            {% for promo in order.appliedPromotions %}
+                                                <tr>
+                                                    <td style="font-size: 13px; color: #16a34a;">
+                                                        {{ promo.name }}{% if promo.code %} ({{ promo.code }}){% endif %}
+                                                    </td>
+                                                    <td align="right" style="font-size: 13px; font-weight: 600; color: #16a34a;">
+                                                        -${{ '%.2f'|format(promo.discount) }}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
                                             <tr>
                                                 <td style="font-size: 13px; color: #8C8070;">
                                                     Total

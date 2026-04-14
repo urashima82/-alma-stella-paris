@@ -56,6 +56,15 @@
                     <td class="px-5 py-3 text-right text-alma-text-muted">{{ 'orders.detail.shipping'|trans }}</td>
                     <td class="px-5 py-3 text-right text-alma-text-muted">{{ 'orders.detail.free_shipping'|trans }}</td>
                 </tr>
+                {% for promo in order.appliedPromotions %}
+                    <tr class="border-b border-alma-hover/50">
+                        <td class="px-5 py-3 text-right text-green-600">
+                            {{ promo.name }}
+                            {% if promo.code %}({{ promo.code }}){% endif %}
+                        </td>
+                        <td class="px-5 py-3 text-right font-medium text-green-600">-${{ promo.discount|number_format(2) }}</td>
+                    </tr>
+                {% endfor %}
                 <tr>
                     <td class="px-5 py-4 text-right font-medium text-alma-text">{{ 'orders.detail.order_total'|trans }}</td>
                     <td class="px-5 py-4 text-right font-medium text-alma-text text-base">${{ order.totalUsd|number_format(2) }}</td>

@@ -113,6 +113,18 @@
                                     </tr>
                                 </table>
                             {% endfor %}
+                            {% for promo in order.appliedPromotions %}
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 8px;">
+                                    <tr>
+                                        <td style="font-size: 13px; color: #16a34a;">
+                                            {{ promo.name }}{% if promo.code %} ({{ promo.code }}){% endif %}
+                                        </td>
+                                        <td align="right" style="font-size: 13px; font-weight: 600; color: #16a34a;">
+                                            -${{ '%.2f'|format(promo.discount) }}
+                                        </td>
+                                    </tr>
+                                </table>
+                            {% endfor %}
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 12px; border-top: 1px solid #E8DDD0; padding-top: 12px;">
                                 <tr>
                                     <td style="font-size: 15px; font-weight: 600; color: #2C2418;">
