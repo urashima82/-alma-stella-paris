@@ -89,7 +89,7 @@ class Order
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $promotionCode = null;
 
-    /** @var list<array{name: string, discount: float, code: string|null}> */
+    /** @var list<array{name: string, nameFr: string, discount: float, code: string|null}> */
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $appliedPromotions = null;
 
@@ -454,7 +454,7 @@ class Order
     }
 
     /**
-     * @param list<array{name: string, discount: float, code: string|null}> $appliedPromotions
+     * @param list<array{name: string, nameFr: string, discount: float, code: string|null}> $appliedPromotions
      */
     public function setAppliedPromotions(array $appliedPromotions): static
     {

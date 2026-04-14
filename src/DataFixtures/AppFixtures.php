@@ -523,7 +523,8 @@ class AppFixtures extends Fixture
     {
         // 1. Product automatic: -15% on necklaces
         $necklacePromo = new Promotion();
-        $necklacePromo->setName('Promo colliers -15%');
+        $necklacePromo->setName('Necklaces promo -15%');
+        $necklacePromo->setNameFr('Promo colliers -15%');
         $necklacePromo->setType(PromotionType::ProductAutomatic);
         $necklacePromo->setDiscountType(DiscountType::Percentage);
         $necklacePromo->setDiscountValue(15.00);
@@ -540,7 +541,8 @@ class AppFixtures extends Fixture
 
         // 2. Cart automatic: -$5 over $80
         $cartAutoPromo = new Promotion();
-        $cartAutoPromo->setName('$5 offerts dès $80');
+        $cartAutoPromo->setName('$5 off over $80');
+        $cartAutoPromo->setNameFr('5 $ offerts dès 80 $');
         $cartAutoPromo->setType(PromotionType::CartAutomatic);
         $cartAutoPromo->setDiscountType(DiscountType::FixedAmount);
         $cartAutoPromo->setDiscountValue(5.00);
@@ -551,7 +553,8 @@ class AppFixtures extends Fixture
 
         // 3. Cart automatic: -10% over $60 (non-cumulable, competes with #2)
         $cartAutoPromoNonCumulable = new Promotion();
-        $cartAutoPromoNonCumulable->setName('-10% dès $60 d\'achat');
+        $cartAutoPromoNonCumulable->setName('-10% over $60');
+        $cartAutoPromoNonCumulable->setNameFr('-10% dès 60 $ d\'achat');
         $cartAutoPromoNonCumulable->setType(PromotionType::CartAutomatic);
         $cartAutoPromoNonCumulable->setDiscountType(DiscountType::Percentage);
         $cartAutoPromoNonCumulable->setDiscountValue(10.00);
@@ -562,7 +565,8 @@ class AppFixtures extends Fixture
 
         // 4. Cart automatic: -15% over $100 (non-cumulable, competes with #3)
         $cartAutoPromo15 = new Promotion();
-        $cartAutoPromo15->setName('-15% dès $100 d\'achat');
+        $cartAutoPromo15->setName('-15% over $100');
+        $cartAutoPromo15->setNameFr('-15% dès 100 $ d\'achat');
         $cartAutoPromo15->setType(PromotionType::CartAutomatic);
         $cartAutoPromo15->setDiscountType(DiscountType::Percentage);
         $cartAutoPromo15->setDiscountValue(15.00);
@@ -573,7 +577,8 @@ class AppFixtures extends Fixture
 
         // 5. Cart code: BIENVENUE10 — 10% off
         $codePromo = new Promotion();
-        $codePromo->setName('Code bienvenue 10%');
+        $codePromo->setName('Welcome 10% off');
+        $codePromo->setNameFr('Code bienvenue 10%');
         $codePromo->setCode('BIENVENUE10');
         $codePromo->setType(PromotionType::CartCode);
         $codePromo->setDiscountType(DiscountType::Percentage);

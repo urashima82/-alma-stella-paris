@@ -158,6 +158,7 @@ class CheckoutController extends AbstractController
                 $order->setAppliedPromotions(\array_map(
                     static fn (array $entry) => [
                         'name' => $entry['promotion']->getName(),
+                        'nameFr' => $entry['promotion']->getNameFr(),
                         'discount' => $entry['discount'],
                         'code' => $entry['promotion']->getCode(),
                     ],
@@ -236,10 +237,13 @@ class CheckoutController extends AbstractController
             $promo = $entry['promotion'];
             $discount = (float) $entry['discount'];
 
+            $localizedName = $locale === 'fr' && $promo->getNameFr() !== ''
+                ? $promo->getNameFr()
+                : $promo->getName();
             $appliedDiscounts[] = [
                 'label' => $promo->getCode() !== null
-                    ? \sprintf('%s (%s)', $promo->getName(), $promo->getCode())
-                    : $promo->getName(),
+                    ? \sprintf('%s (%s)', $localizedName, $promo->getCode())
+                    : $localizedName,
                 'amountConverted' => $this->currencyConverter->convert($discount, $currency),
             ];
         }

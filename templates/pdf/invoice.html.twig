@@ -253,7 +253,7 @@
         {% for promo in order.appliedPromotions %}
             <tr>
                 <td class="total-label" style="color: #16a34a;">
-                    {{ promo.name }}
+                    {{ locale == 'fr' and promo.nameFr is defined and promo.nameFr ? promo.nameFr : promo.name }}
                     {% if promo.code %}({{ promo.code }}){% endif %}
                 </td>
                 <td class="total-value" style="color: #16a34a;">-${{ '%.2f'|format(promo.discount) }}</td>

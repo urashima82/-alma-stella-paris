@@ -59,7 +59,7 @@
                 {% for promo in order.appliedPromotions %}
                     <tr class="border-b border-alma-hover/50">
                         <td class="px-5 py-3 text-right text-green-600">
-                            {{ promo.name }}
+                            {{ app.request.locale == 'fr' and promo.nameFr is defined and promo.nameFr ? promo.nameFr : promo.name }}
                             {% if promo.code %}({{ promo.code }}){% endif %}
                         </td>
                         <td class="px-5 py-3 text-right font-medium text-green-600">-${{ promo.discount|number_format(2) }}</td>

@@ -6,6 +6,7 @@ namespace App\Twig;
 
 use App\Entity\Product;
 use App\Entity\ProductCategory;
+use App\Entity\Promotion;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -26,7 +27,7 @@ class LocaleProductExtension extends AbstractExtension
         ];
     }
 
-    public function localizedName(Product|ProductCategory $entity): string
+    public function localizedName(Product|ProductCategory|Promotion $entity): string
     {
         if ($this->getLocale() === 'fr') {
             return $entity->getNameFr();

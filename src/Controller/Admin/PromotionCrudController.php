@@ -59,7 +59,8 @@ class PromotionCrudController extends AbstractCrudController
         if ($pageName === Crud::PAGE_INDEX) {
             yield IdField::new('id');
             yield BooleanField::new('isActive', 'Active');
-            yield TextField::new('name', 'Nom');
+            yield TextField::new('name', 'Nom (EN)');
+            yield TextField::new('nameFr', 'Nom (FR)');
             yield TextField::new('code', 'Code');
             yield TextField::new('typeLabel', 'Type');
             yield TextField::new('discountLabel', 'Réduction');
@@ -73,7 +74,8 @@ class PromotionCrudController extends AbstractCrudController
         if ($pageName === Crud::PAGE_DETAIL) {
             yield FormField::addTab('Informations');
             yield IdField::new('id');
-            yield TextField::new('name', 'Nom');
+            yield TextField::new('name', 'Nom (EN)');
+            yield TextField::new('nameFr', 'Nom (FR)');
             yield TextField::new('code', 'Code');
             yield TextField::new('typeLabel', 'Type');
             yield TextField::new('discountTypeLabel', 'Type de réduction');
@@ -105,8 +107,11 @@ class PromotionCrudController extends AbstractCrudController
         // ── New / Edit ──
         yield FormField::addTab('Général');
 
-        yield TextField::new('name', 'Nom')
-            ->setHelp('Nom interne de la promotion (ex: "Soldes été 2026")');
+        yield TextField::new('name', 'Nom (EN)')
+            ->setHelp('Nom affiché aux clients anglophones (ex: "Summer sale 2026")');
+
+        yield TextField::new('nameFr', 'Nom (FR)')
+            ->setHelp('Nom affiché aux clients francophones (ex: "Soldes été 2026")');
 
         yield ChoiceField::new('type', 'Type de promotion')
             ->setChoices(\array_combine(

@@ -24,6 +24,9 @@ class Promotion
     #[ORM\Column(length: 255)]
     private string $name = '';
 
+    #[ORM\Column(length: 255)]
+    private string $nameFr = '';
+
     #[ORM\Column(length: 50, unique: true, nullable: true)]
     private ?string $code = null;
 
@@ -122,6 +125,18 @@ class Promotion
     public function setName(string $name): static
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getNameFr(): string
+    {
+        return $this->nameFr;
+    }
+
+    public function setNameFr(string $nameFr): static
+    {
+        $this->nameFr = $nameFr;
 
         return $this;
     }
