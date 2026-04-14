@@ -152,7 +152,8 @@ class PromotionEngine
             $codePromo = $this->validateCouponCode($couponCode, $subtotalUsd, $customerEmail);
 
             if ($codePromo !== null) {
-                $discount = $codePromo->calculateDiscount($subtotalUsd);
+                $eligibleTotal = $this->getEligibleSubtotal($codePromo, $products, $subtotalUsd);
+                $discount = $eligibleTotal > 0.0 ? $codePromo->calculateDiscount($eligibleTotal) : 0.0;
 
                 if ($discount > 0.0) {
                     if ($codePromo->isCumulable()) {
@@ -271,21 +272,58 @@ class PromotionEngine
             }
         }
 
-        // If promotion targets specific products/categories, only apply to matching items
-        $hasRestriction = !$promo->getProducts()->isEmpty() || !$promo->getCategories()->isEmpty();
+        $eligibleTotal = $this->getEligibleSubtotal($promo, $products, $subtotalUsd);
 
-        if ($hasRestriction) {
-            $applicableTotal = 0.0;
-            foreach ($products as $product) {
-                if ($promo->appliesToProduct($product)) {
-                    $applicableTotal += $product->getDisplayPrice();
-                }
-            }
-
-            return $promo->calculateDiscount($applicableTotal);
+        if ($eligibleTotal <= 0.0) {
+            return 0.0;
         }
 
-        return $promo->calculateDiscount($subtotalUsd);
+        return $promo->calculateDiscount($eligibleTotal);
+    }
+
+    /**
+     * Calculate the subtotal eligible for a cart promotion.
+     * Non-cumulable promotions exclude products already discounted
+     * (active product promotion or manual compareAtPrice).
+     *
+     * @param Product[] $products
+     */
+    private function getEligibleSubtotal(Promotion $promo, array $products, float $fullSubtotal): float
+    {
+        $hasRestriction = !$promo->getProducts()->isEmpty() || !$promo->getCategories()->isEmpty();
+
+        if ($promo->isCumulable() && !$hasRestriction) {
+            return $fullSubtotal;
+        }
+
+        $total = 0.0;
+
+        foreach ($products as $product) {
+            if ($hasRestriction && !$promo->appliesToProduct($product)) {
+                continue;
+            }
+
+            if (!$promo->isCumulable() && !$this->isEligibleForNonCumulable($promo, $product)) {
+                continue;
+            }
+
+            $total += $product->getDisplayPrice();
+        }
+
+        return $total;
+    }
+
+    private function isEligibleForNonCumulable(Promotion $promo, Product $product): bool
+    {
+        if ($this->getBestProductPromotion($product) !== null) {
+            return false;
+        }
+
+        if ($product->getCompareAtPrice() !== null && !$promo->overridesCompareAtPrice()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

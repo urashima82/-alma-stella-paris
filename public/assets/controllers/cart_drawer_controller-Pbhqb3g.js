@@ -205,7 +205,7 @@ export default class extends Controller {
     }
 
     _switchButtonToAddToCart(productId) {
-        const button = this.element.querySelector(`[data-cart-button][data-cart-product-id="${productId}"]`);
+        const button = document.querySelector(`[data-cart-button][data-cart-product-id="${productId}"]`);
         if (!button) return;
 
         const label = button.dataset.cartLabelAdd;

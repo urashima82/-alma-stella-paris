@@ -241,16 +241,15 @@ class CartManager
      */
     private function getGuestProductIds(): array
     {
-        // Try session first
+        // Try session first — use has() to distinguish "key not set" from "key set to []"
         $session = $this->requestStack->getSession();
-        /** @var int[] $sessionIds */
-        $sessionIds = $session->get(self::SESSION_KEY, []);
 
-        if ($sessionIds !== []) {
-            return $sessionIds;
+        if ($session->has(self::SESSION_KEY)) {
+            /* @var int[] */
+            return $session->get(self::SESSION_KEY, []);
         }
 
-        // Fall back to cookie
+        // Fall back to cookie (only when session has no cart data at all)
         $request = $this->requestStack->getCurrentRequest();
 
         if ($request === null) {

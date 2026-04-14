@@ -84,6 +84,7 @@ class CartController extends AbstractController
             $displayPrice = $this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier());
             $promoPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
             $effectivePrice = $promoPrice ?? $displayPrice;
+            $compareAtPrice = $this->promotionEngine->getEffectiveCompareAtPrice($product);
             $convertedPrice = $this->currencyConverter->convert($effectivePrice, $currency);
 
             $item = [
@@ -94,12 +95,12 @@ class CartController extends AbstractController
                     ? '/uploads/products/'.$product->getThumbnail()
                     : null,
                 'slug' => $locale === 'fr' ? $product->getSlugFr() : $product->getSlug(),
-                'hasDiscount' => $promoPrice !== null,
+                'hasDiscount' => $compareAtPrice !== null,
             ];
 
-            if ($promoPrice !== null) {
+            if ($compareAtPrice !== null) {
                 $item['originalPriceFormatted'] = $this->formatPrice(
-                    $this->currencyConverter->convert($displayPrice, $currency),
+                    $this->currencyConverter->convert($compareAtPrice, $currency),
                     $currency,
                 );
             }

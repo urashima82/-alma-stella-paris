@@ -27,6 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CheckoutController extends AbstractController
 {
@@ -41,6 +42,7 @@ class CheckoutController extends AbstractController
         private readonly ReservationManager $reservationManager,
         private readonly PromotionEngine $promotionEngine,
         private readonly LoggerInterface $logger,
+        private readonly TranslatorInterface $translator,
         private readonly string $stripePublicKey,
     ) {
     }
@@ -173,10 +175,20 @@ class CheckoutController extends AbstractController
         $items = [];
         foreach ($products as $product) {
             $displayPrice = $this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier());
-            $items[] = [
+            $promoPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
+            $effectivePrice = $promoPrice ?? $displayPrice;
+            $compareAtPrice = $this->promotionEngine->getEffectiveCompareAtPrice($product);
+
+            $item = [
                 'product' => $product,
-                'priceConverted' => $this->currencyConverter->convert($displayPrice, $currency),
+                'priceConverted' => $this->currencyConverter->convert($effectivePrice, $currency),
             ];
+
+            if ($compareAtPrice !== null) {
+                $item['compareAtPriceConverted'] = $this->currencyConverter->convert($compareAtPrice, $currency);
+            }
+
+            $items[] = $item;
         }
 
         // Build address data for logged-in customer's address selector
@@ -795,7 +807,7 @@ class CheckoutController extends AbstractController
         $code = \strtoupper(\trim((string) ($data['code'] ?? '')));
 
         if ($code === '') {
-            return $this->json(['valid' => false, 'message' => 'checkout.coupon_invalid']);
+            return $this->json(['valid' => false, 'message' => $this->translator->trans('checkout.coupon_invalid')]);
         }
 
         $subtotalUsd = $this->cartManager->getSubtotalUsd();
@@ -804,7 +816,7 @@ class CheckoutController extends AbstractController
         $promo = $this->promotionEngine->validateCouponCode($code, $subtotalUsd, $email);
 
         if ($promo === null) {
-            return $this->json(['valid' => false, 'message' => 'checkout.coupon_invalid']);
+            return $this->json(['valid' => false, 'message' => $this->translator->trans('checkout.coupon_invalid')]);
         }
 
         // Store validated code in session
@@ -812,9 +824,21 @@ class CheckoutController extends AbstractController
 
         return $this->json([
             'valid' => true,
-            'message' => 'checkout.coupon_applied',
+            'message' => $this->translator->trans('checkout.coupon_applied'),
             'label' => $promo->getDiscountLabel(),
         ]);
+    }
+
+    #[Route(
+        path: '/coupon/remove',
+        name: 'shop_coupon_remove',
+        methods: ['POST'],
+    )]
+    public function removeCoupon(Request $request): JsonResponse
+    {
+        $request->getSession()->remove('_promo_code');
+
+        return $this->json(['removed' => true]);
     }
 
     private function getCheckoutEmail(Request $request): ?string
