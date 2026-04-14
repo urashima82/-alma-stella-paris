@@ -484,19 +484,19 @@ Shall I proceed to Milestone Y?"
 ---
 
 ## Milestone 10 — Automated emails & reviews
-*Estimated effort: 3-4h*
+*Estimated effort: 2-3h*
 
 ### Tasks
-- [ ] Abandoned cart detection (session-based, Symfony Scheduler cron command)
-- [ ] Abandoned cart email with product images (Symfony Mailer + Twig template)
 - [ ] Post-purchase follow-up email (J+14 via Symfony Scheduler)
 
 > **No newsletter, no Brevo.** Communication strategy relies on social media
 > (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
 > Symfony Mailer + SMTP.
+>
+> **No abandoned cart emails.** The reservation system already handles cart
+> retention and item release — abandoned cart reminders would conflict with this logic.
 
 ### Definition of Done
-- Add to cart, wait for simulated 1h timeout → abandoned cart email received in Mailpit
 - Submit a review via post-purchase email link → review appears on product page
 - Scheduler cron commands run correctly via `php bin/console messenger:consume`
 
@@ -608,19 +608,19 @@ Shall I proceed to Milestone Y?"
 ---
 
 ## Milestone 11 — Automated emails & reviews
-*Estimated effort: 3-4h*
+*Estimated effort: 2-3h*
 
 ### Tasks
-- [ ] Abandoned cart detection (session-based, Symfony Scheduler cron command)
-- [ ] Abandoned cart email with product images (Symfony Mailer + Twig template)
 - [ ] Post-purchase follow-up email (J+14 via Symfony Scheduler)
 
 > **No newsletter, no Brevo.** Communication strategy relies on social media
 > (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
 > Symfony Mailer + SMTP.
+>
+> **No abandoned cart emails.** The reservation system already handles cart
+> retention and item release — abandoned cart reminders would conflict with this logic.
 
 ### Definition of Done
-- Add to cart, wait for simulated 1h timeout → abandoned cart email received in Mailpit
 - Submit a review via post-purchase email link → review appears on product page
 - Scheduler cron commands run correctly via `php bin/console messenger:consume`
 
