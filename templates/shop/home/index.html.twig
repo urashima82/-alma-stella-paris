@@ -5,8 +5,9 @@
 {% block body %}
     {# ── Hero section ── #}
     <section class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        <img src="{{ asset('images/hero_bg.png') }}" alt=""
-             class="absolute inset-0 w-full h-full object-cover opacity-40">
+        <img src="{{ asset('images/hero_bg.webp') }}" alt=""
+             class="absolute inset-0 w-full h-full object-cover opacity-40"
+             fetchpriority="high">
         <div class="absolute inset-0 bg-gradient-to-b from-alma-bg/60 via-alma-bg/30 to-alma-bg"></div>
         <div class="relative text-center px-6 py-24 md:py-36">
             <p class="text-alma-gold text-3xl mb-6">✦</p>

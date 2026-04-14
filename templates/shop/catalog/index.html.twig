@@ -35,10 +35,35 @@
     {% endif %}
 {% endblock %}
 
+{% block og_title %}{% if activeCategory %}{{ 'catalog.title_category'|trans({'%category%': activeCategory|localized_name}) }}{% else %}{{ 'catalog.title'|trans }}{% endif %}{% endblock %}
+{% block og_description %}{% if activeCategory %}{{ 'catalog.meta_description_category'|trans({'%category%': activeCategory|localized_name|lower}) }}{% else %}{{ 'catalog.meta_description'|trans }}{% endif %}{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{{ 'catalog.heading'|trans }}",
+                "item": "{{ url('shop_catalog') }}"
+            }{% if activeCategory %},
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ activeCategory|localized_name }}"
+            }{% endif %}
+        ]
+    }
+    </script>
+{% endblock %}
+
 {% block body %}
     {# ── Page header ── #}
     <section class="relative overflow-hidden">
-        <img src="{{ asset('images/hero_bg.png') }}" alt=""
+        <img src="{{ asset('images/hero_bg.webp') }}" alt=""
              class="absolute inset-0 w-full h-full object-cover opacity-40">
         <div class="absolute inset-0 bg-gradient-to-b from-alma-bg/60 via-alma-bg/30 to-alma-bg"></div>
         <div class="relative max-w-7xl mx-auto px-6 py-14 md:py-20 text-center">

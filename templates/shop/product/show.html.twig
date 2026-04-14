@@ -12,6 +12,71 @@
 
 {% block language_switch_href %}{{ app.request.locale == 'en' ? path('shop_product', {slug: product.slugFr, '_locale': 'fr'}) : path('shop_product', {slug: product.slug, '_locale': 'en'}) }}{% endblock %}
 
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ product|localized_name }} — Alma Stella Paris{% endblock %}
+{% block og_description %}{{ product|localized_description|slice(0, 160) }}{% endblock %}
+{% block og_url %}{{ url('shop_product', {slug: product|localized_slug, '_locale': app.request.locale}) }}{% endblock %}
+{% block og_image %}{% if product.wornPhoto %}{{ absolute_url(asset('uploads/products/' ~ product.wornPhoto)) }}{% elseif product.thumbnail %}{{ absolute_url(asset('uploads/products/' ~ product.thumbnail)) }}{% else %}{{ absolute_url(asset('images/logo.png')) }}{% endif %}{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{{ 'product.breadcrumb_shop'|trans }}",
+                "item": "{{ url('shop_catalog') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ product.category|localized_name }}",
+                "item": "{{ url('shop_catalog', {categorySlug: product.category|localized_slug}) }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ product|localized_name }}"
+            }
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "{{ product|localized_name|e('js') }}",
+        "description": "{{ product|localized_description|e('js') }}",
+        "url": "{{ url('shop_product', {slug: product|localized_slug, '_locale': app.request.locale}) }}",
+        {% if product.wornPhoto %}
+        "image": "{{ absolute_url(asset('uploads/products/' ~ product.wornPhoto)) }}",
+        {% elseif product.thumbnail %}
+        "image": "{{ absolute_url(asset('uploads/products/' ~ product.thumbnail)) }}",
+        {% endif %}
+        "brand": {
+            "@type": "Brand",
+            "name": "Alma Stella Paris"
+        },
+        "category": "{{ product.category|localized_name|e('js') }}",
+        "material": "Stainless steel, natural stones",
+        "offers": {
+            "@type": "Offer",
+            "url": "{{ url('shop_product', {slug: product|localized_slug, '_locale': app.request.locale}) }}",
+            "priceCurrency": "USD",
+            "price": "{{ display_price(product)|number_format(2, '.', '') }}",
+            "availability": "{{ product.isSoldOut ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock' }}",
+            "seller": {
+                "@type": "Organization",
+                "name": "Alma Stella Paris"
+            }
+        }
+    }
+    </script>
+{% endblock %}
+
 {% block body %}
     <div class="max-w-7xl mx-auto px-6 py-10 md:py-16">
 

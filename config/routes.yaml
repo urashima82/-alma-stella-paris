@@ -2,6 +2,10 @@ locale_redirect:
     resource: App\Controller\LocaleRedirectController
     type: attribute
 
+sitemap:
+    resource: App\Controller\SitemapController
+    type: attribute
+
 shop_controllers:
     resource:
         path: ../src/Controller/Shop/

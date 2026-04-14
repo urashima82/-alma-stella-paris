@@ -53,6 +53,7 @@ alma-stella/
 │   │   │   ├── ShippingSettingsCrudController.php # Shipping tier cost overrides
 │   │   │   └── SiteSettingsCrudController.php    # Site-wide settings (active collection, maintenance mode)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
+│   │   ├── SitemapController.php         # /sitemap.xml — auto-generated XML sitemap (no locale prefix)
 │   │   └── Shop/             # Public-facing controllers (locale-prefixed)
 │   │       ├── AboutController.php
 │   │       ├── AccountController.php       # Dashboard, orders, addresses, profile
@@ -67,7 +68,8 @@ alma-stella/
 │   │       ├── LegalController.php         # Legal notice + terms of sale
 │   │       ├── ProductController.php
 │   │       ├── ResetPasswordController.php # Forgot password + reset flow
-│   │       └── SecurityController.php      # Customer login, register (OTP), logout
+│   │       ├── SecurityController.php      # Customer login, register (OTP), logout
+│   │       └── TestimonialController.php   # Testimonial listing + customer submission
 │   ├── Entity/
 │   ├── Enum/
 │   │   ├── AdminRole.php         # SuperAdmin / Admin

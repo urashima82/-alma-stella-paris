@@ -43,6 +43,18 @@ class ProductRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @return Product[]
+     */
+    public function findPublished(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.isPublished = true')
+            ->orderBy('p.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countRecentlySold(int $days = 7): int
     {
         $since = new \DateTimeImmutable(\sprintf('-%d days', $days));

@@ -6,6 +6,18 @@
         <title>{% block title %}{{ 'meta.default_title'|trans }}{% endblock %}</title>
         <meta name="description" content="{% block meta_description %}{{ 'meta.default_description'|trans }}{% endblock %}">
         <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+        {# ── Open Graph tags ── #}
+        <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+        <meta property="og:title" content="{% block og_title %}{{ block('title') }}{% endblock %}">
+        <meta property="og:description" content="{% block og_description %}{{ block('meta_description') }}{% endblock %}">
+        <meta property="og:url" content="{% block og_url %}{{ app.request.uri }}{% endblock %}">
+        <meta property="og:image" content="{% block og_image %}{{ absolute_url(asset('images/logo.png')) }}{% endblock %}">
+        <meta property="og:site_name" content="Alma Stella Paris">
+        <meta property="og:locale" content="{{ app.request.locale == 'fr' ? 'fr_FR' : 'en_US' }}">
+        <meta property="og:locale:alternate" content="{{ app.request.locale == 'fr' ? 'en_US' : 'fr_FR' }}">
+        <meta name="twitter:card" content="{% block twitter_card %}summary_large_image{% endblock %}">
+        {# ── Structured data ── #}
+        {% block structured_data %}{% endblock %}
         {% block hreflang %}
             <link rel="alternate" hreflang="en" href="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': 'en'})) }}">
             <link rel="alternate" hreflang="fr" href="{{ url(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': 'fr'})) }}">

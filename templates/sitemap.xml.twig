@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    {# ── Static pages ── #}
+    {% for locale in ['en', 'fr'] %}
+        <url>
+            <loc>{{ url('shop_home', {'_locale': locale}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_home', {'_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_home', {'_locale': 'fr'}) }}"/>
+            <changefreq>weekly</changefreq>
+            <priority>1.0</priority>
+        </url>
+    {% endfor %}
+
+    {% for locale in ['en', 'fr'] %}
+        <url>
+            <loc>{{ url('shop_catalog', {'_locale': locale}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {'_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {'_locale': 'fr'}) }}"/>
+            <changefreq>daily</changefreq>
+            <priority>0.9</priority>
+        </url>
+    {% endfor %}
+
+    {% for locale in ['en', 'fr'] %}
+        <url>
+            <loc>{{ url('shop_about', {'_locale': locale}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_about', {'_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_about', {'_locale': 'fr'}) }}"/>
+            <changefreq>monthly</changefreq>
+            <priority>0.6</priority>
+        </url>
+    {% endfor %}
+
+    {% for locale in ['en', 'fr'] %}
+        <url>
+            <loc>{{ url('shop_contact', {'_locale': locale}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_contact', {'_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_contact', {'_locale': 'fr'}) }}"/>
+            <changefreq>monthly</changefreq>
+            <priority>0.5</priority>
+        </url>
+    {% endfor %}
+
+    {% for locale in ['en', 'fr'] %}
+        <url>
+            <loc>{{ url('shop_testimonials', {'_locale': locale}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_testimonials', {'_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_testimonials', {'_locale': 'fr'}) }}"/>
+            <changefreq>weekly</changefreq>
+            <priority>0.5</priority>
+        </url>
+    {% endfor %}
+
+    {% for locale in ['en', 'fr'] %}
+        <url>
+            <loc>{{ url('shop_terms', {'_locale': locale}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_terms', {'_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_terms', {'_locale': 'fr'}) }}"/>
+            <changefreq>yearly</changefreq>
+            <priority>0.3</priority>
+        </url>
+    {% endfor %}
+
+    {% for locale in ['en', 'fr'] %}
+        <url>
+            <loc>{{ url('shop_legal_notice', {'_locale': locale}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_legal_notice', {'_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_legal_notice', {'_locale': 'fr'}) }}"/>
+            <changefreq>yearly</changefreq>
+            <priority>0.3</priority>
+        </url>
+    {% endfor %}
+
+    {# ── Category pages ── #}
+    {% for category in categories %}
+        <url>
+            <loc>{{ url('shop_catalog', {categorySlug: category.slug, '_locale': 'en'}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {categorySlug: category.slug, '_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {categorySlug: category.slugFr, '_locale': 'fr'}) }}"/>
+            <changefreq>daily</changefreq>
+            <priority>0.8</priority>
+        </url>
+        <url>
+            <loc>{{ url('shop_catalog', {categorySlug: category.slugFr, '_locale': 'fr'}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {categorySlug: category.slug, '_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {categorySlug: category.slugFr, '_locale': 'fr'}) }}"/>
+            <changefreq>daily</changefreq>
+            <priority>0.8</priority>
+        </url>
+    {% endfor %}
+
+    {# ── Product pages ── #}
+    {% for product in products %}
+        <url>
+            <loc>{{ url('shop_product', {slug: product.slug, '_locale': 'en'}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_product', {slug: product.slug, '_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_product', {slug: product.slugFr, '_locale': 'fr'}) }}"/>
+            <lastmod>{{ product.updatedAt ? product.updatedAt|date('Y-m-d') : product.createdAt|date('Y-m-d') }}</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>0.8</priority>
+        </url>
+        <url>
+            <loc>{{ url('shop_product', {slug: product.slugFr, '_locale': 'fr'}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_product', {slug: product.slug, '_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_product', {slug: product.slugFr, '_locale': 'fr'}) }}"/>
+            <lastmod>{{ product.updatedAt ? product.updatedAt|date('Y-m-d') : product.createdAt|date('Y-m-d') }}</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>0.8</priority>
+        </url>
+    {% endfor %}
+</urlset>
