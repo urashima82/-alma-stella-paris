@@ -549,7 +549,29 @@ class AppFixtures extends Fixture
         $cartAutoPromo->setMinimumAmountUsd(80.00);
         $manager->persist($cartAutoPromo);
 
-        // 3. Cart code: BIENVENUE10 — 10% off
+        // 3. Cart automatic: -10% over $60 (non-cumulable, competes with #2)
+        $cartAutoPromoNonCumulable = new Promotion();
+        $cartAutoPromoNonCumulable->setName('-10% dès $60 d\'achat');
+        $cartAutoPromoNonCumulable->setType(PromotionType::CartAutomatic);
+        $cartAutoPromoNonCumulable->setDiscountType(DiscountType::Percentage);
+        $cartAutoPromoNonCumulable->setDiscountValue(10.00);
+        $cartAutoPromoNonCumulable->setIsActive(true);
+        $cartAutoPromoNonCumulable->setIsCumulable(false);
+        $cartAutoPromoNonCumulable->setMinimumAmountUsd(60.00);
+        $manager->persist($cartAutoPromoNonCumulable);
+
+        // 4. Cart automatic: -15% over $100 (non-cumulable, competes with #3)
+        $cartAutoPromo15 = new Promotion();
+        $cartAutoPromo15->setName('-15% dès $100 d\'achat');
+        $cartAutoPromo15->setType(PromotionType::CartAutomatic);
+        $cartAutoPromo15->setDiscountType(DiscountType::Percentage);
+        $cartAutoPromo15->setDiscountValue(15.00);
+        $cartAutoPromo15->setIsActive(true);
+        $cartAutoPromo15->setIsCumulable(false);
+        $cartAutoPromo15->setMinimumAmountUsd(100.00);
+        $manager->persist($cartAutoPromo15);
+
+        // 5. Cart code: BIENVENUE10 — 10% off
         $codePromo = new Promotion();
         $codePromo->setName('Code bienvenue 10%');
         $codePromo->setCode('BIENVENUE10');
