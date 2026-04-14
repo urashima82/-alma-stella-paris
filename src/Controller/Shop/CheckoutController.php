@@ -129,6 +129,10 @@ class CheckoutController extends AbstractController
         $errors = [];
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+                throw $this->createAccessDeniedException('Invalid CSRF token.');
+            }
+
             $errors = $this->validateCheckoutForm($request);
 
             if ($errors === []) {
@@ -844,6 +848,10 @@ class CheckoutController extends AbstractController
     )]
     public function validateCoupon(Request $request): JsonResponse
     {
+        if (!$this->isCsrfTokenValid('submit', $request->headers->get('X-CSRF-Token'))) {
+            return $this->json(['valid' => false, 'message' => 'Invalid request.'], Response::HTTP_FORBIDDEN);
+        }
+
         $data = \json_decode($request->getContent(), true);
         $code = \strtoupper(\trim((string) ($data['code'] ?? '')));
 
@@ -878,6 +886,10 @@ class CheckoutController extends AbstractController
     )]
     public function removeCoupon(Request $request): JsonResponse
     {
+        if (!$this->isCsrfTokenValid('submit', $request->headers->get('X-CSRF-Token'))) {
+            return $this->json(['removed' => false], Response::HTTP_FORBIDDEN);
+        }
+
         $request->getSession()->remove('_promo_code');
 
         return $this->json(['removed' => true]);
@@ -888,8 +900,12 @@ class CheckoutController extends AbstractController
         name: 'shop_checkout_extend_reservation',
         methods: ['POST'],
     )]
-    public function extendReservation(): JsonResponse
+    public function extendReservation(Request $request): JsonResponse
     {
+        if (!$this->isCsrfTokenValid('submit', $request->headers->get('X-CSRF-Token'))) {
+            return $this->json(['extended' => false], Response::HTTP_FORBIDDEN);
+        }
+
         $result = $this->reservationManager->extendForCurrentSession();
 
         if ($result === null) {

@@ -119,6 +119,10 @@ class AccountController extends AbstractController
         $formData = $this->getEmptyAddressFormData();
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+                throw $this->createAccessDeniedException('Invalid CSRF token.');
+            }
+
             $formData = $this->extractAddressFormData($request);
             $errors = $this->validateAddressForm($formData);
 
@@ -177,6 +181,10 @@ class AccountController extends AbstractController
         ];
 
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+                throw $this->createAccessDeniedException('Invalid CSRF token.');
+            }
+
             $formData = $this->extractAddressFormData($request);
             $errors = $this->validateAddressForm($formData);
 
@@ -209,9 +217,14 @@ class AccountController extends AbstractController
     )]
     public function deleteAddress(
         int $id,
+        Request $request,
         CustomerAddressRepository $addressRepository,
         EntityManagerInterface $entityManager,
     ): Response {
+        if (!$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
         /** @var Customer $customer */
         $customer = $this->getUser();
 
@@ -233,9 +246,14 @@ class AccountController extends AbstractController
     )]
     public function setDefaultAddress(
         int $id,
+        Request $request,
         CustomerAddressRepository $addressRepository,
         EntityManagerInterface $entityManager,
     ): Response {
+        if (!$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
         /** @var Customer $customer */
         $customer = $this->getUser();
 
@@ -266,6 +284,10 @@ class AccountController extends AbstractController
         $errors = [];
         $success = null;
         $action = $request->request->get('_action');
+
+        if ($request->isMethod('POST') && !$this->isCsrfTokenValid('submit', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
 
         if ($request->isMethod('POST') && $action === 'update_info') {
             $firstName = \trim((string) $request->request->get('first_name', ''));

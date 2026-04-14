@@ -47,6 +47,7 @@
                         </a>
                         {% if not address.default %}
                             <form method="post" action="{{ path('shop_account_address_set_default', {'id': address.id}) }}" class="inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
                                 <button type="submit" class="text-alma-text-muted hover:text-alma-gold transition-colors">
                                     {{ 'addresses.set_default'|trans }}
                                 </button>
@@ -54,6 +55,7 @@
                         {% endif %}
                         <form method="post" action="{{ path('shop_account_address_delete', {'id': address.id}) }}" class="inline"
                               onsubmit="return confirm('{{ 'addresses.confirm_delete'|trans }}')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
                             <button type="submit" class="text-red-500 hover:text-red-700 transition-colors">
                                 {{ 'addresses.delete'|trans }}
                             </button>

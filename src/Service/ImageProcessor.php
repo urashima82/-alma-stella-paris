@@ -21,8 +21,16 @@ class ImageProcessor
     /**
      * Resize an image and convert it to WebP.
      */
+    private const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
     public function process(string $sourcePath, string $targetPath, int $maxWidth, int $maxHeight): void
     {
+        $mimeType = \mime_content_type($sourcePath);
+
+        if ($mimeType === false || !\in_array($mimeType, self::ALLOWED_MIME_TYPES, true)) {
+            throw new \RuntimeException(\sprintf('Unsupported image type: %s', $mimeType ?: 'unknown'));
+        }
+
         $image = $this->manager->decodePath($sourcePath);
 
         $image->scaleDown($maxWidth, $maxHeight);

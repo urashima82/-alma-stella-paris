@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -47,7 +48,9 @@ class SecurityController extends AbstractController
     public function register(
         Request $request,
         CustomerRepository $customerRepository,
+        UserPasswordHasherInterface $passwordHasher,
         MailerInterface $mailer,
+        RateLimiterFactory $registrationLimiter,
         string $mailerFromEmail,
         string $mailerFromName,
     ): Response {
@@ -64,6 +67,17 @@ class SecurityController extends AbstractController
         ];
 
         if ($request->isMethod('POST')) {
+            $limiter = $registrationLimiter->create($request->getClientIp() ?? 'unknown');
+            if (!$limiter->consume()->isAccepted()) {
+                $errors[] = 'register.error.rate_limited';
+
+                return $this->render('shop/security/register.html.twig', [
+                    'errors' => $errors,
+                    'form_data' => $formData,
+                    'redirect' => $redirect,
+                ]);
+            }
+
             $formData['first_name'] = \trim((string) $request->request->get('first_name', ''));
             $formData['last_name'] = \trim((string) $request->request->get('last_name', ''));
             $formData['email'] = \trim((string) $request->request->get('email', ''));
@@ -77,11 +91,15 @@ class SecurityController extends AbstractController
                 $locale = $request->getLocale();
 
                 $session = $request->getSession();
+                // Hash password before storing in session to avoid plaintext exposure
+                $tempCustomer = new Customer();
+                $hashedPassword = $passwordHasher->hashPassword($tempCustomer, $password);
+
                 $session->set('_registration_data', [
                     'first_name' => $formData['first_name'],
                     'last_name' => $formData['last_name'],
                     'email' => $formData['email'],
-                    'password' => $password,
+                    'password_hash' => $hashedPassword,
                 ]);
                 $session->set('_registration_otp', $code);
                 $session->set('_registration_otp_expires', \time() + 600);
@@ -127,7 +145,6 @@ class SecurityController extends AbstractController
     )]
     public function verifyEmail(
         Request $request,
-        UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $entityManager,
         CustomerRepository $customerRepository,
         OrderRepository $orderRepository,
@@ -177,7 +194,7 @@ class SecurityController extends AbstractController
                 $customer->setFirstName($registrationData['first_name']);
                 $customer->setLastName($registrationData['last_name']);
                 $customer->setEmail($registrationData['email']);
-                $customer->setPassword($passwordHasher->hashPassword($customer, $registrationData['password']));
+                $customer->setPassword($registrationData['password_hash']);
 
                 $entityManager->persist($customer);
 

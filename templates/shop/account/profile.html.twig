@@ -28,6 +28,7 @@
         <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'profile.section_info'|trans }}</h2>
 
         <form method="post" class="max-w-lg space-y-5">
+            <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
             <input type="hidden" name="_action" value="update_info">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -77,6 +78,7 @@
         <h2 class="font-serif text-xl text-alma-text mb-6">{{ 'profile.section_password'|trans }}</h2>
 
         <form method="post" class="max-w-lg space-y-5">
+            <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
             <input type="hidden" name="_action" value="change_password">
 
             <div>

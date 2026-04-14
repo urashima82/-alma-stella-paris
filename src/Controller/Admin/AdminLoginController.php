@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\LoginLink\LoginLinkHandlerInterface;
 
@@ -29,6 +30,7 @@ class AdminLoginController extends AbstractController
         AdminRepository $adminRepository,
         LoginLinkHandlerInterface $loginLinkHandler,
         MailerInterface $mailer,
+        RateLimiterFactory $adminLoginLimiter,
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('admin');
@@ -37,6 +39,14 @@ class AdminLoginController extends AbstractController
         $emailSent = false;
 
         if ($request->isMethod('POST')) {
+            $limiter = $adminLoginLimiter->create($request->getClientIp() ?? 'unknown');
+            if (!$limiter->consume()->isAccepted()) {
+                return $this->render('admin/login.html.twig', [
+                    'email_sent' => false,
+                    'rate_limited' => true,
+                ]);
+            }
+
             $email = \trim((string) $request->request->get('email', ''));
 
             $admin = $adminRepository->findOneBy(['email' => $email]);

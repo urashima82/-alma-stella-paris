@@ -111,7 +111,8 @@ alma-stella/
 │   │   ├── ImageUploadSubscriber.php     # Processes product images after EasyAdmin persist/update
 │   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
 │   │   ├── MaintenanceModeSubscriber.php # Blocks public requests when maintenance mode is enabled (IP whitelist bypass)
-│   │   └── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
+│   │   ├── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
+│   │   └── SecurityHeadersSubscriber.php # Adds security headers (CSP, X-Frame-Options, HSTS, etc.) to all responses
 │   ├── Message/
 │   │   ├── CleanExpiredReservationsMessage.php
 │   │   └── VerifyPendingOrdersMessage.php

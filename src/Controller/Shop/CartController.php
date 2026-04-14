@@ -27,8 +27,12 @@ class CartController extends AbstractController
     }
 
     #[Route('/cart/add/{id}', name: 'cart_add', methods: ['POST'])]
-    public function add(int $id): JsonResponse
+    public function add(int $id, Request $request): JsonResponse
     {
+        if (!$this->isCsrfTokenValid('submit', $request->headers->get('X-CSRF-Token'))) {
+            return $this->json(['success' => false, 'message' => 'invalid_csrf'], Response::HTTP_FORBIDDEN);
+        }
+
         if ($this->cartManager->contains($id)) {
             return $this->json([
                 'success' => false,
@@ -62,8 +66,12 @@ class CartController extends AbstractController
     }
 
     #[Route('/cart/remove/{id}', name: 'cart_remove', methods: ['POST'])]
-    public function remove(int $id): JsonResponse
+    public function remove(int $id, Request $request): JsonResponse
     {
+        if (!$this->isCsrfTokenValid('submit', $request->headers->get('X-CSRF-Token'))) {
+            return $this->json(['success' => false, 'message' => 'invalid_csrf'], Response::HTTP_FORBIDDEN);
+        }
+
         $this->cartManager->remove($id);
 
         return $this->json([

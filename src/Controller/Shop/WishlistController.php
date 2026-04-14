@@ -10,6 +10,7 @@ use App\Service\ReservationManager;
 use App\Service\WishlistManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -27,8 +28,12 @@ class WishlistController extends AbstractController
 
     #[Route('/wishlist/toggle/{id}', name: 'wishlist_toggle', methods: ['POST'])]
     #[IsGranted('ROLE_CUSTOMER')]
-    public function toggle(int $id): JsonResponse
+    public function toggle(int $id, Request $request): JsonResponse
     {
+        if (!$this->isCsrfTokenValid('submit', $request->headers->get('X-CSRF-Token'))) {
+            return $this->json(['success' => false, 'message' => 'invalid_csrf'], Response::HTTP_FORBIDDEN);
+        }
+
         $product = $this->productRepository->find($id);
 
         if ($product === null) {

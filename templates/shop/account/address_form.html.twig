@@ -25,6 +25,7 @@
     {% endif %}
 
     <form method="post" class="max-w-lg space-y-5">
+        <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
         <div>
             <label for="label" class="block text-sm font-sans text-alma-text-muted mb-1">
                 {{ 'addresses.form.label_label'|trans }} <span class="text-red-500">*</span>

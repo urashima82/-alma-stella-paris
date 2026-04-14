@@ -1,5 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 
+function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
 export default class extends Controller {
     static targets = ['drawer', 'overlay', 'itemList', 'subtotal', 'badge', 'emptyState', 'footer', 'checkoutLink'];
     static values = {
@@ -46,6 +50,7 @@ export default class extends Controller {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': csrfToken(),
                 },
             });
 
@@ -81,6 +86,7 @@ export default class extends Controller {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-Token': csrfToken(),
             },
         });
 

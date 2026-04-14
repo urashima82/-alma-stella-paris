@@ -38,6 +38,9 @@ security:
             lazy: true
             provider: customer_provider
             entry_point: App\Security\CustomerAuthenticationEntryPoint
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
             form_login:
                 login_path: shop_login
                 check_path: shop_login

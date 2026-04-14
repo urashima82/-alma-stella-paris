@@ -12,6 +12,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
@@ -75,18 +76,21 @@ class Product
     private ?\DateTimeImmutable $soldAt = null;
 
     #[Vich\UploadableField(mapping: 'product_images', fileNameProperty: 'thumbnail')]
+    #[Assert\File(maxSize: '5M', mimeTypes: ['image/jpeg', 'image/png', 'image/webp'])]
     private ?File $thumbnailFile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $thumbnail = null;
 
     #[Vich\UploadableField(mapping: 'product_images', fileNameProperty: 'wornPhoto')]
+    #[Assert\File(maxSize: '5M', mimeTypes: ['image/jpeg', 'image/png', 'image/webp'])]
     private ?File $wornPhotoFile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $wornPhoto = null;
 
     #[Vich\UploadableField(mapping: 'product_images', fileNameProperty: 'contextPhoto')]
+    #[Assert\File(maxSize: '5M', mimeTypes: ['image/jpeg', 'image/png', 'image/webp'])]
     private ?File $contextPhotoFile = null;
 
     #[ORM\Column(length: 255, nullable: true)]
