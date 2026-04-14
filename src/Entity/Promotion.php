@@ -103,14 +103,6 @@ class Promotion
         return $this->name;
     }
 
-    /**
-     * Virtual getter for EasyAdmin — returns the code (display handled by formatValue).
-     */
-    public function getShareableLink(): ?string
-    {
-        return $this->code;
-    }
-
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
@@ -141,7 +133,7 @@ class Promotion
 
     public function setCode(?string $code): static
     {
-        $this->code = null !== $code ? \strtoupper(\trim($code)) : null;
+        $this->code = $code !== null ? \strtoupper(\trim($code)) : null;
 
         return $this;
     }
@@ -278,12 +270,12 @@ class Promotion
 
     public function getMinimumAmountUsd(): ?float
     {
-        return null !== $this->minimumAmountUsd ? (float) $this->minimumAmountUsd : null;
+        return $this->minimumAmountUsd !== null ? (float) $this->minimumAmountUsd : null;
     }
 
     public function setMinimumAmountUsd(?float $minimumAmountUsd): static
     {
-        $this->minimumAmountUsd = null !== $minimumAmountUsd
+        $this->minimumAmountUsd = $minimumAmountUsd !== null
             ? \number_format($minimumAmountUsd, 2, '.', '')
             : null;
 
@@ -402,11 +394,11 @@ class Promotion
 
         $now = new \DateTimeImmutable();
 
-        if (null !== $this->startsAt && $now < $this->startsAt) {
+        if ($this->startsAt !== null && $now < $this->startsAt) {
             return false;
         }
 
-        if (null !== $this->endsAt && $now > $this->endsAt) {
+        if ($this->endsAt !== null && $now > $this->endsAt) {
             return false;
         }
 
@@ -418,7 +410,7 @@ class Promotion
      */
     public function hasReachedMaxUsages(): bool
     {
-        if (null === $this->maxUsages) {
+        if ($this->maxUsages === null) {
             return false;
         }
 
@@ -442,7 +434,7 @@ class Promotion
             return true;
         }
 
-        if ($hasCategoryRestriction && null !== $product->getCategory()
+        if ($hasCategoryRestriction && $product->getCategory() !== null
             && $this->categories->contains($product->getCategory())) {
             return true;
         }
@@ -455,7 +447,7 @@ class Promotion
      */
     public function canApplyToProductWithCompareAtPrice(Product $product): bool
     {
-        if (null === $product->getCompareAtPrice()) {
+        if ($product->getCompareAtPrice() === null) {
             return true;
         }
 

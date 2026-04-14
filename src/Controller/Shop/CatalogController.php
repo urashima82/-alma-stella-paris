@@ -33,11 +33,11 @@ class CatalogController extends AbstractController
         $categories = $categoryRepository->findAllOrdered();
         $activeCategory = null;
 
-        if (null !== $categorySlug) {
-            $slugField = 'fr' === $request->getLocale() ? 'slugFr' : 'slug';
+        if ($categorySlug !== null) {
+            $slugField = $request->getLocale() === 'fr' ? 'slugFr' : 'slug';
             $activeCategory = $categoryRepository->findOneBy([$slugField => $categorySlug]);
 
-            if (null === $activeCategory) {
+            if ($activeCategory === null) {
                 throw $this->createNotFoundException('Category not found.');
             }
         }

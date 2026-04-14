@@ -491,7 +491,7 @@ class AppFixtures extends Fixture
             $order->setTrackingNumber($data['tracking']);
             $order->setStripePaymentStatus($data['stripe_status']);
 
-            if ('succeeded' === $data['stripe_status']) {
+            if ($data['stripe_status'] === 'succeeded') {
                 $order->setPaidAt($order->getCreatedAt());
                 ++$invoiceSequence;
                 $order->setInvoiceNumber(\sprintf('FA-%s-%05d', \date('Y'), $invoiceSequence));
@@ -503,7 +503,7 @@ class AppFixtures extends Fixture
                 $item = new OrderItem();
                 $item->setProduct($product);
                 $item->setProductName($productName);
-                $item->setProductNameFr(null !== $product ? $product->getNameFr() : $productName);
+                $item->setProductNameFr($product !== null ? $product->getNameFr() : $productName);
                 $item->setProductPrice($price);
                 $item->setShippingCost($shipping);
                 $order->addItem($item);
@@ -532,7 +532,7 @@ class AppFixtures extends Fixture
         $necklacePromo->setStartsAt(new \DateTimeImmutable('-7 days'));
         $necklacePromo->setEndsAt(new \DateTimeImmutable('+30 days'));
         foreach ($categories as $cat) {
-            if ('necklaces' === $cat->getSlug()) {
+            if ($cat->getSlug() === 'necklaces') {
                 $necklacePromo->addCategory($cat);
             }
         }
@@ -559,18 +559,5 @@ class AppFixtures extends Fixture
         $codePromo->setIsActive(true);
         $codePromo->setMaxUsagesPerEmail(1);
         $manager->persist($codePromo);
-
-        // 4. Private link: FLASH20 — 20% off, limited to 50 uses
-        $privateLinkPromo = new Promotion();
-        $privateLinkPromo->setName('Vente flash Instagram -20%');
-        $privateLinkPromo->setCode('FLASH20');
-        $privateLinkPromo->setType(PromotionType::PrivateLink);
-        $privateLinkPromo->setDiscountType(DiscountType::Percentage);
-        $privateLinkPromo->setDiscountValue(20.00);
-        $privateLinkPromo->setIsActive(true);
-        $privateLinkPromo->setMaxUsages(50);
-        $privateLinkPromo->setStartsAt(new \DateTimeImmutable('-1 day'));
-        $privateLinkPromo->setEndsAt(new \DateTimeImmutable('+14 days'));
-        $manager->persist($privateLinkPromo);
     }
 }

@@ -31,7 +31,7 @@ final class VerifyPendingOrdersCommand extends Command
 
         $total = $result['confirmed'] + $result['cancelled'] + $result['skipped'];
 
-        if (0 === $total) {
+        if ($total === 0) {
             $io->info('No pending orders to verify.');
         } else {
             $io->info(\sprintf(

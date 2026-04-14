@@ -46,14 +46,14 @@ final class PendingOrderVerifier
 
             $order->setStripePaymentStatus($paymentIntent->status);
 
-            if ('succeeded' === $paymentIntent->status) {
+            if ($paymentIntent->status === 'succeeded') {
                 $order->setStatus(OrderStatus::Processing);
                 $order->setPaidAt(new \DateTimeImmutable());
                 $order->setInvoiceNumber($this->orderRepository->nextInvoiceNumber((int) \date('Y')));
 
                 foreach ($order->getItems() as $item) {
                     $product = $item->getProduct();
-                    if (null !== $product && !$product->isSoldOut()) {
+                    if ($product !== null && !$product->isSoldOut()) {
                         $product->setIsSoldOut(true);
                     }
                 }

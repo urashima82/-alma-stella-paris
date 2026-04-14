@@ -526,13 +526,13 @@ Shall I proceed to Milestone Y?"
 *Estimated effort: 8-10h*
 
 > **Full-featured promotion system**: automatic product discounts, automatic cart
-> discounts, manual coupon codes, and private links with pre-applied codes.
+> discounts, manual coupon codes,.
 > Highly configurable from EasyAdmin with usage tracking and analytics.
 
 ### Tasks
 
 #### Entities & enums
-- [x] `PromotionType` enum: `ProductAutomatic` / `CartAutomatic` / `CartCode` / `PrivateLink`
+- [x] `PromotionType` enum: `ProductAutomatic` / `CartAutomatic` / `CartCode`
 - [x] `DiscountType` enum: `Percentage` / `FixedAmount`
 - [x] `Promotion` entity with full configuration fields
 - [x] `PromotionUsage` entity for usage tracking
@@ -568,14 +568,8 @@ Shall I proceed to Milestone Y?"
 - [x] `compareAtPrice` coexists: promo takes priority if `overridesCompareAtPrice = true`
 - [x] Cart drawer shows per-item discount when applicable
 
-#### Private link & banner
-- [x] `?promo=CODE` query param stores code in session + cookie
-- [x] `PromoBannerSubscriber` injects persistent gold banner when promo code is active
-- [x] Banner text: "Code {CODE} appliqué — {discount label} sur votre commande"
-- [x] Banner dismissible but code stays in session
-
 #### DataFixtures
-- [x] Sample promotions (1 product auto, 1 cart auto, 1 code, 1 private link)
+- [x] Sample promotions (1 product auto, 1 cart auto, 1 code)
 
 ### Definition of Done
 - Create promotion in EasyAdmin with all configuration options
@@ -583,7 +577,6 @@ Shall I proceed to Milestone Y?"
 - Cart auto promo → discount line visible in checkout recap
 - Enter valid code at checkout → discount applied, total updated
 - Enter expired/maxed-out code → clear error message
-- `?promo=FLASH20` URL → gold banner + code pre-applied at checkout
 - `isCumulable = false` → best single offer retained
 - `overridesCompareAtPrice = false` → promo skips products with existing compareAtPrice
 - Promotion usage tracked per order, stats visible in EasyAdmin

@@ -108,7 +108,7 @@ class Cart
         $ids = [];
         foreach ($this->items as $item) {
             $id = $item->getProduct()?->getId();
-            if (null !== $id) {
+            if ($id !== null) {
                 $ids[] = $id;
             }
         }

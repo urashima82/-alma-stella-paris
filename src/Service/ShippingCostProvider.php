@@ -46,7 +46,7 @@ class ShippingCostProvider
 
     private function getSettings(ShippingTier $tier): ?ShippingSettings
     {
-        if (null === $this->cache) {
+        if ($this->cache === null) {
             $this->cache = $this->repository->findAllIndexedByTier();
         }
 

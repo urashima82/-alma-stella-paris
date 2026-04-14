@@ -380,14 +380,14 @@ class Order
 
     public function setBillingCountry(?string $billingCountry): static
     {
-        $this->billingCountry = null !== $billingCountry ? \strtoupper($billingCountry) : null;
+        $this->billingCountry = $billingCountry !== null ? \strtoupper($billingCountry) : null;
 
         return $this;
     }
 
     public function hasSeparateBillingAddress(): bool
     {
-        return null !== $this->billingAddressLine1;
+        return $this->billingAddressLine1 !== null;
     }
 
     public function getFullBillingAddress(): string

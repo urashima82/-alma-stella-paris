@@ -72,7 +72,7 @@ class SecurityController extends AbstractController
 
             $errors = $this->validateRegistration($formData, $password, $passwordConfirm, $customerRepository);
 
-            if ([] === $errors) {
+            if ($errors === []) {
                 $code = \str_pad((string) \random_int(0, 999999), 6, '0', \STR_PAD_LEFT);
                 $locale = $request->getLocale();
 
@@ -87,7 +87,7 @@ class SecurityController extends AbstractController
                 $session->set('_registration_otp_expires', \time() + 600);
                 $session->set('_registration_otp_attempts', 0);
 
-                $subject = 'fr' === $locale
+                $subject = $locale === 'fr'
                     ? 'Votre code de vérification — Alma Stella Paris'
                     : 'Your verification code — Alma Stella Paris';
 
@@ -105,7 +105,7 @@ class SecurityController extends AbstractController
                 $mailer->send($email);
 
                 $verifyParams = ['_locale' => $locale];
-                if ('checkout' === $redirect) {
+                if ($redirect === 'checkout') {
                     $verifyParams['redirect'] = 'checkout';
                 }
 
@@ -140,7 +140,7 @@ class SecurityController extends AbstractController
         $session = $request->getSession();
         $registrationData = $session->get('_registration_data');
 
-        if (null === $registrationData) {
+        if ($registrationData === null) {
             return $this->redirectToRoute('shop_register');
         }
 
@@ -166,7 +166,7 @@ class SecurityController extends AbstractController
                 $errors[] = 'verify_email.error.code_invalid';
             } else {
                 // Re-check email uniqueness (could have been taken during OTP delay)
-                if (null !== $customerRepository->findByEmail($registrationData['email'])) {
+                if ($customerRepository->findByEmail($registrationData['email']) !== null) {
                     $this->clearRegistrationSession($session);
                     $this->addFlash('error', 'register.error.email_already_used');
 
@@ -193,8 +193,8 @@ class SecurityController extends AbstractController
 
                 $security->login($customer, 'form_login', 'main');
 
-                if ('checkout' === $redirect) {
-                    $checkoutRoute = 'fr' === $request->getLocale() ? 'shop_checkout_fr' : 'shop_checkout';
+                if ($redirect === 'checkout') {
+                    $checkoutRoute = $request->getLocale() === 'fr' ? 'shop_checkout_fr' : 'shop_checkout';
 
                     return $this->redirectToRoute($checkoutRoute, ['_locale' => $request->getLocale()]);
                 }
@@ -228,7 +228,7 @@ class SecurityController extends AbstractController
         $session = $request->getSession();
         $registrationData = $session->get('_registration_data');
 
-        if (null === $registrationData) {
+        if ($registrationData === null) {
             return $this->redirectToRoute('shop_register');
         }
 
@@ -239,7 +239,7 @@ class SecurityController extends AbstractController
         $session->set('_registration_otp_expires', \time() + 600);
         $session->set('_registration_otp_attempts', 0);
 
-        $subject = 'fr' === $locale
+        $subject = $locale === 'fr'
             ? 'Votre code de vérification — Alma Stella Paris'
             : 'Your verification code — Alma Stella Paris';
 
@@ -285,17 +285,17 @@ class SecurityController extends AbstractController
     {
         $errors = [];
 
-        if ('' === $formData['first_name']) {
+        if ($formData['first_name'] === '') {
             $errors[] = 'register.error.first_name_required';
         }
 
-        if ('' === $formData['last_name']) {
+        if ($formData['last_name'] === '') {
             $errors[] = 'register.error.last_name_required';
         }
 
-        if ('' === $formData['email'] || false === \filter_var($formData['email'], \FILTER_VALIDATE_EMAIL)) {
+        if ($formData['email'] === '' || \filter_var($formData['email'], \FILTER_VALIDATE_EMAIL) === false) {
             $errors[] = 'register.error.email_invalid';
-        } elseif (null !== $customerRepository->findByEmail($formData['email'])) {
+        } elseif ($customerRepository->findByEmail($formData['email']) !== null) {
             $errors[] = 'register.error.email_already_used';
         }
 

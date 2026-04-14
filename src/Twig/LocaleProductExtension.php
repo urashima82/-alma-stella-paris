@@ -28,7 +28,7 @@ class LocaleProductExtension extends AbstractExtension
 
     public function localizedName(Product|ProductCategory $entity): string
     {
-        if ('fr' === $this->getLocale()) {
+        if ($this->getLocale() === 'fr') {
             return $entity->getNameFr();
         }
 
@@ -37,7 +37,7 @@ class LocaleProductExtension extends AbstractExtension
 
     public function localizedDescription(Product $product): string
     {
-        if ('fr' === $this->getLocale()) {
+        if ($this->getLocale() === 'fr') {
             return $product->getDescriptionFr();
         }
 
@@ -46,7 +46,7 @@ class LocaleProductExtension extends AbstractExtension
 
     public function localizedSlug(Product|ProductCategory $entity): string
     {
-        if ('fr' === $this->getLocale()) {
+        if ($this->getLocale() === 'fr') {
             return $entity->getSlugFr();
         }
 

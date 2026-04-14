@@ -35,7 +35,7 @@ class ProductRepository extends ServiceEntityRepository
             ->orderBy('p.createdAt', 'DESC')
             ->setMaxResults($limit);
 
-        if (null !== $collection && 'all' !== $collection) {
+        if ($collection !== null && $collection !== 'all') {
             $qb->andWhere('JSON_CONTAINS(p.availableIn, :collection) = 1')
                 ->setParameter('collection', \sprintf('"%s"', $collection));
         }
@@ -77,12 +77,12 @@ class ProductRepository extends ServiceEntityRepository
             ->orderBy('p.isSoldOut', 'ASC')
             ->addOrderBy('p.createdAt', 'DESC');
 
-        if (null !== $category) {
+        if ($category !== null) {
             $qb->andWhere('p.category = :category')
                 ->setParameter('category', $category);
         }
 
-        if (null !== $collection && 'all' !== $collection) {
+        if ($collection !== null && $collection !== 'all') {
             $qb->andWhere('JSON_CONTAINS(p.availableIn, :collection) = 1')
                 ->setParameter('collection', \sprintf('"%s"', $collection));
         }

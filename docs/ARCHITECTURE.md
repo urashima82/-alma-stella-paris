@@ -72,7 +72,7 @@ alma-stella/
 │   │   ├── ContactSubject.php    # General / Order / Return / Collaboration / Other
 │   │   ├── DiscountType.php      # Percentage / FixedAmount
 │   │   ├── OrderStatus.php       # Pending / Processing / Shipped / Delivered / Cancelled
-│   │   ├── PromotionType.php     # ProductAutomatic / CartAutomatic / CartCode / PrivateLink
+│   │   ├── PromotionType.php     # ProductAutomatic / CartAutomatic / CartCode
 │   │   └── ShippingTier.php      # Standard / Heavy / Set
 │   ├── Repository/
 │   ├── Service/
@@ -104,8 +104,7 @@ alma-stella/
 │   │   ├── EasyAdminFlashSubscriber.php  # Adds flash messages on CRUD persist/update/delete
 │   │   ├── ImageUploadSubscriber.php     # Processes product images after EasyAdmin persist/update
 │   │   ├── LocaleSubscriber.php          # Persists locale in session + cookie (30 days)
-│   │   ├── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
-│   │   └── PromoBannerSubscriber.php     # Captures ?promo=CODE, stores in session/cookie, shows gold banner
+│   │   └── OrderStatusSubscriber.php     # Handles status changes: admin email, shipped/delivered/cancelled to customer
 │   ├── Message/
 │   │   ├── CleanExpiredReservationsMessage.php
 │   │   └── VerifyPendingOrdersMessage.php
@@ -530,7 +529,7 @@ class Promotion
     private int $id;
     private string $name;                       // Admin label
     private ?string $code;                      // Null for auto promos, e.g. "BIENVENUE10" for codes
-    private PromotionType $type;                // ProductAutomatic / CartAutomatic / CartCode / PrivateLink
+    private PromotionType $type;                // ProductAutomatic / CartAutomatic / CartCode
     private DiscountType $discountType;         // Percentage / FixedAmount
     private float $discountValue;               // 10 = 10% or $10
     private bool $isActive;
@@ -561,7 +560,6 @@ class Promotion
 > - `ProductAutomatic`: applies to individual products, generates dynamic strikethrough prices
 > - `CartAutomatic`: applies to cart subtotal when conditions are met, no code required
 > - `CartCode`: requires customer to enter a code at checkout step 2
-> - `PrivateLink`: same as CartCode but pre-applied via `?promo=CODE` URL param + gold banner
 >
 > **Cumul logic:** `isCumulable = false` → best single offer wins. `isCumulable = true` → stacks.
 >

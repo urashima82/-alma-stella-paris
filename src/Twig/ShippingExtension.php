@@ -45,7 +45,7 @@ class ShippingExtension extends AbstractExtension
         // If there's an active product promotion, return the discounted price
         $promoPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
 
-        if (null !== $promoPrice) {
+        if ($promoPrice !== null) {
             return $promoPrice;
         }
 

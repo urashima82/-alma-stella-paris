@@ -75,7 +75,7 @@ class CurrencyExtension extends AbstractExtension
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if (null === $request) {
+        if ($request === null) {
             return CurrencyConverter::BASE_CURRENCY;
         }
 
@@ -90,6 +90,6 @@ class CurrencyExtension extends AbstractExtension
 
     public function isNonUsdCurrency(): bool
     {
-        return CurrencyConverter::BASE_CURRENCY !== $this->getCurrentCurrency();
+        return $this->getCurrentCurrency() !== CurrencyConverter::BASE_CURRENCY;
     }
 }

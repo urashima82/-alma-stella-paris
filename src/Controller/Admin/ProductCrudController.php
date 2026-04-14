@@ -52,7 +52,7 @@ class ProductCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         // ── Index only ──
-        if (Crud::PAGE_INDEX === $pageName) {
+        if ($pageName === Crud::PAGE_INDEX) {
             yield IdField::new('id');
             yield ImageField::new('thumbnail', 'Vignette')
                 ->setBasePath('/uploads/products');

@@ -29,7 +29,7 @@ final class CleanExpiredReservationsCommand extends Command
 
         $count = $this->reservationManager->releaseExpired();
 
-        if (0 === $count) {
+        if ($count === 0) {
             $io->info('No expired reservations.');
         } else {
             $io->success(\sprintf('Released %d expired reservation(s).', $count));

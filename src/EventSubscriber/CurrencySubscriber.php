@@ -42,7 +42,7 @@ class CurrencySubscriber implements EventSubscriberInterface
 
         $cookieCurrency = $request->cookies->get(self::COOKIE_NAME);
 
-        if (null !== $cookieCurrency && CurrencyConverter::isSupported($cookieCurrency)) {
+        if ($cookieCurrency !== null && CurrencyConverter::isSupported($cookieCurrency)) {
             $request->getSession()->set(self::SESSION_KEY, \strtoupper($cookieCurrency));
         }
     }

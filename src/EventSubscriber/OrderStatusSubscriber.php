@@ -42,7 +42,7 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
         $unitOfWork = $this->entityManager->getUnitOfWork();
         $originalData = $unitOfWork->getOriginalEntityData($entity);
 
-        if ([] === $originalData) {
+        if ($originalData === []) {
             return;
         }
 
@@ -57,12 +57,12 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if (OrderStatus::Processing === $newStatus) {
+        if ($newStatus === OrderStatus::Processing) {
             $this->sendAdminNotification($entity);
         }
 
-        if (OrderStatus::Shipped === $newStatus) {
-            if (null === $entity->getTrackingNumber() || '' === \trim($entity->getTrackingNumber())) {
+        if ($newStatus === OrderStatus::Shipped) {
+            if ($entity->getTrackingNumber() === null || \trim($entity->getTrackingNumber()) === '') {
                 $this->addFlash('warning', 'Impossible de passer en « Expédiée » sans numéro de suivi.');
                 $entity->setStatus($oldStatus);
 
@@ -72,11 +72,11 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
             $this->sendNotification($entity, 'shipped');
         }
 
-        if (OrderStatus::Delivered === $newStatus) {
+        if ($newStatus === OrderStatus::Delivered) {
             $this->sendNotification($entity, 'delivered');
         }
 
-        if (OrderStatus::Cancelled === $newStatus) {
+        if ($newStatus === OrderStatus::Cancelled) {
             $this->sendNotification($entity, 'cancelled');
         }
     }
@@ -115,7 +115,7 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
         try {
             $recipients = $this->orderMailer->sendNewOrderAdminNotification($order);
 
-            if ([] !== $recipients) {
+            if ($recipients !== []) {
                 $emails = \array_map(static fn ($admin) => $admin->getEmail(), $recipients);
                 $this->addFlash('success', \sprintf(
                     'Notification admin envoyée à %s',

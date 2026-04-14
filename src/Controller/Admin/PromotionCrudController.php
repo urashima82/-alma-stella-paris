@@ -21,16 +21,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /** @extends AbstractCrudController<Promotion> */
 class PromotionCrudController extends AbstractCrudController
 {
-    public function __construct(
-        private readonly RequestStack $requestStack,
-    ) {
-    }
-
     public static function getEntityFqcn(): string
     {
         return Promotion::class;
@@ -61,32 +55,14 @@ class PromotionCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        $baseUrl = $this->getSiteBaseUrl();
-
         // ── Index ──
-        if (Crud::PAGE_INDEX === $pageName) {
+        if ($pageName === Crud::PAGE_INDEX) {
             yield IdField::new('id');
             yield BooleanField::new('isActive', 'Active');
             yield TextField::new('name', 'Nom');
             yield TextField::new('code', 'Code');
             yield TextField::new('typeLabel', 'Type');
             yield TextField::new('discountLabel', 'Réduction');
-            yield TextField::new('shareableLink', 'Lien')
-                ->formatValue(static function ($value, Promotion $entity) use ($baseUrl): string {
-                    $code = $entity->getCode();
-                    if (null === $code || '' === $code) {
-                        return '<span class="text-body-secondary">—</span>';
-                    }
-
-                    $url = $baseUrl.'?promo='.$code;
-
-                    return \sprintf(
-                        '<a href="%s" target="_blank" class="text-truncate d-inline-block" style="max-width:180px" title="%s">%s</a>',
-                        \htmlspecialchars($url),
-                        \htmlspecialchars($url),
-                        \htmlspecialchars($url),
-                    );
-                });
             yield IntegerField::new('usageCount', 'Utilisations');
             yield DateTimeField::new('endsAt', 'Fin');
 
@@ -94,34 +70,11 @@ class PromotionCrudController extends AbstractCrudController
         }
 
         // ── Detail ──
-        if (Crud::PAGE_DETAIL === $pageName) {
+        if ($pageName === Crud::PAGE_DETAIL) {
             yield FormField::addTab('Informations');
             yield IdField::new('id');
             yield TextField::new('name', 'Nom');
             yield TextField::new('code', 'Code');
-            yield TextField::new('shareableLink', 'Lien à partager')
-                ->formatValue(static function ($value, Promotion $entity) use ($baseUrl): string {
-                    $code = $entity->getCode();
-                    if (null === $code || '' === $code) {
-                        return '<span class="text-body-secondary">Aucun (promotion automatique)</span>';
-                    }
-
-                    $url = $baseUrl.'?promo='.$code;
-                    $id = 'promo-url-'.$entity->getId();
-
-                    return \sprintf(
-                        '<div class="d-flex align-items-center gap-2">'
-                        .'<code id="%s" class="px-2 py-1 bg-light border rounded text-break" style="font-size:13px;">%s</code>'
-                        .'<button type="button" class="btn btn-sm btn-outline-secondary" onclick="navigator.clipboard.writeText(document.getElementById(\'%s\').textContent).then(()=>{this.textContent=\'✓ Copié\';setTimeout(()=>{this.textContent=\'Copier\'},2000)})">'
-                        .'Copier</button>'
-                        .'<a href="%s" target="_blank" class="btn btn-sm btn-outline-primary">Ouvrir</a>'
-                        .'</div>',
-                        $id,
-                        \htmlspecialchars($url),
-                        $id,
-                        \htmlspecialchars($url),
-                    );
-                });
             yield TextField::new('typeLabel', 'Type');
             yield TextField::new('discountTypeLabel', 'Type de réduction');
             yield NumberField::new('discountValue', 'Valeur');
@@ -160,7 +113,7 @@ class PromotionCrudController extends AbstractCrudController
                 \array_map(static fn (PromotionType $t) => $t->label(), PromotionType::cases()),
                 PromotionType::cases(),
             ))
-            ->setHelp('Code promo et Lien privé nécessitent un code');
+            ->setHelp('Le type Code promo nécessite un code');
 
         yield TextField::new('code', 'Code')
             ->setHelp('Laissez vide pour les promos automatiques. Sera converti en majuscules.')
@@ -220,19 +173,5 @@ class PromotionCrudController extends AbstractCrudController
             ->setRequired(false)
             ->setHelp('Laissez vide pour appliquer à toutes les catégories')
             ->autocomplete();
-    }
-
-    private function getSiteBaseUrl(): string
-    {
-        $request = $this->requestStack->getCurrentRequest();
-
-        if (null === $request) {
-            return 'https://almastellaparis.com';
-        }
-
-        $host = $request->getSchemeAndHttpHost();
-
-        // In dev/DDEV, use the actual host; in production, use the real domain
-        return $host;
     }
 }

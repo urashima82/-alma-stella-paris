@@ -28,13 +28,13 @@ class InvoiceController extends AbstractController
     ): Response {
         $order = $orderRepository->findByReference($reference);
 
-        if (null === $order || $order->getInvoiceToken() !== $token) {
+        if ($order === null || $order->getInvoiceToken() !== $token) {
             throw new NotFoundHttpException();
         }
 
-        if (OrderStatus::Delivered !== $order->getStatus()
-            && OrderStatus::Shipped !== $order->getStatus()
-            && OrderStatus::Processing !== $order->getStatus()
+        if ($order->getStatus() !== OrderStatus::Delivered
+            && $order->getStatus() !== OrderStatus::Shipped
+            && $order->getStatus() !== OrderStatus::Processing
         ) {
             throw new NotFoundHttpException();
         }

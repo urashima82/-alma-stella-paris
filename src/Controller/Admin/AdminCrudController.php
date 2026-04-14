@@ -54,7 +54,7 @@ class AdminCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        if (Crud::PAGE_INDEX === $pageName) {
+        if ($pageName === Crud::PAGE_INDEX) {
             return $this->indexFields();
         }
 

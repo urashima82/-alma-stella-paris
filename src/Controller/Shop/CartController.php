@@ -39,7 +39,7 @@ class CartController extends AbstractController
 
         $product = $this->productRepository->find($id);
 
-        if (null === $product) {
+        if ($product === null) {
             return $this->json(['success' => false, 'message' => 'not_found'], Response::HTTP_NOT_FOUND);
         }
 
@@ -88,16 +88,16 @@ class CartController extends AbstractController
 
             $item = [
                 'id' => $product->getId(),
-                'name' => 'fr' === $locale ? $product->getNameFr() : $product->getName(),
+                'name' => $locale === 'fr' ? $product->getNameFr() : $product->getName(),
                 'priceFormatted' => $this->formatPrice($convertedPrice, $currency),
-                'image' => null !== $product->getThumbnail()
+                'image' => $product->getThumbnail() !== null
                     ? '/uploads/products/'.$product->getThumbnail()
                     : null,
-                'slug' => 'fr' === $locale ? $product->getSlugFr() : $product->getSlug(),
-                'hasDiscount' => null !== $promoPrice,
+                'slug' => $locale === 'fr' ? $product->getSlugFr() : $product->getSlug(),
+                'hasDiscount' => $promoPrice !== null,
             ];
 
-            if (null !== $promoPrice) {
+            if ($promoPrice !== null) {
                 $item['originalPriceFormatted'] = $this->formatPrice(
                     $this->currencyConverter->convert($displayPrice, $currency),
                     $currency,

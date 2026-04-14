@@ -70,7 +70,7 @@ class PromotionEngine
     {
         $promo = $this->getBestProductPromotion($product);
 
-        if (null === $promo) {
+        if ($promo === null) {
             return null;
         }
 
@@ -88,11 +88,11 @@ class PromotionEngine
     {
         $promo = $this->getBestProductPromotion($product);
 
-        if (null !== $promo) {
+        if ($promo !== null) {
             return $product->getDisplayPrice();
         }
 
-        if (null !== $product->getCompareAtPrice()) {
+        if ($product->getCompareAtPrice() !== null) {
             return $product->getCompareAtPrice() + $product->getShippingTier()->shippingCostUsd();
         }
 
@@ -106,7 +106,7 @@ class PromotionEngine
     {
         $promo = $this->getBestProductPromotion($product);
 
-        if (null !== $promo) {
+        if ($promo !== null) {
             $displayPrice = $product->getDisplayPrice();
             $discount = $promo->calculateDiscount($displayPrice);
 
@@ -147,11 +147,11 @@ class PromotionEngine
             }
         }
 
-        // Coupon code (CartCode or PrivateLink)
-        if (null !== $couponCode && '' !== $couponCode) {
+        // Coupon code (CartCode)
+        if ($couponCode !== null && $couponCode !== '') {
             $codePromo = $this->validateCouponCode($couponCode, $subtotalUsd, $customerEmail);
 
-            if (null !== $codePromo) {
+            if ($codePromo !== null) {
                 $discount = $codePromo->calculateDiscount($subtotalUsd);
 
                 if ($discount > 0.0) {
@@ -167,7 +167,7 @@ class PromotionEngine
         }
 
         // Best non-cumulable vs sum of cumulables
-        if (null !== $bestNonCumulable) {
+        if ($bestNonCumulable !== null) {
             if ($bestNonCumulableDiscount > $cumulableDiscount) {
                 return [
                     'promotions' => [['promotion' => $bestNonCumulable, 'discount' => $bestNonCumulableDiscount]],
@@ -189,7 +189,7 @@ class PromotionEngine
     {
         $promo = $this->promotionRepository->findByCode($code);
 
-        if (null === $promo) {
+        if ($promo === null) {
             return null;
         }
 
@@ -197,7 +197,7 @@ class PromotionEngine
             return null;
         }
 
-        if (!\in_array($promo->getType(), [PromotionType::CartCode, PromotionType::PrivateLink], true)) {
+        if ($promo->getType() !== PromotionType::CartCode) {
             return null;
         }
 
@@ -205,11 +205,11 @@ class PromotionEngine
             return null;
         }
 
-        if (null !== $promo->getMinimumAmountUsd() && $subtotalUsd < $promo->getMinimumAmountUsd()) {
+        if ($promo->getMinimumAmountUsd() !== null && $subtotalUsd < $promo->getMinimumAmountUsd()) {
             return null;
         }
 
-        if (null !== $customerEmail && null !== $promo->getMaxUsagesPerEmail()) {
+        if ($customerEmail !== null && $promo->getMaxUsagesPerEmail() !== null) {
             $emailUsages = $this->promotionRepository->countUsagesByEmail($promo, $customerEmail);
             if ($emailUsages >= $promo->getMaxUsagesPerEmail()) {
                 return null;
@@ -260,11 +260,11 @@ class PromotionEngine
             return 0.0;
         }
 
-        if (null !== $promo->getMinimumAmountUsd() && $subtotalUsd < $promo->getMinimumAmountUsd()) {
+        if ($promo->getMinimumAmountUsd() !== null && $subtotalUsd < $promo->getMinimumAmountUsd()) {
             return 0.0;
         }
 
-        if (null !== $customerEmail && null !== $promo->getMaxUsagesPerEmail()) {
+        if ($customerEmail !== null && $promo->getMaxUsagesPerEmail() !== null) {
             $emailUsages = $this->promotionRepository->countUsagesByEmail($promo, $customerEmail);
             if ($emailUsages >= $promo->getMaxUsagesPerEmail()) {
                 return 0.0;
@@ -293,7 +293,7 @@ class PromotionEngine
      */
     private function getActiveProductPromotions(): array
     {
-        if (null === $this->activeProductPromotions) {
+        if ($this->activeProductPromotions === null) {
             $this->activeProductPromotions = $this->promotionRepository->findActiveAutoProductPromotions();
         }
 
@@ -305,7 +305,7 @@ class PromotionEngine
      */
     private function getActiveCartPromotions(): array
     {
-        if (null === $this->activeCartPromotions) {
+        if ($this->activeCartPromotions === null) {
             $this->activeCartPromotions = $this->promotionRepository->findActiveAutoCartPromotions();
         }
 

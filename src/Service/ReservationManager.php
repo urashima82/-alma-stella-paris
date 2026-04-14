@@ -35,7 +35,7 @@ final class ReservationManager
         $sessionId = $this->getSessionId();
         $existing = $this->reservationRepository->findOneBy(['product' => $product]);
 
-        if (null !== $existing) {
+        if ($existing !== null) {
             // Already reserved by this session — extend it
             if ($existing->isOwnedBy($sessionId)) {
                 return true;
@@ -86,7 +86,7 @@ final class ReservationManager
     {
         $existing = $this->reservationRepository->findOneBy(['product' => $product]);
 
-        if (null === $existing) {
+        if ($existing === null) {
             return false;
         }
 
@@ -108,7 +108,7 @@ final class ReservationManager
     {
         $reservation = $this->reservationRepository->findActiveByProduct($product);
 
-        if (null === $reservation) {
+        if ($reservation === null) {
             return false;
         }
 
@@ -123,13 +123,13 @@ final class ReservationManager
     {
         $reservations = $this->reservationRepository->findActiveBySessionId($this->getSessionId());
 
-        if ([] === $reservations) {
+        if ($reservations === []) {
             return null;
         }
 
         $earliest = null;
         foreach ($reservations as $reservation) {
-            if (null === $earliest || $reservation->getExpiresAt() < $earliest) {
+            if ($earliest === null || $reservation->getExpiresAt() < $earliest) {
                 $earliest = $reservation->getExpiresAt();
             }
         }
@@ -144,7 +144,7 @@ final class ReservationManager
     {
         $earliest = $this->getEarliestExpiryForCurrentSession();
 
-        if (null === $earliest) {
+        if ($earliest === null) {
             return 0;
         }
 

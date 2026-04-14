@@ -66,7 +66,7 @@ class Admin implements UserInterface
         $roles = $this->roles;
         $roles[] = 'ROLE_ADMIN';
 
-        if (AdminRole::SuperAdmin === $this->role) {
+        if ($this->role === AdminRole::SuperAdmin) {
             $roles[] = 'ROLE_SUPER_ADMIN';
         }
 
@@ -130,7 +130,7 @@ class Admin implements UserInterface
 
     public function isSuperAdmin(): bool
     {
-        return AdminRole::SuperAdmin === $this->role;
+        return $this->role === AdminRole::SuperAdmin;
     }
 
     public function getReceivesAdminEmails(): bool

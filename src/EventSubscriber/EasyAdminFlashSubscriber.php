@@ -51,11 +51,11 @@ final class EasyAdminFlashSubscriber implements EventSubscriberInterface
 
     public function onResponse(ResponseEvent $event): void
     {
-        if (!$event->isMainRequest() || 0 === $this->deleteCount) {
+        if (!$event->isMainRequest() || $this->deleteCount === 0) {
             return;
         }
 
-        $message = 1 === $this->deleteCount
+        $message = $this->deleteCount === 1
             ? 'L\'élément a été supprimé.'
             : \sprintf('%d éléments supprimés.', $this->deleteCount);
 

@@ -25,16 +25,16 @@ class ProductController extends AbstractController
         CartManager $cartManager,
         ReservationManager $reservationManager,
     ): Response {
-        $slugField = 'fr' === $request->getLocale() ? 'slugFr' : 'slug';
+        $slugField = $request->getLocale() === 'fr' ? 'slugFr' : 'slug';
         $product = $productRepository->findOneBy([$slugField => $slug]);
 
-        if (null === $product || !$product->isVisibleInCatalog()) {
+        if ($product === null || !$product->isVisibleInCatalog()) {
             throw $this->createNotFoundException('Product not found.');
         }
 
         return $this->render('shop/product/show.html.twig', [
             'product' => $product,
-            'isInCart' => null !== $product->getId() && $cartManager->contains($product->getId()),
+            'isInCart' => $product->getId() !== null && $cartManager->contains($product->getId()),
             'isReserved' => $reservationManager->isReservedByOther($product),
         ]);
     }

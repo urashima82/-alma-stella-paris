@@ -58,7 +58,7 @@ final class CartMergeSubscriber implements EventSubscriberInterface
 
         // Transfer product reservations from the pre-login session to the
         // post-login session so they are not treated as "reserved by another".
-        if (null !== $this->preLoginSessionId) {
+        if ($this->preLoginSessionId !== null) {
             $this->reservationManager->transferReservations($this->preLoginSessionId);
         }
 

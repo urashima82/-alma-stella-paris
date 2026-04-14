@@ -15,6 +15,11 @@ return (new PhpCsFixer\Config())
         'native_function_invocation' => [
             'include' => ['@all'],
         ],
+        'yoda_style' => [
+            'equal' => false,
+            'identical' => false,
+            'less_and_greater' => false,
+        ],
     ])
     ->setRiskyAllowed(true)
     ->setFinder($finder)

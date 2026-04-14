@@ -84,7 +84,7 @@ class OrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
 
-        if (null === $lastReference) {
+        if ($lastReference === null) {
             return $prefix.'00001';
         }
 
@@ -109,7 +109,7 @@ class OrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
 
-        if (null === $lastNumber) {
+        if ($lastNumber === null) {
             return $prefix.'00001';
         }
 

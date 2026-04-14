@@ -59,7 +59,7 @@ class ResetPasswordController extends AbstractController
                     $message = (new TemplatedEmail())
                         ->from(new Address($this->mailerFromEmail, $this->mailerFromName))
                         ->to(new Address($customer->getEmail(), $customer->getFullName()))
-                        ->subject('en' === $request->getLocale()
+                        ->subject($request->getLocale() === 'en'
                             ? 'Reset your password — Alma Stella Paris'
                             : 'Réinitialisation de votre mot de passe — Alma Stella Paris')
                         ->htmlTemplate('email/reset_password.html.twig')
@@ -117,7 +117,7 @@ class ResetPasswordController extends AbstractController
                 $errors[] = 'reset_password.error.password_mismatch';
             }
 
-            if ([] === $errors) {
+            if ($errors === []) {
                 $this->resetPasswordHelper->removeResetRequest($token);
 
                 $customer->setPassword($passwordHasher->hashPassword($customer, $password));

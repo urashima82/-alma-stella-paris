@@ -41,7 +41,7 @@ class ContactController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Honeypot check
-            if ('' !== (string) $form->get('website')->getData()) {
+            if ((string) $form->get('website')->getData() !== '') {
                 return $this->redirectToRoute('shop_contact');
             }
 

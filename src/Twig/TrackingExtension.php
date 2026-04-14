@@ -20,7 +20,7 @@ class TrackingExtension extends AbstractExtension
 
     public function getTrackingUrl(?string $trackingNumber): ?string
     {
-        if (null === $trackingNumber || '' === $trackingNumber) {
+        if ($trackingNumber === null || $trackingNumber === '') {
             return null;
         }
 

@@ -26,7 +26,7 @@ final class ContactMailer
     {
         $recipients = $this->adminRepository->findEmailRecipients();
 
-        if ([] === $recipients) {
+        if ($recipients === []) {
             return;
         }
 

@@ -36,7 +36,7 @@ class SiteSettingsCrudController extends AbstractCrudController
     {
         $settings = $this->siteSettingsRepository->findOneBy([]);
 
-        if (null === $settings) {
+        if ($settings === null) {
             $settings = new SiteSettings();
             $this->entityManager->persist($settings);
             $this->entityManager->flush();

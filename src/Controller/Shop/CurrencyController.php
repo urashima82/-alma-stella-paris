@@ -25,7 +25,7 @@ class CurrencyController extends AbstractController
 
         $referer = $request->headers->get('referer');
 
-        if (null !== $referer) {
+        if ($referer !== null) {
             return $this->redirect($referer);
         }
 

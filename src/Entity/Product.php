@@ -135,7 +135,7 @@ class Product
     {
         $this->name = $name;
 
-        if ('' === $this->slug) {
+        if ($this->slug === '') {
             $this->slug = (string) (new AsciiSlugger())->slug($name)->lower();
         }
 
@@ -151,7 +151,7 @@ class Product
     {
         $this->nameFr = $nameFr;
 
-        if ('' === $this->slugFr) {
+        if ($this->slugFr === '') {
             $this->slugFr = (string) (new AsciiSlugger('fr'))->slug($nameFr)->lower();
         }
 
@@ -220,12 +220,12 @@ class Product
 
     public function getCompareAtPrice(): ?float
     {
-        return null !== $this->compareAtPrice ? (float) $this->compareAtPrice : null;
+        return $this->compareAtPrice !== null ? (float) $this->compareAtPrice : null;
     }
 
     public function setCompareAtPrice(?float $compareAtPrice): static
     {
-        $this->compareAtPrice = null !== $compareAtPrice
+        $this->compareAtPrice = $compareAtPrice !== null
             ? \number_format($compareAtPrice, 2, '.', '')
             : null;
 
@@ -239,7 +239,7 @@ class Product
 
     public function getDiscountPercent(): ?int
     {
-        if (null === $this->compareAtPrice || (float) $this->compareAtPrice <= $this->getBasePrice()) {
+        if ($this->compareAtPrice === null || (float) $this->compareAtPrice <= $this->getBasePrice()) {
             return null;
         }
 
@@ -303,7 +303,7 @@ class Product
     {
         $this->isSoldOut = $isSoldOut;
 
-        if ($isSoldOut && null === $this->soldAt) {
+        if ($isSoldOut && $this->soldAt === null) {
             $this->soldAt = new \DateTimeImmutable();
         }
 
@@ -348,7 +348,7 @@ class Product
             return true;
         }
 
-        if (null === $this->soldAt) {
+        if ($this->soldAt === null) {
             return false;
         }
 
@@ -364,7 +364,7 @@ class Product
     {
         $this->thumbnailFile = $thumbnailFile;
 
-        if (null !== $thumbnailFile) {
+        if ($thumbnailFile !== null) {
             $this->updatedAt = new \DateTimeImmutable();
         }
 
@@ -392,7 +392,7 @@ class Product
     {
         $this->wornPhotoFile = $wornPhotoFile;
 
-        if (null !== $wornPhotoFile) {
+        if ($wornPhotoFile !== null) {
             $this->updatedAt = new \DateTimeImmutable();
         }
 
@@ -420,7 +420,7 @@ class Product
     {
         $this->contextPhotoFile = $contextPhotoFile;
 
-        if (null !== $contextPhotoFile) {
+        if ($contextPhotoFile !== null) {
             $this->updatedAt = new \DateTimeImmutable();
         }
 

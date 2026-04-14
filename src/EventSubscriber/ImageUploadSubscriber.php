@@ -54,7 +54,7 @@ class ImageUploadSubscriber implements EventSubscriberInterface
     private function processImage(object $entity): void
     {
         $configs = $this->getConfigs($entity);
-        if ([] === $configs) {
+        if ($configs === []) {
             return;
         }
 
@@ -63,7 +63,7 @@ class ImageUploadSubscriber implements EventSubscriberInterface
         foreach ($configs as $config) {
             /** @var string|null $filename */
             $filename = $entity->{$config['getter']}();
-            if (null === $filename) {
+            if ($filename === null) {
                 continue;
             }
 

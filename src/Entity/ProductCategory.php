@@ -61,7 +61,7 @@ class ProductCategory
     {
         $this->name = $name;
 
-        if ('' === $this->slug) {
+        if ($this->slug === '') {
             $this->slug = (string) (new AsciiSlugger())->slug($name)->lower();
         }
 
@@ -77,7 +77,7 @@ class ProductCategory
     {
         $this->nameFr = $nameFr;
 
-        if ('' === $this->slugFr) {
+        if ($this->slugFr === '') {
             $this->slugFr = (string) (new AsciiSlugger('fr'))->slug($nameFr)->lower();
         }
 

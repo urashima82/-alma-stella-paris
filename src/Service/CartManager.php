@@ -42,7 +42,7 @@ class CartManager
 
         $customer = $this->getCustomer();
 
-        if (null !== $customer) {
+        if ($customer !== null) {
             $cart = $this->getOrCreateDbCart($customer);
 
             if ($cart->containsProduct($product->getId())) {
@@ -75,7 +75,7 @@ class CartManager
     {
         $customer = $this->getCustomer();
 
-        if (null !== $customer) {
+        if ($customer !== null) {
             $cart = $this->cartRepository->findByCustomer($customer);
             $cart?->removeProduct($productId);
             $this->entityManager->flush();
@@ -95,7 +95,7 @@ class CartManager
     {
         $customer = $this->getCustomer();
 
-        if (null !== $customer) {
+        if ($customer !== null) {
             $cart = $this->cartRepository->findByCustomer($customer);
             $cart?->clear();
             $this->entityManager->flush();
@@ -114,7 +114,7 @@ class CartManager
     {
         $customer = $this->getCustomer();
 
-        if (null !== $customer) {
+        if ($customer !== null) {
             $cart = $this->cartRepository->findByCustomer($customer);
 
             return $cart?->getProductIds() ?? [];
@@ -133,7 +133,7 @@ class CartManager
     {
         $ids = $this->getProductIds();
 
-        if ([] === $ids) {
+        if ($ids === []) {
             return [];
         }
 
@@ -197,7 +197,7 @@ class CartManager
     {
         $guestIds = $this->getGuestProductIds();
 
-        if ([] === $guestIds) {
+        if ($guestIds === []) {
             return;
         }
 
@@ -227,7 +227,7 @@ class CartManager
     {
         $cart = $this->cartRepository->findByCustomer($customer);
 
-        if (null === $cart) {
+        if ($cart === null) {
             $cart = new Cart();
             $cart->setCustomer($customer);
             $this->entityManager->persist($cart);
@@ -246,20 +246,20 @@ class CartManager
         /** @var int[] $sessionIds */
         $sessionIds = $session->get(self::SESSION_KEY, []);
 
-        if ([] !== $sessionIds) {
+        if ($sessionIds !== []) {
             return $sessionIds;
         }
 
         // Fall back to cookie
         $request = $this->requestStack->getCurrentRequest();
 
-        if (null === $request) {
+        if ($request === null) {
             return [];
         }
 
         $cookieValue = $request->cookies->get(self::COOKIE_NAME);
 
-        if (null === $cookieValue || '' === $cookieValue) {
+        if ($cookieValue === null || $cookieValue === '') {
             return [];
         }
 
@@ -272,7 +272,7 @@ class CartManager
         $ids = \array_values(\array_filter(\array_map('\intval', $decoded), static fn (int $id): bool => $id > 0));
 
         // Restore into session from cookie
-        if ([] !== $ids) {
+        if ($ids !== []) {
             $session->set(self::SESSION_KEY, $ids);
         }
 
@@ -295,10 +295,10 @@ class CartManager
     {
         $customer = $this->getCustomer();
 
-        if (null !== $customer) {
+        if ($customer !== null) {
             $cart = $this->cartRepository->findByCustomer($customer);
 
-            if (null !== $cart) {
+            if ($cart !== null) {
                 $cart->clear();
                 $products = $this->productRepository->findBy(['id' => $ids]);
 
@@ -322,12 +322,12 @@ class CartManager
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if (null === $request) {
+        if ($request === null) {
             return;
         }
 
-        $cookieValue = [] === $ids ? '' : \json_encode($ids, \JSON_THROW_ON_ERROR);
-        $expire = [] === $ids ? 1 : \time() + (self::COOKIE_LIFETIME_DAYS * 86400);
+        $cookieValue = $ids === [] ? '' : \json_encode($ids, \JSON_THROW_ON_ERROR);
+        $expire = $ids === [] ? 1 : \time() + (self::COOKIE_LIFETIME_DAYS * 86400);
 
         $cookie = Cookie::create(self::COOKIE_NAME)
             ->withValue($cookieValue)

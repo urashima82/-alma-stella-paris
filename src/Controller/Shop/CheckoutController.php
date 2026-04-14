@@ -61,7 +61,7 @@ class CheckoutController extends AbstractController
     {
         $products = $this->cartManager->getProducts();
 
-        if ([] === $products) {
+        if ($products === []) {
             return $this->redirectToRoute('shop_catalog', ['_locale' => $request->getLocale()]);
         }
 
@@ -77,7 +77,7 @@ class CheckoutController extends AbstractController
         if ($request->isMethod('POST') && $request->request->has('guest_email')) {
             $email = \trim((string) $request->request->get('guest_email', ''));
 
-            if ('' !== $email && false !== \filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+            if ($email !== '' && \filter_var($email, \FILTER_VALIDATE_EMAIL) !== false) {
                 $request->getSession()->set('_checkout_email', $email);
 
                 return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
@@ -105,7 +105,7 @@ class CheckoutController extends AbstractController
     {
         $products = $this->cartManager->getProducts();
 
-        if ([] === $products) {
+        if ($products === []) {
             return $this->redirectToRoute('shop_catalog', ['_locale' => $request->getLocale()]);
         }
 
@@ -126,9 +126,9 @@ class CheckoutController extends AbstractController
         if ($request->isMethod('POST')) {
             $errors = $this->validateCheckoutForm($request);
 
-            if ([] === $errors) {
+            if ($errors === []) {
                 // Evaluate promotions for the order
-                $couponCodeForOrder = (string) $request->request->get('coupon_code', '') ?: $request->getSession()->get('_promo_code');
+                $couponCodeForOrder = (string) $request->request->get('coupon_code', '');
                 $emailForOrder = $this->getCheckoutEmail($request);
                 $promoResult = $this->promotionEngine->evaluateCartPromotions($products, $subtotalUsd, $couponCodeForOrder, $emailForOrder);
                 $orderDiscountUsd = $promoResult['totalDiscount'];
@@ -136,11 +136,11 @@ class CheckoutController extends AbstractController
 
                 // Reuse existing Pending order if available, otherwise create new
                 $pendingRef = $request->getSession()->get('_pending_order');
-                $existingOrder = null !== $pendingRef
+                $existingOrder = $pendingRef !== null
                     ? $this->orderRepository->findByReference($pendingRef)
                     : null;
 
-                if (null !== $existingOrder && OrderStatus::Pending === $existingOrder->getStatus()) {
+                if ($existingOrder !== null && $existingOrder->getStatus() === OrderStatus::Pending) {
                     $order = $this->updateExistingOrder($existingOrder, $request, $products, $orderFinalTotal);
                 } else {
                     $order = $this->createOrder($request, $products, $orderFinalTotal);
@@ -149,7 +149,7 @@ class CheckoutController extends AbstractController
 
                 // Store discount info on order
                 $order->setDiscountAmountUsd($orderDiscountUsd);
-                $order->setPromotionCode(\is_string($couponCodeForOrder) && '' !== $couponCodeForOrder ? \strtoupper($couponCodeForOrder) : null);
+                $order->setPromotionCode($couponCodeForOrder !== '' ? \strtoupper($couponCodeForOrder) : null);
 
                 // Store promo result in session for tracking on payment confirmation
                 $request->getSession()->set('_order_promotions', \array_map(
@@ -199,7 +199,7 @@ class CheckoutController extends AbstractController
             }
         }
 
-        // Evaluate coupon code (from session/banner or form submission)
+        // Evaluate coupon code from session
         $couponCode = $request->getSession()->get('_promo_code');
         $customerEmail = $this->getCheckoutEmail($request);
         $cartPromoResult = $this->promotionEngine->evaluateCartPromotions($products, $subtotalUsd, $couponCode, $customerEmail);
@@ -208,9 +208,9 @@ class CheckoutController extends AbstractController
 
         // Build applied coupon info for template
         $appliedCoupon = null;
-        if (null !== $couponCode && '' !== $couponCode) {
+        if ($couponCode !== null && $couponCode !== '') {
             $promo = $this->promotionEngine->validateCouponCode($couponCode, $subtotalUsd, $customerEmail);
-            if (null !== $promo) {
+            if ($promo !== null) {
                 $appliedCoupon = [
                     'code' => $couponCode,
                     'label' => $promo->getDiscountLabel(),
@@ -251,13 +251,13 @@ class CheckoutController extends AbstractController
     {
         $orderRef = $request->getSession()->get('_pending_order');
 
-        if (null === $orderRef) {
+        if ($orderRef === null) {
             return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
         }
 
         $order = $this->orderRepository->findByReference($orderRef);
 
-        if (null === $order) {
+        if ($order === null) {
             return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
         }
 
@@ -265,7 +265,7 @@ class CheckoutController extends AbstractController
         $paymentIntentId = $order->getStripePaymentIntentId();
 
         try {
-            if (null !== $paymentIntentId) {
+            if ($paymentIntentId !== null) {
                 $paymentIntent = $this->stripeService->retrievePaymentIntent($paymentIntentId);
             } else {
                 $paymentIntent = $this->stripeService->createPaymentIntent($order);
@@ -307,13 +307,13 @@ class CheckoutController extends AbstractController
     {
         $orderRef = $request->getSession()->get('_pending_order');
 
-        if (null === $orderRef) {
+        if ($orderRef === null) {
             return new JsonResponse(['error' => 'no_pending_order'], Response::HTTP_BAD_REQUEST);
         }
 
         $order = $this->orderRepository->findByReference($orderRef);
 
-        if (null === $order || null === $order->getStripePaymentIntentId()) {
+        if ($order === null || $order->getStripePaymentIntentId() === null) {
             return new JsonResponse(['error' => 'order_not_found'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -325,7 +325,7 @@ class CheckoutController extends AbstractController
             return new JsonResponse(['error' => 'payment_verification_failed'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        if ('succeeded' !== $paymentIntent->status) {
+        if ($paymentIntent->status !== 'succeeded') {
             return new JsonResponse(['error' => 'payment_not_completed', 'status' => $paymentIntent->status], Response::HTTP_BAD_REQUEST);
         }
 
@@ -338,7 +338,7 @@ class CheckoutController extends AbstractController
         // Mark purchased products as sold (setIsSoldOut auto-sets soldAt)
         foreach ($order->getItems() as $item) {
             $product = $item->getProduct();
-            if (null !== $product && !$product->isSoldOut()) {
+            if ($product !== null && !$product->isSoldOut()) {
                 $product->setIsSoldOut(true);
             }
         }
@@ -362,16 +362,16 @@ class CheckoutController extends AbstractController
 
         // Track promotion usage
         $sessionPromos = $request->getSession()->get('_order_promotions', []);
-        if (\is_array($sessionPromos) && [] !== $sessionPromos) {
+        if (\is_array($sessionPromos) && $sessionPromos !== []) {
             $promoRepo = $this->entityManager->getRepository(\App\Entity\Promotion::class);
             $appliedPromotions = [];
             foreach ($sessionPromos as $entry) {
                 $promo = $promoRepo->find($entry['id']);
-                if (null !== $promo) {
+                if ($promo !== null) {
                     $appliedPromotions[] = ['promotion' => $promo, 'discount' => (float) $entry['discount']];
                 }
             }
-            if ([] !== $appliedPromotions) {
+            if ($appliedPromotions !== []) {
                 $this->promotionEngine->recordUsage($order, $appliedPromotions);
             }
         }
@@ -379,7 +379,7 @@ class CheckoutController extends AbstractController
         // Release reservations for purchased products
         foreach ($order->getItems() as $item) {
             $product = $item->getProduct();
-            if (null !== $product) {
+            if ($product !== null) {
                 $this->reservationManager->release($product);
             }
         }
@@ -390,9 +390,7 @@ class CheckoutController extends AbstractController
         $request->getSession()->remove('_checkout_email');
         $request->getSession()->remove('_order_promotions');
         $request->getSession()->remove('_promo_code');
-        $request->getSession()->remove('_promo_banner_label');
-        $request->getSession()->remove('_promo_banner_name');
-        $confirmationRoute = 'fr' === $locale ? 'shop_order_confirmation_fr' : 'shop_order_confirmation';
+        $confirmationRoute = $locale === 'fr' ? 'shop_order_confirmation_fr' : 'shop_order_confirmation';
 
         return new JsonResponse([
             'success' => true,
@@ -419,7 +417,7 @@ class CheckoutController extends AbstractController
     {
         $order = $this->orderRepository->findByReference($reference);
 
-        if (null === $order) {
+        if ($order === null) {
             throw $this->createNotFoundException();
         }
 
@@ -448,7 +446,7 @@ class CheckoutController extends AbstractController
     {
         $order = $this->orderRepository->findByReference($reference);
 
-        if (null === $order) {
+        if ($order === null) {
             throw $this->createNotFoundException();
         }
 
@@ -470,11 +468,11 @@ class CheckoutController extends AbstractController
     {
         $email = \trim((string) $request->getPayload()->get('email', ''));
 
-        if ('' === $email || false === \filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+        if ($email === '' || \filter_var($email, \FILTER_VALIDATE_EMAIL) === false) {
             return new JsonResponse(['exists' => false]);
         }
 
-        return new JsonResponse(['exists' => null !== $customerRepository->findByEmail($email)]);
+        return new JsonResponse(['exists' => $customerRepository->findByEmail($email) !== null]);
     }
 
     /**
@@ -491,27 +489,27 @@ class CheckoutController extends AbstractController
         $postalCode = \trim((string) $request->request->get('postal_code', ''));
         $country = \trim((string) $request->request->get('country', ''));
 
-        if ('' === $email || false === \filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+        if ($email === '' || \filter_var($email, \FILTER_VALIDATE_EMAIL) === false) {
             $errors['customer_email'] = 'checkout.error.email_invalid';
         }
 
-        if ('' === $shippingRecipient) {
+        if ($shippingRecipient === '') {
             $errors['shipping_recipient_name'] = 'checkout.error.shipping_recipient_required';
         }
 
-        if ('' === $line1) {
+        if ($line1 === '') {
             $errors['address_line1'] = 'checkout.error.address_required';
         }
 
-        if ('' === $city) {
+        if ($city === '') {
             $errors['city'] = 'checkout.error.city_required';
         }
 
-        if ('' === $postalCode) {
+        if ($postalCode === '') {
             $errors['postal_code'] = 'checkout.error.postal_code_required';
         }
 
-        if ('' === $country || 2 !== \strlen($country)) {
+        if ($country === '' || \strlen($country) !== 2) {
             $errors['country'] = 'checkout.error.country_required';
         }
 
@@ -523,23 +521,23 @@ class CheckoutController extends AbstractController
             $billingPostalCode = \trim((string) $request->request->get('billing_postal_code', ''));
             $billingCountry = \trim((string) $request->request->get('billing_country', ''));
 
-            if ('' === $billingRecipient) {
+            if ($billingRecipient === '') {
                 $errors['billing_recipient_name'] = 'checkout.error.billing_recipient_required';
             }
 
-            if ('' === $billingLine1) {
+            if ($billingLine1 === '') {
                 $errors['billing_address_line1'] = 'checkout.error.billing_address_required';
             }
 
-            if ('' === $billingCity) {
+            if ($billingCity === '') {
                 $errors['billing_city'] = 'checkout.error.billing_city_required';
             }
 
-            if ('' === $billingPostalCode) {
+            if ($billingPostalCode === '') {
                 $errors['billing_postal_code'] = 'checkout.error.billing_postal_code_required';
             }
 
-            if ('' === $billingCountry || 2 !== \strlen($billingCountry)) {
+            if ($billingCountry === '' || \strlen($billingCountry) !== 2) {
                 $errors['billing_country'] = 'checkout.error.billing_country_required';
             }
         }
@@ -641,7 +639,7 @@ class CheckoutController extends AbstractController
         }
 
         // Reset Stripe PaymentIntent if total changed (new PI will be created at payment step)
-        if ($oldTotal !== $subtotalUsd && null !== $order->getStripePaymentIntentId()) {
+        if ($oldTotal !== $subtotalUsd && $order->getStripePaymentIntentId() !== null) {
             $order->setStripePaymentIntentId(null);
         }
 
@@ -757,7 +755,7 @@ class CheckoutController extends AbstractController
     {
         $count = $customer->getAddresses()->count();
 
-        if (0 === $count) {
+        if ($count === 0) {
             return 'Home';
         }
 
@@ -796,7 +794,7 @@ class CheckoutController extends AbstractController
         $data = \json_decode($request->getContent(), true);
         $code = \strtoupper(\trim((string) ($data['code'] ?? '')));
 
-        if ('' === $code) {
+        if ($code === '') {
             return $this->json(['valid' => false, 'message' => 'checkout.coupon_invalid']);
         }
 
@@ -805,14 +803,12 @@ class CheckoutController extends AbstractController
 
         $promo = $this->promotionEngine->validateCouponCode($code, $subtotalUsd, $email);
 
-        if (null === $promo) {
+        if ($promo === null) {
             return $this->json(['valid' => false, 'message' => 'checkout.coupon_invalid']);
         }
 
         // Store validated code in session
         $request->getSession()->set('_promo_code', $code);
-        $request->getSession()->set('_promo_banner_label', $promo->getDiscountLabel());
-        $request->getSession()->set('_promo_banner_name', $promo->getName());
 
         return $this->json([
             'valid' => true,

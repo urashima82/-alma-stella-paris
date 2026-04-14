@@ -94,7 +94,7 @@ class OrderItem
 
     public function getLocalizedProductName(string $locale = 'en'): string
     {
-        if ('fr' === $locale && '' !== $this->productNameFr) {
+        if ($locale === 'fr' && $this->productNameFr !== '') {
             return $this->productNameFr;
         }
 

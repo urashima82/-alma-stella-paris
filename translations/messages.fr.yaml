@@ -517,9 +517,6 @@ contact:
         message_too_short: "Votre message doit contenir au moins 10 caractères."
         rate_limited: "Vous avez envoyé trop de messages. Veuillez réessayer plus tard."
 
-# ── Promotions ──
-promo:
-    banner_text: "Code %code% appliqué — %discount% sur votre commande"
 
 # ── Language switcher ──
 locale:

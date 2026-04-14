@@ -34,7 +34,7 @@ class AvailableInFilter implements FilterInterface
     {
         $country = $filterDataDto->getValue();
 
-        if (null === $country || '' === $country) {
+        if ($country === null || $country === '') {
             return;
         }
 

@@ -28,7 +28,7 @@ class CurrencyConverter
     {
         $targetCurrency = \strtoupper($targetCurrency);
 
-        if (self::BASE_CURRENCY === $targetCurrency) {
+        if ($targetCurrency === self::BASE_CURRENCY) {
             return $amountUsd;
         }
 
@@ -45,7 +45,7 @@ class CurrencyConverter
     {
         $currency = \strtoupper($currency);
 
-        if (self::BASE_CURRENCY === $currency) {
+        if ($currency === self::BASE_CURRENCY) {
             return 1.0;
         }
 

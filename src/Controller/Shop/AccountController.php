@@ -80,7 +80,7 @@ class AccountController extends AbstractController
             'customer' => $customer,
         ]);
 
-        if (null === $order) {
+        if ($order === null) {
             throw $this->createNotFoundException('Order not found.');
         }
 
@@ -122,7 +122,7 @@ class AccountController extends AbstractController
             $formData = $this->extractAddressFormData($request);
             $errors = $this->validateAddressForm($formData);
 
-            if ([] === $errors) {
+            if ($errors === []) {
                 $address = $this->createAddressFromFormData($formData, $customer);
 
                 if ($address->isDefault()) {
@@ -159,7 +159,7 @@ class AccountController extends AbstractController
         $customer = $this->getUser();
 
         $address = $addressRepository->find($id);
-        if (null === $address || $address->getCustomer() !== $customer) {
+        if ($address === null || $address->getCustomer() !== $customer) {
             throw $this->createNotFoundException('Address not found.');
         }
 
@@ -180,7 +180,7 @@ class AccountController extends AbstractController
             $formData = $this->extractAddressFormData($request);
             $errors = $this->validateAddressForm($formData);
 
-            if ([] === $errors) {
+            if ($errors === []) {
                 $this->updateAddressFromFormData($formData, $address);
 
                 if ($address->isDefault()) {
@@ -216,7 +216,7 @@ class AccountController extends AbstractController
         $customer = $this->getUser();
 
         $address = $addressRepository->find($id);
-        if (null === $address || $address->getCustomer() !== $customer) {
+        if ($address === null || $address->getCustomer() !== $customer) {
             throw $this->createNotFoundException('Address not found.');
         }
 
@@ -240,7 +240,7 @@ class AccountController extends AbstractController
         $customer = $this->getUser();
 
         $address = $addressRepository->find($id);
-        if (null === $address || $address->getCustomer() !== $customer) {
+        if ($address === null || $address->getCustomer() !== $customer) {
             throw $this->createNotFoundException('Address not found.');
         }
 
@@ -267,12 +267,12 @@ class AccountController extends AbstractController
         $success = null;
         $action = $request->request->get('_action');
 
-        if ($request->isMethod('POST') && 'update_info' === $action) {
+        if ($request->isMethod('POST') && $action === 'update_info') {
             $firstName = \trim((string) $request->request->get('first_name', ''));
             $lastName = \trim((string) $request->request->get('last_name', ''));
             $email = \trim((string) $request->request->get('email', ''));
 
-            if ('' !== $firstName && '' !== $lastName && '' !== $email) {
+            if ($firstName !== '' && $lastName !== '' && $email !== '') {
                 $customer->setFirstName($firstName);
                 $customer->setLastName($lastName);
                 $customer->setEmail($email);
@@ -281,7 +281,7 @@ class AccountController extends AbstractController
             }
         }
 
-        if ($request->isMethod('POST') && 'change_password' === $action) {
+        if ($request->isMethod('POST') && $action === 'change_password') {
             $currentPassword = (string) $request->request->get('current_password', '');
             $newPassword = (string) $request->request->get('new_password', '');
             $newPasswordConfirm = (string) $request->request->get('new_password_confirm', '');
@@ -351,23 +351,23 @@ class AccountController extends AbstractController
     {
         $errors = [];
 
-        if ('' === $formData['label']) {
+        if ($formData['label'] === '') {
             $errors[] = 'addresses.error.label_required';
         }
 
-        if ('' === $formData['address_line1']) {
+        if ($formData['address_line1'] === '') {
             $errors[] = 'addresses.error.address_required';
         }
 
-        if ('' === $formData['city']) {
+        if ($formData['city'] === '') {
             $errors[] = 'addresses.error.city_required';
         }
 
-        if ('' === $formData['postal_code']) {
+        if ($formData['postal_code'] === '') {
             $errors[] = 'addresses.error.postal_code_required';
         }
 
-        if ('' === $formData['country'] || 2 !== \strlen($formData['country'])) {
+        if ($formData['country'] === '' || \strlen($formData['country']) !== 2) {
             $errors[] = 'addresses.error.country_required';
         }
 
@@ -392,11 +392,11 @@ class AccountController extends AbstractController
     private function updateAddressFromFormData(array $formData, CustomerAddress $address): void
     {
         $address->setLabel($formData['label']);
-        $address->setRecipientName('' !== $formData['recipient_name'] ? $formData['recipient_name'] : null);
+        $address->setRecipientName($formData['recipient_name'] !== '' ? $formData['recipient_name'] : null);
         $address->setAddressLine1($formData['address_line1']);
-        $address->setAddressLine2('' !== $formData['address_line2'] ? $formData['address_line2'] : null);
+        $address->setAddressLine2($formData['address_line2'] !== '' ? $formData['address_line2'] : null);
         $address->setCity($formData['city']);
-        $address->setState('' !== $formData['state'] ? $formData['state'] : null);
+        $address->setState($formData['state'] !== '' ? $formData['state'] : null);
         $address->setPostalCode($formData['postal_code']);
         $address->setCountry($formData['country']);
         $address->setIsDefault($formData['is_default']);

@@ -27,7 +27,7 @@ final class OrderMailer
 
     public function sendOrderConfirmation(Order $order, string $locale = 'en'): void
     {
-        $subject = 'fr' === $locale
+        $subject = $locale === 'fr'
             ? \sprintf('Confirmation de commande %s', $order->getReference())
             : \sprintf('Order confirmation %s', $order->getReference());
 
@@ -46,7 +46,7 @@ final class OrderMailer
 
     public function sendDeliveredNotification(Order $order, string $locale = 'en'): void
     {
-        $subject = 'fr' === $locale
+        $subject = $locale === 'fr'
             ? \sprintf('Votre commande %s a été livrée', $order->getReference())
             : \sprintf('Your order %s has been delivered', $order->getReference());
 
@@ -72,7 +72,7 @@ final class OrderMailer
 
     public function sendShippedNotification(Order $order, string $locale = 'en'): void
     {
-        $subject = 'fr' === $locale
+        $subject = $locale === 'fr'
             ? \sprintf('Votre commande %s a été expédiée', $order->getReference())
             : \sprintf('Your order %s has been shipped', $order->getReference());
 
@@ -91,7 +91,7 @@ final class OrderMailer
 
     public function sendCancelledNotification(Order $order, string $locale = 'en'): void
     {
-        $subject = 'fr' === $locale
+        $subject = $locale === 'fr'
             ? \sprintf('Votre commande %s a été annulée', $order->getReference())
             : \sprintf('Your order %s has been cancelled', $order->getReference());
 
@@ -115,7 +115,7 @@ final class OrderMailer
     {
         $recipients = $this->adminRepository->findEmailRecipients();
 
-        if ([] === $recipients) {
+        if ($recipients === []) {
             return [];
         }
 

@@ -26,12 +26,12 @@ class LocaleRedirectController extends AbstractController
     private function detectLocale(Request $request): string
     {
         $cookieLocale = $request->cookies->get(self::COOKIE_NAME);
-        if (null !== $cookieLocale && \in_array($cookieLocale, self::SUPPORTED_LOCALES, true)) {
+        if ($cookieLocale !== null && \in_array($cookieLocale, self::SUPPORTED_LOCALES, true)) {
             return $cookieLocale;
         }
 
         $preferredLocale = $request->getPreferredLanguage(self::SUPPORTED_LOCALES);
-        if (null !== $preferredLocale) {
+        if ($preferredLocale !== null) {
             return $preferredLocale;
         }
 
