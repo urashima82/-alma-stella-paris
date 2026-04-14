@@ -670,7 +670,49 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 11 — Social publishing
+## Milestone 11 — Instagram feed (Behold.so)
+*Estimated effort: 2-3h*
+
+> **Prerequisite (client action):** Create a Behold.so account, connect the
+> Instagram Business account `@alma_stella_paris`, and provide the Feed ID.
+> This milestone cannot start until the Feed ID is available.
+
+### Tasks
+
+#### Configuration
+- [ ] Add `BEHOLD_FEED_ID` to `.env` (documented, no default value)
+- [ ] Add `BEHOLD_FEED_ID` to `.env.local` with actual Feed ID from client
+
+#### Service & cache
+- [ ] `InstagramFeedService` — fetches Behold.so JSON API (`https://feeds.behold.so/{feedId}`)
+- [ ] Symfony Cache integration (filesystem adapter, TTL **6h** — same pattern as `CurrencyConverter`)
+- [ ] Graceful fallback: if API unavailable or cache miss fails, return empty array (no error displayed)
+- [ ] Cache warmup via Symfony Scheduler (optional: pre-fetch every 6h to avoid cold cache on first visitor)
+
+#### Homepage integration
+- [ ] Replace placeholder grid (6 ✦ squares) with real Instagram photos from `InstagramFeedService`
+- [ ] Display up to 6 latest posts: thumbnail image, link to original Instagram post
+- [ ] Hover effect: slight zoom + overlay with post caption (truncated)
+- [ ] Responsive grid: 2 columns (mobile) → 3 columns (tablet) → 6 columns (desktop)
+- [ ] Fallback: if no posts available, show current placeholder gracefully (no broken layout)
+
+#### Performance
+- [ ] Images served via Behold CDN (no local download/storage)
+- [ ] Lazy loading (`loading="lazy"`) on all Instagram images
+- [ ] No external JavaScript — server-side fetch only, rendered in Twig
+
+### Definition of Done
+- Homepage displays 6 real Instagram posts from `@alma_stella_paris`
+- Click on a post → opens the original Instagram post in a new tab
+- Disconnect internet → cached posts still display for up to 6h
+- Force cache expiry → service re-fetches from Behold API without error
+- Behold API down → homepage renders without Instagram section (no error, no broken layout)
+- No external JS loaded — zero impact on Lighthouse performance score
+- Mobile responsive: 2 → 3 → 6 columns across breakpoints
+
+---
+
+## Milestone 12 — Social publishing
 *Estimated effort: 4-5h*
 
 ### Tasks
@@ -693,7 +735,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 12 — Security audit & hardening
+## Milestone 13 — Security audit & hardening
 *Estimated effort: 3-4h*
 
 > **Every fix requires developer approval before implementation.**
@@ -720,7 +762,7 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 13 — SEO & performance
+## Milestone 14 — SEO & performance
 *Estimated effort: 3h*
 
 ### Tasks
