@@ -80,6 +80,24 @@ class PromotionEngine
     }
 
     /**
+     * Calculate the effective subtotal for a set of products,
+     * accounting for product-level promotions.
+     *
+     * @param Product[] $products
+     */
+    public function getEffectiveSubtotalUsd(array $products): float
+    {
+        $total = 0.0;
+
+        foreach ($products as $product) {
+            $discountedPrice = $this->getDiscountedDisplayPrice($product);
+            $total += $discountedPrice ?? $product->getDisplayPrice();
+        }
+
+        return $total;
+    }
+
+    /**
      * Get the effective "compare at" price for a product.
      * Priority: active promotion > manual compareAtPrice > null.
      * When a promotion applies, the "compare at" is the original display price.
@@ -307,7 +325,8 @@ class PromotionEngine
                 continue;
             }
 
-            $total += $product->getDisplayPrice();
+            $effectivePrice = $this->getDiscountedDisplayPrice($product) ?? $product->getDisplayPrice();
+            $total += $effectivePrice;
         }
 
         return $total;

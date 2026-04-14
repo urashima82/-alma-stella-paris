@@ -108,7 +108,7 @@ class CartController extends AbstractController
             $items[] = $item;
         }
 
-        $subtotalUsd = $this->cartManager->getSubtotalUsd();
+        $subtotalUsd = $this->promotionEngine->getEffectiveSubtotalUsd($products);
         $subtotalConverted = $this->currencyConverter->convert($subtotalUsd, $currency);
 
         return $this->json([

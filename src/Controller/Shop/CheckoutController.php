@@ -119,7 +119,7 @@ class CheckoutController extends AbstractController
         // Reserve all cart products (extends existing reservations on re-entry)
         $this->reserveCartProducts($products);
 
-        $subtotalUsd = $this->cartManager->getSubtotalUsd();
+        $effectiveSubtotalUsd = $this->promotionEngine->getEffectiveSubtotalUsd($products);
         $currency = $request->getSession()->get('_currency', CurrencyConverter::BASE_CURRENCY);
         $locale = $request->getLocale();
 
@@ -132,9 +132,9 @@ class CheckoutController extends AbstractController
                 // Evaluate promotions for the order
                 $couponCodeForOrder = (string) $request->request->get('coupon_code', '');
                 $emailForOrder = $this->getCheckoutEmail($request);
-                $promoResult = $this->promotionEngine->evaluateCartPromotions($products, $subtotalUsd, $couponCodeForOrder, $emailForOrder);
+                $promoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalUsd, $couponCodeForOrder, $emailForOrder);
                 $orderDiscountUsd = $promoResult['totalDiscount'];
-                $orderFinalTotal = \max(0.0, $subtotalUsd - $orderDiscountUsd);
+                $orderFinalTotal = \max(0.0, $effectiveSubtotalUsd - $orderDiscountUsd);
 
                 // Reuse existing Pending order if available, otherwise create new
                 $pendingRef = $request->getSession()->get('_pending_order');
@@ -214,26 +214,41 @@ class CheckoutController extends AbstractController
         // Evaluate coupon code from session
         $couponCode = $request->getSession()->get('_promo_code');
         $customerEmail = $this->getCheckoutEmail($request);
-        $cartPromoResult = $this->promotionEngine->evaluateCartPromotions($products, $subtotalUsd, $couponCode, $customerEmail);
+        $cartPromoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalUsd, $couponCode, $customerEmail);
         $discountAmountUsd = $cartPromoResult['totalDiscount'];
-        $finalTotalUsd = \max(0.0, $subtotalUsd - $discountAmountUsd);
+        $finalTotalUsd = \max(0.0, $effectiveSubtotalUsd - $discountAmountUsd);
 
-        // Build applied coupon info for template
+        // Build applied discounts list for template (with clear labels)
+        $appliedDiscounts = [];
+        foreach ($cartPromoResult['promotions'] as $entry) {
+            /** @var \App\Entity\Promotion $promo */
+            $promo = $entry['promotion'];
+            $discount = (float) $entry['discount'];
+
+            $appliedDiscounts[] = [
+                'label' => $promo->getCode() !== null
+                    ? \sprintf('%s (%s)', $promo->getName(), $promo->getCode())
+                    : $promo->getName(),
+                'amountConverted' => $this->currencyConverter->convert($discount, $currency),
+            ];
+        }
+
+        // Build applied coupon info independently (for coupon input UI state)
         $appliedCoupon = null;
         if ($couponCode !== null && $couponCode !== '') {
-            $promo = $this->promotionEngine->validateCouponCode($couponCode, $subtotalUsd, $customerEmail);
-            if ($promo !== null) {
+            $validatedPromo = $this->promotionEngine->validateCouponCode($couponCode, $effectiveSubtotalUsd, $customerEmail);
+            if ($validatedPromo !== null) {
                 $appliedCoupon = [
                     'code' => $couponCode,
-                    'label' => $promo->getDiscountLabel(),
+                    'label' => $validatedPromo->getDiscountLabel(),
                 ];
             }
         }
 
         return $this->render('shop/checkout/index.html.twig', [
             'items' => $items,
-            'subtotalUsd' => $subtotalUsd,
-            'subtotalConverted' => $this->currencyConverter->convert($subtotalUsd, $currency),
+            'subtotalUsd' => $effectiveSubtotalUsd,
+            'subtotalConverted' => $this->currencyConverter->convert($effectiveSubtotalUsd, $currency),
             'discountAmountUsd' => $discountAmountUsd,
             'discountConverted' => $this->currencyConverter->convert($discountAmountUsd, $currency),
             'finalTotalConverted' => $this->currencyConverter->convert($finalTotalUsd, $currency),
@@ -243,6 +258,7 @@ class CheckoutController extends AbstractController
             'countries' => self::getShippingCountries($request->getLocale()),
             'customerAddresses' => $customerAddresses,
             'reservationSeconds' => $this->reservationManager->getRemainingSeconds(),
+            'appliedDiscounts' => $appliedDiscounts,
             'appliedCoupon' => $appliedCoupon,
         ]);
     }
@@ -810,10 +826,11 @@ class CheckoutController extends AbstractController
             return $this->json(['valid' => false, 'message' => $this->translator->trans('checkout.coupon_invalid')]);
         }
 
-        $subtotalUsd = $this->cartManager->getSubtotalUsd();
+        $products = $this->cartManager->getProducts();
+        $effectiveSubtotalUsd = $this->promotionEngine->getEffectiveSubtotalUsd($products);
         $email = $this->getCheckoutEmail($request);
 
-        $promo = $this->promotionEngine->validateCouponCode($code, $subtotalUsd, $email);
+        $promo = $this->promotionEngine->validateCouponCode($code, $effectiveSubtotalUsd, $email);
 
         if ($promo === null) {
             return $this->json(['valid' => false, 'message' => $this->translator->trans('checkout.coupon_invalid')]);

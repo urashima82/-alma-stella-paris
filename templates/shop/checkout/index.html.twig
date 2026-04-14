@@ -371,14 +371,14 @@
                             <span class="text-alma-text-muted">{{ 'checkout.shipping_label'|trans }}</span>
                             <span class="text-alma-text">{{ 'checkout.shipping_included'|trans }}</span>
                         </div>
-                        {% if discountAmountUsd is defined and discountAmountUsd > 0 %}
+                        {% for discount in appliedDiscounts|default([]) %}
                             <div class="flex justify-between text-sm font-sans">
-                                <span class="text-green-600">{{ 'checkout.discount'|trans }}</span>
+                                <span class="text-green-600">{{ discount.label }}</span>
                                 <span class="text-green-600 font-medium">
-                                    -{{ discountConverted|price_format(currency) }}
+                                    -{{ discount.amountConverted|price_format(currency) }}
                                 </span>
                             </div>
-                        {% endif %}
+                        {% endfor %}
                         <div class="flex justify-between font-sans">
                             <span class="text-alma-text font-medium">{{ 'checkout.total'|trans }}</span>
                             <span class="text-lg font-semibold text-alma-text">
