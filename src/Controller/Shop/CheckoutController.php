@@ -88,6 +88,7 @@ class CheckoutController extends AbstractController
 
         return $this->render('shop/checkout/identify.html.twig', [
             'reservationSeconds' => $this->reservationManager->getRemainingSeconds(),
+            'extensionsLeft' => $this->reservationManager->getExtensionsLeftForCurrentSession(),
         ]);
     }
 
@@ -266,6 +267,7 @@ class CheckoutController extends AbstractController
             'countries' => self::getShippingCountries($request->getLocale()),
             'customerAddresses' => $customerAddresses,
             'reservationSeconds' => $this->reservationManager->getRemainingSeconds(),
+            'extensionsLeft' => $this->reservationManager->getExtensionsLeftForCurrentSession(),
             'appliedDiscounts' => $appliedDiscounts,
             'appliedCoupon' => $appliedCoupon,
         ]);
@@ -324,6 +326,7 @@ class CheckoutController extends AbstractController
             'stripePublicKey' => $this->stripePublicKey,
             'clientSecret' => $paymentIntent->client_secret,
             'reservationSeconds' => $this->reservationManager->getRemainingSeconds(),
+            'extensionsLeft' => $this->reservationManager->getExtensionsLeftForCurrentSession(),
         ]);
     }
 
@@ -872,6 +875,26 @@ class CheckoutController extends AbstractController
         $request->getSession()->remove('_promo_code');
 
         return $this->json(['removed' => true]);
+    }
+
+    #[Route(
+        path: '/checkout/extend-reservation',
+        name: 'shop_checkout_extend_reservation',
+        methods: ['POST'],
+    )]
+    public function extendReservation(): JsonResponse
+    {
+        $result = $this->reservationManager->extendForCurrentSession();
+
+        if ($result === null) {
+            return $this->json(['extended' => false, 'remainingSeconds' => 0, 'extensionsLeft' => 0]);
+        }
+
+        return $this->json([
+            'extended' => true,
+            'remainingSeconds' => $result['remainingSeconds'],
+            'extensionsLeft' => $result['extensionsLeft'],
+        ]);
     }
 
     private function getCheckoutEmail(Request $request): ?string

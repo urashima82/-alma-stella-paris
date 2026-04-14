@@ -11,6 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
 class Reservation
 {
     public const int DEFAULT_DURATION_MINUTES = 15;
+    public const int EXTENSION_DURATION_MINUTES = 10;
+    public const int MAX_EXTENSIONS = 2;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -29,6 +31,9 @@ class Reservation
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
+
+    #[ORM\Column(options: ['default' => 0])]
+    private int $extensionCount = 0;
 
     public function __construct()
     {
@@ -70,6 +75,11 @@ class Reservation
         return $this->createdAt;
     }
 
+    public function getExtensionCount(): int
+    {
+        return $this->extensionCount;
+    }
+
     public function isExpired(): bool
     {
         return $this->expiresAt <= new \DateTimeImmutable();
@@ -78,6 +88,21 @@ class Reservation
     public function isOwnedBy(string $sessionId): bool
     {
         return $this->sessionId === $sessionId;
+    }
+
+    public function canExtend(): bool
+    {
+        return $this->extensionCount < self::MAX_EXTENSIONS;
+    }
+
+    public function extend(): void
+    {
+        if (!$this->canExtend()) {
+            throw new \LogicException(\sprintf('Reservation already extended %d/%d times.', $this->extensionCount, self::MAX_EXTENSIONS));
+        }
+
+        ++$this->extensionCount;
+        $this->expiresAt = new \DateTimeImmutable(\sprintf('+%d minutes', self::EXTENSION_DURATION_MINUTES));
     }
 
     public function getRemainingSeconds(): int

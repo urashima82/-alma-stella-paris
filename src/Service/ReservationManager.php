@@ -36,16 +36,15 @@ final class ReservationManager
         $existing = $this->reservationRepository->findOneBy(['product' => $product]);
 
         if ($existing !== null) {
-            // Already reserved by this session — extend it
-            if ($existing->isOwnedBy($sessionId)) {
-                return true;
-            }
-
-            // Reserved by someone else — check expiry (lazy check)
+            // Expired reservation — remove it regardless of owner
             if ($existing->isExpired()) {
                 $this->entityManager->remove($existing);
                 $this->entityManager->flush();
+            } elseif ($existing->isOwnedBy($sessionId)) {
+                // Active reservation owned by this session — keep it
+                return true;
             } else {
+                // Active reservation owned by someone else
                 return false;
             }
         }
@@ -113,6 +112,65 @@ final class ReservationManager
         }
 
         return $reservation->isOwnedBy($this->getSessionId());
+    }
+
+    /**
+     * Extend all active reservations for the current session.
+     * Returns the new remaining seconds, or null if no extendable reservations.
+     *
+     * @return array{remainingSeconds: int, extensionsLeft: int}|null
+     */
+    public function extendForCurrentSession(): ?array
+    {
+        $sessionId = $this->getSessionId();
+        $reservations = $this->reservationRepository->findActiveBySessionId($sessionId);
+
+        if ($reservations === []) {
+            return null;
+        }
+
+        $extended = false;
+        foreach ($reservations as $reservation) {
+            if ($reservation->canExtend()) {
+                $reservation->extend();
+                $extended = true;
+            }
+        }
+
+        if (!$extended) {
+            return null;
+        }
+
+        $this->entityManager->flush();
+
+        $this->logger->info('Extended reservations for session {session}.', [
+            'session' => \substr($sessionId, 0, 8).'...',
+        ]);
+
+        return [
+            'remainingSeconds' => $this->getRemainingSeconds(),
+            'extensionsLeft' => $this->getExtensionsLeftForCurrentSession(),
+        ];
+    }
+
+    /**
+     * Get remaining extensions for the current session (minimum across all reservations).
+     */
+    public function getExtensionsLeftForCurrentSession(): int
+    {
+        $reservations = $this->reservationRepository->findActiveBySessionId($this->getSessionId());
+
+        if ($reservations === []) {
+            return 0;
+        }
+
+        $minLeft = Reservation::MAX_EXTENSIONS;
+        foreach ($reservations as $reservation) {
+            $left = Reservation::MAX_EXTENSIONS - $reservation->getExtensionCount();
+            $minLeft = \min($minLeft, $left);
+        }
+
+        return $minLeft;
     }
 
     /**

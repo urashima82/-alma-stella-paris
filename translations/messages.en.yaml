@@ -250,6 +250,8 @@ tracking:
 reservation:
     timer_label: "Your items are reserved for"
     expired_notice: "Your reservation has expired. Items have been removed from your cart."
+    extended_notice: "Your reservation has been extended."
+    extend_button: "I need more time"
     back_to_shop: "Back to shop"
 
 # ── Currency ──

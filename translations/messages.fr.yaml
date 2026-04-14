@@ -250,6 +250,8 @@ tracking:
 reservation:
     timer_label: "Vos articles sont réservés pendant"
     expired_notice: "Votre réservation a expiré. Les articles ont été retirés de votre panier."
+    extended_notice: "Votre réservation a été prolongée."
+    extend_button: "J'ai besoin de plus de temps"
     back_to_shop: "Retour à la boutique"
 
 # ── Currency ──
