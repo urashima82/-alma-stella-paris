@@ -1,5 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 
+function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
 /**
  * Reservation countdown timer with automatic extension on user activity.
  *
@@ -134,6 +138,7 @@ export default class extends Controller {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken(),
                 },
             });
 

@@ -1,5 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 
+function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
 export default class extends Controller {
     static targets = ['emailInput', 'emailStep', 'loginStep', 'choiceStep', 'loginEmail', 'guestEmail', 'errorMessage', 'registerLink'];
     static values = { checkUrl: String };
@@ -17,7 +21,7 @@ export default class extends Controller {
         try {
             const response = await fetch(this.checkUrlValue, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken() },
                 body: JSON.stringify({ email }),
             });
 

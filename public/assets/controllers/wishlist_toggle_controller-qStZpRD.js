@@ -1,5 +1,9 @@
 import { Controller } from '@hotwired/stimulus';
 
+function csrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.content || '';
+}
+
 export default class extends Controller {
     static values = {
         url: String,
@@ -24,6 +28,7 @@ export default class extends Controller {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': csrfToken(),
                 },
             });
 
