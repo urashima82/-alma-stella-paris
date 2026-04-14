@@ -460,7 +460,46 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 9 — Social publishing
+## Milestone 9 — Automated emails & customer testimonials
+*Estimated effort: 2-3h*
+
+### Tasks
+- [ ] `Testimonial` entity (email, rating 1-5, text, firstName, lastNameInitial, city, status)
+- [ ] Post-purchase testimonial request email (J+14 via Symfony Scheduler)
+  - Deduplicate by email: if a `Testimonial` already exists for this email → skip
+  - Email sourced from the `Order` (works for guests and logged-in customers)
+- [ ] Public testimonial submission form (accessible via unique token in email)
+- [ ] Testimonial moderation in EasyAdmin (pending → approved / rejected)
+- [ ] Display latest approved testimonials on homepage (section with "Voir tous les témoignages" link)
+- [ ] Dedicated `/testimonials` page (all approved testimonials)
+- [ ] Footer link to `/testimonials`
+- [ ] DataFixtures: sample testimonials (approved) for development display
+- [ ] Schema.org `AggregateRating` from approved testimonials
+
+> **Testimonials are brand-level, not product-level.** Since every piece is unique
+> and sold once, product reviews make no sense. Testimonials capture the overall
+> Alma Stella experience (quality, packaging, delivery, etc.).
+>
+> **No newsletter, no Brevo.** Communication strategy relies on social media
+> (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
+> Symfony Mailer + SMTP.
+>
+> **No abandoned cart emails.** The reservation system already handles cart
+> retention and item release — abandoned cart reminders would conflict with this logic.
+
+### Definition of Done
+- J+14 after order: customer receives testimonial request email (only if no existing testimonial for that email)
+- Submit a testimonial via email link → testimonial saved as pending
+- Admin approves → testimonial appears on homepage and `/testimonials` page
+- Homepage shows latest testimonials with link to full listing
+- Footer contains link to `/testimonials`
+- Fixtures load sample testimonials visible on homepage after `doctrine:fixtures:load`
+- Returning customer who already left a testimonial is never re-solicited
+- Scheduler cron commands run correctly via `php bin/console messenger:consume`
+
+---
+
+## Milestone 10 — Social publishing
 *Estimated effort: 4-5h*
 
 ### Tasks
@@ -480,25 +519,6 @@ Shall I proceed to Milestone Y?"
 - TikTok Shop: product appears in the TikTok Seller catalog
 - Instagram: deep link opens the Instagram app with pre-filled caption
 - Publish history visible on product detail page in EasyAdmin
-
----
-
-## Milestone 10 — Automated emails & reviews
-*Estimated effort: 2-3h*
-
-### Tasks
-- [ ] Post-purchase follow-up email (J+14 via Symfony Scheduler)
-
-> **No newsletter, no Brevo.** Communication strategy relies on social media
-> (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
-> Symfony Mailer + SMTP.
->
-> **No abandoned cart emails.** The reservation system already handles cart
-> retention and item release — abandoned cart reminders would conflict with this logic.
-
-### Definition of Done
-- Submit a review via post-purchase email link → review appears on product page
-- Scheduler cron commands run correctly via `php bin/console messenger:consume`
 
 ---
 
@@ -584,7 +604,46 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 10 — Social publishing
+## Milestone 10 — Automated emails & customer testimonials
+*Estimated effort: 2-3h*
+
+### Tasks
+- [ ] `Testimonial` entity (email, rating 1-5, text, firstName, lastNameInitial, city, status)
+- [ ] Post-purchase testimonial request email (J+14 via Symfony Scheduler)
+  - Deduplicate by email: if a `Testimonial` already exists for this email → skip
+  - Email sourced from the `Order` (works for guests and logged-in customers)
+- [ ] Public testimonial submission form (accessible via unique token in email)
+- [ ] Testimonial moderation in EasyAdmin (pending → approved / rejected)
+- [ ] Display latest approved testimonials on homepage (section with "Voir tous les témoignages" link)
+- [ ] Dedicated `/testimonials` page (all approved testimonials)
+- [ ] Footer link to `/testimonials`
+- [ ] DataFixtures: sample testimonials (approved) for development display
+- [ ] Schema.org `AggregateRating` from approved testimonials
+
+> **Testimonials are brand-level, not product-level.** Since every piece is unique
+> and sold once, product reviews make no sense. Testimonials capture the overall
+> Alma Stella experience (quality, packaging, delivery, etc.).
+>
+> **No newsletter, no Brevo.** Communication strategy relies on social media
+> (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
+> Symfony Mailer + SMTP.
+>
+> **No abandoned cart emails.** The reservation system already handles cart
+> retention and item release — abandoned cart reminders would conflict with this logic.
+
+### Definition of Done
+- J+14 after order: customer receives testimonial request email (only if no existing testimonial for that email)
+- Submit a testimonial via email link → testimonial saved as pending
+- Admin approves → testimonial appears on homepage and `/testimonials` page
+- Homepage shows latest testimonials with link to full listing
+- Footer contains link to `/testimonials`
+- Fixtures load sample testimonials visible on homepage after `doctrine:fixtures:load`
+- Returning customer who already left a testimonial is never re-solicited
+- Scheduler cron commands run correctly via `php bin/console messenger:consume`
+
+---
+
+## Milestone 11 — Social publishing
 *Estimated effort: 4-5h*
 
 ### Tasks
@@ -604,25 +663,6 @@ Shall I proceed to Milestone Y?"
 - TikTok Shop: product appears in the TikTok Seller catalog
 - Instagram: deep link opens the Instagram app with pre-filled caption
 - Publish history visible on product detail page in EasyAdmin
-
----
-
-## Milestone 11 — Automated emails & reviews
-*Estimated effort: 2-3h*
-
-### Tasks
-- [ ] Post-purchase follow-up email (J+14 via Symfony Scheduler)
-
-> **No newsletter, no Brevo.** Communication strategy relies on social media
-> (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
-> Symfony Mailer + SMTP.
->
-> **No abandoned cart emails.** The reservation system already handles cart
-> retention and item release — abandoned cart reminders would conflict with this logic.
-
-### Definition of Done
-- Submit a review via post-purchase email link → review appears on product page
-- Scheduler cron commands run correctly via `php bin/console messenger:consume`
 
 ---
 
