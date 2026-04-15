@@ -875,7 +875,7 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 - [x] Recreate DDEV environment: `ddev delete --omit-snapshot && ddev start`
 - [x] Run `ddev exec php bin/console doctrine:migrations:migrate`
 - [x] Run `ddev exec php bin/console doctrine:fixtures:load`
-- [ ] Smoke test all pages in browser
+- [x] Smoke test all pages in browser
 
 ### Definition of Done
 - `CurrencyConverter::BASE_CURRENCY` is `'EUR'`
