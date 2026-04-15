@@ -52,6 +52,16 @@ class TestimonialRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function countPending(): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->where('t.status = :status')
+            ->setParameter('status', TestimonialStatus::Pending)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /**
      * @return array{averageRating: float, totalCount: int}
      */

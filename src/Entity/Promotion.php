@@ -487,4 +487,35 @@ class Promotion
             DiscountType::FixedAmount => \sprintf('-$%s', \number_format($this->getDiscountValue(), 2)),
         };
     }
+
+    public function getExpiryBadge(): string
+    {
+        if ($this->endsAt === null) {
+            return '';
+        }
+
+        $now = new \DateTimeImmutable();
+        if ($this->endsAt < $now) {
+            return '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:600;">Expirée</span>';
+        }
+
+        $daysLeft = (int) $now->diff($this->endsAt)->days;
+        if ($daysLeft <= 7) {
+            return \sprintf(
+                '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:600;">Expire dans %dj</span>',
+                $daysLeft,
+            );
+        }
+
+        return '';
+    }
+
+    public function getUsageProgress(): string
+    {
+        if ($this->maxUsages === null) {
+            return (string) $this->usageCount;
+        }
+
+        return \sprintf('%d / %d', $this->usageCount, $this->maxUsages);
+    }
 }

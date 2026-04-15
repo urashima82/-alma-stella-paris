@@ -44,6 +44,15 @@
             font-size: 0.85rem;
             color: var(--text-muted, #6c757d);
         }
+        .stat-card .stat-trend {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.125rem;
+        }
+        .stat-trend--up { color: #22c55e; }
+        .stat-trend--down { color: #ef4444; }
+        .stat-trend--flat { color: var(--text-muted, #6c757d); }
+
         .stat-icon-blue { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
         .stat-icon-green { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
         .stat-icon-amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
@@ -59,8 +68,189 @@
             margin: 1.5rem 0 0.5rem;
             font-weight: 600;
         }
+
+        /* ── Action items ── */
+        .action-items {
+            background: var(--body-bg, #fff);
+            border: 1px solid var(--border-color, #dee2e6);
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .action-items__title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .action-items__title .badge-count {
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        .action-items__list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .action-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid var(--border-color, #dee2e6);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .action-item:hover {
+            background: var(--color-primary-50, #fef3c7);
+            border-color: var(--color-primary-200, #C9A84C);
+            color: inherit;
+            text-decoration: none;
+        }
+        .action-item__count {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .action-item--warning .action-item__count { color: #f59e0b; }
+        .action-item--info .action-item__count { color: #3b82f6; }
+        .action-item--purple .action-item__count { color: #8b5cf6; }
+        .action-item--danger .action-item__count { color: #ef4444; }
+
+        /* ── Latest orders table ── */
+        .latest-orders {
+            background: var(--body-bg, #fff);
+            border: 1px solid var(--border-color, #dee2e6);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .latest-orders__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color, #dee2e6);
+        }
+        .latest-orders__title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        .latest-orders__link {
+            font-size: 0.8rem;
+            color: #C9A84C;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .latest-orders__link:hover { text-decoration: underline; color: #b8943f; }
+        .latest-orders table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .latest-orders th {
+            text-align: left;
+            padding: 0.6rem 1rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted, #6c757d);
+            border-bottom: 1px solid var(--border-color, #dee2e6);
+        }
+        .latest-orders td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid var(--border-color, #f0f0f0);
+        }
+        .latest-orders tr:last-child td { border-bottom: none; }
+
+        /* ── Expiring alert ── */
+        .expiring-alert {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.85rem;
+            color: #92400e;
+            margin-top: 0.75rem;
+        }
+        .ea-dark-scheme .expiring-alert { color: #fbbf24; background: rgba(245, 158, 11, 0.1); }
+
+        /* ── All-clear message ── */
+        .all-clear {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.85rem;
+            color: #15803d;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 8px;
+        }
+        .ea-dark-scheme .all-clear { color: #34d399; background: rgba(34, 197, 94, 0.1); }
     </style>
 
+    {# ── Action items ── #}
+    <p class="dashboard-section-title">À traiter</p>
+    {% if action_items > 0 %}
+        <div class="action-items">
+            <div class="action-items__title">
+                <i class="fa fa-bell" style="color: #f59e0b;"></i>
+                Actions en attente
+                <span class="badge-count">{{ action_items }}</span>
+            </div>
+            <div class="action-items__list">
+                {% if processing_orders > 0 %}
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\OrderCrudController').setAction('index').set('filters[status][comparison]', '=').set('filters[status][value]', 'processing') }}" class="action-item action-item--warning">
+                        <span class="action-item__count">{{ processing_orders }}</span>
+                        <span>commande{{ processing_orders > 1 ? 's' : '' }} en préparation</span>
+                        <i class="fa fa-arrow-right" style="font-size:0.7rem;opacity:0.5;"></i>
+                    </a>
+                {% endif %}
+                {% if unread_messages > 0 %}
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\ContactMessageCrudController').setAction('index').set('filters[isRead]', '0') }}" class="action-item action-item--info">
+                        <span class="action-item__count">{{ unread_messages }}</span>
+                        <span>message{{ unread_messages > 1 ? 's' : '' }} non lu{{ unread_messages > 1 ? 's' : '' }}</span>
+                        <i class="fa fa-arrow-right" style="font-size:0.7rem;opacity:0.5;"></i>
+                    </a>
+                {% endif %}
+                {% if pending_testimonials > 0 %}
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\TestimonialCrudController').setAction('index').set('filters[status][comparison]', '=').set('filters[status][value]', 'pending') }}" class="action-item action-item--purple">
+                        <span class="action-item__count">{{ pending_testimonials }}</span>
+                        <span>témoignage{{ pending_testimonials > 1 ? 's' : '' }} à modérer</span>
+                        <i class="fa fa-arrow-right" style="font-size:0.7rem;opacity:0.5;"></i>
+                    </a>
+                {% endif %}
+                {% if shipped_without_tracking > 0 %}
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\OrderCrudController').setAction('index').set('filters[status][comparison]', '=').set('filters[status][value]', 'shipped') }}" class="action-item action-item--danger">
+                        <span class="action-item__count">{{ shipped_without_tracking }}</span>
+                        <span>expédié{{ shipped_without_tracking > 1 ? 'es' : 'e' }} sans suivi</span>
+                        <i class="fa fa-arrow-right" style="font-size:0.7rem;opacity:0.5;"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="all-clear">
+            <i class="fa fa-check-circle"></i>
+            Tout est à jour — aucune action en attente.
+        </div>
+    {% endif %}
+
+    {# ── Stats: Commandes ── #}
     <p class="dashboard-section-title">Commandes</p>
     <div class="dashboard-grid">
         <div class="stat-card">
@@ -69,6 +259,13 @@
             </div>
             <div class="stat-value">{{ orders_today }}</div>
             <div class="stat-label">Commandes aujourd'hui</div>
+            {% if orders_same_day_last_week > 0 %}
+                {% set orders_diff = orders_today - orders_same_day_last_week %}
+                <div class="stat-trend {{ orders_diff > 0 ? 'stat-trend--up' : (orders_diff < 0 ? 'stat-trend--down' : 'stat-trend--flat') }}">
+                    {{ orders_diff > 0 ? '↑' : (orders_diff < 0 ? '↓' : '→') }}
+                    vs {{ orders_same_day_last_week }} même jour sem. dernière
+                </div>
+            {% endif %}
         </div>
 
         <div class="stat-card">
@@ -77,6 +274,13 @@
             </div>
             <div class="stat-value">${{ revenue_week|number_format(2, '.', ',') }}</div>
             <div class="stat-label">Revenu cette semaine</div>
+            {% if revenue_last_week > 0 %}
+                {% set rev_pct = ((revenue_week - revenue_last_week) / revenue_last_week * 100)|round(0) %}
+                <div class="stat-trend {{ rev_pct > 0 ? 'stat-trend--up' : (rev_pct < 0 ? 'stat-trend--down' : 'stat-trend--flat') }}">
+                    {{ rev_pct > 0 ? '↑' : (rev_pct < 0 ? '↓' : '→') }}
+                    {{ rev_pct > 0 ? '+' : '' }}{{ rev_pct }}% vs sem. précédente
+                </div>
+            {% endif %}
         </div>
 
         <div class="stat-card">
@@ -96,6 +300,7 @@
         </div>
     </div>
 
+    {# ── Stats: Catalogue ── #}
     <p class="dashboard-section-title">Catalogue</p>
     <div class="dashboard-grid">
         <div class="stat-card">
@@ -115,7 +320,51 @@
         </div>
     </div>
 
-    <div style="padding: 2rem 0 1rem; text-align: center;">
-        <p style="font-style: italic; color: var(--text-muted, #6c757d);">"Porter le monde."</p>
+    {% if expiring_sold > 0 %}
+        <div class="expiring-alert">
+            <i class="fa fa-exclamation-triangle"></i>
+            <span><strong>{{ expiring_sold }}</strong> pièce{{ expiring_sold > 1 ? 's' : '' }} vendue{{ expiring_sold > 1 ? 's' : '' }} va{{ expiring_sold > 1 ? 'nt' : '' }} disparaître du catalogue dans les 3 prochains jours.</span>
+        </div>
+    {% endif %}
+
+    {# ── Latest orders ── #}
+    <p class="dashboard-section-title">Dernières commandes</p>
+    <div class="latest-orders">
+        <div class="latest-orders__header">
+            <h3 class="latest-orders__title">5 dernières commandes</h3>
+            <a href="{{ ea_url().setController('App\\Controller\\Admin\\OrderCrudController').setAction('index') }}" class="latest-orders__link">
+                Voir toutes →
+            </a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Réf.</th>
+                    <th>Statut</th>
+                    <th>Client</th>
+                    <th>Total</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in latest_orders %}
+                    <tr>
+                        <td>
+                            <a href="{{ ea_url().setController('App\\Controller\\Admin\\OrderCrudController').setAction('edit').setEntityId(order.id) }}" style="color: #C9A84C; text-decoration: none; font-weight: 500;">
+                                {{ order.reference }}
+                            </a>
+                        </td>
+                        <td>{{ order.statusLabel|raw }}</td>
+                        <td>{{ order.customerName }}</td>
+                        <td>${{ order.totalUsd|number_format(2, '.', ',') }}</td>
+                        <td>{{ order.createdAt|date('d/m/Y H:i') }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center;color:var(--text-muted);padding:1.5rem;">Aucune commande pour le moment.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

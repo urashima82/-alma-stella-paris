@@ -23,6 +23,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
+use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 
 /** @extends AbstractCrudController<Order> */
 class OrderCrudController extends AbstractCrudController
@@ -60,7 +61,8 @@ class OrderCrudController extends AbstractCrudController
                 'Livrée' => OrderStatus::Delivered->value,
                 'Annulée' => OrderStatus::Cancelled->value,
             ]))
-            ->add(DateTimeFilter::new('createdAt', 'Date de commande'));
+            ->add(DateTimeFilter::new('createdAt', 'Date de commande'))
+            ->add(EntityFilter::new('customer', 'Client'));
     }
 
     public function configureFields(string $pageName): iterable
@@ -79,7 +81,25 @@ class OrderCrudController extends AbstractCrudController
     {
         yield TextField::new('reference', 'Réf.');
         yield TextField::new('statusLabel', 'Statut')
-            ->renderAsHtml();
+            ->renderAsHtml()
+            ->formatValue(static function (string $value, Order $entity): string {
+                $html = $value;
+                if ($entity->getStatus() === OrderStatus::Pending) {
+                    $hours = (new \DateTimeImmutable())->getTimestamp() - $entity->getCreatedAt()->getTimestamp();
+                    $hours = (int) ($hours / 3600);
+                    if ($hours >= 24) {
+                        $days = (int) ($hours / 24);
+                        $html .= \sprintf(
+                            ' <span style="color:#ef4444;font-size:0.7rem;font-weight:600;" title="En attente depuis %d jour%s">⚠ %dj</span>',
+                            $days,
+                            $days > 1 ? 's' : '',
+                            $days,
+                        );
+                    }
+                }
+
+                return $html;
+            });
         yield TextField::new('customerName', 'Client');
         yield EmailField::new('customerEmail', 'Email');
         yield IntegerField::new('itemCount', 'Articles')

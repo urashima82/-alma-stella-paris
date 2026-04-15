@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Enum\OrderStatus;
+use App\Repository\ContactMessageRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
+use App\Repository\SiteSettingsRepository;
+use App\Repository\TestimonialRepository;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -25,18 +28,45 @@ class DashboardController extends AbstractDashboardController
     public function __construct(
         private readonly OrderRepository $orderRepository,
         private readonly ProductRepository $productRepository,
+        private readonly ContactMessageRepository $contactMessageRepository,
+        private readonly TestimonialRepository $testimonialRepository,
+        private readonly SiteSettingsRepository $siteSettingsRepository,
     ) {
     }
 
     public function index(): Response
     {
+        $revenueThisWeek = $this->orderRepository->revenueThisWeek();
+        $revenueLastWeek = $this->orderRepository->revenueLastWeek();
+        $ordersToday = $this->orderRepository->countTodayOrders();
+        $ordersSameDayLastWeek = $this->orderRepository->countOrdersSameDayLastWeek();
+        $pendingOrders = $this->orderRepository->countByStatus(OrderStatus::Pending);
+        $processingOrders = $this->orderRepository->countByStatus(OrderStatus::Processing);
+        $unreadMessages = $this->contactMessageRepository->countUnread();
+        $pendingTestimonials = $this->testimonialRepository->countPending();
+        $shippedWithoutTracking = $this->orderRepository->countShippedWithoutTracking();
+        $expiringSold = $this->productRepository->countExpiringSoldSoon();
+
+        $actionItems = $processingOrders + $unreadMessages + $pendingTestimonials + $shippedWithoutTracking;
+
+        $settings = $this->siteSettingsRepository->findOneBy([]);
+
         return $this->render('admin/dashboard.html.twig', [
-            'orders_today' => $this->orderRepository->countTodayOrders(),
-            'revenue_week' => $this->orderRepository->revenueThisWeek(),
-            'pending_orders' => $this->orderRepository->countByStatus(OrderStatus::Pending),
-            'processing_orders' => $this->orderRepository->countByStatus(OrderStatus::Processing),
+            'orders_today' => $ordersToday,
+            'orders_same_day_last_week' => $ordersSameDayLastWeek,
+            'revenue_week' => $revenueThisWeek,
+            'revenue_last_week' => $revenueLastWeek,
+            'pending_orders' => $pendingOrders,
+            'processing_orders' => $processingOrders,
             'products_available' => $this->productRepository->countAvailable(),
             'recently_sold' => $this->productRepository->countRecentlySold(),
+            'unread_messages' => $unreadMessages,
+            'pending_testimonials' => $pendingTestimonials,
+            'shipped_without_tracking' => $shippedWithoutTracking,
+            'expiring_sold' => $expiringSold,
+            'action_items' => $actionItems,
+            'latest_orders' => $this->orderRepository->findLatest(5),
+            'is_maintenance' => $settings?->isMaintenanceMode() ?? false,
         ]);
     }
 
@@ -74,18 +104,37 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
+        $unreadMessages = $this->contactMessageRepository->countUnread();
+        $pendingTestimonials = $this->testimonialRepository->countPending();
+        $processingOrders = $this->orderRepository->countByStatus(OrderStatus::Processing);
+
+        $messagesLabel = 'Messages de contact';
+        if ($unreadMessages > 0) {
+            $messagesLabel .= \sprintf(' (%d)', $unreadMessages);
+        }
+
+        $testimonialsLabel = 'Témoignages';
+        if ($pendingTestimonials > 0) {
+            $testimonialsLabel .= \sprintf(' (%d)', $pendingTestimonials);
+        }
+
+        $ordersLabel = 'Commandes';
+        if ($processingOrders > 0) {
+            $ordersLabel .= \sprintf(' (%d)', $processingOrders);
+        }
+
         yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-home');
         yield MenuItem::section('Catalogue');
         yield MenuItem::linkTo(ProductCrudController::class, 'Produits', 'fa fa-gem');
         yield MenuItem::linkTo(ProductCategoryCrudController::class, 'Catégories', 'fa fa-tags');
         yield MenuItem::linkTo(ShippingSettingsCrudController::class, 'Frais de port', 'fa fa-truck');
         yield MenuItem::section('Ventes');
-        yield MenuItem::linkTo(OrderCrudController::class, 'Commandes', 'fa fa-shopping-bag');
+        yield MenuItem::linkTo(OrderCrudController::class, $ordersLabel, 'fa fa-shopping-bag');
         yield MenuItem::linkTo(CustomerCrudController::class, 'Clients', 'fa fa-user');
         yield MenuItem::linkTo(PromotionCrudController::class, 'Promotions', 'fa fa-percent');
         yield MenuItem::section('Communication');
-        yield MenuItem::linkTo(ContactMessageCrudController::class, 'Messages de contact', 'fa fa-envelope');
-        yield MenuItem::linkTo(TestimonialCrudController::class, 'Témoignages', 'fa fa-star');
+        yield MenuItem::linkTo(ContactMessageCrudController::class, $messagesLabel, 'fa fa-envelope');
+        yield MenuItem::linkTo(TestimonialCrudController::class, $testimonialsLabel, 'fa fa-star');
         yield MenuItem::section('Réglages');
         yield MenuItem::linkTo(SiteSettingsCrudController::class, 'Paramètres du site', 'fa fa-cog');
         yield MenuItem::linkTo(AdminCrudController::class, 'Administrateurs', 'fa fa-users');

@@ -1,0 +1,44 @@
+{% extends '@EasyAdmin/crud/detail.html.twig' %}
+
+{% block main %}
+    {{ parent() }}
+
+    {% set customer = entity.instance %}
+    {% set orders = customer.orders %}
+
+    <div class="customer-orders-panel" style="margin-top: 2rem;">
+        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fa fa-shopping-bag" style="color: #C9A84C;"></i>
+            Commandes ({{ orders|length }})
+        </h3>
+
+        {% if orders|length > 0 %}
+            <table class="table datagrid" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #6c757d); border-bottom: 2px solid var(--border-color, #dee2e6);">Réf.</th>
+                        <th style="text-align: left; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #6c757d); border-bottom: 2px solid var(--border-color, #dee2e6);">Statut</th>
+                        <th style="text-align: left; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #6c757d); border-bottom: 2px solid var(--border-color, #dee2e6);">Total</th>
+                        <th style="text-align: left; padding: 0.5rem 0.75rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #6c757d); border-bottom: 2px solid var(--border-color, #dee2e6);">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color, #f0f0f0);">
+                                <a href="{{ ea_url().setController('App\\Controller\\Admin\\OrderCrudController').setAction('edit').setEntityId(order.id) }}" style="color: #C9A84C; text-decoration: none; font-weight: 500;">
+                                    {{ order.reference }}
+                                </a>
+                            </td>
+                            <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color, #f0f0f0);">{{ order.statusLabel|raw }}</td>
+                            <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color, #f0f0f0);">${{ order.totalUsd|number_format(2, '.', ',') }}</td>
+                            <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color, #f0f0f0);">{{ order.createdAt|date('d/m/Y H:i') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: var(--text-muted, #6c757d); font-style: italic;">Aucune commande pour ce client.</p>
+        {% endif %}
+    </div>
+{% endblock %}

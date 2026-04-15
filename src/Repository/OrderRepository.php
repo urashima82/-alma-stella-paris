@@ -148,4 +148,64 @@ class OrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
     }
+
+    public function revenueLastWeek(): float
+    {
+        $thisMonday = new \DateTimeImmutable('monday this week');
+        $lastMonday = $thisMonday->modify('-7 days');
+
+        $result = $this->createQueryBuilder('o')
+            ->select('SUM(o.totalUsd)')
+            ->where('o.createdAt >= :start')
+            ->andWhere('o.createdAt < :end')
+            ->andWhere('o.status != :cancelled')
+            ->setParameter('start', $lastMonday)
+            ->setParameter('end', $thisMonday)
+            ->setParameter('cancelled', OrderStatus::Cancelled)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (float) ($result ?? 0);
+    }
+
+    public function countOrdersSameDayLastWeek(): int
+    {
+        $lastWeekSameDay = new \DateTimeImmutable('-7 days midnight');
+        $lastWeekSameDayEnd = $lastWeekSameDay->modify('+1 day');
+
+        return (int) $this->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->where('o.createdAt >= :start')
+            ->andWhere('o.createdAt < :end')
+            ->andWhere('o.status != :cancelled')
+            ->setParameter('start', $lastWeekSameDay)
+            ->setParameter('end', $lastWeekSameDayEnd)
+            ->setParameter('cancelled', OrderStatus::Cancelled)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countShippedWithoutTracking(): int
+    {
+        return (int) $this->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->where('o.status = :status')
+            ->andWhere('o.trackingNumber IS NULL OR o.trackingNumber = :empty')
+            ->setParameter('status', OrderStatus::Shipped)
+            ->setParameter('empty', '')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return Order[]
+     */
+    public function findLatest(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('o')
+            ->orderBy('o.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

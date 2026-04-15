@@ -140,3 +140,29 @@ body {
 
 .ea-dark-scheme .admin-toast--info .admin-toast__icon { color: #60a5fa; }
 .ea-dark-scheme .admin-toast--info .admin-toast__progress { background: #60a5fa; }
+
+/* ── Maintenance banner ── */
+.admin-maintenance-banner {
+    background: #dc2626;
+    color: #fff;
+    padding: 0.6rem 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    position: relative;
+    z-index: 1000;
+}
+
+.admin-maintenance-banner__link {
+    color: #fff;
+    text-decoration: underline;
+    font-weight: 700;
+    margin-left: 0.5rem;
+}
+
+.admin-maintenance-banner__link:hover {
+    color: #fecaca;
+}

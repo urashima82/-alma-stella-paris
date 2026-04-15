@@ -60,12 +60,14 @@ class PromotionCrudController extends AbstractCrudController
             yield IdField::new('id');
             yield BooleanField::new('isActive', 'Active');
             yield TextField::new('name', 'Nom (EN)');
-            yield TextField::new('nameFr', 'Nom (FR)');
             yield TextField::new('code', 'Code');
             yield TextField::new('typeLabel', 'Type');
             yield TextField::new('discountLabel', 'Réduction');
-            yield IntegerField::new('usageCount', 'Utilisations');
-            yield DateTimeField::new('endsAt', 'Fin');
+            yield TextField::new('usageProgress', 'Utilisations');
+            yield DateTimeField::new('endsAt', 'Fin')
+                ->setFormat('dd/MM/yyyy');
+            yield TextField::new('expiryBadge', '')
+                ->renderAsHtml();
 
             return;
         }

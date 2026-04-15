@@ -36,5 +36,8 @@ class ProductCategoryCrudController extends AbstractCrudController
         yield SlugField::new('slug')->setTargetFieldName('name');
         yield SlugField::new('slugFr', 'Slug (FR)')->setTargetFieldName('nameFr');
         yield IntegerField::new('position', 'Ordre');
+        yield IntegerField::new('publishedProductCount', 'Produits publiés')
+            ->hideOnForm()
+            ->setTemplatePath('admin/field/order_count.html.twig');
     }
 }

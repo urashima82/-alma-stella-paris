@@ -101,4 +101,32 @@ class ProductRepository extends ServiceEntityRepository
 
         return $qb;
     }
+
+    public function countExpiringSoldSoon(int $expiryDays = 14, int $warningDays = 3): int
+    {
+        $expiryThreshold = new \DateTimeImmutable(\sprintf('-%d days', $expiryDays));
+        $warningThreshold = new \DateTimeImmutable(\sprintf('-%d days', $expiryDays - $warningDays));
+
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->where('p.isSoldOut = true')
+            ->andWhere('p.isPublished = true')
+            ->andWhere('p.soldAt > :expiryThreshold')
+            ->andWhere('p.soldAt <= :warningThreshold')
+            ->setParameter('expiryThreshold', $expiryThreshold)
+            ->setParameter('warningThreshold', $warningThreshold)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function countPublishedByCategory(int $categoryId): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->where('p.isPublished = true')
+            ->andWhere('p.category = :category')
+            ->setParameter('category', $categoryId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

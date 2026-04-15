@@ -7,6 +7,8 @@ namespace App\Controller\Admin;
 use App\Admin\Filter\AvailableInFilter;
 use App\Entity\Product;
 use App\Enum\ShippingTier;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
@@ -37,7 +39,19 @@ class ProductCrudController extends AbstractCrudController
         return $crud
             ->setEntityLabelInSingular('Produit')
             ->setEntityLabelInPlural('Produits')
+            ->setSearchFields(['name', 'nameFr', 'slug', 'description', 'descriptionFr'])
             ->setDefaultSort(['createdAt' => 'DESC']);
+    }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $viewOnSite = Action::new('viewOnSite', 'Voir sur le site', 'fa fa-external-link-alt')
+            ->linkToUrl(static fn (Product $product): string => '/en/product/'.$product->getSlug())
+            ->setHtmlAttributes(['target' => '_blank']);
+
+        return $actions
+            ->add(Crud::PAGE_INDEX, $viewOnSite)
+            ->add(Crud::PAGE_EDIT, $viewOnSite);
     }
 
     public function configureFilters(Filters $filters): Filters

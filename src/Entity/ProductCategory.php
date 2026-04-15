@@ -125,4 +125,11 @@ class ProductCategory
     {
         return $this->products;
     }
+
+    public function getPublishedProductCount(): int
+    {
+        return $this->products->filter(
+            static fn (Product $p): bool => $p->isPublished(),
+        )->count();
+    }
 }

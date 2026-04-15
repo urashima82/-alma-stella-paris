@@ -215,6 +215,43 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->orders->count();
     }
 
+    public function getTotalSpentUsd(): float
+    {
+        $total = 0.0;
+        foreach ($this->orders as $order) {
+            if ($order->getStatus() !== \App\Enum\OrderStatus::Cancelled) {
+                $total += (float) $order->getTotalUsd();
+            }
+        }
+
+        return $total;
+    }
+
+    public function getLastOrderDate(): ?\DateTimeImmutable
+    {
+        $latest = null;
+        foreach ($this->orders as $order) {
+            if ($latest === null || $order->getCreatedAt() > $latest) {
+                $latest = $order->getCreatedAt();
+            }
+        }
+
+        return $latest;
+    }
+
+    public function getLoyaltyBadge(): string
+    {
+        $count = $this->getOrderCount();
+        if ($count >= 3) {
+            return '<span style="background:#C9A84C;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">VIP</span>';
+        }
+        if ($count >= 2) {
+            return '<span style="background:#8b5cf6;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">Fidèle</span>';
+        }
+
+        return '';
+    }
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
