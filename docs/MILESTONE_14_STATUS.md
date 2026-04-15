@@ -18,16 +18,21 @@
 - Compteur produits agrégé (`totalPublishedProductCount`)
 - Template custom `admin/category/index.html.twig` (extends EasyAdmin crud/index)
 
-#### BUG NON RÉSOLU : Drag & drop
+#### Drag & drop — CORRIGÉ
 - Le handle `☰` s'affiche dans une colonne dédiée
 - Le JS de drag & drop est dans `admin/category/index.html.twig` (block `content_footer`)
 - L'endpoint AJAX `POST /admin/category/reorder` existe (`CategoryReorderController`)
-- **Problème** : le drag ne se déclenche pas. Hypothèses :
-  - Le `draggable="true"` sur le `<span>` dans le template Twig pourrait ne pas fonctionner (EasyAdmin peut interférer)
-  - Le JS `DOMContentLoaded` pourrait s'exécuter avant que le tableau soit rendu (Turbo/async)
-  - EasyAdmin utilise peut-être Turbo/Turbo Drive qui empêche le binding des events
-  - Le sélecteur `.table-responsive table tbody` pourrait ne pas matcher la structure HTML réelle
-- **Piste à explorer** : inspecter le HTML généré en admin pour vérifier la structure exacte du tableau et le rendu du handle
+- **Bugs corrigés** :
+  1. Le sélecteur `.table-responsive table tbody` ne matchait rien — EasyAdmin n'a pas de wrapper `.table-responsive`. Corrigé → `table.datagrid tbody`
+  2. `DOMContentLoaded` remplacé par une IIFE — le script est en bas de page, le DOM est déjà prêt
+  3. `draggable="true"` déplacé du `<span>` vers le `<tr>` (activé dynamiquement au `mousedown` sur le handle) — meilleur ghost image et pas d'interférence avec les clics sur la ligne
+  4. `getRowId()` simplifié → utilise `tr[data-id]` (attribut natif EasyAdmin) au lieu de chercher des checkboxes
+- **Drag de groupe (parent ↔ enfants)** :
+  - `data-parent-id` ajouté sur le handle span via le template Twig
+  - Drag d'un parent → déplace la ligne parent + toutes ses lignes enfants en bloc
+  - Drag d'un enfant → réordonne uniquement parmi ses frères/sœurs (même parent)
+  - L'indicateur visuel (ligne dorée) s'affiche aux frontières du groupe cible (haut du premier / bas du dernier enfant)
+  - Le backend (`CategoryReorderController`) groupe déjà par parent → les positions sont recalculées correctement
 
 ### 14c — EasyAdmin product form
 - Champ catégorie filtré (QueryBuilder) : feuilles uniquement (sous-catégories + parents sans enfants)

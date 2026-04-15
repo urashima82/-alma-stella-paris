@@ -1,1 +1,2 @@
-<span class="ea-sortable-handle" draggable="true" title="Glisser pour réordonner">☰</span>
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+<span class="ea-sortable-handle" data-parent-id="{{ entity.instance.parent ? entity.instance.parent.id : '' }}" title="Glisser pour réordonner">☰</span>

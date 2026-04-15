@@ -1,7 +1,7 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% set category = entity.instance %}
 {% if category.parent is not null %}
-    <span style="padding-left:24px;color:#888">↳</span> {{ category.name }}
+    <span style="padding-left:24px;color:#888">↳</span> {{ category.nameFr }} <span style="color:#999;font-size:0.85em">({{ category.name }})</span>
 {% else %}
-    <strong>{{ category.name }}</strong>
+    <strong>{{ category.nameFr }}</strong> <span style="color:#999;font-size:0.85em">({{ category.name }})</span>
 {% endif %}

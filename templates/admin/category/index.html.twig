@@ -39,44 +39,107 @@
     {{ parent() }}
     <div class="ea-reorder-toast" id="reorderToast">✓ Ordre sauvegardé</div>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var tbody = document.querySelector('.table-responsive table tbody');
+    (function() {
+        var tbody = document.querySelector('table.datagrid tbody');
         if (!tbody) return;
 
         var reorderUrl = '{{ path("admin_category_reorder") }}';
         var dragRow = null;
+        var dragGroup = [];
+        var dragIsParent = false;
 
-        function getRowId(row) {
-            var cb = row.querySelector('input[name="batchActionEntityIds[]"]');
-            if (cb) return parseInt(cb.value, 10);
-            var link = row.querySelector('a[href*="entityId"]');
-            if (link) {
-                var m = link.href.match(/entityId=(\d+)/);
-                if (m) return parseInt(m[1], 10);
-            }
-            return null;
+        // --- Helpers ---
+
+        function parentIdOf(row) {
+            var h = row.querySelector('.ea-sortable-handle');
+            return h && h.dataset.parentId ? h.dataset.parentId : null;
         }
 
-        tbody.querySelectorAll('tr').forEach(function(row) {
-            if (!getRowId(row)) return;
+        function rowId(row) {
+            return row.dataset.id || null;
+        }
 
+        function isParentRow(row) {
+            return !parentIdOf(row);
+        }
+
+        /** Return children rows that immediately follow a parent row. */
+        function childRowsOf(parentRow) {
+            var pid = rowId(parentRow);
+            var children = [];
+            var next = parentRow.nextElementSibling;
+            while (next && parentIdOf(next) === pid) {
+                children.push(next);
+                next = next.nextElementSibling;
+            }
+            return children;
+        }
+
+        /** Return the group [parentRow, ...childRows] that `row` belongs to. */
+        function groupOf(row) {
+            if (isParentRow(row)) return [row].concat(childRowsOf(row));
+            // Child — walk backward to find its parent row
+            var pid = parentIdOf(row);
+            var prev = row.previousElementSibling;
+            while (prev) {
+                if (isParentRow(prev) && rowId(prev) === pid) {
+                    return [prev].concat(childRowsOf(prev));
+                }
+                prev = prev.previousElementSibling;
+            }
+            return [row];
+        }
+
+        // --- Drag init ---
+
+        tbody.querySelectorAll('tr[data-id]').forEach(function(row) {
             var handle = row.querySelector('.ea-sortable-handle');
             if (!handle) return;
 
-            handle.addEventListener('dragstart', function(e) {
+            handle.addEventListener('mousedown', function() { row.draggable = true; });
+            handle.addEventListener('mouseup', function() { row.draggable = false; });
+
+            row.addEventListener('dragstart', function(e) {
                 dragRow = row;
-                row.classList.add('ea-dragging');
+                dragIsParent = isParentRow(row);
+                dragGroup = dragIsParent ? [row].concat(childRowsOf(row)) : [row];
+                dragGroup.forEach(function(r) { r.classList.add('ea-dragging'); });
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('text/plain', '');
             });
 
             row.addEventListener('dragover', function(e) {
-                if (!dragRow || dragRow === row) return;
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                clearAll();
-                var rect = row.getBoundingClientRect();
-                row.classList.add(e.clientY < rect.top + rect.height / 2 ? 'ea-drag-over-top' : 'ea-drag-over-bottom');
+                if (!dragRow) return;
+                // Don't allow dropping on the dragged group itself
+                if (dragGroup.indexOf(row) !== -1) return;
+
+                if (dragIsParent) {
+                    // Parent drag: allow hover on any row of another group
+                    // but only show indicator at group boundaries
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    clearAll();
+                    var targetGroup = groupOf(row);
+                    var first = targetGroup[0];
+                    var last = targetGroup[targetGroup.length - 1];
+                    var rectFirst = first.getBoundingClientRect();
+                    var rectLast = last.getBoundingClientRect();
+                    var groupMid = (rectFirst.top + rectLast.bottom) / 2;
+                    if (e.clientY < groupMid) {
+                        first.classList.add('ea-drag-over-top');
+                    } else {
+                        last.classList.add('ea-drag-over-bottom');
+                    }
+                } else {
+                    // Child drag: only allow within same parent
+                    if (parentIdOf(row) !== parentIdOf(dragRow)) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    clearAll();
+                    var rect = row.getBoundingClientRect();
+                    row.classList.add(e.clientY < rect.top + rect.height / 2
+                        ? 'ea-drag-over-top' : 'ea-drag-over-bottom');
+                }
             });
 
             row.addEventListener('dragleave', function() {
@@ -85,21 +148,38 @@
 
             row.addEventListener('drop', function(e) {
                 e.preventDefault();
-                if (!dragRow || dragRow === row) return;
-                var rect = row.getBoundingClientRect();
-                if (e.clientY < rect.top + rect.height / 2) {
-                    tbody.insertBefore(dragRow, row);
+                if (!dragRow || dragGroup.indexOf(row) !== -1) return;
+
+                if (dragIsParent) {
+                    var targetGroup = groupOf(row);
+                    var first = targetGroup[0];
+                    var last = targetGroup[targetGroup.length - 1];
+                    var rectFirst = first.getBoundingClientRect();
+                    var rectLast = last.getBoundingClientRect();
+                    var groupMid = (rectFirst.top + rectLast.bottom) / 2;
+                    var refNode = e.clientY < groupMid
+                        ? first
+                        : last.nextElementSibling;
+                    // Move entire drag group
+                    dragGroup.forEach(function(r) { tbody.insertBefore(r, refNode); });
                 } else {
-                    tbody.insertBefore(dragRow, row.nextSibling);
+                    if (parentIdOf(row) !== parentIdOf(dragRow)) return;
+                    var rect = row.getBoundingClientRect();
+                    tbody.insertBefore(dragRow,
+                        e.clientY < rect.top + rect.height / 2 ? row : row.nextSibling);
                 }
+
                 clearAll();
                 saveOrder();
             });
 
             row.addEventListener('dragend', function() {
-                row.classList.remove('ea-dragging');
+                row.draggable = false;
+                dragGroup.forEach(function(r) { r.classList.remove('ea-dragging'); });
                 clearAll();
                 dragRow = null;
+                dragGroup = [];
+                dragIsParent = false;
             });
         });
 
@@ -111,9 +191,8 @@
 
         function saveOrder() {
             var ids = [];
-            tbody.querySelectorAll('tr').forEach(function(row) {
-                var id = getRowId(row);
-                if (id) ids.push(id);
+            tbody.querySelectorAll('tr[data-id]').forEach(function(row) {
+                ids.push(parseInt(row.getAttribute('data-id'), 10));
             });
             if (!ids.length) return;
 
@@ -129,6 +208,6 @@
                 setTimeout(function() { t.classList.remove('visible'); }, 2200);
             });
         }
-    });
+    })();
     </script>
 {% endblock %}

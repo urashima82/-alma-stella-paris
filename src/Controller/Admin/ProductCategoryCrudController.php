@@ -45,7 +45,7 @@ class ProductCategoryCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield IdField::new('id')->hideOnForm();
+        yield IdField::new('id')->hideOnForm()->setSortable(false);
 
         yield TextField::new('treeSortKey', '')
             ->hideOnForm()
@@ -59,13 +59,15 @@ class ProductCategoryCrudController extends AbstractCrudController
 
         yield TextField::new('name', 'Nom (EN)')
             ->onlyOnForms();
-        yield TextField::new('nameFr', 'Nom (FR)');
+        yield TextField::new('nameFr', 'Nom (FR)')
+            ->onlyOnForms();
         yield SlugField::new('slug')->setTargetFieldName('name')
             ->onlyOnForms();
         yield SlugField::new('slugFr', 'Slug (FR)')->setTargetFieldName('nameFr')
             ->onlyOnForms();
 
         yield AssociationField::new('parent', 'Catégorie parente')
+            ->onlyOnForms()
             ->setRequired(false)
             ->setQueryBuilder(static fn (QueryBuilder $qb): QueryBuilder => $qb
                 ->andWhere('entity.parent IS NULL')
@@ -73,7 +75,8 @@ class ProductCategoryCrudController extends AbstractCrudController
             )
             ->setHelp('Laisser vide pour une catégorie racine.');
 
-        yield IntegerField::new('position', 'Ordre');
+        yield IntegerField::new('position', 'Ordre')
+            ->onlyOnForms();
 
         yield IntegerField::new('totalPublishedProductCount', 'Produits publiés')
             ->hideOnForm()
