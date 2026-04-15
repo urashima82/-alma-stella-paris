@@ -6,7 +6,7 @@
 >
 > **Remaining items:**
 > - C1 (Stripe webhook): Deferred — existing cron-based PendingOrderVerifier is acceptable
-> - C2 (CVE-2025-64500): Requires Symfony 7.3 upgrade — no 7.2.x patch available
+> - ~~C2 (CVE-2025-64500): Fixed — upgraded to Symfony 7.4 LTS (v7.4.8)~~
 > - M4 (Email enumeration): Accepted as UX trade-off
 > - B1-B3 (Low severity): Documented, no code change needed
 

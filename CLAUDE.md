@@ -74,7 +74,7 @@ via pre-commit hooks.
 
 | Layer | Technology | Version |
 |---|---|---|
-| Framework | Symfony | 7.2.x |
+| Framework | Symfony | 7.4.x (LTS) |
 | Database | MariaDB | 10.11+ |
 | ORM | Doctrine | 3.x |
 | CSS | Tailwind CSS | 4.x |

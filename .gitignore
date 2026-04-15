@@ -43,6 +43,10 @@
 /compose.override.yaml
 ###< docker compose ###
 
+###> symfony/framework-bundle (auto-generated) ###
+/config/reference.php
+###< symfony/framework-bundle (auto-generated) ###
+
 ###> uploads ###
 /public/uploads/products/*
 !/public/uploads/products/.gitkeep
