@@ -73,8 +73,8 @@ class CustomerCrudController extends AbstractCrudController
         yield IntegerField::new('orderCount', 'Commandes')
             ->hideOnForm()
             ->setTemplatePath('admin/field/order_count.html.twig');
-        yield MoneyField::new('totalSpentUsd', 'Total dépensé')
-            ->setCurrency('USD')
+        yield MoneyField::new('totalSpentEur', 'Total dépensé')
+            ->setCurrency('EUR')
             ->setStoredAsCents(false)
             ->setNumDecimals(2)
             ->hideOnForm();

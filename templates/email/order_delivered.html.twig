@@ -70,7 +70,7 @@
                                                         {{ locale == 'fr' and promo.nameFr is defined and promo.nameFr ? promo.nameFr : promo.name }}{% if promo.code %} ({{ promo.code }}){% endif %}
                                                     </td>
                                                     <td align="right" style="font-size: 13px; font-weight: 600; color: #16a34a;">
-                                                        -${{ '%.2f'|format(promo.discount) }}
+                                                        -€{{ '%.2f'|format(promo.discount) }}
                                                     </td>
                                                 </tr>
                                             {% endfor %}
@@ -79,7 +79,7 @@
                                                     Total
                                                 </td>
                                                 <td align="right" style="font-size: 15px; font-weight: 600; color: #2C2418;">
-                                                    ${{ '%.2f'|format(order.totalUsd) }}
+                                                    €{{ '%.2f'|format(order.totalEur) }}
                                                 </td>
                                             </tr>
                                         </table>
@@ -102,7 +102,7 @@
                                             {{ item.getLocalizedProductName(locale) }}
                                         </td>
                                         <td align="right" style="font-size: 14px; color: #2C2418;">
-                                            ${{ '%.2f'|format(item.lineTotal) }}
+                                            €{{ '%.2f'|format(item.lineTotal) }}
                                         </td>
                                     </tr>
                                 </table>

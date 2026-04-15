@@ -57,7 +57,7 @@ class OrderRepository extends ServiceEntityRepository
         $monday = new \DateTimeImmutable('monday this week');
 
         $result = $this->createQueryBuilder('o')
-            ->select('SUM(o.totalUsd)')
+            ->select('SUM(o.totalEur)')
             ->where('o.createdAt >= :monday')
             ->andWhere('o.status != :cancelled')
             ->setParameter('monday', $monday)
@@ -155,7 +155,7 @@ class OrderRepository extends ServiceEntityRepository
         $lastMonday = $thisMonday->modify('-7 days');
 
         $result = $this->createQueryBuilder('o')
-            ->select('SUM(o.totalUsd)')
+            ->select('SUM(o.totalEur)')
             ->where('o.createdAt >= :start')
             ->andWhere('o.createdAt < :end')
             ->andWhere('o.status != :cancelled')

@@ -238,7 +238,7 @@ class Product
 
     public function getDisplayPrice(): float
     {
-        return $this->getBasePrice() + $this->shippingTier->shippingCostUsd();
+        return $this->getBasePrice() + $this->shippingTier->shippingCostEur();
     }
 
     public function getDiscountPercent(): ?int

@@ -65,7 +65,7 @@
         "offers": {
             "@type": "Offer",
             "url": "{{ url('shop_product', {slug: product|localized_slug, '_locale': app.request.locale}) }}",
-            "priceCurrency": "USD",
+            "priceCurrency": "EUR",
             "price": "{{ display_price(product)|number_format(2, '.', '') }}",
             "availability": "{{ product.isSoldOut ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock' }}",
             "seller": {

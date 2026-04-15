@@ -34,7 +34,7 @@
                                 {{ order.createdAt|date('d/m/Y H:i') }}
                             </span>
                         </div>
-                        <span class="fs-5 fw-bold">${{ order.totalUsd|number_format(2, '.', ',') }}</span>
+                        <span class="fs-5 fw-bold">€{{ order.totalEur|number_format(2, '.', ',') }}</span>
                     </div>
                 </div>
             </div>
@@ -164,7 +164,7 @@
                 <div class="content-panel-body">
                     <dl class="row mb-0">
                         <dt class="col-5 text-body-secondary fw-normal">Total</dt>
-                        <dd class="col-7 fw-bold">${{ order.totalUsd|number_format(2, '.', ',') }}</dd>
+                        <dd class="col-7 fw-bold">€{{ order.totalEur|number_format(2, '.', ',') }}</dd>
 
                         <dt class="col-5 text-body-secondary fw-normal">Statut</dt>
                         <dd class="col-7">{{ order.stripePaymentStatus ?? '&mdash;' }}</dd>

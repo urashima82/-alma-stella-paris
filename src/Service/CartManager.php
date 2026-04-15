@@ -185,9 +185,9 @@ class CartManager
     }
 
     /**
-     * Get the subtotal in USD (base currency) including shipping.
+     * Get the subtotal in EUR (base currency) including shipping.
      */
-    public function getSubtotalUsd(): float
+    public function getSubtotalEur(): float
     {
         $total = 0.0;
 

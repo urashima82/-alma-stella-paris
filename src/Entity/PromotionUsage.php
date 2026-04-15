@@ -28,7 +28,7 @@ class PromotionUsage
     private string $customerEmail = '';
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private string $discountAmountUsd = '0.00';
+    private string $discountAmountEur = '0.00';
 
     #[ORM\Column]
     private \DateTimeImmutable $usedAt;
@@ -44,7 +44,7 @@ class PromotionUsage
         $usage->promotion = $promotion;
         $usage->order = $order;
         $usage->customerEmail = $email;
-        $usage->discountAmountUsd = \number_format($discountAmount, 2, '.', '');
+        $usage->discountAmountEur = \number_format($discountAmount, 2, '.', '');
 
         return $usage;
     }
@@ -69,9 +69,9 @@ class PromotionUsage
         return $this->customerEmail;
     }
 
-    public function getDiscountAmountUsd(): float
+    public function getDiscountAmountEur(): float
     {
-        return (float) $this->discountAmountUsd;
+        return (float) $this->discountAmountEur;
     }
 
     public function getUsedAt(): \DateTimeImmutable

@@ -61,7 +61,7 @@ class Promotion
     private ?int $maxUsagesPerEmail = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    private ?string $minimumAmountUsd = null;
+    private ?string $minimumAmountEur = null;
 
     /** @var Collection<int, Product> */
     #[ORM\ManyToMany(targetEntity: Product::class)]
@@ -81,7 +81,7 @@ class Promotion
     private int $usageCount = 0;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 12, scale: 2)]
-    private string $revenueGeneratedUsd = '0.00';
+    private string $revenueGeneratedEur = '0.00';
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastUsedAt = null;
@@ -283,15 +283,15 @@ class Promotion
         return $this;
     }
 
-    public function getMinimumAmountUsd(): ?float
+    public function getMinimumAmountEur(): ?float
     {
-        return $this->minimumAmountUsd !== null ? (float) $this->minimumAmountUsd : null;
+        return $this->minimumAmountEur !== null ? (float) $this->minimumAmountEur : null;
     }
 
-    public function setMinimumAmountUsd(?float $minimumAmountUsd): static
+    public function setMinimumAmountEur(?float $minimumAmountEur): static
     {
-        $this->minimumAmountUsd = $minimumAmountUsd !== null
-            ? \number_format($minimumAmountUsd, 2, '.', '')
+        $this->minimumAmountEur = $minimumAmountEur !== null
+            ? \number_format($minimumAmountEur, 2, '.', '')
             : null;
 
         return $this;
@@ -359,15 +359,15 @@ class Promotion
         return $this;
     }
 
-    public function getRevenueGeneratedUsd(): float
+    public function getRevenueGeneratedEur(): float
     {
-        return (float) $this->revenueGeneratedUsd;
+        return (float) $this->revenueGeneratedEur;
     }
 
     public function addRevenue(float $amount): static
     {
-        $this->revenueGeneratedUsd = \number_format(
-            (float) $this->revenueGeneratedUsd + $amount,
+        $this->revenueGeneratedEur = \number_format(
+            (float) $this->revenueGeneratedEur + $amount,
             2,
             '.',
             '',
@@ -484,7 +484,7 @@ class Promotion
     {
         return match ($this->discountType) {
             DiscountType::Percentage => \sprintf('-%g%%', $this->getDiscountValue()),
-            DiscountType::FixedAmount => \sprintf('-$%s', \number_format($this->getDiscountValue(), 2)),
+            DiscountType::FixedAmount => \sprintf('-€%s', \number_format($this->getDiscountValue(), 2)),
         };
     }
 

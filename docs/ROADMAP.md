@@ -179,18 +179,18 @@ Shall I proceed to Milestone Y?"
 ### Tasks
 - [x] `CurrencyConverter` service (open.er-api.com, cached 6h)
 - [x] `CurrencyExtension` Twig extension with `|price` filter
-- [x] Currency selector in header (USD / EUR / CAD / GBP / MXN)
+- [x] Currency selector in header (EUR / USD / CAD / GBP / MXN)
 - [x] Selection stored in session + cookie (30-day expiry)
-- [x] Disclaimer displayed when non-USD currency selected:
-  *"Prices shown in [EUR] are indicative. You will be charged in USD at checkout."*
-- [x] Fallback to USD if exchange rate API is unavailable
+- [x] Disclaimer displayed when non-EUR currency selected:
+  *"Prices shown in [USD] are indicative. You will be charged in EUR at checkout."*
+- [x] Fallback to EUR if exchange rate API is unavailable
 
 ### Definition of Done
-- Select EUR → all product prices update across all pages
+- Select USD → all product prices update across all pages
 - Refresh the page → currency selection is remembered
 - Close and reopen browser → currency still remembered (cookie)
-- Force the exchange rate API to fail (mock) → site displays USD without error
-- Disclaimer visible only when non-USD currency selected
+- Force the exchange rate API to fail (mock) → site displays EUR without error
+- Disclaimer visible only when non-EUR currency selected
 
 ---
 
@@ -685,126 +685,126 @@ Shall I proceed to Milestone Y?"
 ### Tasks
 
 #### 1. Entity & database schema (rename USD → EUR)
-- [ ] `Order` entity: rename `$totalUsd` → `$totalEur`, `$discountAmountUsd` → `$discountAmountEur`
+- [x] `Order` entity: rename `$totalUsd` → `$totalEur`, `$discountAmountUsd` → `$discountAmountEur`
   - Rename all getters/setters: `getTotalUsd()` → `getTotalEur()`, `setTotalUsd()` → `setTotalEur()`,
     `getDiscountAmountUsd()` → `getDiscountAmountEur()`, `setDiscountAmountUsd()` → `setDiscountAmountEur()`
   - Update `getItemsSummary()`: change `$` symbols to `€` and `getTotalUsd()` → `getTotalEur()`
-- [ ] `OrderItem` entity: rename `$discountAmountUsd` → `$discountAmountEur`
+- [x] `OrderItem` entity: rename `$discountAmountUsd` → `$discountAmountEur`
   - Rename getter/setter: `getDiscountAmountUsd()` → `getDiscountAmountEur()`
   - Update `getLineTotal()` docblock: "in EUR" instead of "in USD"
-- [ ] `ShippingSettings` entity: rename `$shippingCostUsd` → `$shippingCostEur`
+- [x] `ShippingSettings` entity: rename `$shippingCostUsd` → `$shippingCostEur`
   - Rename getter/setter accordingly
-- [ ] `Promotion` entity: update any field labels/docblocks referencing USD
+- [x] `Promotion` entity: update any field labels/docblocks referencing USD
   - `fixedAmountValue` and `minimumOrderAmount` are now in EUR (docblocks)
-- [ ] `PromotionUsage` entity: update any USD references in docblocks
-- [ ] Modify initial migration (`Version20260408140632`):
+- [x] `PromotionUsage` entity: update any USD references in docblocks
+- [x] Modify initial migration (`Version20260408140632`):
   - Rename columns: `total_usd` → `total_eur`, `discount_amount_usd` → `discount_amount_eur` (on `order` table)
   - Rename column: `discount_amount_usd` → `discount_amount_eur` (on `order_item` table)
   - Rename column: `shipping_cost_usd` → `shipping_cost_eur` (on `shipping_settings` table)
 
 #### 2. ShippingTier enum (EUR values)
-- [ ] Rename method `shippingCostUsd()` → `shippingCostEur()`
-- [ ] Convert hardcoded shipping costs to EUR:
+- [x] Rename method `shippingCostUsd()` → `shippingCostEur()`
+- [x] Convert hardcoded shipping costs to EUR:
   - Standard: 10 €
   - Heavy: 15 €
   - Set: 20 €
 
 #### 3. CurrencyConverter service
-- [ ] Change `BASE_CURRENCY` constant: `'USD'` → `'EUR'`
-- [ ] Change `API_URL`: `open.er-api.com/v6/latest/USD` → `open.er-api.com/v6/latest/EUR`
-- [ ] Rename `convert()` parameter: `$amountUsd` → `$amountEur`
-- [ ] Update `SUPPORTED_CURRENCIES` array order: `['EUR', 'USD', 'CAD', 'GBP', 'MXN']`
-- [ ] Update default symbol fallback: `'$'` → `'€'`
+- [x] Change `BASE_CURRENCY` constant: `'USD'` → `'EUR'`
+- [x] Change `API_URL`: `open.er-api.com/v6/latest/USD` → `open.er-api.com/v6/latest/EUR`
+- [x] Rename `convert()` parameter: `$amountUsd` → `$amountEur`
+- [x] Update `SUPPORTED_CURRENCIES` array order: `['EUR', 'USD', 'CAD', 'GBP', 'MXN']`
+- [x] Update default symbol fallback: `'$'` → `'€'`
 
 #### 4. StripeService
-- [ ] Change PaymentIntent currency: `'usd'` → `'eur'`
-- [ ] Update amount calculation: `getTotalUsd()` → `getTotalEur()`
+- [x] Change PaymentIntent currency: `'usd'` → `'eur'`
+- [x] Update amount calculation: `getTotalUsd()` → `getTotalEur()`
 
 #### 5. ShippingCostProvider service
-- [ ] Rename method returning cost: update any `Usd` references to `Eur`
-- [ ] Ensure `ShippingSettings` column reference updated
+- [x] Rename method returning cost: update any `Usd` references to `Eur`
+- [x] Ensure `ShippingSettings` column reference updated
 
 #### 6. PromotionEngine service
-- [ ] Update all `discountAmountUsd` / `totalUsd` references to EUR equivalents
-- [ ] Verify fixed-amount promotions are treated as EUR
+- [x] Update all `discountAmountUsd` / `totalUsd` references to EUR equivalents
+- [x] Verify fixed-amount promotions are treated as EUR
 
 #### 7. CartManager & CartController
-- [ ] Update any `Usd` / `USD` references in price calculations
+- [x] Update any `Usd` / `USD` references in price calculations
 
 #### 8. CheckoutController
-- [ ] Replace all `totalUsd` / `discountAmountUsd` calls with EUR equivalents
-- [ ] Replace all `setTotalUsd()` / `setDiscountAmountUsd()` calls
-- [ ] Update inline comments referencing USD
+- [x] Replace all `totalUsd` / `discountAmountUsd` calls with EUR equivalents
+- [x] Replace all `setTotalUsd()` / `setDiscountAmountUsd()` calls
+- [x] Update inline comments referencing USD
 
 #### 9. CurrencyExtension (Twig)
-- [ ] Default currency: `EUR` instead of `USD`
-- [ ] Rename `is_non_usd_currency()` → `is_non_eur_currency()`
-- [ ] Update `|price` filter: parameter name `$amountUsd` → `$amountEur`
-- [ ] Update fallback behavior for base currency
+- [x] Default currency: `EUR` instead of `USD`
+- [x] Rename `is_non_usd_currency()` → `is_non_eur_currency()`
+- [x] Update `|price` filter: parameter name `$amountUsd` → `$amountEur`
+- [x] Update fallback behavior for base currency
 
 #### 10. CurrencySubscriber
-- [ ] Default currency fallback: `'EUR'` instead of `'USD'`
+- [x] Default currency fallback: `'EUR'` instead of `'USD'`
 
 #### 11. Templates — storefront (15 Twig files)
-- [ ] `base.html.twig`: update currency disclaimer text (charged in EUR)
-- [ ] `checkout/index.html.twig`: `$` → `€` in price display, USD → EUR references
-- [ ] `checkout/payment.html.twig`: same
-- [ ] `product/show.html.twig`: same
-- [ ] `account/orders.html.twig`: same
-- [ ] `account/order_detail.html.twig`: same
-- [ ] Update `is_non_usd_currency` → `is_non_eur_currency` in all templates
+- [x] `base.html.twig`: update currency disclaimer text (charged in EUR)
+- [x] `checkout/index.html.twig`: `$` → `€` in price display, USD → EUR references
+- [x] `checkout/payment.html.twig`: same
+- [x] `product/show.html.twig`: same
+- [x] `account/orders.html.twig`: same
+- [x] `account/order_detail.html.twig`: same
+- [x] Update `is_non_usd_currency` → `is_non_eur_currency` in all templates
 
 #### 12. Templates — emails (5 Twig files)
-- [ ] `order_confirmation.html.twig`: `$` → `€`, USD → EUR
-- [ ] `order_shipped.html.twig`: same
-- [ ] `order_delivered.html.twig`: same
-- [ ] `order_cancelled.html.twig`: same
-- [ ] `admin_new_order.html.twig`: same
+- [x] `order_confirmation.html.twig`: `$` → `€`, USD → EUR
+- [x] `order_shipped.html.twig`: same
+- [x] `order_delivered.html.twig`: same
+- [x] `order_cancelled.html.twig`: same
+- [x] `admin_new_order.html.twig`: same
 
 #### 13. Templates — admin & invoice
-- [ ] `admin/dashboard.html.twig`: `$` → `€`, USD → EUR
-- [ ] `admin/order/edit.html.twig`: same
-- [ ] `admin/customer/detail.html.twig`: same
-- [ ] `pdf/invoice.html.twig`: update currency symbol and references
+- [x] `admin/dashboard.html.twig`: `$` → `€`, USD → EUR
+- [x] `admin/order/edit.html.twig`: same
+- [x] `admin/customer/detail.html.twig`: same
+- [x] `pdf/invoice.html.twig`: update currency symbol and references
 
 #### 14. EasyAdmin controllers
-- [ ] `OrderCrudController`: update field labels (`Total USD` → `Total EUR`, etc.)
-- [ ] `OrderItemCrudController`: same
-- [ ] `ProductCrudController`: update `basePrice` label context
-- [ ] `PromotionCrudController`: update currency references in labels
-- [ ] `ShippingSettingsCrudController`: rename field labels USD → EUR
-- [ ] `CustomerCrudController`: update any USD display references
+- [x] `OrderCrudController`: update field labels (`Total USD` → `Total EUR`, etc.)
+- [x] `OrderItemCrudController`: same
+- [x] `ProductCrudController`: update `basePrice` label context
+- [x] `PromotionCrudController`: update currency references in labels
+- [x] `ShippingSettingsCrudController`: rename field labels USD → EUR
+- [x] `CustomerCrudController`: update any USD display references
 
 #### 15. Translations (YAML)
-- [ ] `messages.en.yaml`: update disclaimer text and any USD-specific strings
-- [ ] `messages.fr.yaml`: same
+- [x] `messages.en.yaml`: update disclaimer text and any USD-specific strings
+- [x] `messages.fr.yaml`: same
 
 #### 16. OrderRepository
-- [ ] Update any `totalUsd` / `discountAmountUsd` DQL or QueryBuilder references
+- [x] Update any `totalUsd` / `discountAmountUsd` DQL or QueryBuilder references
 
 #### 17. DataFixtures
-- [ ] Convert all product `basePrice` values from USD to EUR equivalents
-- [ ] Convert `compareAtPrice` values
-- [ ] Convert promotion `fixedAmountValue` and `minimumOrderAmount`
-- [ ] Convert shipping settings default values
-- [ ] Update order fixture totals
+- [x] Convert all product `basePrice` values from USD to EUR equivalents
+- [x] Convert `compareAtPrice` values
+- [x] Convert promotion `fixedAmountValue` and `minimumOrderAmount`
+- [x] Convert shipping settings default values
+- [x] Update order fixture totals
 
 #### 18. Documentation
-- [ ] `CLAUDE.md`: update all "USD" references to "EUR" (reference currency, Stripe, localisation,
+- [x] `CLAUDE.md`: update all "USD" references to "EUR" (reference currency, Stripe, localisation,
   architecture decisions, out of scope section)
-- [ ] `docs/ARCHITECTURE.md`: update currency references throughout
-- [ ] `docs/LOCALISATION.md`: update "one price, many displays" to EUR base, update disclaimer text,
+- [x] `docs/ARCHITECTURE.md`: update currency references throughout
+- [x] `docs/LOCALISATION.md`: update "one price, many displays" to EUR base, update disclaimer text,
   update default currency
-- [ ] `docs/ROADMAP.md`: update Milestone 4 description (cosmetic disclaimer = non-EUR)
-- [ ] V2 backlog: remove "Multi-currency Stripe charges" line (no longer relevant)
+- [x] `docs/ROADMAP.md`: update Milestone 4 description (cosmetic disclaimer = non-EUR)
+- [x] V2 backlog: remove "Multi-currency Stripe charges" line (no longer relevant)
 
 #### 19. Rebuild & verify
-- [ ] Run `ddev exec vendor/bin/php-cs-fixer fix`
-- [ ] Run `ddev exec vendor/bin/phpstan analyse` — zero errors
-- [ ] Run `ddev exec php bin/console tailwind:build && ddev exec php bin/console asset-map:compile`
-- [ ] Recreate DDEV environment: `ddev delete --omit-snapshot && ddev start`
-- [ ] Run `ddev exec php bin/console doctrine:migrations:migrate`
-- [ ] Run `ddev exec php bin/console doctrine:fixtures:load`
+- [x] Run `ddev exec vendor/bin/php-cs-fixer fix`
+- [x] Run `ddev exec vendor/bin/phpstan analyse` — zero errors
+- [x] Run `ddev exec php bin/console tailwind:build && ddev exec php bin/console asset-map:compile`
+- [x] Recreate DDEV environment: `ddev delete --omit-snapshot && ddev start`
+- [x] Run `ddev exec php bin/console doctrine:migrations:migrate`
+- [x] Run `ddev exec php bin/console doctrine:fixtures:load`
 - [ ] Smoke test all pages in browser
 
 ### Definition of Done

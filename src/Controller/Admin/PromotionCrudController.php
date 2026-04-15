@@ -91,13 +91,13 @@ class PromotionCrudController extends AbstractCrudController
             yield DateTimeField::new('endsAt', 'Fin');
             yield IntegerField::new('maxUsages', 'Utilisations max');
             yield IntegerField::new('maxUsagesPerEmail', 'Max par email');
-            yield NumberField::new('minimumAmountUsd', 'Montant min (USD)');
+            yield NumberField::new('minimumAmountEur', 'Montant min (EUR)');
             yield AssociationField::new('products', 'Produits ciblés');
             yield AssociationField::new('categories', 'Catégories ciblées');
 
             yield FormField::addTab('Statistiques');
             yield IntegerField::new('usageCount', 'Utilisations');
-            yield NumberField::new('revenueGeneratedUsd', 'Revenu généré (USD)')
+            yield NumberField::new('revenueGeneratedEur', 'Revenu généré (EUR)')
                 ->setNumDecimals(2);
             yield DateTimeField::new('lastUsedAt', 'Dernière utilisation');
             yield DateTimeField::new('createdAt', 'Créée le');
@@ -133,7 +133,7 @@ class PromotionCrudController extends AbstractCrudController
             ));
 
         yield NumberField::new('discountValue', 'Valeur de la réduction')
-            ->setHelp('Ex: 10 pour 10% ou 5.00 pour $5')
+            ->setHelp('Ex: 10 pour 10% ou 5.00 pour 5€')
             ->setNumDecimals(2);
 
         yield BooleanField::new('isActive', 'Active');
@@ -164,7 +164,7 @@ class PromotionCrudController extends AbstractCrudController
             ->setRequired(false)
             ->setHelp('Laissez vide pour illimité par client');
 
-        yield NumberField::new('minimumAmountUsd', 'Montant minimum du panier (USD)')
+        yield NumberField::new('minimumAmountEur', 'Montant minimum du panier (EUR)')
             ->setRequired(false)
             ->setNumDecimals(2)
             ->setHelp('Laissez vide pour aucun minimum');

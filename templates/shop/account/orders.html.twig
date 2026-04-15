@@ -37,7 +37,7 @@
                                 {{ order.status.label() }}
                             </span>
                             <span class="font-sans text-sm font-medium text-alma-text">
-                                ${{ order.totalUsd|number_format(2) }}
+                                {{ order.totalEur|price }}
                             </span>
                         </div>
                     </div>

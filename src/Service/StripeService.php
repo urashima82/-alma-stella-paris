@@ -20,11 +20,11 @@ final class StripeService
 
     public function createPaymentIntent(Order $order): PaymentIntent
     {
-        $amountInCents = (int) \round($order->getTotalUsd() * 100);
+        $amountInCents = (int) \round($order->getTotalEur() * 100);
 
         return $this->stripe->paymentIntents->create([
             'amount' => $amountInCents,
-            'currency' => 'usd',
+            'currency' => 'eur',
             'metadata' => [
                 'order_reference' => $order->getReference(),
             ],

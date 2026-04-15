@@ -9,39 +9,39 @@
 ## Currency system
 
 ### Core principle
-**One price, many displays.** All prices are stored in USD in the database.
-Conversion is cosmetic — Stripe always charges in USD.
+**One price, many displays.** All prices are stored in EUR in the database.
+Conversion is cosmetic — Stripe always charges in EUR.
 
 ```
-Database:     basePrice = 38.00 (USD, always)
-              displayPrice = basePrice + shippingTier.cost = 48.00 (USD)
+Database:     basePrice = 35.00 (EUR, always)
+              displayPrice = basePrice + shippingTier.cost = 45.00 (EUR)
 
 Twig filter:  {{ product.displayPrice | price }}
-              → USD visitor sees: $48.00
-              → EUR visitor sees: ~€44.20 (live rate)
-              → CAD visitor sees: ~CA$65.50 (live rate)
+              → EUR visitor sees: 45,00 €
+              → USD visitor sees: ~$49.50 (live rate)
+              → CAD visitor sees: ~CA$67.00 (live rate)
 ```
 
 ### Supported currencies
 
 | Code | Label | Locale | Flag |
 |---|---|---|---|
-| USD | US Dollar | en_US | 🇺🇸 |
 | EUR | Euro | fr_FR | 🇪🇺 |
+| USD | US Dollar | en_US | 🇺🇸 |
 | CAD | Canadian Dollar | fr_CA | 🇨🇦 |
 | GBP | British Pound | en_GB | 🇬🇧 |
 | MXN | Mexican Peso | es_MX | 🇲🇽 |
 
 ### Exchange rate source
-- API: `https://open.er-api.com/v6/latest/USD`
+- API: `https://open.er-api.com/v6/latest/EUR`
 - Free tier, no API key required for these currencies
 - Cache TTL: **6 hours** (Symfony Cache, Redis in production)
-- Fallback: display USD silently if API is unreachable
+- Fallback: display EUR silently if API is unreachable
 
 ### Currency preference storage
 1. Session (current visit)
 2. Cookie `alma_currency`, 30-day expiry, `SameSite=Lax`
-3. Default if neither: `USD`
+3. Default if neither: `EUR`
 
 ```php
 // src/Controller/Shop/CurrencyController.php
@@ -64,11 +64,11 @@ public function set(string $code, Request $request, SessionInterface $session): 
 }
 ```
 
-### Disclaimer (mandatory for non-USD)
+### Disclaimer (mandatory for non-EUR)
 
-This message **must** appear near every price when the selected currency is not USD:
+This message **must** appear near every price when the selected currency is not EUR:
 
-> *"Prices shown in [EUR] are indicative. You will be charged in USD at checkout."*
+> *"Prices shown in [USD] are indicative. You will be charged in EUR at checkout."*
 
 Placement: below the price on product detail, in the cart drawer, and at the
 top of the checkout page.
@@ -220,7 +220,7 @@ All public URLs are in English:
     "offers": {
         "@type": "Offer",
         "price": "{{ product.displayPrice }}",
-        "priceCurrency": "USD",
+        "priceCurrency": "EUR",
         "availability": "{{ product.stock > 0
             ? 'https://schema.org/InStock'
             : 'https://schema.org/OutOfStock' }}"

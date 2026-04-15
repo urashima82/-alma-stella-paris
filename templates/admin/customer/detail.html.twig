@@ -31,7 +31,7 @@
                                 </a>
                             </td>
                             <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color, #f0f0f0);">{{ order.statusLabel|raw }}</td>
-                            <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color, #f0f0f0);">${{ order.totalUsd|number_format(2, '.', ',') }}</td>
+                            <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color, #f0f0f0);">€{{ order.totalEur|number_format(2, '.', ',') }}</td>
                             <td style="padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-color, #f0f0f0);">{{ order.createdAt|date('d/m/Y H:i') }}</td>
                         </tr>
                     {% endfor %}

@@ -69,7 +69,7 @@
                             </button>
                             <div class="absolute left-0 top-full mt-2 bg-white border border-alma-gold-muted rounded shadow-lg py-1 z-50 hidden"
                                  data-currency-selector-target="dropdown">
-                                {% for code in ['USD', 'EUR', 'GBP', 'CAD', 'MXN'] %}
+                                {% for code in ['EUR', 'USD', 'GBP', 'CAD', 'MXN'] %}
                                     <form method="post" action="{{ path('currency_switch') }}">
                                         <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
                                         <input type="hidden" name="currency" value="{{ code }}">
@@ -233,7 +233,7 @@
                         <div>
                             <p class="text-xs uppercase tracking-widest text-alma-text-muted mb-3">{{ 'currency.label'|trans }}</p>
                             <div class="flex flex-wrap gap-2">
-                                {% for code in ['USD', 'EUR', 'GBP', 'CAD', 'MXN'] %}
+                                {% for code in ['EUR', 'USD', 'GBP', 'CAD', 'MXN'] %}
                                     <form method="post" action="{{ path('currency_switch') }}">
                                         <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
                                         <input type="hidden" name="currency" value="{{ code }}">

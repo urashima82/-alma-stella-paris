@@ -46,9 +46,9 @@
                     {{ totalConverted|price_format(currency) }}
                 </span>
             </div>
-            {% if currency != 'USD' %}
+            {% if currency != 'EUR' %}
                 <p class="text-xs text-alma-text-muted mt-2">
-                    {{ 'checkout.charged_in_usd'|trans({'%amount%': order.totalUsd|price_format('USD')}) }}
+                    {{ 'checkout.charged_in_eur'|trans({'%amount%': order.totalEur|price_format('EUR')}) }}
                 </p>
             {% endif %}
         </div>

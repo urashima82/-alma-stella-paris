@@ -71,9 +71,9 @@ class ProductCrudController extends AbstractCrudController
             yield ImageField::new('thumbnail', 'Vignette')
                 ->setBasePath('/uploads/products');
             yield TextField::new('nameFr', 'Nom');
-            yield NumberField::new('displayPrice', 'Prix affiché (USD)')
+            yield NumberField::new('displayPrice', 'Prix affiché (EUR)')
                 ->setNumDecimals(2)
-                ->formatValue(static fn (float $value): string => '$'.\number_format($value, 2));
+                ->formatValue(static fn (float $value): string => \number_format($value, 2).' €');
             yield AssociationField::new('category', 'Catégorie');
             yield ChoiceField::new('availableIn', 'Disponible en')
                 ->setChoices([
@@ -163,12 +163,12 @@ class ProductCrudController extends AbstractCrudController
             ->setHelp('Cochez les pays où ce produit est disponible.');
 
         yield FormField::addFieldset('Tarification', 'fa fa-tag');
-        yield MoneyField::new('basePrice', 'Prix de base (USD)')
-            ->setCurrency('USD')
+        yield MoneyField::new('basePrice', 'Prix de base (EUR)')
+            ->setCurrency('EUR')
             ->setStoredAsCents(false)
             ->setNumDecimals(2);
-        yield MoneyField::new('compareAtPrice', 'Ancien prix (USD)')
-            ->setCurrency('USD')
+        yield MoneyField::new('compareAtPrice', 'Ancien prix (EUR)')
+            ->setCurrency('EUR')
             ->setStoredAsCents(false)
             ->setNumDecimals(2)
             ->setRequired(false)

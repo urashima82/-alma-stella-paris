@@ -45,8 +45,8 @@ class ShippingSettingsCrudController extends AbstractCrudController
             ->setTemplatePath('admin/field/shipping_tier_badge.html.twig')
             ->hideOnForm();
         yield TextField::new('label', 'Libellé');
-        yield MoneyField::new('shippingCostUsd', 'Frais de port (USD)')
-            ->setCurrency('USD')
+        yield MoneyField::new('shippingCostEur', 'Frais de port (EUR)')
+            ->setCurrency('EUR')
             ->setStoredAsCents(false)
             ->setNumDecimals(2);
         yield NumberField::new('maxWeightGrams', 'Poids max (g)')

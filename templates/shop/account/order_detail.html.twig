@@ -47,7 +47,7 @@
                 {% for item in order.items %}
                     <tr class="border-b border-alma-hover/50">
                         <td class="px-5 py-3 text-alma-text">{{ item.getLocalizedProductName(app.request.locale) }}</td>
-                        <td class="px-5 py-3 text-right font-medium text-alma-text">${{ item.lineTotal|number_format(2) }}</td>
+                        <td class="px-5 py-3 text-right font-medium text-alma-text">{{ item.lineTotal|price }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -62,12 +62,12 @@
                             {{ app.request.locale == 'fr' and promo.nameFr is defined and promo.nameFr ? promo.nameFr : promo.name }}
                             {% if promo.code %}({{ promo.code }}){% endif %}
                         </td>
-                        <td class="px-5 py-3 text-right font-medium text-green-600">-${{ promo.discount|number_format(2) }}</td>
+                        <td class="px-5 py-3 text-right font-medium text-green-600">-{{ promo.discount|price }}</td>
                     </tr>
                 {% endfor %}
                 <tr>
                     <td class="px-5 py-4 text-right font-medium text-alma-text">{{ 'orders.detail.order_total'|trans }}</td>
-                    <td class="px-5 py-4 text-right font-medium text-alma-text text-base">${{ order.totalUsd|number_format(2) }}</td>
+                    <td class="px-5 py-4 text-right font-medium text-alma-text text-base">{{ order.totalEur|price }}</td>
                 </tr>
             </tfoot>
         </table>

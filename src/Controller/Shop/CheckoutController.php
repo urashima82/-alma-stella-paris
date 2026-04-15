@@ -122,7 +122,7 @@ class CheckoutController extends AbstractController
         // Reserve all cart products (extends existing reservations on re-entry)
         $this->reserveCartProducts($products);
 
-        $effectiveSubtotalUsd = $this->promotionEngine->getEffectiveSubtotalUsd($products);
+        $effectiveSubtotalEur = $this->promotionEngine->getEffectiveSubtotalEur($products);
         $currency = $request->getSession()->get('_currency', CurrencyConverter::BASE_CURRENCY);
         $locale = $request->getLocale();
 
@@ -139,9 +139,9 @@ class CheckoutController extends AbstractController
                 // Evaluate promotions for the order
                 $couponCodeForOrder = (string) $request->request->get('coupon_code', '');
                 $emailForOrder = $this->getCheckoutEmail($request);
-                $promoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalUsd, $couponCodeForOrder, $emailForOrder);
-                $orderDiscountUsd = $promoResult['totalDiscount'];
-                $orderFinalTotal = \max(0.0, $effectiveSubtotalUsd - $orderDiscountUsd);
+                $promoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalEur, $couponCodeForOrder, $emailForOrder);
+                $orderDiscountEur = $promoResult['totalDiscount'];
+                $orderFinalTotal = \max(0.0, $effectiveSubtotalEur - $orderDiscountEur);
 
                 // Reuse existing Pending order if available, otherwise create new
                 $pendingRef = $request->getSession()->get('_pending_order');
@@ -157,7 +157,7 @@ class CheckoutController extends AbstractController
                 }
 
                 // Store discount info on order
-                $order->setDiscountAmountUsd($orderDiscountUsd);
+                $order->setDiscountAmountEur($orderDiscountEur);
                 $order->setPromotionCode($couponCodeForOrder !== '' ? \strtoupper($couponCodeForOrder) : null);
                 $order->setAppliedPromotions(\array_map(
                     static fn (array $entry) => [
@@ -230,9 +230,9 @@ class CheckoutController extends AbstractController
         // Evaluate coupon code from session
         $couponCode = $request->getSession()->get('_promo_code');
         $customerEmail = $this->getCheckoutEmail($request);
-        $cartPromoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalUsd, $couponCode, $customerEmail);
-        $discountAmountUsd = $cartPromoResult['totalDiscount'];
-        $finalTotalUsd = \max(0.0, $effectiveSubtotalUsd - $discountAmountUsd);
+        $cartPromoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalEur, $couponCode, $customerEmail);
+        $discountAmountEur = $cartPromoResult['totalDiscount'];
+        $finalTotalEur = \max(0.0, $effectiveSubtotalEur - $discountAmountEur);
 
         // Build applied discounts list for template (with clear labels)
         $appliedDiscounts = [];
@@ -255,7 +255,7 @@ class CheckoutController extends AbstractController
         // Build applied coupon info independently (for coupon input UI state)
         $appliedCoupon = null;
         if ($couponCode !== null && $couponCode !== '') {
-            $validatedPromo = $this->promotionEngine->validateCouponCode($couponCode, $effectiveSubtotalUsd, $customerEmail);
+            $validatedPromo = $this->promotionEngine->validateCouponCode($couponCode, $effectiveSubtotalEur, $customerEmail);
             if ($validatedPromo !== null) {
                 $appliedCoupon = [
                     'code' => $couponCode,
@@ -266,11 +266,11 @@ class CheckoutController extends AbstractController
 
         return $this->render('shop/checkout/index.html.twig', [
             'items' => $items,
-            'subtotalUsd' => $effectiveSubtotalUsd,
-            'subtotalConverted' => $this->currencyConverter->convert($effectiveSubtotalUsd, $currency),
-            'discountAmountUsd' => $discountAmountUsd,
-            'discountConverted' => $this->currencyConverter->convert($discountAmountUsd, $currency),
-            'finalTotalConverted' => $this->currencyConverter->convert($finalTotalUsd, $currency),
+            'subtotalEur' => $effectiveSubtotalEur,
+            'subtotalConverted' => $this->currencyConverter->convert($effectiveSubtotalEur, $currency),
+            'discountAmountEur' => $discountAmountEur,
+            'discountConverted' => $this->currencyConverter->convert($discountAmountEur, $currency),
+            'finalTotalConverted' => $this->currencyConverter->convert($finalTotalEur, $currency),
             'currency' => $currency,
             'errors' => $errors,
             'formData' => $this->getFormData($request),
@@ -331,7 +331,7 @@ class CheckoutController extends AbstractController
 
         return $this->render('shop/checkout/payment.html.twig', [
             'order' => $order,
-            'totalConverted' => $this->currencyConverter->convert($order->getTotalUsd(), $currency),
+            'totalConverted' => $this->currencyConverter->convert($order->getTotalEur(), $currency),
             'currency' => $currency,
             'stripePublicKey' => $this->stripePublicKey,
             'clientSecret' => $paymentIntent->client_secret,
@@ -474,7 +474,7 @@ class CheckoutController extends AbstractController
 
         return $this->render('shop/checkout/confirmation.html.twig', [
             'order' => $order,
-            'totalConverted' => $this->currencyConverter->convert($order->getTotalUsd(), $currency),
+            'totalConverted' => $this->currencyConverter->convert($order->getTotalEur(), $currency),
             'currency' => $currency,
         ]);
     }
@@ -503,7 +503,7 @@ class CheckoutController extends AbstractController
 
         return $this->render('shop/checkout/tracking.html.twig', [
             'order' => $order,
-            'totalConverted' => $this->currencyConverter->convert($order->getTotalUsd(), $currency),
+            'totalConverted' => $this->currencyConverter->convert($order->getTotalEur(), $currency),
             'currency' => $currency,
         ]);
     }
@@ -669,13 +669,13 @@ class CheckoutController extends AbstractController
     /**
      * @param Product[] $products
      */
-    private function updateExistingOrder(Order $order, Request $request, array $products, float $subtotalUsd): Order
+    private function updateExistingOrder(Order $order, Request $request, array $products, float $subtotalEur): Order
     {
         $this->fillOrderFromRequest($order, $request);
 
         // Replace items if cart changed
-        $oldTotal = $order->getTotalUsd();
-        $order->setTotalUsd($subtotalUsd);
+        $oldTotal = $order->getTotalEur();
+        $order->setTotalEur($subtotalEur);
 
         foreach ($order->getItems()->toArray() as $oldItem) {
             $order->removeItem($oldItem);
@@ -686,13 +686,13 @@ class CheckoutController extends AbstractController
             $item = OrderItem::fromProduct($product, $shippingCost);
             $discountedPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
             if ($discountedPrice !== null) {
-                $item->setDiscountAmountUsd($product->getDisplayPrice() - $discountedPrice);
+                $item->setDiscountAmountEur($product->getDisplayPrice() - $discountedPrice);
             }
             $order->addItem($item);
         }
 
         // Reset Stripe PaymentIntent if total changed (new PI will be created at payment step)
-        if ($oldTotal !== $subtotalUsd && $order->getStripePaymentIntentId() !== null) {
+        if ($oldTotal !== $subtotalEur && $order->getStripePaymentIntentId() !== null) {
             $order->setStripePaymentIntentId(null);
         }
 
@@ -702,19 +702,19 @@ class CheckoutController extends AbstractController
     /**
      * @param Product[] $products
      */
-    private function createOrder(Request $request, array $products, float $subtotalUsd): Order
+    private function createOrder(Request $request, array $products, float $subtotalEur): Order
     {
         $order = new Order();
         $order->setReference($this->orderRepository->nextOrderReference((int) \date('Y')));
         $this->fillOrderFromRequest($order, $request);
-        $order->setTotalUsd($subtotalUsd);
+        $order->setTotalEur($subtotalEur);
 
         foreach ($products as $product) {
             $shippingCost = $this->shippingCostProvider->getCost($product->getShippingTier());
             $item = OrderItem::fromProduct($product, $shippingCost);
             $discountedPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
             if ($discountedPrice !== null) {
-                $item->setDiscountAmountUsd($product->getDisplayPrice() - $discountedPrice);
+                $item->setDiscountAmountEur($product->getDisplayPrice() - $discountedPrice);
             }
             $order->addItem($item);
         }
@@ -860,10 +860,10 @@ class CheckoutController extends AbstractController
         }
 
         $products = $this->cartManager->getProducts();
-        $effectiveSubtotalUsd = $this->promotionEngine->getEffectiveSubtotalUsd($products);
+        $effectiveSubtotalEur = $this->promotionEngine->getEffectiveSubtotalEur($products);
         $email = $this->getCheckoutEmail($request);
 
-        $promo = $this->promotionEngine->validateCouponCode($code, $effectiveSubtotalUsd, $email);
+        $promo = $this->promotionEngine->validateCouponCode($code, $effectiveSubtotalEur, $email);
 
         if ($promo === null) {
             return $this->json(['valid' => false, 'message' => $this->translator->trans('checkout.coupon_invalid')]);

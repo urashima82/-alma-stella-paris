@@ -10,9 +10,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CurrencyConverter
 {
-    public const string BASE_CURRENCY = 'USD';
-    public const array SUPPORTED_CURRENCIES = ['USD', 'EUR', 'CAD', 'GBP', 'MXN'];
-    private const string API_URL = 'https://open.er-api.com/v6/latest/USD';
+    public const string BASE_CURRENCY = 'EUR';
+    public const array SUPPORTED_CURRENCIES = ['EUR', 'USD', 'CAD', 'GBP', 'MXN'];
+    private const string API_URL = 'https://open.er-api.com/v6/latest/EUR';
     private const int CACHE_TTL_SECONDS = 21600; // 6 hours
 
     public function __construct(
@@ -22,23 +22,23 @@ class CurrencyConverter
     }
 
     /**
-     * Convert an amount from USD to the target currency.
+     * Convert an amount from EUR to the target currency.
      */
-    public function convert(float $amountUsd, string $targetCurrency): float
+    public function convert(float $amountEur, string $targetCurrency): float
     {
         $targetCurrency = \strtoupper($targetCurrency);
 
         if ($targetCurrency === self::BASE_CURRENCY) {
-            return $amountUsd;
+            return $amountEur;
         }
 
         $rate = $this->getRate($targetCurrency);
 
-        return \round($amountUsd * $rate, 2);
+        return \round($amountEur * $rate, 2);
     }
 
     /**
-     * Get the exchange rate for a given currency relative to USD.
+     * Get the exchange rate for a given currency relative to EUR.
      * Returns 1.0 as fallback if the API is unavailable or the currency is unsupported.
      */
     public function getRate(string $currency): float
@@ -65,7 +65,7 @@ class CurrencyConverter
             'CAD' => 'CA$',
             'GBP' => "\u{00A3}",
             'MXN' => 'MX$',
-            default => '$',
+            default => "\u{20AC}",
         };
     }
 

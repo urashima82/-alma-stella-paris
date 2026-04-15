@@ -85,7 +85,7 @@ class PromotionEngine
      *
      * @param Product[] $products
      */
-    public function getEffectiveSubtotalUsd(array $products): float
+    public function getEffectiveSubtotalEur(array $products): float
     {
         $total = 0.0;
 
@@ -111,7 +111,7 @@ class PromotionEngine
         }
 
         if ($product->getCompareAtPrice() !== null) {
-            return $product->getCompareAtPrice() + $product->getShippingTier()->shippingCostUsd();
+            return $product->getCompareAtPrice() + $product->getShippingTier()->shippingCostEur();
         }
 
         return null;
@@ -146,7 +146,7 @@ class PromotionEngine
      *
      * @return array{promotions: list<array{promotion: Promotion, discount: float}>, totalDiscount: float}
      */
-    public function evaluateCartPromotions(array $products, float $subtotalUsd, ?string $couponCode = null, ?string $customerEmail = null): array
+    public function evaluateCartPromotions(array $products, float $subtotalEur, ?string $couponCode = null, ?string $customerEmail = null): array
     {
         $results = [];
         $totalDiscount = 0.0;
@@ -158,7 +158,7 @@ class PromotionEngine
         $bestAutoNonCumulableDiscount = 0.0;
 
         foreach ($this->getActiveCartPromotions() as $promo) {
-            $discount = $this->evaluateSingleCartPromotion($promo, $products, $subtotalUsd, $customerEmail);
+            $discount = $this->evaluateSingleCartPromotion($promo, $products, $subtotalEur, $customerEmail);
 
             if ($discount <= 0.0) {
                 continue;
@@ -183,7 +183,7 @@ class PromotionEngine
 
         // --- Phase 2: Coupon code (always stacks with auto promos, applies only to full-price items) ---
         if ($couponCode !== null && $couponCode !== '') {
-            $codePromo = $this->validateCouponCode($couponCode, $subtotalUsd, $customerEmail);
+            $codePromo = $this->validateCouponCode($couponCode, $subtotalEur, $customerEmail);
 
             if ($codePromo !== null) {
                 $eligibleTotal = $this->getCouponEligibleSubtotal($codePromo, $products);
@@ -205,7 +205,7 @@ class PromotionEngine
     /**
      * Validate a coupon code and return the Promotion if valid, null otherwise.
      */
-    public function validateCouponCode(string $code, float $subtotalUsd = 0.0, ?string $customerEmail = null): ?Promotion
+    public function validateCouponCode(string $code, float $subtotalEur = 0.0, ?string $customerEmail = null): ?Promotion
     {
         $promo = $this->promotionRepository->findByCode($code);
 
@@ -225,7 +225,7 @@ class PromotionEngine
             return null;
         }
 
-        if ($promo->getMinimumAmountUsd() !== null && $subtotalUsd < $promo->getMinimumAmountUsd()) {
+        if ($promo->getMinimumAmountEur() !== null && $subtotalEur < $promo->getMinimumAmountEur()) {
             return null;
         }
 
@@ -258,7 +258,7 @@ class PromotionEngine
             );
 
             $promo->incrementUsageCount();
-            $promo->addRevenue($order->getTotalUsd());
+            $promo->addRevenue($order->getTotalEur());
             $promo->setLastUsedAt(new \DateTimeImmutable());
 
             $this->entityManager->persist($usage);
@@ -270,7 +270,7 @@ class PromotionEngine
     /**
      * @param Product[] $products
      */
-    private function evaluateSingleCartPromotion(Promotion $promo, array $products, float $subtotalUsd, ?string $customerEmail): float
+    private function evaluateSingleCartPromotion(Promotion $promo, array $products, float $subtotalEur, ?string $customerEmail): float
     {
         if (!$promo->isCurrentlyValid()) {
             return 0.0;
@@ -280,7 +280,7 @@ class PromotionEngine
             return 0.0;
         }
 
-        if ($promo->getMinimumAmountUsd() !== null && $subtotalUsd < $promo->getMinimumAmountUsd()) {
+        if ($promo->getMinimumAmountEur() !== null && $subtotalEur < $promo->getMinimumAmountEur()) {
             return 0.0;
         }
 
@@ -291,7 +291,7 @@ class PromotionEngine
             }
         }
 
-        $eligibleTotal = $this->getEligibleSubtotal($promo, $products, $subtotalUsd);
+        $eligibleTotal = $this->getEligibleSubtotal($promo, $products, $subtotalEur);
 
         if ($eligibleTotal <= 0.0) {
             return 0.0;

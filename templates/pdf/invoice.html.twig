@@ -238,7 +238,7 @@
             {% for item in order.items %}
                 <tr>
                     <td class="product-name">{{ item.getLocalizedProductName(locale) }}</td>
-                    <td class="right">${{ '%.2f'|format(item.lineTotal) }}</td>
+                    <td class="right">€{{ '%.2f'|format(item.lineTotal) }}</td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -256,16 +256,16 @@
                     {{ locale == 'fr' and promo.nameFr is defined and promo.nameFr ? promo.nameFr : promo.name }}
                     {% if promo.code %}({{ promo.code }}){% endif %}
                 </td>
-                <td class="total-value" style="color: #16a34a;">-${{ '%.2f'|format(promo.discount) }}</td>
+                <td class="total-value" style="color: #16a34a;">-€{{ '%.2f'|format(promo.discount) }}</td>
             </tr>
         {% endfor %}
         <tr>
             <td class="total-label">TVA</td>
-            <td class="total-value">$0.00</td>
+            <td class="total-value">€0.00</td>
         </tr>
         <tr class="grand-total">
-            <td class="total-label">Total (USD)</td>
-            <td class="total-value">${{ '%.2f'|format(order.totalUsd) }}</td>
+            <td class="total-label">Total (EUR)</td>
+            <td class="total-value">€{{ '%.2f'|format(order.totalEur) }}</td>
         </tr>
     </table>
 
@@ -275,9 +275,9 @@
         SIRET : 917 539 751 — 11 rue Guy de Maupassant, 31200 Toulouse, France<br>
         TVA non applicable, art. 293 B du CGI.
         {% if locale == 'fr' %}
-            — Paiement traité par Stripe en USD.
+            — Paiement traité par Stripe en EUR.
         {% else %}
-            — Payment processed by Stripe in USD.
+            — Payment processed by Stripe in EUR.
         {% endif %}
     </div>
 </body>

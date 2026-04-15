@@ -19,12 +19,12 @@ enum ShippingTier: string
         };
     }
 
-    public function shippingCostUsd(): float
+    public function shippingCostEur(): float
     {
         return match ($this) {
             self::Standard => 10.00,
-            self::Heavy => 14.00,
-            self::Set => 22.00,
+            self::Heavy => 15.00,
+            self::Set => 20.00,
         };
     }
 

@@ -22,7 +22,7 @@ class ShippingCostProvider
     {
         $settings = $this->getSettings($tier);
 
-        return $settings?->getShippingCostUsd() ?? $tier->shippingCostUsd();
+        return $settings?->getShippingCostEur() ?? $tier->shippingCostEur();
     }
 
     public function getLabel(ShippingTier $tier): string

@@ -104,8 +104,8 @@ class OrderCrudController extends AbstractCrudController
         yield EmailField::new('customerEmail', 'Email');
         yield IntegerField::new('itemCount', 'Articles')
             ->formatValue(static fn ($value, Order $entity) => $entity->getItems()->count());
-        yield MoneyField::new('totalUsd', 'Total')
-            ->setCurrency('USD')
+        yield MoneyField::new('totalEur', 'Total')
+            ->setCurrency('EUR')
             ->setStoredAsCents(false)
             ->setNumDecimals(2);
         yield CountryField::new('shippingCountry', 'Destination');

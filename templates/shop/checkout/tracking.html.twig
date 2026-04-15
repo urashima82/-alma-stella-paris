@@ -84,7 +84,7 @@
                             {{ app.request.locale == 'fr' and promo.nameFr is defined and promo.nameFr ? promo.nameFr : promo.name }}
                             {% if promo.code %}({{ promo.code }}){% endif %}
                         </span>
-                        <span class="text-green-600 font-medium">-${{ promo.discount|number_format(2) }}</span>
+                        <span class="text-green-600 font-medium">-{{ promo.discount|price }}</span>
                     </div>
                 {% endfor %}
                 <div class="flex justify-between text-sm font-sans">

@@ -178,9 +178,9 @@ Recommended: B — matches e-commerce standard behavior."
 See `ARCHITECTURE.md` for full technical details.
 
 ### Key decisions summary
-- **Reference currency:** USD — all `base_price` stored in USD in the database
+- **Reference currency:** EUR — all `base_price` stored in EUR in the database
 - **Currency display:** cosmetic conversion via live exchange rates (open.er-api.com,
-  cached 6h) — Stripe always charges in USD
+  cached 6h) — Stripe always charges in EUR
 - **Shipping model:** `ShippingTier` enum with costs baked into display price —
   no dynamic shipping calculator at checkout
 - **Social publishing:** Pinterest and TikTok Shop via API (direct); Instagram
@@ -195,12 +195,12 @@ See `ARCHITECTURE.md` for full technical details.
 > Read `LOCALISATION.md` for full implementation details.
 
 ### Quick reference
-- Prices stored in **USD**, displayed in visitor's chosen currency
-- Supported currencies: `USD`, `EUR`, `CAD`, `GBP`, `MXN`
-- Default currency: `USD`
+- Prices stored in **EUR**, displayed in visitor's chosen currency
+- Supported currencies: `EUR`, `USD`, `CAD`, `GBP`, `MXN`
+- Default currency: `EUR`
 - Currency preference stored in **session + cookie (30 days)**
-- Non-USD prices carry a disclaimer: *"Prices shown in [currency] are indicative.
-  You will be charged in USD at checkout."*
+- Non-EUR prices carry a disclaimer: *"Prices shown in [currency] are indicative.
+  You will be charged in EUR at checkout."*
 - French content must use correct UTF-8 accented characters at all times
 - Product descriptions are bilingual FR/EN (see content guidelines in `DESIGN.md`)
 - **EasyAdmin is in French** — locale `fr`, all menu items, labels, and
@@ -229,7 +229,7 @@ Hover:       #E8DDD0  (soft taupe)
 
 - Geo-pricing (different prices per country)
 - Direct Instagram API publishing (use deep link instead)
-- Multi-currency Stripe charges (always charge USD)
+- Multi-currency Stripe charges (always charge EUR)
 - Backend user accounts at launch (V2)
 - Complex shipping weight calculator (ShippingTier enum is sufficient)
 - Any Drupal dependency

@@ -270,9 +270,9 @@
 
         <div class="stat-card">
             <div class="stat-icon stat-icon-green">
-                <i class="fa fa-dollar-sign"></i>
+                <i class="fa fa-euro-sign"></i>
             </div>
-            <div class="stat-value">${{ revenue_week|number_format(2, '.', ',') }}</div>
+            <div class="stat-value">€{{ revenue_week|number_format(2, '.', ',') }}</div>
             <div class="stat-label">Revenu cette semaine</div>
             {% if revenue_last_week > 0 %}
                 {% set rev_pct = ((revenue_week - revenue_last_week) / revenue_last_week * 100)|round(0) %}
@@ -329,7 +329,7 @@
                         </td>
                         <td>{{ order.statusLabel|raw }}</td>
                         <td>{{ order.customerName }}</td>
-                        <td>${{ order.totalUsd|number_format(2, '.', ',') }}</td>
+                        <td>€{{ order.totalEur|number_format(2, '.', ',') }}</td>
                         <td>{{ order.createdAt|date('d/m/Y H:i') }}</td>
                     </tr>
                 {% else %}

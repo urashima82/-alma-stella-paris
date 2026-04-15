@@ -119,84 +119,84 @@ class AppFixtures extends Fixture
                 'Pendentif Étoile Doré',
                 'Delicate gold star pendant on a fine chain, inspired by the night sky over the Mexican desert. Made from water-resistant stainless steel with 18K gold plating.',
                 'Délicat pendentif étoile en acier doré, inspiré du ciel nocturne au-dessus du désert mexicain. Acier inoxydable résistant à l\'eau avec placage or 18 carats.',
-                38.00, 48.00, ShippingTier::Standard, 'Necklaces', true, true, [Product::COUNTRY_MEXICO],
+                35.00, 44.00, ShippingTier::Standard, 'Necklaces', true, true, [Product::COUNTRY_MEXICO],
             ],
             [
                 'Turquoise Stone Ring',
                 'Bague Pierre Turquoise',
                 'Statement turquoise ring set in gold-plated stainless steel. Each stone is unique, hand-selected for its vibrant color.',
                 'Bague turquoise sertie dans de l\'acier inoxydable plaqué or. Chaque pierre est unique, sélectionnée à la main pour sa couleur vibrante.',
-                28.00, null, ShippingTier::Standard, 'Rings', true, true, [Product::COUNTRY_MEXICO],
+                26.00, null, ShippingTier::Standard, 'Rings', true, true, [Product::COUNTRY_MEXICO],
             ],
             [
                 'Black Onyx Drop Earrings',
                 'Boucles d\'Oreilles Onyx Noir',
                 'Elegant drop earrings featuring polished black onyx stones. A timeless piece that transitions effortlessly from day to night.',
                 'Élégantes boucles d\'oreilles pendantes en onyx noir poli. Une pièce intemporelle qui passe facilement du jour à la nuit.',
-                32.00, 42.00, ShippingTier::Standard, 'Earrings', true, true, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                29.00, 39.00, ShippingTier::Standard, 'Earrings', true, true, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
             ],
             [
                 'Layered Gold Chain Bracelet',
                 'Bracelet Chaînes Dorées Superposées',
                 'Multi-layered gold chain bracelet with a delicate bohemian feel. Water-resistant, perfect for everyday wear.',
                 'Bracelet multi-chaînes dorées à l\'esprit bohème délicat. Résistant à l\'eau, parfait pour le quotidien.',
-                26.00, null, ShippingTier::Standard, 'Bracelets', true, true, [Product::COUNTRY_FRANCE],
+                24.00, null, ShippingTier::Standard, 'Bracelets', true, true, [Product::COUNTRY_FRANCE],
             ],
             [
                 'Mother of Pearl Choker',
                 'Ras-de-Cou Nacre',
                 'Stunning choker necklace featuring natural mother of pearl elements. A statement piece inspired by the coasts of Oaxaca.',
                 'Superbe ras-de-cou avec éléments en nacre naturelle. Une pièce forte inspirée des côtes d\'Oaxaca.',
-                40.00, null, ShippingTier::Heavy, 'Necklaces', true, false, [Product::COUNTRY_MEXICO],
+                37.00, null, ShippingTier::Heavy, 'Necklaces', true, false, [Product::COUNTRY_MEXICO],
             ],
             [
                 'Lapis Lazuli Stud Earrings',
                 'Puces d\'Oreilles Lapis-Lazuli',
                 'Minimalist stud earrings with genuine lapis lazuli stones. The deep blue evokes the Mediterranean sky.',
                 'Puces d\'oreilles minimalistes en véritable lapis-lazuli. Le bleu profond évoque le ciel méditerranéen.',
-                24.00, null, ShippingTier::Standard, 'Earrings', true, false, [Product::COUNTRY_FRANCE],
+                22.00, null, ShippingTier::Standard, 'Earrings', true, false, [Product::COUNTRY_FRANCE],
             ],
             [
                 'Hammered Gold Cuff',
                 'Manchette Dorée Martelée',
                 'Bold hammered gold cuff bracelet. Each piece is hand-finished, making every cuff subtly unique.',
                 'Manchette dorée martelée audacieuse. Chaque pièce est finie à la main, rendant chaque manchette subtilement unique.',
-                52.00, 65.00, ShippingTier::Heavy, 'Bracelets', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                48.00, 60.00, ShippingTier::Heavy, 'Bracelets', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
             ],
             [
                 'Shell & Gold Anklet',
                 'Chaîne de Cheville Coquillage & Or',
                 'Dainty anklet combining natural shell elements with gold-plated chain. Summer-ready and water-resistant.',
                 'Chaîne de cheville délicate alliant coquillages naturels et chaîne plaquée or. Prête pour l\'été et résistante à l\'eau.',
-                18.00, null, ShippingTier::Standard, 'Anklets', true, false, [Product::COUNTRY_MEXICO],
+                17.00, null, ShippingTier::Standard, 'Anklets', true, false, [Product::COUNTRY_MEXICO],
             ],
             [
                 'Moonstone Solitaire Ring',
                 'Bague Solitaire Pierre de Lune',
                 'Ethereal moonstone solitaire ring with a luminous, milky glow. Set in brushed gold-plated steel.',
                 'Bague solitaire en pierre de lune éthérée avec un éclat lumineux et laiteux. Sertie dans de l\'acier plaqué or brossé.',
-                48.00, null, ShippingTier::Standard, 'Rings', true, false, [Product::COUNTRY_FRANCE],
+                44.00, null, ShippingTier::Standard, 'Rings', true, false, [Product::COUNTRY_FRANCE],
             ],
             [
                 'Coin Charm Necklace',
                 'Collier Médaillon',
                 'Vintage-inspired coin charm on a fine gold chain. A versatile everyday piece with old-world charm.',
                 'Médaillon d\'inspiration vintage sur une fine chaîne dorée. Une pièce polyvalente au charme d\'antan.',
-                34.00, null, ShippingTier::Standard, 'Necklaces', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                31.00, null, ShippingTier::Standard, 'Necklaces', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
             ],
             [
                 'Beaded Stone Bracelet',
                 'Bracelet Perles de Pierre',
                 'Natural stone bead bracelet with gold accent beads. Each stone carries its own unique pattern and energy.',
                 'Bracelet de perles en pierre naturelle avec perles dorées. Chaque pierre porte son propre motif et énergie unique.',
-                22.00, null, ShippingTier::Standard, 'Bracelets', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                20.00, null, ShippingTier::Standard, 'Bracelets', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
             ],
             [
                 'Pearl & Gold Hoops',
                 'Créoles Perles & Or',
                 'Modern gold hoops adorned with freshwater pearls. A contemporary twist on a timeless classic.',
                 'Créoles dorées modernes ornées de perles d\'eau douce. Une touche contemporaine sur un classique intemporel.',
-                36.00, 45.00, ShippingTier::Standard, 'Earrings', true, false, [Product::COUNTRY_FRANCE],
+                33.00, 41.00, ShippingTier::Standard, 'Earrings', true, false, [Product::COUNTRY_FRANCE],
             ],
         ];
 
@@ -327,7 +327,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => 'CF123456789FR',
                 'stripe_status' => 'succeeded',
-                'items' => [['Gold Star Pendant Necklace', 38.00, 4.90]],
+                'items' => [['Gold Star Pendant Necklace', 35.00, 10.00]],
                 'days_ago' => 21,
             ],
             [
@@ -345,8 +345,8 @@ class AppFixtures extends Fixture
                 'tracking' => '6A12345678901',
                 'stripe_status' => 'succeeded',
                 'items' => [
-                    ['Black Onyx Drop Earrings', 32.00, 4.90],
-                    ['Layered Gold Chain Bracelet', 26.00, 4.90],
+                    ['Black Onyx Drop Earrings', 29.00, 10.00],
+                    ['Layered Gold Chain Bracelet', 24.00, 10.00],
                 ],
                 'days_ago' => 5,
             ],
@@ -364,7 +364,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => null,
                 'stripe_status' => 'succeeded',
-                'items' => [['Mother of Pearl Choker', 40.00, 6.90]],
+                'items' => [['Mother of Pearl Choker', 37.00, 15.00]],
                 'days_ago' => 2,
             ],
             [
@@ -382,8 +382,8 @@ class AppFixtures extends Fixture
                 'tracking' => 'MX987654321',
                 'stripe_status' => 'succeeded',
                 'items' => [
-                    ['Turquoise Stone Ring', 28.00, 4.90],
-                    ['Beaded Stone Bracelet', 22.00, 4.90],
+                    ['Turquoise Stone Ring', 26.00, 10.00],
+                    ['Beaded Stone Bracelet', 20.00, 10.00],
                 ],
                 'days_ago' => 3,
             ],
@@ -402,36 +402,36 @@ class AppFixtures extends Fixture
                 'tracking' => null,
                 'stripe_status' => 'succeeded',
                 'items' => [
-                    ['Gold Star Pendant Necklace', 38.00, 4.90],
-                    ['Turquoise Stone Ring', 28.00, 4.90],
-                    ['Black Onyx Drop Earrings', 32.00, 4.90],
-                    ['Layered Gold Chain Bracelet', 26.00, 4.90],
-                    ['Mother of Pearl Choker', 40.00, 6.90],
-                    ['Lapis Lazuli Stud Earrings', 24.00, 4.90],
-                    ['Hammered Gold Cuff', 52.00, 6.90],
-                    ['Shell & Gold Anklet', 18.00, 4.90],
-                    ['Moonstone Solitaire Ring', 48.00, 4.90],
-                    ['Coin Charm Necklace', 34.00, 4.90],
-                    ['Beaded Stone Bracelet', 22.00, 4.90],
-                    ['Pearl & Gold Hoops', 36.00, 4.90],
-                    ['Rose Quartz Pendant Necklace', 42.00, 4.90],
-                    ['Aventurine Twist Ring', 30.00, 4.90],
-                    ['Tiger Eye Huggie Earrings', 26.00, 4.90],
-                    ['Amethyst Chain Bracelet', 34.00, 4.90],
-                    ['Jade Teardrop Necklace', 46.00, 6.90],
-                    ['Garnet Cluster Studs', 28.00, 4.90],
-                    ['Citrine Wave Bangle', 38.00, 6.90],
-                    ['Coral & Gold Ankle Chain', 20.00, 4.90],
-                    ['Agate Slice Pendant', 44.00, 4.90],
-                    ['Opal Crescent Earrings', 50.00, 4.90],
-                    ['Malachite Signet Ring', 36.00, 4.90],
-                    ['Carnelian Sun Necklace', 40.00, 4.90],
-                    ['Labradorite Charm Bracelet', 32.00, 4.90],
-                    ['Amazonite Drop Earrings', 28.00, 4.90],
-                    ['Smoky Quartz Chain Ring', 24.00, 4.90],
-                    ['Rhodonite Heart Pendant', 38.00, 4.90],
-                    ['Peridot Vine Anklet', 22.00, 4.90],
-                    ['Jasper Bohemian Cuff', 56.00, 6.90],
+                    ['Gold Star Pendant Necklace', 35.00, 10.00],
+                    ['Turquoise Stone Ring', 26.00, 10.00],
+                    ['Black Onyx Drop Earrings', 29.00, 10.00],
+                    ['Layered Gold Chain Bracelet', 24.00, 10.00],
+                    ['Mother of Pearl Choker', 37.00, 15.00],
+                    ['Lapis Lazuli Stud Earrings', 22.00, 10.00],
+                    ['Hammered Gold Cuff', 48.00, 15.00],
+                    ['Shell & Gold Anklet', 17.00, 10.00],
+                    ['Moonstone Solitaire Ring', 44.00, 10.00],
+                    ['Coin Charm Necklace', 31.00, 10.00],
+                    ['Beaded Stone Bracelet', 20.00, 10.00],
+                    ['Pearl & Gold Hoops', 33.00, 10.00],
+                    ['Rose Quartz Pendant Necklace', 39.00, 10.00],
+                    ['Aventurine Twist Ring', 28.00, 10.00],
+                    ['Tiger Eye Huggie Earrings', 24.00, 10.00],
+                    ['Amethyst Chain Bracelet', 31.00, 10.00],
+                    ['Jade Teardrop Necklace', 42.00, 15.00],
+                    ['Garnet Cluster Studs', 26.00, 10.00],
+                    ['Citrine Wave Bangle', 35.00, 15.00],
+                    ['Coral & Gold Ankle Chain', 18.00, 10.00],
+                    ['Agate Slice Pendant', 40.00, 10.00],
+                    ['Opal Crescent Earrings', 46.00, 10.00],
+                    ['Malachite Signet Ring', 33.00, 10.00],
+                    ['Carnelian Sun Necklace', 37.00, 10.00],
+                    ['Labradorite Charm Bracelet', 29.00, 10.00],
+                    ['Amazonite Drop Earrings', 26.00, 10.00],
+                    ['Smoky Quartz Chain Ring', 22.00, 10.00],
+                    ['Rhodonite Heart Pendant', 35.00, 10.00],
+                    ['Peridot Vine Anklet', 20.00, 10.00],
+                    ['Jasper Bohemian Cuff', 52.00, 15.00],
                 ],
                 'days_ago' => 1,
             ],
@@ -449,7 +449,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => null,
                 'stripe_status' => null,
-                'items' => [['Hammered Gold Cuff', 52.00, 6.90]],
+                'items' => [['Hammered Gold Cuff', 48.00, 15.00]],
                 'days_ago' => 0,
             ],
             [
@@ -466,7 +466,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => null,
                 'stripe_status' => 'canceled',
-                'items' => [['Pearl & Gold Hoops', 36.00, 4.90]],
+                'items' => [['Pearl & Gold Hoops', 33.00, 10.00]],
                 'days_ago' => 10,
             ],
             // --- Testimonial test orders ---
@@ -485,7 +485,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => 'US123456789EN',
                 'stripe_status' => 'succeeded',
-                'items' => [['Lapis Lazuli Stud Earrings', 24.00, 4.90]],
+                'items' => [['Lapis Lazuli Stud Earrings', 22.00, 10.00]],
                 'days_ago' => 18,
             ],
             // Delivered 25 days ago, NO testimonial → scheduler SHOULD send email (FR)
@@ -504,8 +504,8 @@ class AppFixtures extends Fixture
                 'tracking' => 'CF987654321FR',
                 'stripe_status' => 'succeeded',
                 'items' => [
-                    ['Coin Charm Necklace', 34.00, 4.90],
-                    ['Shell & Gold Anklet', 18.00, 4.90],
+                    ['Coin Charm Necklace', 31.00, 10.00],
+                    ['Shell & Gold Anklet', 17.00, 10.00],
                 ],
                 'days_ago' => 25,
             ],
@@ -524,7 +524,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => 'CA555666777',
                 'stripe_status' => 'succeeded',
-                'items' => [['Moonstone Solitaire Ring', 48.00, 4.90]],
+                'items' => [['Moonstone Solitaire Ring', 44.00, 10.00]],
                 'days_ago' => 10,
             ],
         ];
@@ -580,7 +580,7 @@ class AppFixtures extends Fixture
                 $total += $price + $shipping;
             }
 
-            $order->setTotalUsd($total);
+            $order->setTotalEur($total);
             $manager->persist($order);
         }
     }
@@ -609,40 +609,40 @@ class AppFixtures extends Fixture
         }
         $manager->persist($necklacePromo);
 
-        // 2. Cart automatic: -$5 over $80
+        // 2. Cart automatic: -5€ over 75€
         $cartAutoPromo = new Promotion();
-        $cartAutoPromo->setName('$5 off over $80');
-        $cartAutoPromo->setNameFr('5 $ offerts dès 80 $');
+        $cartAutoPromo->setName('5€ off over 75€');
+        $cartAutoPromo->setNameFr('5 € offerts dès 75 €');
         $cartAutoPromo->setType(PromotionType::CartAutomatic);
         $cartAutoPromo->setDiscountType(DiscountType::FixedAmount);
         $cartAutoPromo->setDiscountValue(5.00);
         $cartAutoPromo->setIsActive(true);
         $cartAutoPromo->setIsCumulable(true);
-        $cartAutoPromo->setMinimumAmountUsd(80.00);
+        $cartAutoPromo->setMinimumAmountEur(75.00);
         $manager->persist($cartAutoPromo);
 
-        // 3. Cart automatic: -10% over $60 (non-cumulable, competes with #2)
+        // 3. Cart automatic: -10% over 55€ (non-cumulable, competes with #2)
         $cartAutoPromoNonCumulable = new Promotion();
-        $cartAutoPromoNonCumulable->setName('-10% over $60');
-        $cartAutoPromoNonCumulable->setNameFr('-10% dès 60 $ d\'achat');
+        $cartAutoPromoNonCumulable->setName('-10% over 55€');
+        $cartAutoPromoNonCumulable->setNameFr('-10% dès 55 € d\'achat');
         $cartAutoPromoNonCumulable->setType(PromotionType::CartAutomatic);
         $cartAutoPromoNonCumulable->setDiscountType(DiscountType::Percentage);
         $cartAutoPromoNonCumulable->setDiscountValue(10.00);
         $cartAutoPromoNonCumulable->setIsActive(true);
         $cartAutoPromoNonCumulable->setIsCumulable(false);
-        $cartAutoPromoNonCumulable->setMinimumAmountUsd(60.00);
+        $cartAutoPromoNonCumulable->setMinimumAmountEur(55.00);
         $manager->persist($cartAutoPromoNonCumulable);
 
-        // 4. Cart automatic: -15% over $100 (non-cumulable, competes with #3)
+        // 4. Cart automatic: -15% over 90€ (non-cumulable, competes with #3)
         $cartAutoPromo15 = new Promotion();
-        $cartAutoPromo15->setName('-15% over $100');
-        $cartAutoPromo15->setNameFr('-15% dès 100 $ d\'achat');
+        $cartAutoPromo15->setName('-15% over 90€');
+        $cartAutoPromo15->setNameFr('-15% dès 90 € d\'achat');
         $cartAutoPromo15->setType(PromotionType::CartAutomatic);
         $cartAutoPromo15->setDiscountType(DiscountType::Percentage);
         $cartAutoPromo15->setDiscountValue(15.00);
         $cartAutoPromo15->setIsActive(true);
         $cartAutoPromo15->setIsCumulable(false);
-        $cartAutoPromo15->setMinimumAmountUsd(100.00);
+        $cartAutoPromo15->setMinimumAmountEur(90.00);
         $manager->persist($cartAutoPromo15);
 
         // 5. Cart code: BIENVENUE10 — 10% off

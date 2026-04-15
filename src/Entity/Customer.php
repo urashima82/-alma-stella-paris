@@ -215,12 +215,12 @@ class Customer implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->orders->count();
     }
 
-    public function getTotalSpentUsd(): float
+    public function getTotalSpentEur(): float
     {
         $total = 0.0;
         foreach ($this->orders as $order) {
             if ($order->getStatus() !== \App\Enum\OrderStatus::Cancelled) {
-                $total += (float) $order->getTotalUsd();
+                $total += (float) $order->getTotalEur();
             }
         }
 

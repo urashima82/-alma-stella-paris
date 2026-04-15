@@ -30,18 +30,18 @@ class CurrencyExtension extends AbstractExtension
     {
         return [
             new TwigFunction('current_currency', $this->getCurrentCurrency(...)),
-            new TwigFunction('is_non_usd_currency', $this->isNonUsdCurrency(...)),
+            new TwigFunction('is_non_eur_currency', $this->isNonEurCurrency(...)),
             new TwigFunction('currency_symbol', [CurrencyConverter::class, 'getSymbol']),
         ];
     }
 
     /**
-     * Format a USD price into the visitor's selected currency.
+     * Format a EUR price into the visitor's selected currency.
      */
-    public function formatPrice(float $amountUsd, ?string $currency = null): string
+    public function formatPrice(float $amountEur, ?string $currency = null): string
     {
         $currency = $currency ?? $this->getCurrentCurrency();
-        $converted = $this->currencyConverter->convert($amountUsd, $currency);
+        $converted = $this->currencyConverter->convert($amountEur, $currency);
         $symbol = CurrencyConverter::getSymbol($currency);
 
         // Format with 2 decimals, strip trailing .00
@@ -88,7 +88,7 @@ class CurrencyExtension extends AbstractExtension
         return $currency;
     }
 
-    public function isNonUsdCurrency(): bool
+    public function isNonEurCurrency(): bool
     {
         return $this->getCurrentCurrency() !== CurrencyConverter::BASE_CURRENCY;
     }

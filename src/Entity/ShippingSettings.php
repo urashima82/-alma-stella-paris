@@ -24,7 +24,7 @@ class ShippingSettings
     private string $label;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 2)]
-    private string $shippingCostUsd = '0.00';
+    private string $shippingCostEur = '0.00';
 
     #[ORM\Column]
     private int $maxWeightGrams = 0;
@@ -39,7 +39,7 @@ class ShippingSettings
         $settings = new self();
         $settings->tier = $tier;
         $settings->label = $tier->label();
-        $settings->shippingCostUsd = \number_format($tier->shippingCostUsd(), 2, '.', '');
+        $settings->shippingCostEur = \number_format($tier->shippingCostEur(), 2, '.', '');
         $settings->maxWeightGrams = $tier->maxWeightGrams();
 
         return $settings;
@@ -67,14 +67,14 @@ class ShippingSettings
         return $this;
     }
 
-    public function getShippingCostUsd(): float
+    public function getShippingCostEur(): float
     {
-        return (float) $this->shippingCostUsd;
+        return (float) $this->shippingCostEur;
     }
 
-    public function setShippingCostUsd(float $shippingCostUsd): static
+    public function setShippingCostEur(float $shippingCostEur): static
     {
-        $this->shippingCostUsd = \number_format($shippingCostUsd, 2, '.', '');
+        $this->shippingCostEur = \number_format($shippingCostEur, 2, '.', '');
 
         return $this;
     }

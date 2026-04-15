@@ -24,20 +24,20 @@ class OrderItemCrudController extends AbstractCrudController
             ->setDisabled();
 
         yield MoneyField::new('productPrice', 'Prix')
-            ->setCurrency('USD')
+            ->setCurrency('EUR')
             ->setStoredAsCents(false)
             ->setNumDecimals(2)
             ->setDisabled();
 
         yield MoneyField::new('shippingCost', 'Livraison')
-            ->setCurrency('USD')
+            ->setCurrency('EUR')
             ->setStoredAsCents(false)
             ->setNumDecimals(2)
             ->setDisabled();
 
         yield NumberField::new('lineTotal', 'Total ligne')
             ->setNumDecimals(2)
-            ->formatValue(static fn (mixed $value): string => '$'.\number_format((float) ($value ?? 0), 2))
+            ->formatValue(static fn (mixed $value): string => \number_format((float) ($value ?? 0), 2).' €')
             ->setDisabled();
     }
 }

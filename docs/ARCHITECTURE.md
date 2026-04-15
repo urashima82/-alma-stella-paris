@@ -182,8 +182,8 @@ class Product
     private string $slugFr;                  // French URL slug
     private string $description;             // English
     private string $descriptionFr;           // French (with accents)
-    private float $basePrice;               // USD — internal, never displayed raw
-    private ?float $compareAtPrice;         // USD — original price for discount display (nullable)
+    private float $basePrice;               // EUR — internal, never displayed raw
+    private ?float $compareAtPrice;         // EUR — original price for discount display (nullable)
     private ShippingTier $shippingTier;     // Determines shipping cost baked in
     private ProductCategory $category;
     private bool $isPublished;
@@ -205,7 +205,7 @@ class Product
     // Computed — never stored
     public function getDisplayPrice(): float
     {
-        return $this->basePrice + $this->shippingTier->shippingCostUsd();
+        return $this->basePrice + $this->shippingTier->shippingCostEur();
     }
 
     public function getDiscountPercent(): ?int  // null if no compare-at price
@@ -220,9 +220,9 @@ class Product
 // src/Enum/ShippingTier.php
 enum ShippingTier: string
 {
-    case Standard = 'standard'; // Small pieces <100g  — rings, studs, fine chains   → +$10
-    case Heavy    = 'heavy';    // Statement pieces 100-350g — large necklaces, cuffs → +$14
-    case Set      = 'set';      // Full sets / gift boxes 350g-1kg                    → +$22
+    case Standard = 'standard'; // Small pieces <100g  — rings, studs, fine chains   → +10€
+    case Heavy    = 'heavy';    // Statement pieces 100-350g — large necklaces, cuffs → +15€
+    case Set      = 'set';      // Full sets / gift boxes 350g-1kg                    → +20€
 
     public function label(): string
     {
@@ -233,12 +233,12 @@ enum ShippingTier: string
         };
     }
 
-    public function shippingCostUsd(): float
+    public function shippingCostEur(): float
     {
         return match($this) {
             self::Standard => 10.00,
-            self::Heavy    => 14.00,
-            self::Set      => 22.00,
+            self::Heavy    => 15.00,
+            self::Set      => 20.00,
         };
     }
 
@@ -254,7 +254,7 @@ enum ShippingTier: string
 ```
 
 > **Note on shipping costs:** When La Poste or Estafeta update their rates,
-> update `shippingCostUsd()` only — all display prices recalculate automatically.
+> update `shippingCostEur()` only — all display prices recalculate automatically.
 > No database migration needed.
 
 ### Order
@@ -289,7 +289,7 @@ class Order
     private ?string $billingCountry;
 
     private string $originCountry;              // 'FR' or 'MX' — set by Estelle at dispatch
-    private float $totalUsd;
+    private float $totalEur;
     private string $stripePaymentIntentId;      // Stripe PaymentIntent ID
     private ?string $stripePaymentStatus;       // Tracks Stripe PI status
     private ?string $trackingNumber;
@@ -449,7 +449,7 @@ class ShippingSettings
     private int $id;
     private ShippingTier $tier;            // Standard / Heavy / Set
     private string $label;
-    private float $shippingCostUsd;
+    private float $shippingCostEur;
     private int $maxWeightGrams;
 
     public static function createFromTier(ShippingTier $tier): self
@@ -562,7 +562,7 @@ class Promotion
     private ?string $code;                      // Null for auto promos, e.g. "BIENVENUE10" for codes
     private PromotionType $type;                // ProductAutomatic / CartAutomatic / CartCode
     private DiscountType $discountType;         // Percentage / FixedAmount
-    private float $discountValue;               // 10 = 10% or $10
+    private float $discountValue;               // 10 = 10% or 10€
     private bool $isActive;
     private bool $isCumulable;                  // Can stack with other promos
     private bool $overridesCompareAtPrice;      // If false, skip products with existing compareAtPrice
@@ -570,12 +570,12 @@ class Promotion
     private ?\DateTimeImmutable $endsAt;
     private ?int $maxUsages;                    // Total usage limit
     private ?int $maxUsagesPerEmail;            // Per-customer limit
-    private ?float $minimumAmountUsd;           // Minimum cart amount
+    private ?float $minimumAmountEur;           // Minimum cart amount
     private Collection $products;               // ManyToMany → Product (targeted)
     private Collection $categories;             // ManyToMany → ProductCategory (targeted)
     private Collection $usages;                 // OneToMany → PromotionUsage
     private int $usageCount;                    // Auto-incremented counter
-    private float $revenueGeneratedUsd;         // Revenue tracked
+    private float $revenueGeneratedEur;         // Revenue tracked
     private ?\DateTimeImmutable $lastUsedAt;
 
     public function isCurrentlyValid(): bool    // Active + within date range
@@ -583,7 +583,7 @@ class Promotion
     public function appliesToProduct(Product $product): bool  // Empty lists = applies to all
     public function canApplyToProductWithCompareAtPrice(Product $product): bool
     public function calculateDiscount(float $price): float
-    public function getDiscountLabel(): string  // e.g. "-10%" or "-$5.00"
+    public function getDiscountLabel(): string  // e.g. "-10%" or "-5,00 €"
 }
 ```
 
@@ -635,10 +635,10 @@ class Testimonial
 
 ### CurrencyConverter
 
-- Fetches rates from `https://open.er-api.com/v6/latest/USD` (free, no key)
+- Fetches rates from `https://open.er-api.com/v6/latest/EUR` (free, no key)
 - Cached 6 hours via Symfony Cache (Redis in production, filesystem in dev)
-- Supported currencies: `USD`, `EUR`, `CAD`, `GBP`, `MXN`
-- Falls back to USD silently if the external API is unavailable
+- Supported currencies: `EUR`, `USD`, `CAD`, `GBP`, `MXN`
+- Falls back to EUR silently if the external API is unavailable
 - Formats output using PHP `NumberFormatter` with correct locale per currency
 
 ### CartManager
@@ -666,7 +666,7 @@ class Testimonial
 ### ShippingCostProvider
 
 - Resolves shipping cost for a `ShippingTier`: checks `ShippingSettings` in DB first
-- Falls back to `ShippingTier::shippingCostUsd()` enum default if no DB override
+- Falls back to `ShippingTier::shippingCostEur()` enum default if no DB override
 - Used by `Product::getDisplayPrice()` and checkout total calculation
 
 ### ImageProcessor
@@ -683,7 +683,7 @@ class Testimonial
 
 ### StripeService
 
-- Creates Stripe PaymentIntents server-side (amount in cents, USD)
+- Creates Stripe PaymentIntents server-side (amount in cents, EUR)
 - Retrieves existing PaymentIntents for verification
 - Uses `StripeClient` (SDK v20) with secret key from env
 - Automatic payment methods enabled (card, Apple Pay, Google Pay)
@@ -756,7 +756,7 @@ PDF invoice generation via dompdf (`dompdf/dompdf`):
   - Brand logo (base64-encoded PNG in header)
   - Invoice number (`FA-YYYY-XXXXX`), payment date, billing address
   - Items with localized product names and prices (shipping included in unit price)
-  - Shipping: "Offerte" / "Free", TVA $0.00, Total (USD)
+  - Shipping: "Offerte" / "Free", TVA 0,00 €, Total (EUR)
   - Fixed page footer on every page: legal mentions (Estelle Bédé, EI, SIRET 917 539 751, address, TVA art. 293 B CGI)
 
 ---
