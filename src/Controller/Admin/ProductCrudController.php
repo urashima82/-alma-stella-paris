@@ -70,7 +70,7 @@ class ProductCrudController extends AbstractCrudController
             yield IdField::new('id');
             yield ImageField::new('thumbnail', 'Vignette')
                 ->setBasePath('/uploads/products');
-            yield TextField::new('name', 'Nom (EN)');
+            yield TextField::new('nameFr', 'Nom');
             yield NumberField::new('displayPrice', 'Prix affiché (USD)')
                 ->setNumDecimals(2)
                 ->formatValue(static fn (float $value): string => '$'.\number_format($value, 2));
@@ -87,8 +87,8 @@ class ProductCrudController extends AbstractCrudController
                 ]);
             yield BooleanField::new('isPublished', 'Publié');
             yield BooleanField::new('isSoldOut', 'Vendu');
-            yield DateTimeField::new('soldAt', 'Vendu le');
-            yield DateTimeField::new('createdAt', 'Créé le');
+            yield DateTimeField::new('soldAt', 'Vendu le')
+                ->setFormat('dd/MM/yyyy HH:mm');
 
             return;
         }

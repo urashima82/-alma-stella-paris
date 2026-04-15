@@ -283,49 +283,22 @@
             {% endif %}
         </div>
 
-        <div class="stat-card">
-            <div class="stat-icon stat-icon-amber">
-                <i class="fa fa-clock"></i>
-            </div>
-            <div class="stat-value">{{ pending_orders }}</div>
-            <div class="stat-label">En attente</div>
-        </div>
-
-        <div class="stat-card">
+        <a href="{{ ea_url().setController('App\\Controller\\Admin\\OrderCrudController').setAction('index').set('filters[status][comparison]', '=').set('filters[status][value]', 'processing') }}" class="stat-card" style="text-decoration: none; color: inherit;">
             <div class="stat-icon stat-icon-purple">
                 <i class="fa fa-box"></i>
             </div>
             <div class="stat-value">{{ processing_orders }}</div>
             <div class="stat-label">En préparation</div>
-        </div>
-    </div>
+        </a>
 
-    {# ── Stats: Catalogue ── #}
-    <p class="dashboard-section-title">Catalogue</p>
-    <div class="dashboard-grid">
-        <div class="stat-card">
-            <div class="stat-icon stat-icon-gold">
-                <i class="fa fa-gem"></i>
+        <a href="{{ ea_url().setController('App\\Controller\\Admin\\OrderCrudController').setAction('index').set('filters[status][comparison]', '=').set('filters[status][value]', 'shipped') }}" class="stat-card" style="text-decoration: none; color: inherit;">
+            <div class="stat-icon stat-icon-amber">
+                <i class="fa fa-truck"></i>
             </div>
-            <div class="stat-value">{{ products_available }}</div>
-            <div class="stat-label">Pièces disponibles</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon stat-icon-red">
-                <i class="fa fa-fire"></i>
-            </div>
-            <div class="stat-value">{{ recently_sold }}</div>
-            <div class="stat-label">Vendues ces 7 derniers jours</div>
-        </div>
+            <div class="stat-value">{{ shipped_orders }}</div>
+            <div class="stat-label">Expédiées</div>
+        </a>
     </div>
-
-    {% if expiring_sold > 0 %}
-        <div class="expiring-alert">
-            <i class="fa fa-exclamation-triangle"></i>
-            <span><strong>{{ expiring_sold }}</strong> pièce{{ expiring_sold > 1 ? 's' : '' }} vendue{{ expiring_sold > 1 ? 's' : '' }} va{{ expiring_sold > 1 ? 'nt' : '' }} disparaître du catalogue dans les 3 prochains jours.</span>
-        </div>
-    {% endif %}
 
     {# ── Latest orders ── #}
     <p class="dashboard-section-title">Dernières commandes</p>

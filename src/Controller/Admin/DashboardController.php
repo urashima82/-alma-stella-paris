@@ -42,6 +42,7 @@ class DashboardController extends AbstractDashboardController
         $ordersSameDayLastWeek = $this->orderRepository->countOrdersSameDayLastWeek();
         $pendingOrders = $this->orderRepository->countByStatus(OrderStatus::Pending);
         $processingOrders = $this->orderRepository->countByStatus(OrderStatus::Processing);
+        $shippedOrders = $this->orderRepository->countByStatus(OrderStatus::Shipped);
         $unreadMessages = $this->contactMessageRepository->countUnread();
         $pendingTestimonials = $this->testimonialRepository->countPending();
         $shippedWithoutTracking = $this->orderRepository->countShippedWithoutTracking();
@@ -58,6 +59,7 @@ class DashboardController extends AbstractDashboardController
             'revenue_last_week' => $revenueLastWeek,
             'pending_orders' => $pendingOrders,
             'processing_orders' => $processingOrders,
+            'shipped_orders' => $shippedOrders,
             'products_available' => $this->productRepository->countAvailable(),
             'recently_sold' => $this->productRepository->countRecentlySold(),
             'unread_messages' => $unreadMessages,
