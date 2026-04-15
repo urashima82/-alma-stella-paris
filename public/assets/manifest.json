@@ -1,5 +1,5 @@
 {
-    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-A03lTLX.js",
+    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-hJLmW9a.js",
     "@symfony\/stimulus-bundle\/loader.js": "\/assets\/@symfony\/stimulus-bundle\/loader-IOzBDLu.js",
     "app.js": "\/assets\/app--q683F4.js",
     "bundles\/easyadmin\/app.912702e5.css": "\/assets\/bundles\/easyadmin\/app.912702e5-e-OEP2a.css",
@@ -34,7 +34,9 @@
     "controllers\/address_selector_controller.js": "\/assets\/controllers\/address_selector_controller-_t0rh4g.js",
     "controllers\/billing_toggle_controller.js": "\/assets\/controllers\/billing_toggle_controller-CLhha_R.js",
     "controllers\/cart_drawer_controller.js": "\/assets\/controllers\/cart_drawer_controller-t_ckoxR.js",
+    "controllers\/category_drawer_controller.js": "\/assets\/controllers\/category_drawer_controller-r8xdSII.js",
     "controllers\/checkout_identify_controller.js": "\/assets\/controllers\/checkout_identify_controller-6uV6-Fi.js",
+    "controllers\/collapsible_controller.js": "\/assets\/controllers\/collapsible_controller--Jkv19z.js",
     "controllers\/coupon_code_controller.js": "\/assets\/controllers\/coupon_code_controller-M-95aIS.js",
     "controllers\/csrf_protection_controller.js": "\/assets\/controllers\/csrf_protection_controller-6ynUAeX.js",
     "controllers\/currency_selector_controller.js": "\/assets\/controllers\/currency_selector_controller-kq9ihR0.js",
@@ -42,12 +44,13 @@
     "controllers\/hello_controller.js": "\/assets\/controllers\/hello_controller-VYgvytJ.js",
     "controllers\/lightbox_controller.js": "\/assets\/controllers\/lightbox_controller-6McrgZ0.js",
     "controllers\/mobile_menu_controller.js": "\/assets\/controllers\/mobile_menu_controller-VSVfHX_.js",
+    "controllers\/nav_dropdown_controller.js": "\/assets\/controllers\/nav_dropdown_controller-VIeyCyp.js",
     "controllers\/reservation_timer_controller.js": "\/assets\/controllers\/reservation_timer_controller-tcsvRLB.js",
     "controllers\/star_rating_controller.js": "\/assets\/controllers\/star_rating_controller-ZTm3wzB.js",
     "controllers\/stripe_payment_controller.js": "\/assets\/controllers\/stripe_payment_controller-cox-LsV.js",
     "controllers\/turnstile_controller.js": "\/assets\/controllers\/turnstile_controller-Rf0WHeB.js",
     "controllers\/wishlist_toggle_controller.js": "\/assets\/controllers\/wishlist_toggle_controller-qStZpRD.js",
     "stimulus_bootstrap.js": "\/assets\/stimulus_bootstrap-xCO4u8H.js",
-    "styles\/app.css": "\/assets\/styles\/app-zCHSCu2.css",
+    "styles\/app.css": "\/assets\/styles\/app-7XttBth.css",
     "vendor\/@hotwired\/stimulus\/stimulus.index.js": "\/assets\/vendor\/@hotwired\/stimulus\/stimulus.index-S4zNcea.js"
 }

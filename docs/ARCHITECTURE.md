@@ -17,13 +17,16 @@ alma-stella/
 │       ├── address_selector_controller.js   # Fills checkout form from saved customer address
 │       ├── billing_toggle_controller.js     # Shows/hides billing address fields (checkbox toggle)
 │       ├── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
+│       ├── category_drawer_controller.js   # Mobile category filter drawer (slide-in from left)
 │       ├── checkout_identify_controller.js  # Email detection: existing account → login, new → guest
+│       ├── collapsible_controller.js        # Collapsible/accordion sections (sidebar, mobile nav)
 │       ├── coupon_code_controller.js        # Async coupon code validation at checkout
 │       ├── csrf_protection_controller.js    # CSRF token handling on forms
 │       ├── currency_selector_controller.js  # Dropdown toggle for currency selector
 │       ├── email_check_controller.js        # Async email existence check on registration form
 │       ├── lightbox_controller.js           # Image lightbox / gallery view on product detail
 │       ├── mobile_menu_controller.js        # Mobile hamburger menu toggle
+│       ├── nav_dropdown_controller.js      # Desktop navbar category dropdown (hover with delay)
 │       ├── reservation_timer_controller.js  # Checkout countdown timer (mm:ss, auto-reload on expiry)
 │       ├── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
 │       └── wishlist_toggle_controller.js    # Heart toggle (AJAX POST, guest redirect to login)
@@ -532,7 +535,7 @@ class Reservation
 
 | Entity | Purpose |
 |---|---|
-| `ProductCategory` | Necklaces, Earrings, Bracelets, Rings, Anklets, Sets |
+| `ProductCategory` | Two-level hierarchy: root categories (Necklaces, Earrings, Bracelets, Rings, Anklets, Sets) with optional subcategories (Pendants, Chokers, etc.). Self-referencing `parent` ManyToOne. Products attach to leaf categories only. |
 | ~~`ProductImage`~~ | **Removed** — replaced by 3 VichUploader fields on `Product`: `thumbnail`, `wornPhoto`, `contextPhoto` |
 | `OrderItem` | Snapshot of product + price + bilingual name at order time |
 | `Admin` | Admin users — passwordless auth via magic link |

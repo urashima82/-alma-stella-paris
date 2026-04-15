@@ -1,0 +1,7 @@
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+{% set category = entity.instance %}
+{% if category.parent is not null %}
+    <span style="padding-left:24px;color:#888">↳</span> {{ category.name }}
+{% else %}
+    <strong>{{ category.name }}</strong>
+{% endif %}

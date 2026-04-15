@@ -83,7 +83,8 @@ class AppFixtures extends Fixture
      */
     private function loadCategories(ObjectManager $manager): array
     {
-        $data = [
+        // Parent categories (roots)
+        $roots = [
             ['Necklaces', 'Colliers', 'colliers', 0],
             ['Earrings', 'Boucles d\'oreilles', 'boucles-d-oreilles', 1],
             ['Bracelets', 'Bracelets', 'bracelets', 2],
@@ -93,12 +94,38 @@ class AppFixtures extends Fixture
         ];
 
         $categories = [];
-        foreach ($data as [$name, $nameFr, $slugFr, $position]) {
+        foreach ($roots as [$name, $nameFr, $slugFr, $position]) {
             $category = new ProductCategory();
             $category->setName($name);
             $category->setNameFr($nameFr);
             $category->setSlugFr($slugFr);
             $category->setPosition($position);
+            $manager->persist($category);
+            $categories[$name] = $category;
+        }
+
+        // Subcategories: [name, nameFr, slugFr, position, parentKey]
+        $children = [
+            ['Pendants', 'Pendentifs', 'pendentifs', 0, 'Necklaces'],
+            ['Chokers', 'Ras-de-cou', 'ras-de-cou', 1, 'Necklaces'],
+            ['Long & Chain', 'Sautoirs & Chaînes', 'sautoirs-chaines', 2, 'Necklaces'],
+            ['Hoops', 'Créoles', 'creoles', 0, 'Earrings'],
+            ['Studs', 'Puces', 'puces', 1, 'Earrings'],
+            ['Drops', 'Pendantes', 'pendantes', 2, 'Earrings'],
+            ['Chain', 'Chaînes', 'chaines', 0, 'Bracelets'],
+            ['Cuffs', 'Manchettes', 'manchettes', 1, 'Bracelets'],
+            ['Beaded', 'Perles & Pierres', 'perles-pierres', 2, 'Bracelets'],
+            ['Stone Rings', 'Pierres', 'pierres', 0, 'Rings'],
+            ['Plain & Stackable', 'Simples & Empilables', 'simples-empilables', 1, 'Rings'],
+        ];
+
+        foreach ($children as [$name, $nameFr, $slugFr, $position, $parentKey]) {
+            $category = new ProductCategory();
+            $category->setName($name);
+            $category->setNameFr($nameFr);
+            $category->setSlugFr($slugFr);
+            $category->setPosition($position);
+            $category->setParent($categories[$parentKey]);
             $manager->persist($category);
             $categories[$name] = $category;
         }
@@ -119,49 +146,49 @@ class AppFixtures extends Fixture
                 'Pendentif Étoile Doré',
                 'Delicate gold star pendant on a fine chain, inspired by the night sky over the Mexican desert. Made from water-resistant stainless steel with 18K gold plating.',
                 'Délicat pendentif étoile en acier doré, inspiré du ciel nocturne au-dessus du désert mexicain. Acier inoxydable résistant à l\'eau avec placage or 18 carats.',
-                35.00, 44.00, ShippingTier::Standard, 'Necklaces', true, true, [Product::COUNTRY_MEXICO],
+                35.00, 44.00, ShippingTier::Standard, 'Pendants', true, true, [Product::COUNTRY_MEXICO],
             ],
             [
                 'Turquoise Stone Ring',
                 'Bague Pierre Turquoise',
                 'Statement turquoise ring set in gold-plated stainless steel. Each stone is unique, hand-selected for its vibrant color.',
                 'Bague turquoise sertie dans de l\'acier inoxydable plaqué or. Chaque pierre est unique, sélectionnée à la main pour sa couleur vibrante.',
-                26.00, null, ShippingTier::Standard, 'Rings', true, true, [Product::COUNTRY_MEXICO],
+                26.00, null, ShippingTier::Standard, 'Stone Rings', true, true, [Product::COUNTRY_MEXICO],
             ],
             [
                 'Black Onyx Drop Earrings',
                 'Boucles d\'Oreilles Onyx Noir',
                 'Elegant drop earrings featuring polished black onyx stones. A timeless piece that transitions effortlessly from day to night.',
                 'Élégantes boucles d\'oreilles pendantes en onyx noir poli. Une pièce intemporelle qui passe facilement du jour à la nuit.',
-                29.00, 39.00, ShippingTier::Standard, 'Earrings', true, true, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                29.00, 39.00, ShippingTier::Standard, 'Drops', true, true, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
             ],
             [
                 'Layered Gold Chain Bracelet',
                 'Bracelet Chaînes Dorées Superposées',
                 'Multi-layered gold chain bracelet with a delicate bohemian feel. Water-resistant, perfect for everyday wear.',
                 'Bracelet multi-chaînes dorées à l\'esprit bohème délicat. Résistant à l\'eau, parfait pour le quotidien.',
-                24.00, null, ShippingTier::Standard, 'Bracelets', true, true, [Product::COUNTRY_FRANCE],
+                24.00, null, ShippingTier::Standard, 'Chain', true, true, [Product::COUNTRY_FRANCE],
             ],
             [
                 'Mother of Pearl Choker',
                 'Ras-de-Cou Nacre',
                 'Stunning choker necklace featuring natural mother of pearl elements. A statement piece inspired by the coasts of Oaxaca.',
                 'Superbe ras-de-cou avec éléments en nacre naturelle. Une pièce forte inspirée des côtes d\'Oaxaca.',
-                37.00, null, ShippingTier::Heavy, 'Necklaces', true, false, [Product::COUNTRY_MEXICO],
+                37.00, null, ShippingTier::Heavy, 'Chokers', true, false, [Product::COUNTRY_MEXICO],
             ],
             [
                 'Lapis Lazuli Stud Earrings',
                 'Puces d\'Oreilles Lapis-Lazuli',
                 'Minimalist stud earrings with genuine lapis lazuli stones. The deep blue evokes the Mediterranean sky.',
                 'Puces d\'oreilles minimalistes en véritable lapis-lazuli. Le bleu profond évoque le ciel méditerranéen.',
-                22.00, null, ShippingTier::Standard, 'Earrings', true, false, [Product::COUNTRY_FRANCE],
+                22.00, null, ShippingTier::Standard, 'Studs', true, false, [Product::COUNTRY_FRANCE],
             ],
             [
                 'Hammered Gold Cuff',
                 'Manchette Dorée Martelée',
                 'Bold hammered gold cuff bracelet. Each piece is hand-finished, making every cuff subtly unique.',
                 'Manchette dorée martelée audacieuse. Chaque pièce est finie à la main, rendant chaque manchette subtilement unique.',
-                48.00, 60.00, ShippingTier::Heavy, 'Bracelets', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                48.00, 60.00, ShippingTier::Heavy, 'Cuffs', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
             ],
             [
                 'Shell & Gold Anklet',
@@ -175,28 +202,28 @@ class AppFixtures extends Fixture
                 'Bague Solitaire Pierre de Lune',
                 'Ethereal moonstone solitaire ring with a luminous, milky glow. Set in brushed gold-plated steel.',
                 'Bague solitaire en pierre de lune éthérée avec un éclat lumineux et laiteux. Sertie dans de l\'acier plaqué or brossé.',
-                44.00, null, ShippingTier::Standard, 'Rings', true, false, [Product::COUNTRY_FRANCE],
+                44.00, null, ShippingTier::Standard, 'Stone Rings', true, false, [Product::COUNTRY_FRANCE],
             ],
             [
                 'Coin Charm Necklace',
                 'Collier Médaillon',
                 'Vintage-inspired coin charm on a fine gold chain. A versatile everyday piece with old-world charm.',
                 'Médaillon d\'inspiration vintage sur une fine chaîne dorée. Une pièce polyvalente au charme d\'antan.',
-                31.00, null, ShippingTier::Standard, 'Necklaces', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                31.00, null, ShippingTier::Standard, 'Long & Chain', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
             ],
             [
                 'Beaded Stone Bracelet',
                 'Bracelet Perles de Pierre',
                 'Natural stone bead bracelet with gold accent beads. Each stone carries its own unique pattern and energy.',
                 'Bracelet de perles en pierre naturelle avec perles dorées. Chaque pierre porte son propre motif et énergie unique.',
-                20.00, null, ShippingTier::Standard, 'Bracelets', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                20.00, null, ShippingTier::Standard, 'Beaded', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
             ],
             [
                 'Pearl & Gold Hoops',
                 'Créoles Perles & Or',
                 'Modern gold hoops adorned with freshwater pearls. A contemporary twist on a timeless classic.',
                 'Créoles dorées modernes ornées de perles d\'eau douce. Une touche contemporaine sur un classique intemporel.',
-                33.00, 41.00, ShippingTier::Standard, 'Earrings', true, false, [Product::COUNTRY_FRANCE],
+                33.00, 41.00, ShippingTier::Standard, 'Hoops', true, false, [Product::COUNTRY_FRANCE],
             ],
         ];
 
@@ -602,10 +629,8 @@ class AppFixtures extends Fixture
         $necklacePromo->setOverridesCompareAtPrice(false);
         $necklacePromo->setStartsAt(new \DateTimeImmutable('-7 days'));
         $necklacePromo->setEndsAt(new \DateTimeImmutable('+30 days'));
-        foreach ($categories as $cat) {
-            if ($cat->getSlug() === 'necklaces') {
-                $necklacePromo->addCategory($cat);
-            }
+        if (isset($categories['Necklaces'])) {
+            $necklacePromo->addCategory($categories['Necklaces']);
         }
         $manager->persist($necklacePromo);
 

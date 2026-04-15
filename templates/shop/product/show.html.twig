@@ -34,7 +34,7 @@
                 "@type": "ListItem",
                 "position": 2,
                 "name": "{{ product.category|localized_name }}",
-                "item": "{{ url('shop_catalog', {categorySlug: product.category|localized_slug}) }}"
+                "item": "{{ category_path(product.category) }}"
             },
             {
                 "@type": "ListItem",
@@ -84,7 +84,13 @@
         <nav class="text-sm font-sans text-alma-text-muted mb-8" aria-label="Breadcrumb">
             <a href="{{ path('shop_catalog') }}" class="hover:text-alma-gold transition-colors">{{ 'product.breadcrumb_shop'|trans }}</a>
             <span class="mx-2">/</span>
-            <a href="{{ path('shop_catalog', {categorySlug: product.category|localized_slug}) }}" class="hover:text-alma-gold transition-colors">
+            {% if product.category.parent is not null %}
+                <a href="{{ category_path(product.category.parent) }}" class="hover:text-alma-gold transition-colors">
+                    {{ product.category.parent|localized_name }}
+                </a>
+                <span class="mx-2">/</span>
+            {% endif %}
+            <a href="{{ category_path(product.category) }}" class="hover:text-alma-gold transition-colors">
                 {{ product.category|localized_name }}
             </a>
             <span class="mx-2">/</span>

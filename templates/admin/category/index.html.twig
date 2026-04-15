@@ -1,0 +1,134 @@
+{% extends '@EasyAdmin/crud/index.html.twig' %}
+
+{% block head_javascript %}
+    {{ parent() }}
+    <style>
+        .ea-sortable-cell { width: 32px; text-align: center; }
+        .ea-sortable-handle {
+            cursor: grab;
+            user-select: none;
+            color: #aaa;
+            font-size: 1.2em;
+            line-height: 1;
+        }
+        .ea-sortable-handle:hover { color: #C9A84C; }
+        .ea-sortable-handle:active { cursor: grabbing; color: #A8893A; }
+        tr.ea-dragging { opacity: 0.3; }
+        tr.ea-drag-over-top td { box-shadow: inset 0 2px 0 0 #C9A84C; }
+        tr.ea-drag-over-bottom td { box-shadow: inset 0 -2px 0 0 #C9A84C; }
+        .ea-reorder-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            background: #166534;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+        .ea-reorder-toast.visible { opacity: 1; transform: translateY(0); }
+    </style>
+{% endblock %}
+
+{% block content_footer %}
+    {{ parent() }}
+    <div class="ea-reorder-toast" id="reorderToast">✓ Ordre sauvegardé</div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tbody = document.querySelector('.table-responsive table tbody');
+        if (!tbody) return;
+
+        var reorderUrl = '{{ path("admin_category_reorder") }}';
+        var dragRow = null;
+
+        function getRowId(row) {
+            var cb = row.querySelector('input[name="batchActionEntityIds[]"]');
+            if (cb) return parseInt(cb.value, 10);
+            var link = row.querySelector('a[href*="entityId"]');
+            if (link) {
+                var m = link.href.match(/entityId=(\d+)/);
+                if (m) return parseInt(m[1], 10);
+            }
+            return null;
+        }
+
+        tbody.querySelectorAll('tr').forEach(function(row) {
+            if (!getRowId(row)) return;
+
+            var handle = row.querySelector('.ea-sortable-handle');
+            if (!handle) return;
+
+            handle.addEventListener('dragstart', function(e) {
+                dragRow = row;
+                row.classList.add('ea-dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', '');
+            });
+
+            row.addEventListener('dragover', function(e) {
+                if (!dragRow || dragRow === row) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                clearAll();
+                var rect = row.getBoundingClientRect();
+                row.classList.add(e.clientY < rect.top + rect.height / 2 ? 'ea-drag-over-top' : 'ea-drag-over-bottom');
+            });
+
+            row.addEventListener('dragleave', function() {
+                row.classList.remove('ea-drag-over-top', 'ea-drag-over-bottom');
+            });
+
+            row.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (!dragRow || dragRow === row) return;
+                var rect = row.getBoundingClientRect();
+                if (e.clientY < rect.top + rect.height / 2) {
+                    tbody.insertBefore(dragRow, row);
+                } else {
+                    tbody.insertBefore(dragRow, row.nextSibling);
+                }
+                clearAll();
+                saveOrder();
+            });
+
+            row.addEventListener('dragend', function() {
+                row.classList.remove('ea-dragging');
+                clearAll();
+                dragRow = null;
+            });
+        });
+
+        function clearAll() {
+            tbody.querySelectorAll('.ea-drag-over-top,.ea-drag-over-bottom').forEach(function(el) {
+                el.classList.remove('ea-drag-over-top', 'ea-drag-over-bottom');
+            });
+        }
+
+        function saveOrder() {
+            var ids = [];
+            tbody.querySelectorAll('tr').forEach(function(row) {
+                var id = getRowId(row);
+                if (id) ids.push(id);
+            });
+            if (!ids.length) return;
+
+            fetch(reorderUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderedIds: ids })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function() {
+                var t = document.getElementById('reorderToast');
+                t.classList.add('visible');
+                setTimeout(function() { t.classList.remove('visible'); }, 2200);
+            });
+        }
+    });
+    </script>
+{% endblock %}

@@ -121,7 +121,51 @@
                     {# Desktop nav links — left of logo (desktop only) #}
                     <div class="hidden md:flex items-center gap-8 absolute right-[calc(50%+3.5rem)]">
                         <a href="{{ path('shop_home') }}" class="font-sans text-xs uppercase tracking-[0.25em] font-light hover:text-alma-gold transition-colors {{ app.request.attributes.get('_route') == 'shop_home' ? 'text-alma-gold-dark' : '' }}">{{ 'nav.home'|trans }}</a>
-                        <a href="{{ path('shop_catalog') }}" class="font-sans text-xs uppercase tracking-[0.25em] font-light hover:text-alma-gold transition-colors {{ app.request.attributes.get('_route') == 'shop_catalog' ? 'text-alma-gold-dark' : '' }}">{{ 'nav.shop'|trans }}</a>
+                        {# Boutique with dropdown #}
+                        {% set isShopRoute = app.request.attributes.get('_route') == 'shop_catalog' %}
+                        <div class="relative"
+                             data-controller="nav-dropdown"
+                             data-action="mouseenter->nav-dropdown#show mouseleave->nav-dropdown#hide">
+                            <a href="{{ path('shop_catalog') }}"
+                               class="font-sans text-xs uppercase tracking-[0.25em] font-light hover:text-alma-gold transition-colors {{ isShopRoute ? 'text-alma-gold-dark' : '' }}">
+                                {{ 'nav.shop'|trans }}
+                            </a>
+                            {# Dropdown mega-menu #}
+                            <div class="hidden absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50 transition-opacity duration-200"
+                                 data-nav-dropdown-target="dropdown"
+                                 data-action="mouseenter->nav-dropdown#keepOpen mouseleave->nav-dropdown#hide">
+                                <div class="bg-alma-bg border border-alma-gold-muted shadow-lg p-6 min-w-[480px]">
+                                    <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                                        {% for root in nav_categories() %}
+                                            <div>
+                                                <a href="{{ category_path(root) }}"
+                                                   class="font-sans text-xs uppercase tracking-widest font-medium text-alma-text hover:text-alma-gold transition-colors">
+                                                    {{ root|localized_name }}
+                                                </a>
+                                                {% if root.hasChildren() %}
+                                                    <ul class="mt-1.5 space-y-1">
+                                                        {% for child in root.children %}
+                                                            <li>
+                                                                <a href="{{ category_path(child) }}"
+                                                                   class="text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors">
+                                                                    {{ child|localized_name }}
+                                                                </a>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="mt-4 pt-3 border-t border-alma-hover/50">
+                                        <a href="{{ path('shop_catalog') }}"
+                                           class="text-xs font-sans text-alma-gold hover:text-alma-gold-dark transition-colors">
+                                            {{ 'catalog.filter_all'|trans }} &rarr;
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {# Desktop nav links — right of logo (desktop only) #}
@@ -225,7 +269,9 @@
                     </div>
                     <nav class="px-6 py-8 flex flex-col gap-6">
                         <a href="{{ path('shop_home') }}" class="font-serif text-xl transition-colors {{ app.request.attributes.get('_route') == 'shop_home' ? 'text-alma-gold-dark' : 'text-alma-text hover:text-alma-gold' }}">{{ 'nav.home'|trans }}</a>
+
                         <a href="{{ path('shop_catalog') }}" class="font-serif text-xl transition-colors {{ app.request.attributes.get('_route') == 'shop_catalog' ? 'text-alma-gold-dark' : 'text-alma-text hover:text-alma-gold' }}">{{ 'nav.shop'|trans }}</a>
+
                         <a href="{{ path('shop_about') }}" class="font-serif text-xl transition-colors {{ app.request.attributes.get('_route') == 'shop_about' ? 'text-alma-gold-dark' : 'text-alma-text hover:text-alma-gold' }}">{{ 'nav.about'|trans }}</a>
                         <a href="{{ path('shop_contact') }}" class="font-serif text-xl transition-colors {{ app.request.attributes.get('_route') == 'shop_contact' ? 'text-alma-gold-dark' : 'text-alma-text hover:text-alma-gold' }}">{{ 'nav.contact'|trans }}</a>
                         <div class="h-px bg-alma-gold-muted my-2"></div>

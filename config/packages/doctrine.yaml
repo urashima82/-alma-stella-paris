@@ -17,6 +17,8 @@ doctrine:
         dql:
             string_functions:
                 JSON_CONTAINS: App\Doctrine\JsonContainsFunction
+            numeric_functions:
+                IFNULL: App\Doctrine\IfNullFunction
         auto_mapping: true
         mappings:
             App:

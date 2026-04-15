@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Admin\Filter\AvailableInFilter;
 use App\Entity\Product;
 use App\Enum\ShippingTier;
+use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -74,7 +75,8 @@ class ProductCrudController extends AbstractCrudController
             yield NumberField::new('displayPrice', 'Prix affiché (EUR)')
                 ->setNumDecimals(2)
                 ->formatValue(static fn (float $value): string => \number_format($value, 2).' €');
-            yield AssociationField::new('category', 'Catégorie');
+            yield TextField::new('category', 'Catégorie')
+                ->formatValue(static fn ($value, Product $entity): string => (string) $entity->getCategory());
             yield ChoiceField::new('availableIn', 'Disponible en')
                 ->setChoices([
                     'France' => Product::COUNTRY_FRANCE,
@@ -151,7 +153,15 @@ class ProductCrudController extends AbstractCrudController
         yield BooleanField::new('isPublished', 'Publié');
         yield BooleanField::new('isFeatured', 'Mis en avant');
         yield BooleanField::new('isSoldOut', 'Vendu');
-        yield AssociationField::new('category', 'Catégorie');
+        yield AssociationField::new('category', 'Catégorie')
+            ->setQueryBuilder(static fn (QueryBuilder $qb): QueryBuilder => $qb
+                ->leftJoin('entity.children', 'ch')
+                ->leftJoin('entity.parent', 'p')
+                ->groupBy('entity.id')
+                ->having('COUNT(ch.id) = 0')
+                ->orderBy('COALESCE(p.position, entity.position)', 'ASC')
+                ->addOrderBy('entity.position', 'ASC')
+            );
 
         yield FormField::addFieldset('Disponibilité', 'fa fa-globe');
         yield ChoiceField::new('availableIn', 'Pays')

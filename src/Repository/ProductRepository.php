@@ -102,6 +102,7 @@ class ProductRepository extends ServiceEntityRepository
         $soldOutCutoff = new \DateTimeImmutable('-14 days');
 
         $qb = $this->createQueryBuilder('p')
+            ->join('p.category', 'c')
             ->andWhere('p.isPublished = true')
             ->andWhere('p.isSoldOut = false OR (p.isSoldOut = true AND p.soldAt > :soldOutCutoff)')
             ->setParameter('soldOutCutoff', $soldOutCutoff)
@@ -109,8 +110,14 @@ class ProductRepository extends ServiceEntityRepository
             ->addOrderBy('p.createdAt', 'DESC');
 
         if ($category !== null) {
-            $qb->andWhere('p.category = :category')
-                ->setParameter('category', $category);
+            if ($category->hasChildren()) {
+                // Parent category: show products from all children
+                $qb->andWhere('c.parent = :parentCategory')
+                    ->setParameter('parentCategory', $category);
+            } else {
+                $qb->andWhere('p.category = :category')
+                    ->setParameter('category', $category);
+            }
         }
 
         if ($collection !== null && $collection !== 'all') {

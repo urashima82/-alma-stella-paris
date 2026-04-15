@@ -74,20 +74,39 @@
 
     {# ── Category pages ── #}
     {% for category in categories %}
-        <url>
-            <loc>{{ url('shop_catalog', {categorySlug: category.slug, '_locale': 'en'}) }}</loc>
-            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {categorySlug: category.slug, '_locale': 'en'}) }}"/>
-            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {categorySlug: category.slugFr, '_locale': 'fr'}) }}"/>
-            <changefreq>daily</changefreq>
-            <priority>0.8</priority>
-        </url>
-        <url>
-            <loc>{{ url('shop_catalog', {categorySlug: category.slugFr, '_locale': 'fr'}) }}</loc>
-            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {categorySlug: category.slug, '_locale': 'en'}) }}"/>
-            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {categorySlug: category.slugFr, '_locale': 'fr'}) }}"/>
-            <changefreq>daily</changefreq>
-            <priority>0.8</priority>
-        </url>
+        {% if category.parent is null %}
+            {# Root category — /shop/{parentSlug} #}
+            <url>
+                <loc>{{ url('shop_catalog', {parentSlug: category.slug, '_locale': 'en'}) }}</loc>
+                <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {parentSlug: category.slug, '_locale': 'en'}) }}"/>
+                <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {parentSlug: category.slugFr, '_locale': 'fr'}) }}"/>
+                <changefreq>daily</changefreq>
+                <priority>0.8</priority>
+            </url>
+            <url>
+                <loc>{{ url('shop_catalog', {parentSlug: category.slugFr, '_locale': 'fr'}) }}</loc>
+                <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {parentSlug: category.slug, '_locale': 'en'}) }}"/>
+                <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {parentSlug: category.slugFr, '_locale': 'fr'}) }}"/>
+                <changefreq>daily</changefreq>
+                <priority>0.8</priority>
+            </url>
+        {% else %}
+            {# Subcategory — /shop/{parentSlug}/{childSlug} #}
+            <url>
+                <loc>{{ url('shop_catalog', {parentSlug: category.parent.slug, childSlug: category.slug, '_locale': 'en'}) }}</loc>
+                <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {parentSlug: category.parent.slug, childSlug: category.slug, '_locale': 'en'}) }}"/>
+                <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {parentSlug: category.parent.slugFr, childSlug: category.slugFr, '_locale': 'fr'}) }}"/>
+                <changefreq>daily</changefreq>
+                <priority>0.7</priority>
+            </url>
+            <url>
+                <loc>{{ url('shop_catalog', {parentSlug: category.parent.slugFr, childSlug: category.slugFr, '_locale': 'fr'}) }}</loc>
+                <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_catalog', {parentSlug: category.parent.slug, childSlug: category.slug, '_locale': 'en'}) }}"/>
+                <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_catalog', {parentSlug: category.parent.slugFr, childSlug: category.slugFr, '_locale': 'fr'}) }}"/>
+                <changefreq>daily</changefreq>
+                <priority>0.7</priority>
+            </url>
+        {% endif %}
     {% endfor %}
 
     {# ── Product pages ── #}

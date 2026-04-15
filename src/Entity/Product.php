@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Enum\ShippingTier;
 use App\Repository\ProductRepository;
+use App\Validator\LeafCategory;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -57,6 +58,7 @@ class Product
 
     #[ORM\ManyToOne(targetEntity: ProductCategory::class, inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
+    #[LeafCategory]
     private ?ProductCategory $category = null;
 
     #[ORM\Column]

@@ -17,9 +17,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class CatalogController extends AbstractController
 {
     #[Route(
-        path: ['en' => '/shop/{categorySlug}', 'fr' => '/boutique/{categorySlug}'],
+        path: ['en' => '/shop/{parentSlug}/{childSlug}', 'fr' => '/boutique/{parentSlug}/{childSlug}'],
         name: 'shop_catalog',
-        defaults: ['categorySlug' => null],
+        defaults: ['parentSlug' => null, 'childSlug' => null],
+        requirements: ['parentSlug' => '[a-z0-9-]+', 'childSlug' => '[a-z0-9-]+'],
     )]
     public function index(
         Request $request,
@@ -28,17 +29,29 @@ class CatalogController extends AbstractController
         SiteSettingsRepository $siteSettingsRepository,
         PaginatorInterface $paginator,
         ReservationManager $reservationManager,
-        ?string $categorySlug = null,
+        ?string $parentSlug = null,
+        ?string $childSlug = null,
     ): Response {
-        $categories = $categoryRepository->findAllOrdered();
+        $rootCategories = $categoryRepository->findRootCategories();
+        $locale = $request->getLocale();
         $activeCategory = null;
+        $activeParent = null;
 
-        if ($categorySlug !== null) {
-            $slugField = $request->getLocale() === 'fr' ? 'slugFr' : 'slug';
-            $activeCategory = $categoryRepository->findOneBy([$slugField => $categorySlug]);
+        if ($parentSlug !== null) {
+            $activeParent = $categoryRepository->findBySlug($parentSlug, $locale);
 
-            if ($activeCategory === null) {
+            if ($activeParent === null || !$activeParent->isRoot()) {
                 throw $this->createNotFoundException('Category not found.');
+            }
+
+            if ($childSlug !== null) {
+                $activeCategory = $categoryRepository->findBySlug($childSlug, $locale);
+
+                if ($activeCategory === null || $activeCategory->getParent()?->getId() !== $activeParent->getId()) {
+                    throw $this->createNotFoundException('Subcategory not found.');
+                }
+            } else {
+                $activeCategory = $activeParent;
             }
         }
 
@@ -52,8 +65,9 @@ class CatalogController extends AbstractController
         );
 
         return $this->render('shop/catalog/index.html.twig', [
-            'categories' => $categories,
+            'rootCategories' => $rootCategories,
             'activeCategory' => $activeCategory,
+            'activeParent' => $activeParent,
             'pagination' => $pagination,
             'reservedProductIds' => $reservationManager->getReservedProductIdsByOthers(),
         ]);
