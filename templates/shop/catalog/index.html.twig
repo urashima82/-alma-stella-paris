@@ -333,24 +333,25 @@
                                             </div>
                                         {% endif %}
 
-                                        {# Gold border on hover #}
-                                        <div class="absolute inset-0 border border-transparent group-hover:border-alma-gold/40 transition-colors duration-300 pointer-events-none"></div>
+                                        {# Gold border — permanent for featured, on hover for others #}
+                                        <div class="absolute inset-0 border transition-colors duration-300 pointer-events-none
+                                                    {{ product.isFeatured ? 'border-alma-gold/50 group-hover:border-alma-gold/70' : 'border-transparent group-hover:border-alma-gold/40' }}"></div>
 
                                         {# Badges #}
-                                        <div class="absolute top-2 left-2 flex flex-row gap-1">
+                                        <div class="absolute top-2 left-2 flex flex-row gap-1 items-center">
                                             {% if product.isSoldOut %}
-                                                <span class="px-2 py-1 bg-alma-text text-alma-bg text-[10px] font-sans font-medium leading-none tracking-wide">{{ 'badge.sold'|trans }}</span>
+                                                <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium tracking-wide bg-alma-text text-alma-bg">{{ 'badge.sold'|trans }}</span>
                                             {% elseif isProductReserved %}
-                                                <span class="px-2 py-1 bg-alma-hover text-alma-text text-[10px] font-sans font-medium leading-none tracking-wide">{{ 'badge.reserved'|trans }}</span>
+                                                <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium tracking-wide bg-alma-hover text-alma-text">{{ 'badge.reserved'|trans }}</span>
                                             {% else %}
-                                                <span class="px-1.5 py-1 bg-alma-gold/90 text-white text-[9px] sm:text-[10px] font-sans font-medium leading-none tracking-wider uppercase">{{ 'badge.unique'|trans }}</span>
+                                                <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium tracking-wider capitalize bg-alma-gold/90 text-white">{{ 'badge.unique'|trans }}</span>
                                             {% endif %}
                                             {% if product.isNew() %}
-                                                <span class="px-1.5 py-1 bg-white/90 text-alma-text text-[9px] sm:text-[10px] font-sans font-medium leading-none border border-alma-hover/60 tracking-wide">{{ 'badge.new'|trans }}</span>
+                                                <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium tracking-wide bg-white/90 text-alma-text ring-1 ring-alma-hover/60">{{ 'badge.new'|trans }}</span>
                                             {% endif %}
                                             {% set discount = discount_percent(product) %}
                                             {% if discount and not product.isSoldOut %}
-                                                <span class="px-1.5 py-1 bg-red-600/90 text-white text-[9px] sm:text-[10px] font-sans font-medium leading-none">-{{ discount }}%</span>
+                                                <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium bg-red-600/90 text-white">-{{ discount }}%</span>
                                             {% endif %}
                                         </div>
                                         {# Wishlist heart #}
@@ -380,7 +381,7 @@
                                         <div class="flex justify-between items-start gap-2">
                                             <div class="min-w-0">
                                                 <h3 class="font-serif text-sm sm:text-base text-alma-text group-hover:text-alma-gold transition-colors leading-snug truncate">
-                                                    {{ product|localized_name }}
+                                                    {% if product.isFeatured %}<span class="text-alma-gold">✦</span> {% endif %}{{ product|localized_name }}
                                                 </h3>
                                                 <p class="text-alma-text-muted text-[11px] sm:text-xs mt-0.5">
                                                     {{ product.category|localized_name }}

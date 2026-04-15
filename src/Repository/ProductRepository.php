@@ -107,6 +107,7 @@ class ProductRepository extends ServiceEntityRepository
             ->andWhere('p.isSoldOut = false OR (p.isSoldOut = true AND p.soldAt > :soldOutCutoff)')
             ->setParameter('soldOutCutoff', $soldOutCutoff)
             ->orderBy('p.isSoldOut', 'ASC')
+            ->addOrderBy('p.isFeatured', 'DESC')
             ->addOrderBy('p.createdAt', 'DESC');
 
         if ($category !== null) {
