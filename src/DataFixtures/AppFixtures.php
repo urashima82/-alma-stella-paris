@@ -496,6 +496,46 @@ class AppFixtures extends Fixture
                 'items' => [['Pearl & Gold Hoops', 33.00, 10.00]],
                 'days_ago' => 10,
             ],
+            // --- Abandoned order test cases (pending, no payment initiated) ---
+            // Pending 3 days ago, no PaymentIntent → cleaner SHOULD delete
+            [
+                'reference' => 'ASP-2026-00011',
+                'status' => OrderStatus::Pending,
+                'name' => 'David Thompson',
+                'email' => 'david.thompson@example.com',
+                'locale' => 'en',
+                'line1' => '200 University Ave',
+                'city' => 'Palo Alto',
+                'state' => 'CA',
+                'postal' => '94301',
+                'country' => 'US',
+
+                'tracking' => null,
+                'stripe_status' => null,
+                'items' => [['Turquoise Stone Ring', 26.00, 10.00]],
+                'days_ago' => 3,
+            ],
+            // Pending 7 days ago, no PaymentIntent → cleaner SHOULD delete
+            [
+                'reference' => 'ASP-2026-00012',
+                'status' => OrderStatus::Pending,
+                'name' => 'Camille Lefèvre',
+                'email' => 'camille.lefevre@example.com',
+                'locale' => 'fr',
+                'line1' => '8 place Bellecour',
+                'city' => 'Lyon',
+                'state' => null,
+                'postal' => '69002',
+                'country' => 'FR',
+
+                'tracking' => null,
+                'stripe_status' => null,
+                'items' => [
+                    ['Lapis Lazuli Stud Earrings', 22.00, 10.00],
+                    ['Shell & Gold Anklet', 17.00, 10.00],
+                ],
+                'days_ago' => 7,
+            ],
             // --- Testimonial test orders ---
             // Delivered 18 days ago, NO testimonial → scheduler SHOULD send email (EN)
             [

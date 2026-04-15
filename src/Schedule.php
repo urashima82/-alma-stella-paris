@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use App\Message\CleanAbandonedOrdersMessage;
 use App\Message\CleanExpiredReservationsMessage;
 use App\Message\SendTestimonialRequestsMessage;
 use App\Message\VerifyPendingOrdersMessage;
@@ -28,6 +29,7 @@ class Schedule implements ScheduleProviderInterface
             ->processOnlyLastMissedRun(true)
             ->add(RecurringMessage::every('5 minutes', new VerifyPendingOrdersMessage()))
             ->add(RecurringMessage::every('5 minutes', new CleanExpiredReservationsMessage()))
-            ->add(RecurringMessage::every('6 hours', new SendTestimonialRequestsMessage()));
+            ->add(RecurringMessage::every('6 hours', new SendTestimonialRequestsMessage()))
+            ->add(RecurringMessage::every('1 hour', new CleanAbandonedOrdersMessage()));
     }
 }

@@ -139,6 +139,22 @@ class OrderRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return Order[]
+     */
+    public function findAbandonedPending(\DateTimeImmutable $olderThan): array
+    {
+        return $this->createQueryBuilder('o')
+            ->where('o.status = :status')
+            ->andWhere('o.stripePaymentIntentId IS NULL')
+            ->andWhere('o.createdAt < :cutoff')
+            ->setParameter('status', OrderStatus::Pending)
+            ->setParameter('cutoff', $olderThan)
+            ->orderBy('o.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function countByStatus(OrderStatus $status): int
     {
         return (int) $this->createQueryBuilder('o')
