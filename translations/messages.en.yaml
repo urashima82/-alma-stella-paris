@@ -23,6 +23,8 @@ home:
     icon_shipping: "Free shipping"
     featured_heading: "Handpicked for You"
     featured_subtitle: "Our favorites, curated for you."
+    latest_heading: "Our Latest Pieces"
+    latest_subtitle: "Freshly added to the collection."
     view_all: "View all jewelry"
     testimonials_heading: "What our customers say"
     testimonials_subtitle: "Real stories from the Alma Stella community."

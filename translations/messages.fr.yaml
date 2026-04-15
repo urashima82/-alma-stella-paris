@@ -23,6 +23,8 @@ home:
     icon_shipping: "Livraison offerte"
     featured_heading: "Coups de cœur"
     featured_subtitle: "Nos favoris, sélectionnés pour vous."
+    latest_heading: "Nos dernières pièces"
+    latest_subtitle: "Fraîchement ajoutées à la collection."
     view_all: "Voir tous les bijoux"
     testimonials_heading: "Ce que nos clientes disent"
     testimonials_subtitle: "Des histoires authentiques de la communauté Alma Stella."

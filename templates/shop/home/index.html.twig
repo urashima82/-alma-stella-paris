@@ -52,15 +52,17 @@
     </section>
 
     {# ── Featured products ── #}
-    <section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
-        <div class="text-center mb-14">
-            <h2 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
-                {{ 'home.featured_heading'|trans }}
-            </h2>
-            <p class="font-sans text-sm text-alma-text-muted">{{ 'home.featured_subtitle'|trans }}</p>
-        </div>
+    {% if featuredProducts is not empty %}
+        <section class="max-w-7xl mx-auto px-6 py-20 md:py-28">
+            <div class="text-center mb-14">
+                <h2 class="font-serif text-3xl md:text-4xl font-light text-alma-text mb-3">
+                    {{ (isFeaturedFallback ? 'home.latest_heading' : 'home.featured_heading')|trans }}
+                </h2>
+                <p class="font-sans text-sm text-alma-text-muted">
+                    {{ (isFeaturedFallback ? 'home.latest_subtitle' : 'home.featured_subtitle')|trans }}
+                </p>
+            </div>
 
-        {% if featuredProducts is not empty %}
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
                 {% for product in featuredProducts %}
                     <article class="group cursor-pointer">
@@ -117,8 +119,8 @@
                     {{ 'home.view_all'|trans }}
                 </a>
             </div>
-        {% endif %}
-    </section>
+        </section>
+    {% endif %}
 
     {# ── Thin gold divider ── #}
     <div class="max-w-7xl mx-auto px-6">

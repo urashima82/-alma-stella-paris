@@ -85,6 +85,7 @@ class ProductCrudController extends AbstractCrudController
                     Product::COUNTRY_FRANCE => 'primary',
                     Product::COUNTRY_MEXICO => 'success',
                 ]);
+            yield BooleanField::new('isFeatured', 'Coup de cœur');
             yield BooleanField::new('isPublished', 'Publié');
             yield BooleanField::new('isSoldOut', 'Vendu');
             yield DateTimeField::new('soldAt', 'Vendu le')

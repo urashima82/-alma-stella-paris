@@ -20,9 +20,17 @@ class HomeController extends AbstractController
         TestimonialRepository $testimonialRepository,
     ): Response {
         $activeCollection = $siteSettingsRepository->getActiveCollection();
+        $featuredProducts = $productRepository->findFeatured(4, $activeCollection);
+        $isFeaturedFallback = false;
+
+        if (\count($featuredProducts) === 0) {
+            $featuredProducts = $productRepository->findLatestAvailable(4, $activeCollection);
+            $isFeaturedFallback = true;
+        }
 
         return $this->render('shop/home/index.html.twig', [
-            'featuredProducts' => $productRepository->findFeatured(4, $activeCollection),
+            'featuredProducts' => $featuredProducts,
+            'isFeaturedFallback' => $isFeaturedFallback,
             'testimonials' => $testimonialRepository->findApproved(3),
             'testimonialStats' => $testimonialRepository->getApprovedStats(),
         ]);

@@ -78,6 +78,25 @@ class ProductRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * @return Product[]
+     */
+    public function findLatestAvailable(int $limit = 4, ?string $collection = null): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->andWhere('p.isPublished = true')
+            ->andWhere('p.isSoldOut = false')
+            ->orderBy('p.createdAt', 'DESC')
+            ->setMaxResults($limit);
+
+        if ($collection !== null && $collection !== 'all') {
+            $qb->andWhere('JSON_CONTAINS(p.availableIn, :collection) = 1')
+                ->setParameter('collection', \sprintf('"%s"', $collection));
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function findVisibleQuery(?ProductCategory $category = null, ?string $collection = null): QueryBuilder
     {
         $soldOutCutoff = new \DateTimeImmutable('-14 days');
