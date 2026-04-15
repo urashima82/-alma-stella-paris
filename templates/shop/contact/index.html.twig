@@ -89,6 +89,9 @@
                 {{ form_widget(form.website) }}
             </div>
 
+            {# Turnstile bot protection #}
+            {% include 'shop/_turnstile.html.twig' %}
+
             {# Submit button #}
             <div class="text-center pt-2">
                 <button type="submit"

@@ -9,6 +9,8 @@ parameters:
     upload_dir: '%kernel.project_dir%/public/uploads/products'
     mailer.from_email: '%env(MAILER_FROM_EMAIL)%'
     mailer.from_name: '%env(MAILER_FROM_NAME)%'
+    turnstile.site_key: '%env(TURNSTILE_SITE_KEY)%'
+    turnstile.secret_key: '%env(TURNSTILE_SECRET_KEY)%'
 
 services:
     # default configuration for services in *this* file
@@ -20,6 +22,8 @@ services:
             string $mailerFromEmail: '%mailer.from_email%'
             string $mailerFromName: '%mailer.from_name%'
             string $appEnv: '%kernel.environment%'
+            string $turnstileSiteKey: '%turnstile.site_key%'
+            string $turnstileSecretKey: '%turnstile.secret_key%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

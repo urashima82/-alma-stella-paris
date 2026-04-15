@@ -95,6 +95,9 @@
                 {{ form_errors(form.city) }}
             </div>
 
+            {# Turnstile bot protection #}
+            {% include 'shop/_turnstile.html.twig' %}
+
             {# Submit #}
             <div class="text-center pt-4">
                 <button type="submit"

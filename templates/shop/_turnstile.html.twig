@@ -1,0 +1,8 @@
+{# Cloudflare Turnstile widget — include this inside any form that needs bot protection.
+   Does nothing when Turnstile is not configured (dev environment). #}
+{% if turnstile_enabled() %}
+    <div class="flex justify-center"
+         data-controller="turnstile"
+         data-turnstile-site-key-value="{{ turnstile_site_key() }}">
+    </div>
+{% endif %}

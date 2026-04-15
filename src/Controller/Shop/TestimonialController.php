@@ -8,6 +8,7 @@ use App\Enum\TestimonialStatus;
 use App\Form\TestimonialSubmitType;
 use App\Repository\TestimonialRepository;
 use App\Service\TestimonialMailer;
+use App\Service\TurnstileVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,6 +29,7 @@ class TestimonialController extends AbstractController
         TestimonialRepository $testimonialRepository,
         EntityManagerInterface $em,
         TestimonialMailer $testimonialMailer,
+        TurnstileVerifier $turnstileVerifier,
     ): Response {
         $testimonial = $testimonialRepository->findByToken($token);
 
@@ -45,6 +47,14 @@ class TestimonialController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Turnstile bot protection check
+            $turnstileToken = (string) $request->request->get('cf-turnstile-response', '');
+            if (!$turnstileVerifier->verify($turnstileToken, $request->getClientIp())) {
+                $this->addFlash('error', 'testimonial.error.bot_detected');
+
+                return $this->redirectToRoute('shop_testimonial_submit', ['token' => $token]);
+            }
+
             $testimonial->setSubmittedAt(new \DateTimeImmutable());
             $testimonial->setStatus(TestimonialStatus::Pending);
             $em->flush();

@@ -8,6 +8,7 @@ use App\Entity\ContactMessage;
 use App\Entity\Customer;
 use App\Form\ContactType;
 use App\Service\ContactMailer;
+use App\Service\TurnstileVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,7 @@ class ContactController extends AbstractController
         EntityManagerInterface $em,
         ContactMailer $contactMailer,
         RateLimiterFactory $contactFormLimiter,
+        TurnstileVerifier $turnstileVerifier,
     ): Response {
         $contactMessage = new ContactMessage();
 
@@ -42,6 +44,14 @@ class ContactController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // Honeypot check
             if ((string) $form->get('website')->getData() !== '') {
+                return $this->redirectToRoute('shop_contact');
+            }
+
+            // Turnstile bot protection check
+            $turnstileToken = (string) $request->request->get('cf-turnstile-response', '');
+            if (!$turnstileVerifier->verify($turnstileToken, $request->getClientIp())) {
+                $this->addFlash('error', 'contact.error.bot_detected');
+
                 return $this->redirectToRoute('shop_contact');
             }
 
