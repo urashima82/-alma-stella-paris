@@ -670,6 +670,164 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+## Milestone 10b — EUR base currency migration
+*Estimated effort: 6-8h*
+
+> **Architectural change:** Switch the reference currency from USD to EUR.
+> Estelle's Stripe settlement currency is EUR (French bank account), so charging
+> in EUR eliminates the ~2% Stripe conversion fee on all EUR transactions.
+> Non-EUR currencies (USD, CAD, GBP, MXN) remain as cosmetic display with
+> a disclaimer: "You will be charged in EUR at checkout."
+>
+> **Since we are still in creation phase** (nothing in production), all changes
+> are made in place — modify existing migration, no backwards compatibility needed.
+
+### Tasks
+
+#### 1. Entity & database schema (rename USD → EUR)
+- [ ] `Order` entity: rename `$totalUsd` → `$totalEur`, `$discountAmountUsd` → `$discountAmountEur`
+  - Rename all getters/setters: `getTotalUsd()` → `getTotalEur()`, `setTotalUsd()` → `setTotalEur()`,
+    `getDiscountAmountUsd()` → `getDiscountAmountEur()`, `setDiscountAmountUsd()` → `setDiscountAmountEur()`
+  - Update `getItemsSummary()`: change `$` symbols to `€` and `getTotalUsd()` → `getTotalEur()`
+- [ ] `OrderItem` entity: rename `$discountAmountUsd` → `$discountAmountEur`
+  - Rename getter/setter: `getDiscountAmountUsd()` → `getDiscountAmountEur()`
+  - Update `getLineTotal()` docblock: "in EUR" instead of "in USD"
+- [ ] `ShippingSettings` entity: rename `$shippingCostUsd` → `$shippingCostEur`
+  - Rename getter/setter accordingly
+- [ ] `Promotion` entity: update any field labels/docblocks referencing USD
+  - `fixedAmountValue` and `minimumOrderAmount` are now in EUR (docblocks)
+- [ ] `PromotionUsage` entity: update any USD references in docblocks
+- [ ] Modify initial migration (`Version20260408140632`):
+  - Rename columns: `total_usd` → `total_eur`, `discount_amount_usd` → `discount_amount_eur` (on `order` table)
+  - Rename column: `discount_amount_usd` → `discount_amount_eur` (on `order_item` table)
+  - Rename column: `shipping_cost_usd` → `shipping_cost_eur` (on `shipping_settings` table)
+
+#### 2. ShippingTier enum (EUR values)
+- [ ] Rename method `shippingCostUsd()` → `shippingCostEur()`
+- [ ] Convert hardcoded shipping costs to EUR:
+  - Standard: 10 €
+  - Heavy: 15 €
+  - Set: 20 €
+
+#### 3. CurrencyConverter service
+- [ ] Change `BASE_CURRENCY` constant: `'USD'` → `'EUR'`
+- [ ] Change `API_URL`: `open.er-api.com/v6/latest/USD` → `open.er-api.com/v6/latest/EUR`
+- [ ] Rename `convert()` parameter: `$amountUsd` → `$amountEur`
+- [ ] Update `SUPPORTED_CURRENCIES` array order: `['EUR', 'USD', 'CAD', 'GBP', 'MXN']`
+- [ ] Update default symbol fallback: `'$'` → `'€'`
+
+#### 4. StripeService
+- [ ] Change PaymentIntent currency: `'usd'` → `'eur'`
+- [ ] Update amount calculation: `getTotalUsd()` → `getTotalEur()`
+
+#### 5. ShippingCostProvider service
+- [ ] Rename method returning cost: update any `Usd` references to `Eur`
+- [ ] Ensure `ShippingSettings` column reference updated
+
+#### 6. PromotionEngine service
+- [ ] Update all `discountAmountUsd` / `totalUsd` references to EUR equivalents
+- [ ] Verify fixed-amount promotions are treated as EUR
+
+#### 7. CartManager & CartController
+- [ ] Update any `Usd` / `USD` references in price calculations
+
+#### 8. CheckoutController
+- [ ] Replace all `totalUsd` / `discountAmountUsd` calls with EUR equivalents
+- [ ] Replace all `setTotalUsd()` / `setDiscountAmountUsd()` calls
+- [ ] Update inline comments referencing USD
+
+#### 9. CurrencyExtension (Twig)
+- [ ] Default currency: `EUR` instead of `USD`
+- [ ] Rename `is_non_usd_currency()` → `is_non_eur_currency()`
+- [ ] Update `|price` filter: parameter name `$amountUsd` → `$amountEur`
+- [ ] Update fallback behavior for base currency
+
+#### 10. CurrencySubscriber
+- [ ] Default currency fallback: `'EUR'` instead of `'USD'`
+
+#### 11. Templates — storefront (15 Twig files)
+- [ ] `base.html.twig`: update currency disclaimer text (charged in EUR)
+- [ ] `checkout/index.html.twig`: `$` → `€` in price display, USD → EUR references
+- [ ] `checkout/payment.html.twig`: same
+- [ ] `product/show.html.twig`: same
+- [ ] `account/orders.html.twig`: same
+- [ ] `account/order_detail.html.twig`: same
+- [ ] Update `is_non_usd_currency` → `is_non_eur_currency` in all templates
+
+#### 12. Templates — emails (5 Twig files)
+- [ ] `order_confirmation.html.twig`: `$` → `€`, USD → EUR
+- [ ] `order_shipped.html.twig`: same
+- [ ] `order_delivered.html.twig`: same
+- [ ] `order_cancelled.html.twig`: same
+- [ ] `admin_new_order.html.twig`: same
+
+#### 13. Templates — admin & invoice
+- [ ] `admin/dashboard.html.twig`: `$` → `€`, USD → EUR
+- [ ] `admin/order/edit.html.twig`: same
+- [ ] `admin/customer/detail.html.twig`: same
+- [ ] `pdf/invoice.html.twig`: update currency symbol and references
+
+#### 14. EasyAdmin controllers
+- [ ] `OrderCrudController`: update field labels (`Total USD` → `Total EUR`, etc.)
+- [ ] `OrderItemCrudController`: same
+- [ ] `ProductCrudController`: update `basePrice` label context
+- [ ] `PromotionCrudController`: update currency references in labels
+- [ ] `ShippingSettingsCrudController`: rename field labels USD → EUR
+- [ ] `CustomerCrudController`: update any USD display references
+
+#### 15. Translations (YAML)
+- [ ] `messages.en.yaml`: update disclaimer text and any USD-specific strings
+- [ ] `messages.fr.yaml`: same
+
+#### 16. OrderRepository
+- [ ] Update any `totalUsd` / `discountAmountUsd` DQL or QueryBuilder references
+
+#### 17. DataFixtures
+- [ ] Convert all product `basePrice` values from USD to EUR equivalents
+- [ ] Convert `compareAtPrice` values
+- [ ] Convert promotion `fixedAmountValue` and `minimumOrderAmount`
+- [ ] Convert shipping settings default values
+- [ ] Update order fixture totals
+
+#### 18. Documentation
+- [ ] `CLAUDE.md`: update all "USD" references to "EUR" (reference currency, Stripe, localisation,
+  architecture decisions, out of scope section)
+- [ ] `docs/ARCHITECTURE.md`: update currency references throughout
+- [ ] `docs/LOCALISATION.md`: update "one price, many displays" to EUR base, update disclaimer text,
+  update default currency
+- [ ] `docs/ROADMAP.md`: update Milestone 4 description (cosmetic disclaimer = non-EUR)
+- [ ] V2 backlog: remove "Multi-currency Stripe charges" line (no longer relevant)
+
+#### 19. Rebuild & verify
+- [ ] Run `ddev exec vendor/bin/php-cs-fixer fix`
+- [ ] Run `ddev exec vendor/bin/phpstan analyse` — zero errors
+- [ ] Run `ddev exec php bin/console tailwind:build && ddev exec php bin/console asset-map:compile`
+- [ ] Recreate DDEV environment: `ddev delete --omit-snapshot && ddev start`
+- [ ] Run `ddev exec php bin/console doctrine:migrations:migrate`
+- [ ] Run `ddev exec php bin/console doctrine:fixtures:load`
+- [ ] Smoke test all pages in browser
+
+### Definition of Done
+- `CurrencyConverter::BASE_CURRENCY` is `'EUR'`
+- Stripe PaymentIntent uses `'eur'` currency
+- All entity properties, getters, setters reference EUR (no `Usd` anywhere in codebase)
+- All database columns reference EUR (`total_eur`, `discount_amount_eur`, `shipping_cost_eur`)
+- Default currency in header selector is EUR
+- Select USD → disclaimer shows "You will be charged in EUR at checkout"
+- Select EUR → no disclaimer shown
+- `|price` filter converts from EUR base to selected display currency
+- Product prices in fixtures are in EUR
+- All email templates show `€` symbol
+- Invoice PDF shows `€` amounts
+- EasyAdmin dashboard revenue displayed in `€`
+- `PHPStan analyse` passes at level 6
+- `php-cs-fixer fix` reports no changes
+- All 12 fixture products load correctly
+- `grep -ri "totalUsd\|discountAmountUsd\|shippingCostUsd" src/` returns zero results
+- Documentation (CLAUDE.md, ARCHITECTURE.md, LOCALISATION.md) consistently references EUR
+
+---
+
 ## Milestone 11 — Instagram feed (Behold.so)
 *Estimated effort: 2-3h*
 
@@ -765,7 +923,7 @@ Shall I proceed to Milestone Y?"
 ## V2 backlog (post-launch, not in current scope)
 
 - ~~Wishlist persistence (tied to customer account)~~ ✅ Implemented
-- Multi-currency Stripe charges (vs current cosmetic conversion)
+- ~~Multi-currency Stripe charges (vs current cosmetic conversion)~~ ✅ Replaced by EUR base currency (Milestone 10b)
 - Lookbook / editorial seasonal pages
 - Referral program ("Give $10, Get $10")
 - Loyalty program (3 orders → automatic discount)
