@@ -21,6 +21,5 @@
     "\/assets\/controllers\/currency_selector_controller.js",
     "\/assets\/controllers\/reservation_timer_controller.js",
     "\/assets\/controllers\/collapsible_controller.js",
-    "\/assets\/controllers\/nav_dropdown_controller.js",
     "\/assets\/controllers\/account_dropdown_controller.js"
 ]

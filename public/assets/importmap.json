@@ -8,7 +8,7 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-hJLmW9a.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-8j2pj9Z.js",
         "type": "js"
     },
     "\/assets\/controllers\/wishlist_toggle_controller.js": {
@@ -79,10 +79,6 @@
         "path": "\/assets\/controllers\/collapsible_controller--Jkv19z.js",
         "type": "js"
     },
-    "\/assets\/controllers\/nav_dropdown_controller.js": {
-        "path": "\/assets\/controllers\/nav_dropdown_controller-VIeyCyp.js",
-        "type": "js"
-    },
     "\/assets\/controllers\/account_dropdown_controller.js": {
         "path": "\/assets\/controllers\/account_dropdown_controller-oeOGf29.js",
         "type": "js"
@@ -92,7 +88,7 @@
         "type": "js"
     },
     "\/assets\/styles\/app.css": {
-        "path": "\/assets\/styles\/app-7XttBth.css",
+        "path": "\/assets\/styles\/app-A-zkTZZ.css",
         "type": "css"
     },
     "@hotwired\/stimulus": {
