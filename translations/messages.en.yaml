@@ -123,6 +123,15 @@ error:
     500_heading: "Oops, something went wrong"
     500_text: "We're experiencing a temporary issue. Please try again in a few moments."
     500_home: "Back to home"
+    403_title: "Access denied | Alma Stella Paris"
+    403_heading: "Access denied"
+    403_text: "You don't have permission to access this page. If you believe this is an error, please contact us."
+    403_home: "Back to home"
+    403_shop: "Shop the collection"
+    generic_title: "Error | Alma Stella Paris"
+    generic_heading: "Something went wrong"
+    generic_text: "Something didn't go as expected. Please try again or go back to the home page."
+    generic_home: "Back to home"
 
 # ── Cart ──
 cart:

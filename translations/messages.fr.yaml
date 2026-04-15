@@ -123,6 +123,15 @@ error:
     500_heading: "Oups, un problème est survenu"
     500_text: "Nous rencontrons un problème temporaire. Veuillez réessayer dans quelques instants."
     500_home: "Retour à l'accueil"
+    403_title: "Accès refusé | Alma Stella Paris"
+    403_heading: "Accès refusé"
+    403_text: "Vous n'avez pas la permission d'accéder à cette page. Si vous pensez qu'il s'agit d'une erreur, n'hésitez pas à nous contacter."
+    403_home: "Retour à l'accueil"
+    403_shop: "Découvrir la collection"
+    generic_title: "Erreur | Alma Stella Paris"
+    generic_heading: "Une erreur est survenue"
+    generic_text: "Quelque chose ne s'est pas passé comme prévu. Veuillez réessayer ou revenir à l'accueil."
+    generic_home: "Retour à l'accueil"
 
 # ── Cart ──
 cart:
