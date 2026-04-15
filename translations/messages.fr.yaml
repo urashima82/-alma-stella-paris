@@ -304,6 +304,8 @@ legal:
     data_text_2: "Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Pour exercer ce droit, contactez-nous via le formulaire de contact du site."
     cookies_heading: "Cookies"
     cookies_text: "Ce site utilise des cookies strictement nécessaires à son fonctionnement (session, préférence de devise et de langue). Aucun cookie de traçage publicitaire n'est utilisé."
+    design_heading: "Conception et développement"
+    design_text: 'Site conçu et développé par <a href="https://nicolas-bede.fr/" target="_blank" rel="noopener" class="text-alma-gold hover:underline">Nicolas Bédé</a>.'
 
 # ── CGV ──
 terms:
