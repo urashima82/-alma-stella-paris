@@ -26,7 +26,6 @@ alma-stella/
 │       ├── email_check_controller.js        # Async email existence check on registration form
 │       ├── lightbox_controller.js           # Image lightbox / gallery view on product detail
 │       ├── mobile_menu_controller.js        # Mobile hamburger menu toggle
-│       ├── nav_dropdown_controller.js      # Desktop navbar category dropdown (hover with delay)
 │       ├── reservation_timer_controller.js  # Checkout countdown timer (mm:ss, auto-reload on expiry)
 │       ├── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
 │       └── wishlist_toggle_controller.js    # Heart toggle (AJAX POST, guest redirect to login)

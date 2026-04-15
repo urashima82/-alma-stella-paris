@@ -994,15 +994,9 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 - [x] Drawer contains same collapsible category tree + "Fermer" button
 - [x] Background overlay (grisé) when drawer is open
 
-### 14f — Navbar dropdown
-- [x] Desktop: hover on "Boutique" opens dropdown with parent → subcategory list
-- [x] Dropdown styled with brand palette (warm white background, gold accents)
-- [x] Dropdown disappears on mouse leave with slight delay (UX)
-- [x] Mobile: accordéon imbriqué dans le menu hamburger
-  - [x] Tap "Boutique" → déplie la liste des parents
-  - [x] Tap sur un parent avec enfants → déplie ses sous-catégories (bullet points)
-  - [x] Parents sans enfants (Coffrets, Chaînes de cheville) → lien direct, pas d'accordéon
-  - [x] Chaque niveau se replie/déplie indépendamment
+### 14f — Navbar
+- [x] Desktop + mobile: "Boutique" is a simple link to `/shop` (mega-menu removed)
+- [x] `nav_dropdown_controller.js` removed (no longer needed)
 
 ### 14g — Fixtures & data update
 - [x] Restructure `AppFixtures` with parent + subcategory hierarchy
@@ -1024,8 +1018,7 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 - `/shop/bracelets/manchettes` shows only cuff bracelets
 - `/shop/coffrets` shows coffret products directly (no subcategory level)
 - Sidebar: collapsible tree for parents with children, simple links for childless parents
-- Navbar dropdown on hover reveals category hierarchy (childless parents = direct links)
-- Mobile navigation works with touch-friendly accordion + direct links for childless parents
+- Navbar "Boutique" links directly to catalog (no dropdown)
 - All 12 fixture products correctly assigned to leaf categories
 - No broken links, 404 on invalid slugs
 
