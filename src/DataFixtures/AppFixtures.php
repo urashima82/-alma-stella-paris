@@ -145,8 +145,8 @@ class AppFixtures extends Fixture
             [
                 'Gold Star Pendant Necklace',
                 'Pendentif Étoile Doré',
-                'Delicate gold star pendant on a fine chain, inspired by the night sky over the Mexican desert. Made from water-resistant stainless steel with 18K gold plating.',
-                'Délicat pendentif étoile en acier doré, inspiré du ciel nocturne au-dessus du désert mexicain. Acier inoxydable résistant à l\'eau avec placage or 18 carats.',
+                'Delicate gold star pendant on a fine chain, inspired by the night sky over the Mexican desert. Made from water-resistant stainless steel.',
+                'Délicat pendentif étoile en acier doré, inspiré du ciel nocturne au-dessus du désert mexicain. Acier inoxydable résistant à l\'eau.',
                 35.00, 44.00, ShippingTier::Standard, 'Pendants', true, true, [Product::COUNTRY_MEXICO],
             ],
             [
@@ -293,15 +293,15 @@ class AppFixtures extends Fixture
         ];
 
         $descriptionsEn = [
-            'Handcrafted piece featuring genuine %s. Water-resistant stainless steel with 18K gold plating. Unique piece curated between Paris and Mexico.',
+            'Handcrafted piece featuring genuine %s. Water-resistant stainless steel. Unique piece curated between Paris and Mexico.',
             'A beautiful %s jewelry piece, hand-selected for its unique character and natural beauty. Durable, water-resistant, perfect for everyday wear.',
-            'Elegant design showcasing natural %s. Part of our exclusive collection bridging Parisian sophistication and Mexican bohemian spirit. 18K gold-plated stainless steel.',
+            'Elegant design showcasing natural %s. Part of our exclusive collection bridging Parisian sophistication and Mexican bohemian spirit. Water-resistant stainless steel.',
         ];
 
         $descriptionsFr = [
-            'Pièce unique en %s véritable. Acier inoxydable résistant à l\'eau, plaqué or 18 carats. Sélectionnée avec soin entre Paris et le Mexique.',
+            'Pièce unique en %s véritable. Acier inoxydable résistant à l\'eau. Sélectionnée avec soin entre Paris et le Mexique.',
             'Bijou en %s naturel, choisi pour son caractère unique et sa beauté. Résistant à l\'eau, parfait pour le quotidien.',
-            'Bijou élégant en %s d\'exception. Collection exclusive entre Paris et le Mexique. Acier inoxydable plaqué or 18 carats, résistant à l\'eau.',
+            'Bijou élégant en %s d\'exception. Collection exclusive entre Paris et le Mexique. Acier inoxydable résistant à l\'eau.',
         ];
 
         $prices = [18.00, 22.00, 24.00, 26.00, 28.00, 29.00, 31.00, 33.00, 35.00, 37.00, 39.00, 42.00, 44.00, 46.00, 48.00, 52.00];
