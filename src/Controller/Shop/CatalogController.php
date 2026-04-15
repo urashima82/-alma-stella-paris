@@ -64,11 +64,17 @@ class CatalogController extends AbstractController
             12,
         );
 
+        $totalProductCount = $productRepository->findVisibleQuery(null, $activeCollection)
+            ->select('COUNT(p.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
         return $this->render('shop/catalog/index.html.twig', [
             'rootCategories' => $rootCategories,
             'activeCategory' => $activeCategory,
             'activeParent' => $activeParent,
             'pagination' => $pagination,
+            'totalProductCount' => (int) $totalProductCount,
             'reservedProductIds' => $reservationManager->getReservedProductIdsByOthers(),
         ]);
     }

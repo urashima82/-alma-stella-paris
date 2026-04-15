@@ -40,6 +40,7 @@ class AppFixtures extends Fixture
         $customers = $this->loadCustomers($manager);
         $categories = $this->loadCategories($manager);
         $products = $this->loadProducts($manager, $categories);
+        $this->generateBulkProducts($manager, $categories);
         $this->linkRelatedProducts($products);
         $this->loadOrders($manager, $products, $customers);
         $this->loadPromotions($manager, $products, $categories);
@@ -247,6 +248,100 @@ class AppFixtures extends Fixture
         }
 
         return $products;
+    }
+
+    /**
+     * Generate 288 additional products (300 total with the 12 hand-crafted ones).
+     *
+     * @param array<string, ProductCategory> $categories
+     */
+    private function generateBulkProducts(ObjectManager $manager, array $categories): void
+    {
+        $stones = [
+            ['Agate', 'Agate'], ['Alexandrite', 'Alexandrite'], ['Amazonite', 'Amazonite'],
+            ['Amber', 'Ambre'], ['Amethyst', 'Améthyste'], ['Aquamarine', 'Aigue-marine'],
+            ['Aventurine', 'Aventurine'], ['Carnelian', 'Cornaline'], ['Chalcedony', 'Calcédoine'],
+            ['Chrysoprase', 'Chrysoprase'], ['Citrine', 'Citrine'], ['Coral', 'Corail'],
+            ['Emerald', 'Émeraude'], ['Fluorite', 'Fluorite'], ['Garnet', 'Grenat'],
+            ['Hematite', 'Hématite'], ['Howlite', 'Howlite'], ['Iolite', 'Iolite'],
+            ['Jade', 'Jade'], ['Jasper', 'Jaspe'], ['Kyanite', 'Cyanite'],
+            ['Labradorite', 'Labradorite'], ['Larimar', 'Larimar'], ['Malachite', 'Malachite'],
+            ['Obsidian', 'Obsidienne'], ['Opal', 'Opale'], ['Pearl', 'Perle'],
+            ['Peridot', 'Péridot'], ['Prehnite', 'Préhnite'], ['Pyrite', 'Pyrite'],
+            ['Rhodonite', 'Rhodonite'], ['Rose Quartz', 'Quartz Rose'], ['Ruby', 'Rubis'],
+            ['Sapphire', 'Saphir'], ['Serpentine', 'Serpentine'], ['Smoky Quartz', 'Quartz Fumé'],
+            ['Sodalite', 'Sodalite'], ['Sunstone', 'Pierre de Soleil'], ['Tanzanite', 'Tanzanite'],
+            ['Tiger Eye', 'Œil de Tigre'], ['Topaz', 'Topaze'], ['Turquoise', 'Turquoise'],
+            ['Unakite', 'Unakite'], ['Zoisite', 'Zoïsite'],
+        ];
+
+        // [nameTemplateEN, nameTemplateFR, count] — total = 288
+        $categoryConfig = [
+            'Pendants' => ['%s Pendant Necklace',  'Collier Pendentif %s',   23],
+            'Chokers' => ['%s Choker',            'Ras-de-Cou %s',          22],
+            'Long & Chain' => ['%s Chain Necklace',    'Sautoir %s',             22],
+            'Hoops' => ['%s Hoop Earrings',     'Créoles %s',             22],
+            'Studs' => ['%s Stud Earrings',     'Puces %s',               22],
+            'Drops' => ['%s Drop Earrings',     'Pendantes %s',           22],
+            'Chain' => ['%s Chain Bracelet',    'Bracelet Chaîne %s',     22],
+            'Cuffs' => ['%s Cuff Bracelet',     'Manchette %s',           22],
+            'Beaded' => ['%s Bead Bracelet',     'Bracelet Perles %s',     22],
+            'Stone Rings' => ['%s Statement Ring',    'Bague %s',               21],
+            'Plain & Stackable' => ['%s Stacking Ring',     'Anneau %s',              23],
+            'Anklets' => ['%s Anklet',            'Chaîne de Cheville %s',  22],
+            'Sets' => ['%s Jewelry Set',       'Coffret %s',             23],
+        ];
+
+        $descriptionsEn = [
+            'Handcrafted piece featuring genuine %s. Water-resistant stainless steel with 18K gold plating. Unique piece curated between Paris and Mexico.',
+            'A beautiful %s jewelry piece, hand-selected for its unique character and natural beauty. Durable, water-resistant, perfect for everyday wear.',
+            'Elegant design showcasing natural %s. Part of our exclusive collection bridging Parisian sophistication and Mexican bohemian spirit. 18K gold-plated stainless steel.',
+        ];
+
+        $descriptionsFr = [
+            'Pièce unique en %s véritable. Acier inoxydable résistant à l\'eau, plaqué or 18 carats. Sélectionnée avec soin entre Paris et le Mexique.',
+            'Bijou en %s naturel, choisi pour son caractère unique et sa beauté. Résistant à l\'eau, parfait pour le quotidien.',
+            'Bijou élégant en %s d\'exception. Collection exclusive entre Paris et le Mexique. Acier inoxydable plaqué or 18 carats, résistant à l\'eau.',
+        ];
+
+        $prices = [18.00, 22.00, 24.00, 26.00, 28.00, 29.00, 31.00, 33.00, 35.00, 37.00, 39.00, 42.00, 44.00, 46.00, 48.00, 52.00];
+
+        $stoneCount = \count($stones);
+        $priceCount = \count($prices);
+        $stoneIndex = 0;
+        $globalIndex = 0;
+
+        foreach ($categoryConfig as $catKey => [$tplEn, $tplFr, $count]) {
+            for ($i = 0; $i < $count; ++$i) {
+                [$stoneEn, $stoneFr] = $stones[$stoneIndex % $stoneCount];
+
+                $price = $prices[$globalIndex % $priceCount];
+                $descIndex = $globalIndex % 3;
+
+                $product = new Product();
+                $product->setName(\sprintf($tplEn, $stoneEn));
+                $product->setNameFr(\sprintf($tplFr, $stoneFr));
+                $product->setDescription(\sprintf($descriptionsEn[$descIndex], \strtolower($stoneEn)));
+                $product->setDescriptionFr(\sprintf($descriptionsFr[$descIndex], \mb_strtolower($stoneFr)));
+                $product->setBasePrice($price);
+                $product->setCompareAtPrice($globalIndex % 5 === 0 ? $price + 12.00 : null);
+                $product->setShippingTier($catKey === 'Sets' ? ShippingTier::Set : ($price >= 44.00 ? ShippingTier::Heavy : ShippingTier::Standard));
+                $product->setCategory($categories[$catKey]);
+                $product->setIsPublished(true);
+                $product->setIsFeatured($globalIndex % 15 === 0);
+                $product->setIsSoldOut($globalIndex % 20 === 0);
+                $product->setAvailableIn(match ($globalIndex % 3) {
+                    0 => [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
+                    1 => [Product::COUNTRY_FRANCE],
+                    default => [Product::COUNTRY_MEXICO],
+                });
+
+                $manager->persist($product);
+
+                ++$stoneIndex;
+                ++$globalIndex;
+            }
+        }
     }
 
     /**

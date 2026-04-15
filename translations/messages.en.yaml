@@ -44,7 +44,7 @@ catalog:
     pagination_previous: "&larr; Previous"
     pagination_next: "Next &rarr;"
     filter_categories: "Categories"
-    filter_button: "Filter"
+    filter_button: "Categories"
     clear_filter: "Clear filter"
     results_singular: "piece"
     results_plural: "pieces"

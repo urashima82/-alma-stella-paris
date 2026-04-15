@@ -115,10 +115,13 @@
 
                 {# "All" link #}
                 <a href="{{ path('shop_catalog') }}"
-                   class="group flex items-center gap-2.5 py-1.5 mb-1 text-sm font-sans transition-colors
+                   class="group flex items-center justify-between py-1.5 mb-1 text-sm font-sans transition-colors
                           {{ activeCategory is null ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
-                    <span class="w-3.5 h-px transition-all duration-200 {{ activeCategory is null ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
-                    {{ 'catalog.filter_all'|trans }}
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-3.5 h-px transition-all duration-200 {{ activeCategory is null ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
+                        {{ 'catalog.filter_all'|trans }}
+                    </span>
+                    <span class="text-[11px] tabular-nums {{ activeCategory is null ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ totalProductCount }}</span>
                 </a>
 
                 <div class="h-px bg-alma-hover/50 my-3"></div>
@@ -135,6 +138,7 @@
                                     <span class="w-3.5 h-px transition-all duration-200 {{ isParentActive and activeCategory.id == root.id ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
                                     {{ root|localized_name }}
                                 </a>
+                                <span class="text-[11px] tabular-nums {{ isParentActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }} mr-0.5">{{ root.totalPublishedProductCount }}</span>
                                 <button type="button"
                                         class="p-1 text-alma-text-muted/50 hover:text-alma-gold transition-colors rounded-sm"
                                         data-action="click->collapsible#toggle"
@@ -202,6 +206,9 @@
                             {{ 'catalog.clear_filter'|trans }}
                         </a>
                     {% endif %}
+                    <span class="ml-auto text-xs font-sans text-alma-text-muted">
+                        {{ pagination.totalItemCount }} {{ pagination.totalItemCount > 1 ? 'catalog.results_plural'|trans : 'catalog.results_singular'|trans }}
+                    </span>
                 </div>
                 {# Overlay — starts invisible, JS fades it #}
                 <div class="fixed inset-0 z-40 bg-alma-text/40 backdrop-blur-sm"
@@ -224,10 +231,13 @@
                     {# Drawer body #}
                     <nav class="px-6 py-5 overflow-y-auto max-h-[calc(100vh-3.5rem)]">
                         <a href="{{ path('shop_catalog') }}"
-                           class="group flex items-center gap-2.5 py-2 text-sm font-sans transition-colors
+                           class="group flex items-center justify-between py-2 text-sm font-sans transition-colors
                                   {{ activeCategory is null ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
-                            <span class="w-3.5 h-px transition-all duration-200 {{ activeCategory is null ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
-                            {{ 'catalog.filter_all'|trans }}
+                            <span class="flex items-center gap-2.5">
+                                <span class="w-3.5 h-px transition-all duration-200 {{ activeCategory is null ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
+                                {{ 'catalog.filter_all'|trans }}
+                            </span>
+                            <span class="text-[11px] tabular-nums {{ activeCategory is null ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ totalProductCount }}</span>
                         </a>
 
                         <div class="h-px bg-alma-hover/40 my-3"></div>
@@ -243,6 +253,7 @@
                                             <span class="w-3.5 h-px transition-all duration-200 {{ isParentActive and activeCategory.id == root.id ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
                                             {{ root|localized_name }}
                                         </a>
+                                        <span class="text-[11px] tabular-nums {{ isParentActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }} mr-0.5">{{ root.totalPublishedProductCount }}</span>
                                         <button type="button"
                                                 class="p-1.5 text-alma-text-muted/50 hover:text-alma-gold transition-colors"
                                                 data-action="click->collapsible#toggle"
@@ -294,6 +305,9 @@
                 {% set wishlistedIds = wishlist_product_ids() %}
 
                 {% if pagination|length > 0 %}
+                    <p class="hidden md:block text-xs font-sans text-alma-text-muted mb-4">
+                        {{ pagination.totalItemCount }} {{ pagination.totalItemCount > 1 ? 'catalog.results_plural'|trans : 'catalog.results_singular'|trans }}
+                    </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-5 md:gap-6 lg:gap-8">
                         {% for product in pagination %}
                             <article class="group">
@@ -380,36 +394,50 @@
 
                     {# ── Pagination ── #}
                     {% if pagination.pageCount > 1 %}
-                        <nav class="mt-14 flex items-center justify-center gap-1.5" aria-label="Pagination">
-                            {% if pagination.currentPageNumber > 1 %}
-                                <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({page: pagination.currentPageNumber - 1})) }}"
-                                   class="px-3 py-2 text-sm font-sans text-alma-text-muted
-                                          hover:text-alma-gold transition-colors">
-                                    {{ 'catalog.pagination_previous'|trans|raw }}
-                                </a>
-                            {% endif %}
+                        {% set current = pagination.currentPageNumber %}
+                        {% set last = pagination.pageCount %}
+                        {% set route = app.request.attributes.get('_route') %}
+                        {% set params = app.request.attributes.get('_route_params') %}
+                        <nav class="mt-14 flex items-center justify-center gap-2" aria-label="Pagination">
+                            {# Previous #}
+                            <a href="{{ current > 1 ? path(route, params|merge({page: current - 1})) : '#' }}"
+                               class="px-3 py-2 text-sm font-sans transition-colors
+                                      {{ current > 1 ? 'text-alma-text-muted hover:text-alma-gold' : 'text-alma-hover pointer-events-none' }}"
+                               {{ current <= 1 ? 'aria-disabled="true"' }}>
+                                {{ 'catalog.pagination_previous'|trans|raw }}
+                            </a>
 
-                            {% for page in 1..pagination.pageCount %}
-                                {% if page == pagination.currentPageNumber %}
-                                    <span class="w-9 h-9 flex items-center justify-center text-sm font-sans bg-alma-text text-alma-bg">
-                                        {{ page }}
-                                    </span>
-                                {% else %}
-                                    <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({page: page})) }}"
-                                       class="w-9 h-9 flex items-center justify-center text-sm font-sans text-alma-text-muted
-                                              hover:text-alma-gold transition-colors">
-                                        {{ page }}
-                                    </a>
+                            {# Mobile: "3 / 13" #}
+                            <span class="md:hidden text-sm font-sans text-alma-text-muted">
+                                <span class="text-alma-text font-medium">{{ current }}</span> / {{ last }}
+                            </span>
+
+                            {# Desktop: 1 … 5 [6] 7 … 13 (delta = 1) #}
+                            {% for page in 1..last %}
+                                {% if page == 1 or page == last or (page >= current - 1 and page <= current + 1) %}
+                                    {% if page == current %}
+                                        <span class="hidden md:flex w-9 h-9 items-center justify-center text-sm font-sans bg-alma-text text-alma-bg">
+                                            {{ page }}
+                                        </span>
+                                    {% else %}
+                                        <a href="{{ path(route, params|merge({page: page})) }}"
+                                           class="hidden md:flex w-9 h-9 items-center justify-center text-sm font-sans text-alma-text-muted
+                                                  hover:text-alma-gold transition-colors">
+                                            {{ page }}
+                                        </a>
+                                    {% endif %}
+                                {% elseif page == 2 or page == last - 1 %}
+                                    <span class="hidden md:flex w-9 h-9 items-center justify-center text-sm font-sans text-alma-text-muted">…</span>
                                 {% endif %}
                             {% endfor %}
 
-                            {% if pagination.currentPageNumber < pagination.pageCount %}
-                                <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({page: pagination.currentPageNumber + 1})) }}"
-                                   class="px-3 py-2 text-sm font-sans text-alma-text-muted
-                                          hover:text-alma-gold transition-colors">
-                                    {{ 'catalog.pagination_next'|trans|raw }}
-                                </a>
-                            {% endif %}
+                            {# Next #}
+                            <a href="{{ current < last ? path(route, params|merge({page: current + 1})) : '#' }}"
+                               class="px-3 py-2 text-sm font-sans transition-colors
+                                      {{ current < last ? 'text-alma-text-muted hover:text-alma-gold' : 'text-alma-hover pointer-events-none' }}"
+                               {{ current >= last ? 'aria-disabled="true"' }}>
+                                {{ 'catalog.pagination_next'|trans|raw }}
+                            </a>
                         </nav>
                     {% endif %}
 

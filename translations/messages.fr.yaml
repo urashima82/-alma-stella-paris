@@ -44,7 +44,7 @@ catalog:
     pagination_previous: "&larr; Précédent"
     pagination_next: "Suivant &rarr;"
     filter_categories: "Catégories"
-    filter_button: "Filtrer"
+    filter_button: "Catégories"
     clear_filter: "Effacer le filtre"
     results_singular: "pièce"
     results_plural: "pièces"
