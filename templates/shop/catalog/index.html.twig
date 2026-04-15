@@ -82,7 +82,7 @@
         <img src="{{ asset('images/hero_bg.webp') }}" alt=""
              class="absolute inset-0 w-full h-full object-cover opacity-30">
         <div class="absolute inset-0 bg-gradient-to-b from-alma-bg/50 to-alma-bg"></div>
-        <div class="relative max-w-7xl mx-auto px-6 py-10 md:py-14 text-center">
+        <div class="relative max-w-7xl mx-auto px-6 pt-20 pb-10 md:pt-28 md:pb-14 text-center">
             <h1 class="font-serif text-3xl md:text-4xl font-light text-alma-text tracking-wide">
                 {% if activeCategory %}
                     {{ activeCategory|localized_name }}
@@ -90,7 +90,11 @@
                     {{ 'catalog.heading'|trans }}
                 {% endif %}
             </h1>
-            {% if activeCategory is null %}
+            {% if activeCategory and activeCategory|localized_description %}
+                <p class="font-sans text-sm text-alma-text-muted mt-2 max-w-lg mx-auto">
+                    {{ activeCategory|localized_description }}
+                </p>
+            {% elseif activeCategory is null %}
                 <p class="font-sans text-sm text-alma-text-muted mt-2">
                     {{ 'catalog.subtitle'|trans }}
                 </p>

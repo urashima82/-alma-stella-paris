@@ -33,6 +33,12 @@ class ProductCategory
     #[ORM\Column(length: 120, unique: true)]
     private string $slugFr = '';
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $descriptionFr = null;
+
     #[Gedmo\SortablePosition]
     #[ORM\Column]
     private int $position = 0;
@@ -140,6 +146,30 @@ class ProductCategory
     public function setSlugFr(string $slugFr): static
     {
         $this->slugFr = $slugFr;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getDescriptionFr(): ?string
+    {
+        return $this->descriptionFr;
+    }
+
+    public function setDescriptionFr(?string $descriptionFr): static
+    {
+        $this->descriptionFr = $descriptionFr;
 
         return $this;
     }

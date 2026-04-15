@@ -18,6 +18,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 /** @extends AbstractCrudController<ProductCategory> */
@@ -65,6 +66,15 @@ class ProductCategoryCrudController extends AbstractCrudController
             ->onlyOnForms();
         yield SlugField::new('slugFr', 'Slug (FR)')->setTargetFieldName('nameFr')
             ->onlyOnForms();
+
+        yield TextareaField::new('description', 'Description (EN)')
+            ->onlyOnForms()
+            ->setRequired(false)
+            ->setHelp('Courte description affichée en en-tête de la catégorie (version anglaise).');
+        yield TextareaField::new('descriptionFr', 'Description (FR)')
+            ->onlyOnForms()
+            ->setRequired(false)
+            ->setHelp('Courte description affichée en en-tête de la catégorie (version française).');
 
         yield AssociationField::new('parent', 'Catégorie parente')
             ->onlyOnForms()

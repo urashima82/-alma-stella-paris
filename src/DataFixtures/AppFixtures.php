@@ -84,49 +84,53 @@ class AppFixtures extends Fixture
      */
     private function loadCategories(ObjectManager $manager): array
     {
-        // Parent categories (roots)
+        // Parent categories (roots): [name, nameFr, slugFr, position, description, descriptionFr]
         $roots = [
-            ['Necklaces', 'Colliers', 'colliers', 0],
-            ['Earrings', 'Boucles d\'oreilles', 'boucles-d-oreilles', 1],
-            ['Bracelets', 'Bracelets', 'bracelets', 2],
-            ['Rings', 'Bagues', 'bagues', 3],
-            ['Anklets', 'Chaînes de cheville', 'chaines-de-cheville', 4],
-            ['Sets', 'Coffrets', 'coffrets', 5],
+            ['Necklaces', 'Colliers', 'colliers', 0, 'Pendants, chokers & chains — each piece curated between Paris and Mexico.', 'Pendentifs, ras-de-cou & chaînes — chaque pièce chinée entre Paris et le Mexique.'],
+            ['Earrings', 'Boucles d\'oreilles', 'boucles-d-oreilles', 1, 'Hoops, studs & drops to frame your face with effortless elegance.', 'Créoles, puces & pendantes pour sublimer votre visage avec élégance.'],
+            ['Bracelets', 'Bracelets', 'bracelets', 2, 'Chains, cuffs & beaded designs — water-resistant everyday companions.', 'Chaînes, manchettes & perles — des compagnons du quotidien résistants à l\'eau.'],
+            ['Rings', 'Bagues', 'bagues', 3, 'Natural stones & stackable bands to adorn every finger.', 'Pierres naturelles & anneaux empilables pour orner chaque doigt.'],
+            ['Anklets', 'Chaînes de cheville', 'chaines-de-cheville', 4, 'Delicate ankle chains for a sun-kissed bohemian touch.', 'Délicates chaînes de cheville pour une touche bohème ensoleillée.'],
+            ['Sets', 'Coffrets', 'coffrets', 5, 'Thoughtfully paired pieces, ready to give or to keep.', 'Des pièces assorties avec soin, à offrir ou à s\'offrir.'],
         ];
 
         $categories = [];
-        foreach ($roots as [$name, $nameFr, $slugFr, $position]) {
+        foreach ($roots as [$name, $nameFr, $slugFr, $position, $description, $descriptionFr]) {
             $category = new ProductCategory();
             $category->setName($name);
             $category->setNameFr($nameFr);
             $category->setSlugFr($slugFr);
             $category->setPosition($position);
+            $category->setDescription($description);
+            $category->setDescriptionFr($descriptionFr);
             $manager->persist($category);
             $categories[$name] = $category;
         }
 
-        // Subcategories: [name, nameFr, slugFr, position, parentKey]
+        // Subcategories: [name, nameFr, slugFr, position, parentKey, description, descriptionFr]
         $children = [
-            ['Pendants', 'Pendentifs', 'pendentifs', 0, 'Necklaces'],
-            ['Chokers', 'Ras-de-cou', 'ras-de-cou', 1, 'Necklaces'],
-            ['Long & Chain', 'Sautoirs & Chaînes', 'sautoirs-chaines', 2, 'Necklaces'],
-            ['Hoops', 'Créoles', 'creoles', 0, 'Earrings'],
-            ['Studs', 'Puces', 'puces', 1, 'Earrings'],
-            ['Drops', 'Pendantes', 'pendantes', 2, 'Earrings'],
-            ['Chain', 'Chaînes', 'chaines', 0, 'Bracelets'],
-            ['Cuffs', 'Manchettes', 'manchettes', 1, 'Bracelets'],
-            ['Beaded', 'Perles & Pierres', 'perles-pierres', 2, 'Bracelets'],
-            ['Stone Rings', 'Pierres', 'pierres', 0, 'Rings'],
-            ['Plain & Stackable', 'Simples & Empilables', 'simples-empilables', 1, 'Rings'],
+            ['Pendants', 'Pendentifs', 'pendentifs', 0, 'Necklaces', 'Statement pendants with natural stones and gold details.', 'Pendentifs affirmés aux pierres naturelles et détails dorés.'],
+            ['Chokers', 'Ras-de-cou', 'ras-de-cou', 1, 'Necklaces', 'Close-fitting necklaces for a refined, modern look.', 'Colliers ajustés pour un look raffiné et moderne.'],
+            ['Long & Chain', 'Sautoirs & Chaînes', 'sautoirs-chaines', 2, 'Necklaces', 'Layering-friendly long necklaces and fine chains.', 'Sautoirs et chaînes fines parfaits pour le layering.'],
+            ['Hoops', 'Créoles', 'creoles', 0, 'Earrings', 'Classic and textured hoops in every size.', 'Créoles classiques et texturées dans toutes les tailles.'],
+            ['Studs', 'Puces', 'puces', 1, 'Earrings', 'Minimal studs for understated everyday sparkle.', 'Puces minimalistes pour une touche d\'éclat au quotidien.'],
+            ['Drops', 'Pendantes', 'pendantes', 2, 'Earrings', 'Dangling earrings that catch the light and the eye.', 'Boucles pendantes qui captent la lumière et les regards.'],
+            ['Chain', 'Chaînes', 'chaines', 0, 'Bracelets', 'Fine chain bracelets in stainless steel.', 'Bracelets chaîne en acier inoxydable.'],
+            ['Cuffs', 'Manchettes', 'manchettes', 1, 'Bracelets', 'Bold cuff bracelets for a strong wrist statement.', 'Manchettes audacieuses pour affirmer votre poignet.'],
+            ['Beaded', 'Perles & Pierres', 'perles-pierres', 2, 'Bracelets', 'Natural stone and bead bracelets with artisan charm.', 'Bracelets en pierres naturelles et perles au charme artisanal.'],
+            ['Stone Rings', 'Pierres', 'pierres', 0, 'Rings', 'Rings featuring hand-selected natural gemstones.', 'Bagues ornées de pierres naturelles sélectionnées à la main.'],
+            ['Plain & Stackable', 'Simples & Empilables', 'simples-empilables', 1, 'Rings', 'Sleek bands to mix, match and stack your way.', 'Anneaux épurés à mixer et empiler selon vos envies.'],
         ];
 
-        foreach ($children as [$name, $nameFr, $slugFr, $position, $parentKey]) {
+        foreach ($children as [$name, $nameFr, $slugFr, $position, $parentKey, $description, $descriptionFr]) {
             $category = new ProductCategory();
             $category->setName($name);
             $category->setNameFr($nameFr);
             $category->setSlugFr($slugFr);
             $category->setPosition($position);
             $category->setParent($categories[$parentKey]);
+            $category->setDescription($description);
+            $category->setDescriptionFr($descriptionFr);
             $manager->persist($category);
             $categories[$name] = $category;
         }
