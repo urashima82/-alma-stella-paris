@@ -48,6 +48,8 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+---
+
 ## Milestone 1 — Product catalog (admin + data layer)
 *Estimated effort: 4-5h*
 
@@ -80,6 +82,8 @@ Shall I proceed to Milestone Y?"
 - All 12 fixture products load correctly via `doctrine:fixtures:load`
 - French labels in EasyAdmin show correct accents (é, à, è, ù, ê, etc.)
 - `isSoldOut` toggle works in EasyAdmin, `soldAt` auto-set when toggled
+
+---
 
 ---
 
@@ -129,6 +133,8 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+---
+
 ## Milestone 3 — Internationalization (FR/EN)
 *Estimated effort: 5-6h*
 
@@ -173,6 +179,8 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+---
+
 ## Milestone 4 — Currency selector
 *Estimated effort: 2-3h*
 
@@ -191,6 +199,8 @@ Shall I proceed to Milestone Y?"
 - Close and reopen browser → currency still remembered (cookie)
 - Force the exchange rate API to fail (mock) → site displays EUR without error
 - Disclaimer visible only when non-EUR currency selected
+
+---
 
 ---
 
@@ -263,6 +273,8 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+---
+
 ## Milestone 6 — Admin authentication (Magic Link)
 *Estimated effort: 1-2h*
 
@@ -283,6 +295,8 @@ Shall I proceed to Milestone Y?"
 - Logout → redirected to login page
 - All EasyAdmin CRUDs inaccessible without `ROLE_ADMIN`
 - No password stored in database
+
+---
 
 ---
 
@@ -312,6 +326,8 @@ Shall I proceed to Milestone Y?"
 - Dashboard stats display correctly
 - Origin country (FR/MX) saved without affecting customer-facing prices
 - Shipping costs editable from EasyAdmin
+
+---
 
 ---
 
@@ -460,93 +476,6 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 9 — Automated emails & customer testimonials
-*Estimated effort: 2-3h*
-
-### Tasks
-- [x] `Testimonial` entity (email, rating 1-5, text, firstName, lastNameInitial, city, status)
-- [x] Post-purchase testimonial request email (J+14 via Symfony Scheduler)
-  - Deduplicate by email: if a `Testimonial` already exists for this email → skip
-  - Email sourced from the `Order` (works for guests and logged-in customers)
-- [x] Public testimonial submission form (accessible via unique token in email)
-- [x] Testimonial moderation in EasyAdmin (pending → approved / rejected)
-- [x] Display latest approved testimonials on homepage (section with "Voir tous les témoignages" link)
-- [x] Dedicated `/testimonials` page (all approved testimonials)
-- [x] Footer link to `/testimonials`
-- [x] DataFixtures: sample testimonials (approved) for development display
-- [x] Schema.org `AggregateRating` from approved testimonials
-
-> **Testimonials are brand-level, not product-level.** Since every piece is unique
-> and sold once, product reviews make no sense. Testimonials capture the overall
-> Alma Stella experience (quality, packaging, delivery, etc.).
->
-> **No newsletter, no Brevo.** Communication strategy relies on social media
-> (Instagram, Pinterest, TikTok Shop). Transactional emails only, sent via
-> Symfony Mailer + SMTP.
->
-> **No abandoned cart emails.** The reservation system already handles cart
-> retention and item release — abandoned cart reminders would conflict with this logic.
-
-### Definition of Done
-- J+14 after order: customer receives testimonial request email (only if no existing testimonial for that email)
-- Submit a testimonial via email link → testimonial saved as pending
-- Admin approves → testimonial appears on homepage and `/testimonials` page
-- Homepage shows latest testimonials with link to full listing
-- Footer contains link to `/testimonials`
-- Fixtures load sample testimonials visible on homepage after `doctrine:fixtures:load`
-- Returning customer who already left a testimonial is never re-solicited
-- Scheduler cron commands run correctly via `php bin/console messenger:consume`
-
----
-
-## Milestone 10 — Social publishing
-*Estimated effort: 4-5h*
-
-### Tasks
-- [ ] Pinterest API client (`PinterestApiClient` service)
-- [ ] TikTok Shop API client (`TikTokShopApiClient` service)
-- [ ] Instagram deep link generator
-- [ ] `SocialPublisher` service orchestrating all three
-- [ ] EasyAdmin action button "Publish to social media" on product detail + index
-- [ ] Modal with checkboxes (Pinterest ☑ / TikTok Shop ☑ / Instagram ☑)
-- [ ] Flash messages per channel (success/error)
-- [ ] `social_publish_log` table tracking publish history per product per channel
-
-### Definition of Done
-- Click "Publish to social media" on a product → modal appears
-- Deselect Pinterest → only TikTok and Instagram are processed
-- Pinterest: Pin appears in the connected Pinterest Business account
-- TikTok Shop: product appears in the TikTok Seller catalog
-- Instagram: deep link opens the Instagram app with pre-filled caption
-- Publish history visible on product detail page in EasyAdmin
-
----
-
-## Milestone 11 — Security audit & hardening
-*Estimated effort: 3-4h*
-
-> **Every fix requires developer approval before implementation.**
-> Claude audits and proposes — developer validates before any change is applied.
-
-### Tasks
-- [ ] OWASP Top 10 audit (XSS, CSRF, SQL injection, mass assignment, etc.)
-- [ ] Stripe webhook signature verification audit
-- [ ] Authentication & session security review (magic link, customer auth)
-- [ ] Rate limiting on sensitive endpoints (login, testimonial submission, checkout)
-- [ ] Input validation & sanitization audit (forms, query parameters)
-- [ ] CORS & security headers review (`X-Content-Type-Options`, `X-Frame-Options`, CSP, etc.)
-- [ ] Dependency vulnerability scan (`composer audit`)
-- [ ] File upload security review (image uploads, WebP conversion)
-- [ ] Environment secrets audit (`.env` not exposed, no hardcoded keys)
-- [ ] EasyAdmin access control review (admin routes properly protected)
-
-### Definition of Done
-- Full audit report delivered with findings classified by severity (critical / high / medium / low)
-- Each proposed fix reviewed and approved by developer before implementation
-- All critical and high severity issues resolved
-- `composer audit` returns no known vulnerabilities
-- Security headers verified via browser dev tools or online scanner
-
 ---
 
 ## Milestone 12 — SEO & performance
@@ -566,6 +495,8 @@ Shall I proceed to Milestone Y?"
 - `/sitemap.xml` lists all published products and static pages
 - Sharing a product URL on social media shows correct OG image and title
 - Lighthouse mobile score ≥ 90 for homepage
+
+---
 
 ---
 
@@ -631,6 +562,8 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+---
+
 ## Milestone 10 — Automated emails & customer testimonials
 *Estimated effort: 2-3h*
 
@@ -667,6 +600,143 @@ Shall I proceed to Milestone Y?"
 - Fixtures load sample testimonials visible on homepage after `doctrine:fixtures:load`
 - Returning customer who already left a testimonial is never re-solicited
 - Scheduler cron commands run correctly via `php bin/console messenger:consume`
+
+---
+
+---
+
+## Milestone 13 — Security audit & hardening
+*Estimated effort: 3-4h*
+
+> **Every fix requires developer approval before implementation.**
+> Claude audits and proposes — developer validates before any change is applied.
+
+### Tasks
+- [x] OWASP Top 10 audit (XSS, CSRF, SQL injection, mass assignment, etc.)
+- [x] Stripe webhook signature verification audit
+- [x] Authentication & session security review (magic link, customer auth)
+- [x] Rate limiting on sensitive endpoints (login, testimonial submission, checkout)
+- [x] Input validation & sanitization audit (forms, query parameters)
+- [x] CORS & security headers review (`X-Content-Type-Options`, `X-Frame-Options`, CSP, etc.)
+- [x] Dependency vulnerability scan (`composer audit`)
+- [x] File upload security review (image uploads, WebP conversion)
+- [x] Environment secrets audit (`.env` not exposed, no hardcoded keys)
+- [x] EasyAdmin access control review (admin routes properly protected)
+
+### Definition of Done
+- Full audit report delivered with findings classified by severity (critical / high / medium / low)
+- Each proposed fix reviewed and approved by developer before implementation
+- All critical and high severity issues resolved
+- `composer audit` returns no known vulnerabilities
+- Security headers verified via browser dev tools or online scanner
+
+---
+
+---
+
+## Milestone 14 — Two-level category hierarchy
+*Estimated effort: 6-8h*
+
+> **Categories become hierarchical (parent → subcategory) with mixed mode.**
+> A product is attached to a **leaf category** — either a subcategory (level 2)
+> or a parent that has no children (e.g. Coffrets, Chaînes de cheville).
+> Products cannot be attached to a parent that has children.
+> URLs: `/shop/{parentSlug}/{childSlug}` for hierarchical categories,
+> `/shop/{slug}` for single-level categories.
+
+### Category structure
+
+```
+Colliers (Necklaces)
+  ├─ Pendentifs (Pendants)
+  ├─ Ras-de-cou (Chokers)
+  └─ Sautoirs & Chaînes (Long & Chain)
+
+Boucles d'oreilles (Earrings)
+  ├─ Créoles (Hoops)
+  ├─ Puces (Studs)
+  └─ Pendantes (Drops)
+
+Bracelets (Bracelets)
+  ├─ Chaînes (Chain)
+  ├─ Manchettes (Cuffs)
+  └─ Perles & Pierres (Beaded)
+
+Bagues (Rings)
+  ├─ Pierres (Stone)
+  └─ Simples & Empilables (Plain)
+
+Chaînes de cheville (Anklets)      ← no subcategories (leaf parent)
+
+Coffrets (Sets)                    ← no subcategories (leaf parent)
+```
+
+### 14a — Entity & migration
+- [x] Add self-referencing `parent` (ManyToOne, nullable) and `children` (OneToMany) to `ProductCategory`
+- [x] Add validation: max 2 levels (a parent cannot have a parent)
+- [x] Add validation: products can only be attached to leaf categories (subcategory OR childless parent)
+- [x] Modify initial migration to add `parent_id` column with foreign key
+- [x] Recreate DDEV environment and verify schema
+
+### 14b — EasyAdmin category management
+- [x] Category list: indented tree view (subcategories shown with `↳` prefix under parent)
+- [x] Drag & drop reordering (handle `☰`) to change position and parent assignment
+- [x] Category form: parent selector (dropdown showing only root categories)
+- [x] Category form: prevent selecting a parent that already has a parent (enforce 2 levels max)
+- [x] Position ordering works within each level (siblings sorted by position)
+- [x] Product count column aggregates subcategories for parent rows
+
+### 14c — EasyAdmin product form
+- [x] Product category field: show leaf categories only (subcategories + childless parents), grouped by parent
+- [x] Category filter in product list: adapted for hierarchy
+
+### 14d — Catalog controller & routing
+- [x] Route: `/shop/{parentSlug}/{childSlug}` (EN) / `/boutique/{parentSlug}/{childSlug}` (FR) — subcategory filter
+- [x] Route: `/shop/{parentSlug}` (EN) / `/boutique/{parentSlug}` (FR) — all products of a parent (or direct for childless parents like Coffrets, Chaînes de cheville)
+- [x] Keep `/shop` / `/boutique` showing all products (no filter)
+- [x] 404 if parent slug or child slug not found
+- [x] Breadcrumb structured data: 2-level for hierarchical, 1-level for childless parents
+
+### 14e — Shop sidebar (category filters)
+- [x] Replace horizontal category bar with vertical sidebar (desktop: left column)
+- [x] Sidebar: collapsible sections per parent category (with children)
+- [x] Childless parents (Coffrets, Chaînes de cheville) shown as simple links, no collapse
+- [x] Active parent auto-expanded, others collapsed by default
+- [x] Active subcategory highlighted
+- [x] Product count per subcategory displayed (and per childless parent)
+- [x] Responsive mobile: "Filtrer" button opens a drawer (slide-in panel from left)
+- [x] Drawer contains same collapsible category tree + "Fermer" button
+- [x] Background overlay (grisé) when drawer is open
+
+### 14f — Navbar
+- [x] Desktop + mobile: "Boutique" is a simple link to `/shop` (mega-menu removed)
+- [x] `nav_dropdown_controller.js` removed (no longer needed)
+
+### 14g — Fixtures & data update
+- [x] Restructure `AppFixtures` with parent + subcategory hierarchy
+- [x] Reassign 12 existing products to appropriate leaf categories (subcategories or childless parents)
+- [x] Reload fixtures and verify all products display correctly
+
+### 14h — Repository & Twig filters
+- [x] `findAllOrdered()` → returns tree structure (parents with children)
+- [x] `findRootCategories()` — returns only parent categories
+- [x] `findChildrenByParent()` — returns subcategories of a given parent
+- [x] `localized_name` / `localized_slug` filters still work on both levels
+- [x] Update `ARCHITECTURE.md` with new category structure
+
+### Definition of Done
+- Create parent + subcategory in EasyAdmin → hierarchy displays correctly
+- Cannot assign a product to a parent that has children (forced to pick leaf category)
+- Can assign a product to a childless parent (e.g. Coffrets) → works correctly
+- `/shop/bracelets` shows all bracelet products (from all subcategories)
+- `/shop/bracelets/manchettes` shows only cuff bracelets
+- `/shop/coffrets` shows coffret products directly (no subcategory level)
+- Sidebar: collapsible tree for parents with children, simple links for childless parents
+- Navbar "Boutique" links directly to catalog (no dropdown)
+- All 12 fixture products correctly assigned to leaf categories
+- No broken links, 404 on invalid slugs
+
+---
 
 ---
 
@@ -828,6 +898,8 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+---
+
 ## Milestone 11 — Instagram feed (Behold.so)
 *Estimated effort: 2-3h*
 
@@ -870,6 +942,8 @@ Shall I proceed to Milestone Y?"
 
 ---
 
+---
+
 ## Milestone 12 — Social publishing
 *Estimated effort: 4-5h*
 
@@ -893,135 +967,6 @@ Shall I proceed to Milestone Y?"
 
 ---
 
-## Milestone 13 — Security audit & hardening
-*Estimated effort: 3-4h*
-
-> **Every fix requires developer approval before implementation.**
-> Claude audits and proposes — developer validates before any change is applied.
-
-### Tasks
-- [x] OWASP Top 10 audit (XSS, CSRF, SQL injection, mass assignment, etc.)
-- [x] Stripe webhook signature verification audit
-- [x] Authentication & session security review (magic link, customer auth)
-- [x] Rate limiting on sensitive endpoints (login, testimonial submission, checkout)
-- [x] Input validation & sanitization audit (forms, query parameters)
-- [x] CORS & security headers review (`X-Content-Type-Options`, `X-Frame-Options`, CSP, etc.)
-- [x] Dependency vulnerability scan (`composer audit`)
-- [x] File upload security review (image uploads, WebP conversion)
-- [x] Environment secrets audit (`.env` not exposed, no hardcoded keys)
-- [x] EasyAdmin access control review (admin routes properly protected)
-
-### Definition of Done
-- Full audit report delivered with findings classified by severity (critical / high / medium / low)
-- Each proposed fix reviewed and approved by developer before implementation
-- All critical and high severity issues resolved
-- `composer audit` returns no known vulnerabilities
-- Security headers verified via browser dev tools or online scanner
-
----
-
-## Milestone 14 — Two-level category hierarchy
-*Estimated effort: 6-8h*
-
-> **Categories become hierarchical (parent → subcategory) with mixed mode.**
-> A product is attached to a **leaf category** — either a subcategory (level 2)
-> or a parent that has no children (e.g. Coffrets, Chaînes de cheville).
-> Products cannot be attached to a parent that has children.
-> URLs: `/shop/{parentSlug}/{childSlug}` for hierarchical categories,
-> `/shop/{slug}` for single-level categories.
-
-### Category structure
-
-```
-Colliers (Necklaces)
-  ├─ Pendentifs (Pendants)
-  ├─ Ras-de-cou (Chokers)
-  └─ Sautoirs & Chaînes (Long & Chain)
-
-Boucles d'oreilles (Earrings)
-  ├─ Créoles (Hoops)
-  ├─ Puces (Studs)
-  └─ Pendantes (Drops)
-
-Bracelets (Bracelets)
-  ├─ Chaînes (Chain)
-  ├─ Manchettes (Cuffs)
-  └─ Perles & Pierres (Beaded)
-
-Bagues (Rings)
-  ├─ Pierres (Stone)
-  └─ Simples & Empilables (Plain)
-
-Chaînes de cheville (Anklets)      ← no subcategories (leaf parent)
-
-Coffrets (Sets)                    ← no subcategories (leaf parent)
-```
-
-### 14a — Entity & migration
-- [x] Add self-referencing `parent` (ManyToOne, nullable) and `children` (OneToMany) to `ProductCategory`
-- [x] Add validation: max 2 levels (a parent cannot have a parent)
-- [x] Add validation: products can only be attached to leaf categories (subcategory OR childless parent)
-- [x] Modify initial migration to add `parent_id` column with foreign key
-- [x] Recreate DDEV environment and verify schema
-
-### 14b — EasyAdmin category management
-- [x] Category list: indented tree view (subcategories shown with `↳` prefix under parent)
-- [x] Drag & drop reordering (handle `☰`) to change position and parent assignment
-- [x] Category form: parent selector (dropdown showing only root categories)
-- [x] Category form: prevent selecting a parent that already has a parent (enforce 2 levels max)
-- [x] Position ordering works within each level (siblings sorted by position)
-- [x] Product count column aggregates subcategories for parent rows
-
-### 14c — EasyAdmin product form
-- [x] Product category field: show leaf categories only (subcategories + childless parents), grouped by parent
-- [x] Category filter in product list: adapted for hierarchy
-
-### 14d — Catalog controller & routing
-- [x] Route: `/shop/{parentSlug}/{childSlug}` (EN) / `/boutique/{parentSlug}/{childSlug}` (FR) — subcategory filter
-- [x] Route: `/shop/{parentSlug}` (EN) / `/boutique/{parentSlug}` (FR) — all products of a parent (or direct for childless parents like Coffrets, Chaînes de cheville)
-- [x] Keep `/shop` / `/boutique` showing all products (no filter)
-- [x] 404 if parent slug or child slug not found
-- [x] Breadcrumb structured data: 2-level for hierarchical, 1-level for childless parents
-
-### 14e — Shop sidebar (category filters)
-- [x] Replace horizontal category bar with vertical sidebar (desktop: left column)
-- [x] Sidebar: collapsible sections per parent category (with children)
-- [x] Childless parents (Coffrets, Chaînes de cheville) shown as simple links, no collapse
-- [x] Active parent auto-expanded, others collapsed by default
-- [x] Active subcategory highlighted
-- [x] Product count per subcategory displayed (and per childless parent)
-- [x] Responsive mobile: "Filtrer" button opens a drawer (slide-in panel from left)
-- [x] Drawer contains same collapsible category tree + "Fermer" button
-- [x] Background overlay (grisé) when drawer is open
-
-### 14f — Navbar
-- [x] Desktop + mobile: "Boutique" is a simple link to `/shop` (mega-menu removed)
-- [x] `nav_dropdown_controller.js` removed (no longer needed)
-
-### 14g — Fixtures & data update
-- [x] Restructure `AppFixtures` with parent + subcategory hierarchy
-- [x] Reassign 12 existing products to appropriate leaf categories (subcategories or childless parents)
-- [x] Reload fixtures and verify all products display correctly
-
-### 14h — Repository & Twig filters
-- [x] `findAllOrdered()` → returns tree structure (parents with children)
-- [x] `findRootCategories()` — returns only parent categories
-- [x] `findChildrenByParent()` — returns subcategories of a given parent
-- [x] `localized_name` / `localized_slug` filters still work on both levels
-- [x] Update `ARCHITECTURE.md` with new category structure
-
-### Definition of Done
-- Create parent + subcategory in EasyAdmin → hierarchy displays correctly
-- Cannot assign a product to a parent that has children (forced to pick leaf category)
-- Can assign a product to a childless parent (e.g. Coffrets) → works correctly
-- `/shop/bracelets` shows all bracelet products (from all subcategories)
-- `/shop/bracelets/manchettes` shows only cuff bracelets
-- `/shop/coffrets` shows coffret products directly (no subcategory level)
-- Sidebar: collapsible tree for parents with children, simple links for childless parents
-- Navbar "Boutique" links directly to catalog (no dropdown)
-- All 12 fixture products correctly assigned to leaf categories
-- No broken links, 404 on invalid slugs
-
 ---
 
 ## V2 backlog (post-launch, not in current scope)
@@ -1032,3 +977,4 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 - Referral program ("Give $10, Get $10")
 - Loyalty program (3 orders → automatic discount)
 - Faire/Ankorstore B2B wholesale channel
+
