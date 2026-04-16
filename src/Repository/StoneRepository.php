@@ -24,7 +24,7 @@ class StoneRepository extends ServiceEntityRepository
     public function findAllOrdered(): array
     {
         return $this->createQueryBuilder('s')
-            ->orderBy('s.position', 'ASC')
+            ->orderBy('s.nameFr', 'ASC')
             ->getQuery()
             ->getResult();
     }

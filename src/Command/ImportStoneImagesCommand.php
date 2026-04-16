@@ -50,6 +50,7 @@ final class ImportStoneImagesCommand extends Command
         'Nacre' => 'Nacre',
         'Perle' => 'Perle',
         'Abalone' => 'Abalone',
+        'Agate blanche' => 'Agate blanche',
     ];
 
     public function __construct(

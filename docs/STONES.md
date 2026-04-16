@@ -1180,6 +1180,70 @@ séparément dans une pochette souple (très tendre).
 
 ---
 
+## Agate Blanche
+
+**Accroche :** La pierre de sérénité. Un blanc pur qui apaise depuis l'aube des civilisations.
+
+**Description :**
+L'agate blanche est une calcédoine — quartz microcristallin — d'un blanc laiteux
+à translucide, parfois traversée de fines bandes nacrées presque imperceptibles.
+C'est la plus sobre et la plus apaisante des agates, une famille de pierres qui
+doit son nom au philosophe grec Théophraste, disciple d'Aristote, qui la décrivit
+vers 350 av. J.-C. après l'avoir trouvée sur les rivages du fleuve Achates
+(aujourd'hui le Dirillo), au sud de la Sicile. L'agate est ainsi l'une des
+premières pierres à avoir reçu un nom scientifique dans l'histoire de la
+minéralogie.
+
+Les Égyptiens travaillaient déjà l'agate dès 3500 av. J.-C., en façonnant des
+amulettes protectrices et des bijoux funéraires. Les Sumériens en ornaient leurs
+parures vers 2500 av. J.-C. Dans la tradition islamique, l'agate blanche était
+surnommée « pierre de lait », car on lui attribuait le pouvoir de favoriser la
+lactation. En Grèce, elle était associée à Gaïa, la Terre-Mère ; à Rome, à
+Aurore, la déesse de l'aube — une association poétique entre la blancheur de la
+pierre et la première lumière du jour.
+
+**Le saviez-vous ?**
+C'est l'agate qui a fait d'Idar-Oberstein, petite ville allemande de
+Rhénanie-Palatinat, la capitale mondiale de la taille de pierres. Dès le
+XVᵉ siècle, les artisans utilisaient des meules géantes actionnées par les
+eaux de la rivière Nahe. Les tailleurs travaillaient allongés face contre terre
+sur des planches de bois, pressant les pierres contre les roues en rotation avec
+le poids de leur corps — une technique spectaculaire pratiquée pendant quatre
+siècles, jusqu'à l'arrivée de l'électricité au milieu du XIXᵉ siècle.
+
+**Traditions :**
+Pierre de protection universelle, portée en amulette par les Égyptiens, les Grecs
+et les Romains. Les Romains la réduisaient en poudre qu'ils mêlaient à l'eau,
+croyant pouvoir neutraliser le venin de serpent. Dans la tradition celtique,
+l'agate blanche était liée à Ceridwen, déesse de la sagesse et de la
+transformation.
+
+**Vertus :**
+L'agate blanche est un silence. Là où d'autres pierres stimulent, éveillent ou
+enflamment, elle apaise. C'est la pierre de celles qui ont besoin de calme dans
+le bruit, de clarté dans la confusion, d'une pause dans la course. Elle stabilise
+les émotions, harmonise le corps et l'esprit et enveloppe d'une sérénité douce,
+sans pesanteur. Pierre de pureté, elle invite à revenir à l'essentiel, à se
+défaire du superflu, à retrouver une paix intérieure lumineuse. On la porte pour
+se recentrer, comme on prend une grande respiration.
+*Chakra : Couronne.*
+
+**Caractéristiques :**
+
+| Propriété | Valeur |
+|---|---|
+| Couleur | Blanc laiteux à translucide, parfois finement bandé |
+| Éclat | Vitreux à cireux |
+| Origine | Brésil, Inde, Madagascar, Uruguay, Allemagne (Idar-Oberstein) |
+
+**Entretien :**
+Pierre résistante (famille du quartz). Nettoyer à l'eau tiède savonneuse avec
+une brosse douce. Éviter l'exposition prolongée au soleil direct (risque de
+jaunissement). Nettoyeur à ultrasons généralement sûr, sauf si la pierre
+présente des fissures visibles. Bonne durabilité pour un usage quotidien.
+
+---
+
 ## Tableau récapitulatif
 
 | Pierre | Couleur dominante |
@@ -1205,3 +1269,4 @@ séparément dans une pochette souple (très tendre).
 | Nacre | Iridescent blanc |
 | Perle | Blanc lustré |
 | Abalone | Iridescent multicolore |
+| Agate Blanche | Blanc laiteux |

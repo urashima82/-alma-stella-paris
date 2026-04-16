@@ -156,3 +156,9 @@ A single loose round pearl, no shell, soft cream and pink overtones, resting on 
 ```
 A polished abalone shell fragment showing vivid blue-green-purple iridescence, resting on warm linen fabric, soft natural light revealing shifting colors, a dried sea lavender sprig nearby, warm white background #FAF8F4, editorial jewelry photography, oceanic and vibrant mood, macro detail on the swirling prismatic surface --ar 1:1 --s 750 --v 6.1
 ```
+
+### 22. Agate Blanche (White Agate)
+
+```
+A smooth white agate stone with subtle translucent banding, resting on a warm linen cloth, soft diffused morning light creating a gentle glow through the milky surface, dried white lunaria seed pods nearby, warm cream background #F0EBE1, editorial still life photography, pure and serene mood, macro detail on the delicate layered bands within the stone --ar 1:1 --s 750 --v 6.1
+```
