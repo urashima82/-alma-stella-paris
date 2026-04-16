@@ -47,7 +47,7 @@ final class SecurityHeadersSubscriber implements EventSubscriberInterface
             ."script-src 'self' 'unsafe-inline' data: https://js.stripe.com https://feeds.behold.so https://cdn.jsdelivr.net https://challenges.cloudflare.com; "
             ."style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             ."font-src 'self' https://fonts.gstatic.com; "
-            ."img-src 'self' data: https://*.cdninstagram.com https://*.behold.so; "
+            ."img-src 'self' data: https://*.cdninstagram.com https://*.behold.so https://behold.pictures; "
             .'frame-src https://js.stripe.com https://challenges.cloudflare.com; '
             ."connect-src 'self' https://api.stripe.com https://feeds.behold.so;";
 

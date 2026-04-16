@@ -89,6 +89,7 @@ alma-stella/
 │   │   ├── ContactMailer.php        # Contact form notification (plain text to admins, reply-to sender)
 │   │   ├── CurrencyConverter.php    # Exchange rates from open.er-api.com, cached 6h
 │   │   ├── ImageProcessor.php       # Resizes and converts images to WebP (GD driver)
+│   │   ├── InstagramFeedService.php # Instagram feed via Behold.so API, cached 6h
 │   │   ├── InvoiceGenerator.php      # PDF invoice generation (dompdf, bilingual, logo + legal footer)
 │   │   ├── OrderMailer.php          # Order emails (confirmation, shipped, delivered, cancelled, admin)
 │   │   ├── PendingOrderVerifier.php # Verifies pending orders against Stripe API
@@ -677,6 +678,16 @@ class Testimonial
 ---
 
 ## Services
+
+### InstagramFeedService
+
+- Fetches Instagram feed from Behold.so API (`https://feeds.behold.so/{feedId}`)
+- Cached 6 hours via Symfony Cache (same pattern as `CurrencyConverter`)
+- Returns up to 6 latest posts: image URL (medium size via Behold CDN), permalink, caption
+- Graceful fallback: returns empty array if API unavailable or Feed ID not configured
+- No external JavaScript — server-side fetch only, rendered in Twig
+- Images served via Behold CDN (`behold.pictures`) with lazy loading
+- Config: `BEHOLD_FEED_ID` env var (injected via `services.yaml` bind)
 
 ### CurrencyConverter
 

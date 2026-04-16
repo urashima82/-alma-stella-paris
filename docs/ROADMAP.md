@@ -910,26 +910,26 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 ### Tasks
 
 #### Configuration
-- [ ] Add `BEHOLD_FEED_ID` to `.env` (documented, no default value)
-- [ ] Add `BEHOLD_FEED_ID` to `.env.local` with actual Feed ID from client
+- [x] Add `BEHOLD_FEED_ID` to `.env` (documented, no default value)
+- [x] Add `BEHOLD_FEED_ID` to `.env.local` with actual Feed ID from client
 
 #### Service & cache
-- [ ] `InstagramFeedService` — fetches Behold.so JSON API (`https://feeds.behold.so/{feedId}`)
-- [ ] Symfony Cache integration (filesystem adapter, TTL **6h** — same pattern as `CurrencyConverter`)
-- [ ] Graceful fallback: if API unavailable or cache miss fails, return empty array (no error displayed)
-- [ ] Cache warmup via Symfony Scheduler (optional: pre-fetch every 6h to avoid cold cache on first visitor)
+- [x] `InstagramFeedService` — fetches Behold.so JSON API (`https://feeds.behold.so/{feedId}`)
+- [x] Symfony Cache integration (filesystem adapter, TTL **6h** — same pattern as `CurrencyConverter`)
+- [x] Graceful fallback: if API unavailable or cache miss fails, return empty array (no error displayed)
+- [x] Cache warmup via Symfony Scheduler (optional: pre-fetch every 6h to avoid cold cache on first visitor)
 
 #### Homepage integration
-- [ ] Replace placeholder grid (6 ✦ squares) with real Instagram photos from `InstagramFeedService`
-- [ ] Display up to 6 latest posts: thumbnail image, link to original Instagram post
-- [ ] Hover effect: slight zoom + overlay with post caption (truncated)
-- [ ] Responsive grid: 2 columns (mobile) → 3 columns (tablet) → 6 columns (desktop)
-- [ ] Fallback: if no posts available, show current placeholder gracefully (no broken layout)
+- [x] Replace placeholder grid (6 ✦ squares) with real Instagram photos from `InstagramFeedService`
+- [x] Display up to 6 latest posts: thumbnail image, link to original Instagram post
+- [x] Hover effect: slight zoom + overlay with post caption (truncated)
+- [x] Responsive grid: 2 columns (mobile) → 3 columns (tablet) → 6 columns (desktop)
+- [x] Fallback: if no posts available, show current placeholder gracefully (no broken layout)
 
 #### Performance
-- [ ] Images served via Behold CDN (no local download/storage)
-- [ ] Lazy loading (`loading="lazy"`) on all Instagram images
-- [ ] No external JavaScript — server-side fetch only, rendered in Twig
+- [x] Images served via Behold CDN (no local download/storage)
+- [x] Lazy loading (`loading="lazy"`) on all Instagram images
+- [x] No external JavaScript — server-side fetch only, rendered in Twig
 
 ### Definition of Done
 - Homepage displays 6 real Instagram posts from `@alma_stella_paris`

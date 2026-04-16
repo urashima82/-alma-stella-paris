@@ -191,19 +191,41 @@
             <p class="font-sans text-sm text-alma-text-muted">{{ 'home.instagram_subtitle'|trans }}</p>
         </div>
 
-        <div class="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
-            {% for i in 1..6 %}
-                <a href="https://www.instagram.com/alma_stella_paris/"
-                   target="_blank" rel="noopener"
-                   class="group block aspect-square bg-alma-surface border border-transparent
-                          hover:border-alma-gold transition-colors duration-300
-                          flex items-center justify-center">
-                    <div class="text-center">
-                        <p class="text-alma-gold text-2xl mb-1 group-hover:scale-110 transition-transform duration-300">✦</p>
-                        <p class="text-[10px] text-alma-text-muted uppercase tracking-widest">Instagram</p>
-                    </div>
-                </a>
-            {% endfor %}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+            {% if instagramPosts is not empty %}
+                {% for post in instagramPosts %}
+                    <a href="{{ post.permalink }}"
+                       target="_blank" rel="noopener"
+                       class="group relative block aspect-square overflow-hidden
+                              border border-transparent hover:border-alma-gold transition-colors duration-300">
+                        <img src="{{ post.imageUrl }}"
+                             alt="{{ post.caption|length > 80 ? post.caption|slice(0, 80) ~ '…' : post.caption }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             loading="lazy">
+                        <div class="absolute inset-0 bg-alma-text/0 group-hover:bg-alma-text/50
+                                    transition-colors duration-300 flex items-center justify-center">
+                            <p class="text-white text-xs font-sans px-3 text-center leading-relaxed
+                                      opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-4">
+                                {{ post.caption|length > 120 ? post.caption|slice(0, 120) ~ '…' : post.caption }}
+                            </p>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                {# Fallback: graceful placeholder when no posts available #}
+                {% for i in 1..6 %}
+                    <a href="https://www.instagram.com/alma_stella_paris/"
+                       target="_blank" rel="noopener"
+                       class="group block aspect-square bg-alma-surface border border-transparent
+                              hover:border-alma-gold transition-colors duration-300
+                              flex items-center justify-center">
+                        <div class="text-center">
+                            <p class="text-alma-gold text-2xl mb-1 group-hover:scale-110 transition-transform duration-300">✦</p>
+                            <p class="text-[10px] text-alma-text-muted uppercase tracking-widest">Instagram</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% endif %}
         </div>
     </section>
 {% endblock %}

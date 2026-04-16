@@ -7,6 +7,7 @@ namespace App\Controller\Shop;
 use App\Repository\ProductRepository;
 use App\Repository\SiteSettingsRepository;
 use App\Repository\TestimonialRepository;
+use App\Service\InstagramFeedService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,6 +19,7 @@ class HomeController extends AbstractController
         ProductRepository $productRepository,
         SiteSettingsRepository $siteSettingsRepository,
         TestimonialRepository $testimonialRepository,
+        InstagramFeedService $instagramFeedService,
     ): Response {
         $activeCollection = $siteSettingsRepository->getActiveCollection();
         $featuredProducts = $productRepository->findFeatured(4, $activeCollection);
@@ -33,6 +35,7 @@ class HomeController extends AbstractController
             'isFeaturedFallback' => $isFeaturedFallback,
             'testimonials' => $testimonialRepository->findApproved(3),
             'testimonialStats' => $testimonialRepository->getApprovedStats(),
+            'instagramPosts' => $instagramFeedService->getLatestPosts(),
         ]);
     }
 }
