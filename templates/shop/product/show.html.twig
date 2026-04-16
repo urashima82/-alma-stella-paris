@@ -232,6 +232,21 @@
                     <p>{{ product|localized_description }}</p>
                 </div>
 
+                {# Stone badges #}
+                {% if product.stones|length > 0 %}
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        {% for stone in product.stones %}
+                            <a href="{{ stone_path(stone) }}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1
+                                      bg-alma-gold/10 text-alma-gold text-xs font-sans font-medium
+                                      border border-alma-gold/30 hover:bg-alma-gold/20 transition-colors"
+                               title="{{ stone|localized_short_description }}">
+                                {{ stone|localized_name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 {# Material badges #}
                 <div class="flex flex-wrap gap-2 mb-8">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1
@@ -239,11 +254,13 @@
                                  border border-alma-hover">
                         {{ 'product.material_badge_steel'|trans }}
                     </span>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1
-                                 bg-alma-surface text-alma-text-muted text-xs font-sans font-medium
-                                 border border-alma-hover">
-                        {{ 'product.material_badge_stone'|trans }}
-                    </span>
+                    {% if product.stones|length > 0 %}
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1
+                                     bg-alma-surface text-alma-text-muted text-xs font-sans font-medium
+                                     border border-alma-hover">
+                            {{ 'product.material_badge_stone'|trans }}
+                        </span>
+                    {% endif %}
                     <span class="inline-flex items-center gap-1.5 px-3 py-1
                                  bg-alma-surface text-alma-text-muted text-xs font-sans font-medium
                                  border border-alma-hover">

@@ -2,6 +2,7 @@
 nav:
     home: Home
     shop: Shop
+    stones: "Our Stones"
     about: About
     contact: Contact
     language: Language
@@ -118,6 +119,7 @@ footer:
     terms: "Terms of Sale"
     copyright: "© %year% Alma Stella Paris. All rights reserved."
     motto: '"Porter le monde." ✦'
+    stones: "Our stones"
 
 # ── Error pages ──
 error:
@@ -594,6 +596,30 @@ testimonial:
         text_too_short: "Your testimonial must be at least 10 characters."
         first_name_required: "Please enter your first name."
         last_name_initial_required: "Please enter your last name initial."
+
+# ── Stone guide ──
+stones:
+    title: "Stone Guide | Alma Stella Paris"
+    title_suffix: "Alma Stella Paris"
+    meta_description: "Discover the natural stones used in Alma Stella Paris jewelry. Origins, virtues, and meaning of each stone."
+    heading: "Our Stones"
+    intro: "Each natural stone tells a story shaped by millennia. Discover the origins, traditions, and virtues of the stones that adorn our jewelry."
+    empty: "No stones to display yet."
+    guide_label: "Stone guide"
+    characteristics: "Characteristics"
+    color_label: "Color"
+    lustre_label: "Lustre"
+    origin_label: "Origin"
+    chakra_label: "Chakra"
+    fun_fact_label: "Did you know?"
+    traditions_label: "Traditions"
+    virtues_label: "Virtues"
+    care_label: "Care instructions"
+    products_heading: "Jewelry with %stone%"
+    products_subtitle: "Discover our pieces featuring this stone."
+    disclaimer: "The energetic and spiritual properties described in this guide are part of lithotherapy (crystal healing), an ancestral practice not recognized by conventional medicine. These virtues are presented for informational purposes and do not substitute for medical advice."
+    filter_heading: "Stones"
+    filter_no_stone: "Without stone"
 
 # ── Language switcher ──
 locale:

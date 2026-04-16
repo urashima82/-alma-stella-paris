@@ -103,6 +103,11 @@ class Product
     #[ORM\JoinTable(name: 'product_related')]
     private Collection $relatedProducts;
 
+    /** @var Collection<int, Stone> */
+    #[ORM\ManyToMany(targetEntity: Stone::class, inversedBy: 'products')]
+    #[ORM\JoinTable(name: 'product_stone')]
+    private Collection $stones;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -112,6 +117,7 @@ class Product
     public function __construct()
     {
         $this->relatedProducts = new ArrayCollection();
+        $this->stones = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -463,6 +469,28 @@ class Product
     public function removeRelatedProduct(self $product): static
     {
         $this->relatedProducts->removeElement($product);
+
+        return $this;
+    }
+
+    /** @return Collection<int, Stone> */
+    public function getStones(): Collection
+    {
+        return $this->stones;
+    }
+
+    public function addStone(Stone $stone): static
+    {
+        if (!$this->stones->contains($stone)) {
+            $this->stones->add($stone);
+        }
+
+        return $this;
+    }
+
+    public function removeStone(Stone $stone): static
+    {
+        $this->stones->removeElement($stone);
 
         return $this;
     }

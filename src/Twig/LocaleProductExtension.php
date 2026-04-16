@@ -7,6 +7,7 @@ namespace App\Twig;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
 use App\Entity\Promotion;
+use App\Entity\Stone;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Extension\AbstractExtension;
@@ -27,6 +28,8 @@ class LocaleProductExtension extends AbstractExtension
             new TwigFilter('localized_name', $this->localizedName(...)),
             new TwigFilter('localized_description', $this->localizedDescription(...)),
             new TwigFilter('localized_slug', $this->localizedSlug(...)),
+            new TwigFilter('localized_short_description', $this->localizedShortDescription(...)),
+            new TwigFilter('localized_virtues', $this->localizedVirtues(...)),
         ];
     }
 
@@ -34,10 +37,11 @@ class LocaleProductExtension extends AbstractExtension
     {
         return [
             new TwigFunction('category_path', $this->categoryPath(...)),
+            new TwigFunction('stone_path', $this->stonePath(...)),
         ];
     }
 
-    public function localizedName(Product|ProductCategory|Promotion $entity): string
+    public function localizedName(Product|ProductCategory|Promotion|Stone $entity): string
     {
         if ($this->getLocale() === 'fr') {
             return $entity->getNameFr();
@@ -46,7 +50,7 @@ class LocaleProductExtension extends AbstractExtension
         return $entity->getName();
     }
 
-    public function localizedDescription(Product|ProductCategory $entity): string
+    public function localizedDescription(Product|ProductCategory|Stone $entity): string
     {
         if ($this->getLocale() === 'fr') {
             return $entity->getDescriptionFr() ?? '';
@@ -55,7 +59,7 @@ class LocaleProductExtension extends AbstractExtension
         return $entity->getDescription() ?? '';
     }
 
-    public function localizedSlug(Product|ProductCategory $entity): string
+    public function localizedSlug(Product|ProductCategory|Stone $entity): string
     {
         if ($this->getLocale() === 'fr') {
             return $entity->getSlugFr();
@@ -82,6 +86,33 @@ class LocaleProductExtension extends AbstractExtension
 
         return $this->urlGenerator->generate('shop_catalog', [
             'parentSlug' => $isFr ? $category->getSlugFr() : $category->getSlug(),
+        ]);
+    }
+
+    public function localizedShortDescription(Stone $stone): string
+    {
+        if ($this->getLocale() === 'fr') {
+            return $stone->getShortDescriptionFr();
+        }
+
+        return $stone->getShortDescription();
+    }
+
+    public function localizedVirtues(Stone $stone): string
+    {
+        if ($this->getLocale() === 'fr') {
+            return $stone->getVirtuesFr();
+        }
+
+        return $stone->getVirtues();
+    }
+
+    public function stonePath(Stone $stone): string
+    {
+        $isFr = $this->getLocale() === 'fr';
+
+        return $this->urlGenerator->generate('shop_stone_show', [
+            'slug' => $isFr ? $stone->getSlugFr() : $stone->getSlug(),
         ]);
     }
 

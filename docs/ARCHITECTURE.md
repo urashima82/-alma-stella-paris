@@ -52,6 +52,7 @@ alma-stella/
 │   │   │   ├── ProductCategoryCrudController.php # Category management
 │   │   │   ├── ProductCrudController.php         # Product management with image uploads
 │   │   │   ├── PromotionCrudController.php      # Promotion management with targeting + stats
+│   │   │   ├── StoneCrudController.php          # Stone CRUD — bilingual, image upload, product links
 │   │   │   ├── ShippingSettingsCrudController.php # Shipping tier cost overrides
 │   │   │   └── SiteSettingsCrudController.php    # Site-wide settings (active collection, maintenance mode)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
@@ -69,6 +70,7 @@ alma-stella/
 │   │       ├── InvoiceController.php       # PDF invoice download (token-verified, locale-aware)
 │   │       ├── LegalController.php         # Legal notice + terms of sale
 │   │       ├── ProductController.php
+│   │       ├── StoneGuideController.php    # Stone guide: index + detail pages
 │   │       ├── ResetPasswordController.php # Forgot password + reset flow
 │   │       ├── SecurityController.php      # Customer login, register (OTP), logout
 │   │       └── TestimonialController.php   # Testimonial listing + customer submission
@@ -550,6 +552,47 @@ class Reservation
 | `SiteSettings` | Singleton — active collection filter + maintenance mode (toggle, message, IP whitelist) |
 | `Promotion` | Promotions & coupons — product auto, cart auto, code, private link |
 | `PromotionUsage` | Tracks promotion usage per order (discount amount, email, timestamp) |
+| `Stone` | Natural stone guide — bilingual content, virtues, origin, ManyToMany with Product |
+
+---
+
+### Stone
+
+```php
+// src/Entity/Stone.php
+class Stone
+{
+    private int $id;
+    private string $name;                    // EN name
+    private string $nameFr;                  // FR name
+    private string $slug;                    // Auto-generated from name (unique)
+    private string $slugFr;                  // Auto-generated from nameFr (unique)
+    private string $shortDescription;        // Short hook EN (badges, tooltips)
+    private string $shortDescriptionFr;      // Short hook FR
+    private string $description;             // Full description EN
+    private string $descriptionFr;           // Full description FR
+    private ?string $funFact;                // "Did you know?" EN
+    private ?string $funFactFr;              // "Le saviez-vous ?" FR
+    private ?string $traditions;             // Cultural traditions EN
+    private ?string $traditionsFr;           // Cultural traditions FR
+    private string $virtues;                 // Emotional/spiritual virtues EN
+    private string $virtuesFr;               // Emotional/spiritual virtues FR
+    private ?string $chakra;                 // Associated chakra(s)
+    private string $color;                   // Dominant color
+    private ?string $lustre;                 // Stone lustre
+    private ?string $origin;                 // Geographic origin
+    private ?string $care;                   // Care instructions EN
+    private ?string $careFr;                 // Care instructions FR
+    private ?string $imageName;              // VichUploader (stone_images mapping)
+    private int $position;                   // Display order
+    private Collection<Product> $products;   // ManyToMany (inversedBy, owning side = Product)
+}
+```
+
+> **Purpose:** Each stone has a dedicated page with origin, traditions, virtues,
+> and links to products. Products can have multiple stones (e.g. Duo Émeraude
+> & Malachite). The stone filter in the catalog allows filtering by stone type,
+> with a "Sans pierre" option for plain steel jewelry.
 
 ---
 

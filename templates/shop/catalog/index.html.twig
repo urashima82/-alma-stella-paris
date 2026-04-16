@@ -185,6 +185,41 @@
                         </a>
                     {% endif %}
                 {% endfor %}
+
+                {# ── Stone filter ── #}
+                {% if stones|length > 0 %}
+                    <div class="h-px bg-alma-hover/50 my-4"></div>
+                    <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-4">
+                        {{ 'stones.filter_heading'|trans }}
+                    </p>
+                    {% for stone in stones %}
+                        {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
+                        {% set stoneCount = stone.availableProductCount %}
+                        {% if stoneCount > 0 %}
+                            {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
+                            <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
+                               class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors
+                                      {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                <span>{{ stone|localized_name }}</span>
+                                <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stoneCount }}</span>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    {# "Without stone" option #}
+                    {% set isNoStoneActive = noStoneFilter is defined and noStoneFilter %}
+                    {% set noStoneParams = app.request.attributes.get('_route_params')|merge({stone: 'none'}) %}
+                    <a href="{{ path(app.request.attributes.get('_route'), noStoneParams) }}"
+                       class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors italic
+                              {{ isNoStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                        <span>{{ 'stones.filter_no_stone'|trans }}</span>
+                    </a>
+                    {% if activeStone is not null or (noStoneFilter is defined and noStoneFilter) %}
+                        <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}"
+                           class="mt-1 text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover">
+                            {{ 'catalog.clear_filter'|trans }}
+                        </a>
+                    {% endif %}
+                {% endif %}
             </aside>
 
             {# ══════════════════════════════════════════════ #}
@@ -298,6 +333,34 @@
                                 </a>
                             {% endif %}
                         {% endfor %}
+
+                        {# ── Stone filter (mobile) ── #}
+                        {% if stones|length > 0 %}
+                            <div class="h-px bg-alma-hover/40 my-4"></div>
+                            <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-3">
+                                {{ 'stones.filter_heading'|trans }}
+                            </p>
+                            {% for stone in stones %}
+                                {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
+                                {% set stoneCount = stone.availableProductCount %}
+                                {% if stoneCount > 0 %}
+                                    {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
+                                    <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
+                                       class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors
+                                              {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                        <span>{{ stone|localized_name }}</span>
+                                        <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stoneCount }}</span>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                            {% set isNoStoneActive = noStoneFilter is defined and noStoneFilter %}
+                            {% set noStoneParams = app.request.attributes.get('_route_params')|merge({stone: 'none'}) %}
+                            <a href="{{ path(app.request.attributes.get('_route'), noStoneParams) }}"
+                               class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors italic
+                                      {{ isNoStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                <span>{{ 'stones.filter_no_stone'|trans }}</span>
+                            </a>
+                        {% endif %}
                     </nav>
                 </div>
             </div>

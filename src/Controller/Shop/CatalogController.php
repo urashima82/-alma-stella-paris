@@ -7,6 +7,7 @@ namespace App\Controller\Shop;
 use App\Repository\ProductCategoryRepository;
 use App\Repository\ProductRepository;
 use App\Repository\SiteSettingsRepository;
+use App\Repository\StoneRepository;
 use App\Service\ReservationManager;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,6 +28,7 @@ class CatalogController extends AbstractController
         ProductRepository $productRepository,
         ProductCategoryRepository $categoryRepository,
         SiteSettingsRepository $siteSettingsRepository,
+        StoneRepository $stoneRepository,
         PaginatorInterface $paginator,
         ReservationManager $reservationManager,
         ?string $parentSlug = null,
@@ -56,7 +58,14 @@ class CatalogController extends AbstractController
         }
 
         $activeCollection = $siteSettingsRepository->getActiveCollection();
-        $query = $productRepository->findVisibleQuery($activeCategory, $activeCollection);
+
+        $stoneSlug = $request->query->getString('stone');
+        $activeStone = null;
+        if ($stoneSlug !== '') {
+            $activeStone = $stoneRepository->findBySlug($stoneSlug, $locale);
+        }
+
+        $query = $productRepository->findVisibleQuery($activeCategory, $activeCollection, $activeStone, $stoneSlug === 'none');
 
         $pagination = $paginator->paginate(
             $query,
@@ -76,6 +85,9 @@ class CatalogController extends AbstractController
             'pagination' => $pagination,
             'totalProductCount' => (int) $totalProductCount,
             'reservedProductIds' => $reservationManager->getReservedProductIdsByOthers(),
+            'stones' => $stoneRepository->findAllOrdered(),
+            'activeStone' => $activeStone,
+            'noStoneFilter' => $stoneSlug === 'none',
         ]);
     }
 }

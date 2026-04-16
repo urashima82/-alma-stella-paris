@@ -110,6 +110,34 @@
         {% endif %}
     {% endfor %}
 
+    {# ── Stone guide pages ── #}
+    {% for locale in ['en', 'fr'] %}
+        <url>
+            <loc>{{ url('shop_stone_index', {'_locale': locale}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_stone_index', {'_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_stone_index', {'_locale': 'fr'}) }}"/>
+            <changefreq>monthly</changefreq>
+            <priority>0.7</priority>
+        </url>
+    {% endfor %}
+
+    {% for stone in stones %}
+        <url>
+            <loc>{{ url('shop_stone_show', {slug: stone.slug, '_locale': 'en'}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_stone_show', {slug: stone.slug, '_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_stone_show', {slug: stone.slugFr, '_locale': 'fr'}) }}"/>
+            <changefreq>monthly</changefreq>
+            <priority>0.6</priority>
+        </url>
+        <url>
+            <loc>{{ url('shop_stone_show', {slug: stone.slugFr, '_locale': 'fr'}) }}</loc>
+            <xhtml:link rel="alternate" hreflang="en" href="{{ url('shop_stone_show', {slug: stone.slug, '_locale': 'en'}) }}"/>
+            <xhtml:link rel="alternate" hreflang="fr" href="{{ url('shop_stone_show', {slug: stone.slugFr, '_locale': 'fr'}) }}"/>
+            <changefreq>monthly</changefreq>
+            <priority>0.6</priority>
+        </url>
+    {% endfor %}
+
     {# ── Product pages ── #}
     {% for product in products %}
         <url>

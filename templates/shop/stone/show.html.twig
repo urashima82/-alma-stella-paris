@@ -1,0 +1,337 @@
+{% extends 'shop/base.html.twig' %}
+
+{% block language_switch_href %}
+    {{ app.request.locale == 'en'
+        ? path('shop_stone_show', {slug: stone.slugFr, '_locale': 'fr'})
+        : path('shop_stone_show', {slug: stone.slug, '_locale': 'en'})
+    }}
+{% endblock %}
+
+{% block hreflang %}
+    <link rel="alternate" hreflang="en" href="{{ url('shop_stone_show', {slug: stone.slug, '_locale': 'en'}) }}">
+    <link rel="alternate" hreflang="fr" href="{{ url('shop_stone_show', {slug: stone.slugFr, '_locale': 'fr'}) }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url('shop_stone_show', {slug: stone.slug, '_locale': 'en'}) }}">
+{% endblock %}
+
+{% block title %}{{ stone|localized_name }} — {{ 'stones.title_suffix'|trans }}{% endblock %}
+{% block meta_description %}{{ stone|localized_short_description }} {{ stone|localized_virtues|slice(0, 120) }}{% endblock %}
+
+{% block og_title %}{{ stone|localized_name }} — {{ 'stones.title_suffix'|trans }}{% endblock %}
+{% block og_description %}{{ stone|localized_short_description }}{% endblock %}
+{% block og_image %}{% if stone.imageName %}{{ absolute_url(asset('uploads/stones/' ~ stone.imageName)) }}{% else %}{{ absolute_url(asset('images/logo.png')) }}{% endif %}{% endblock %}
+
+{% block structured_data %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "{{ 'nav.home'|trans }}",
+                "item": "{{ url('shop_home') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "{{ 'stones.heading'|trans }}",
+                "item": "{{ url('shop_stone_index') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ stone|localized_name }}"
+            }
+        ]
+    }
+    </script>
+{% endblock %}
+
+{% block body %}
+    {# ══════════════════════════════════════════════════════════════ #}
+    {#  HERO — Warm light header with subtle texture                #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    <section class="relative overflow-hidden">
+        {# Background — stones lifestyle image, same style as homepage hero #}
+        <div class="absolute inset-0">
+            <img src="{{ asset('images/stones_hero_bg.webp') }}" alt=""
+                 class="w-full h-full object-cover opacity-30">
+            <div class="absolute inset-0 bg-gradient-to-b from-alma-bg/50 via-alma-bg/70 to-alma-bg"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-6">
+            {# Breadcrumb #}
+            <nav class="text-xs font-sans text-alma-text-muted pt-8 pb-12 md:pt-10 md:pb-20" aria-label="Breadcrumb">
+                <a href="{{ path('shop_home') }}" class="hover:text-alma-gold transition-colors">{{ 'nav.home'|trans }}</a>
+                <span class="mx-2 opacity-40">/</span>
+                <a href="{{ path('shop_stone_index') }}" class="hover:text-alma-gold transition-colors">{{ 'stones.heading'|trans }}</a>
+                <span class="mx-2 opacity-40">/</span>
+                <span class="text-alma-text">{{ stone|localized_name }}</span>
+            </nav>
+
+            {# Hero content — asymmetric layout #}
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-16 md:pb-24 items-end">
+                {# Left: Stone image #}
+                <div class="md:col-span-5 lg:col-span-4">
+                    <div class="relative aspect-square max-w-sm mx-auto md:mx-0">
+                        <div class="absolute -inset-3 border border-alma-gold/15 pointer-events-none"></div>
+                        <div class="relative aspect-square bg-alma-surface overflow-hidden flex items-center justify-center
+                                    ring-1 ring-alma-hover">
+                            {% if stone.imageName %}
+                                <img src="{{ asset('uploads/stones/' ~ stone.imageName) }}"
+                                     alt="{{ stone|localized_name }}"
+                                     class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="text-center">
+                                    <p class="text-alma-gold text-5xl mb-3">✦</p>
+                                    <p class="font-serif text-lg text-alma-text-muted italic">{{ stone|localized_name }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {# Right: Title + hook #}
+                <div class="md:col-span-7 lg:col-span-8">
+                    <p class="text-[10px] font-sans uppercase tracking-[0.3em] text-alma-gold mb-4">
+                        {{ 'stones.guide_label'|trans }}
+                    </p>
+                    <h1 class="font-serif text-4xl md:text-5xl lg:text-6xl font-light text-alma-text tracking-wide mb-5 leading-[1.1]">
+                        {{ stone|localized_name }}
+                    </h1>
+                    <p class="font-serif text-lg md:text-xl text-alma-gold italic leading-relaxed max-w-xl">
+                        {{ stone|localized_short_description }}
+                    </p>
+
+                    {# Quick characteristics — inline on hero #}
+                    <div class="flex flex-wrap gap-x-6 gap-y-2 mt-8 text-xs font-sans">
+                        <span>
+                            <span class="text-alma-text-muted">{{ 'stones.color_label'|trans }}</span>
+                            <span class="text-alma-text ml-1.5">{{ stone.color }}</span>
+                        </span>
+                        {% if stone.origin %}
+                            <span>
+                                <span class="text-alma-text-muted">{{ 'stones.origin_label'|trans }}</span>
+                                <span class="text-alma-text ml-1.5">{{ stone.origin }}</span>
+                            </span>
+                        {% endif %}
+                        {% if stone.chakra %}
+                            <span>
+                                <span class="text-alma-text-muted">{{ 'stones.chakra_label'|trans }}</span>
+                                <span class="text-alma-text ml-1.5">{{ stone.chakra }}</span>
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ══════════════════════════════════════════════════════════════ #}
+    {#  EDITORIAL CONTENT — Narrow reading column                   #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    <div class="max-w-3xl mx-auto px-6 py-16 md:py-24">
+
+        {# ── Description ── #}
+        {% set description = stone|localized_description %}
+        {% if description|trim %}
+            <div class="font-sans text-[15px] text-alma-text leading-[1.85] space-y-5">
+                {% for paragraph in description|split("\n\n") %}
+                    {% if paragraph|trim %}
+                        <p>{{ paragraph|trim }}</p>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {# ── Fun fact — highlight card ── #}
+        {% set funFact = app.request.locale == 'fr' ? stone.funFactFr : stone.funFact %}
+        {% if funFact %}
+            <div class="my-14 md:my-16 relative">
+                <div class="absolute -left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-alma-gold/40 to-transparent hidden md:block"></div>
+                <div class="bg-alma-surface/60 border border-alma-hover/60 p-7 md:p-8 md:ml-4">
+                    <p class="flex items-center gap-2 text-xs font-sans uppercase tracking-[0.2em] text-alma-gold mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+                        </svg>
+                        {{ 'stones.fun_fact_label'|trans }}
+                    </p>
+                    <p class="font-sans text-sm text-alma-text leading-relaxed">{{ funFact }}</p>
+                </div>
+            </div>
+        {% endif %}
+
+        {# ── Traditions ── #}
+        {% set traditions = app.request.locale == 'fr' ? stone.traditionsFr : stone.traditions %}
+        {% if traditions %}
+            <div class="mb-14">
+                <div class="flex items-center gap-4 mb-5">
+                    <div class="h-px flex-1 bg-alma-hover"></div>
+                    <h2 class="font-serif text-sm uppercase tracking-[0.2em] text-alma-text-muted shrink-0">
+                        {{ 'stones.traditions_label'|trans }}
+                    </h2>
+                    <div class="h-px flex-1 bg-alma-hover"></div>
+                </div>
+                <p class="font-sans text-sm text-alma-text-muted leading-[1.85]">{{ traditions }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {# ══════════════════════════════════════════════════════════════ #}
+    {#  VIRTUES — Emotional highlight section                       #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    <section class="bg-alma-surface/50 border-y border-alma-hover/40">
+        <div class="max-w-7xl mx-auto px-6 py-16 md:py-20">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-16 items-start">
+                {# Left label #}
+                <div class="md:col-span-4 lg:col-span-3">
+                    <p class="text-alma-gold text-xl mb-3">✦</p>
+                    <h2 class="font-serif text-2xl md:text-3xl font-light text-alma-text mb-3">
+                        {{ 'stones.virtues_label'|trans }}
+                    </h2>
+                    {% if stone.chakra %}
+                        <p class="text-xs font-sans text-alma-gold italic">
+                            {{ 'stones.chakra_label'|trans }} : {{ stone.chakra }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                {# Right content #}
+                <div class="md:col-span-8 lg:col-span-9">
+                    <div class="font-sans text-[15px] text-alma-text leading-[1.85] space-y-4 max-w-2xl">
+                        {% for paragraph in (stone|localized_virtues)|split("\n") %}
+                            {% if paragraph|trim %}
+                                <p>{{ paragraph|trim }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ══════════════════════════════════════════════════════════════ #}
+    {#  CHARACTERISTICS & CARE — Detailed specs                     #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    <div class="max-w-3xl mx-auto px-6 py-14 md:py-20">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-14">
+            {# Characteristics card #}
+            <div>
+                <h3 class="flex items-center gap-3 font-serif text-sm uppercase tracking-[0.2em] text-alma-text-muted mb-6">
+                    <span class="w-6 h-px bg-alma-gold/50"></span>
+                    {{ 'stones.characteristics'|trans }}
+                </h3>
+                <dl class="space-y-4 text-sm font-sans">
+                    <div class="flex justify-between items-baseline border-b border-alma-hover/40 pb-3">
+                        <dt class="text-alma-text-muted">{{ 'stones.color_label'|trans }}</dt>
+                        <dd class="text-alma-text font-medium text-right">{{ stone.color }}</dd>
+                    </div>
+                    {% if stone.lustre %}
+                        <div class="flex justify-between items-baseline border-b border-alma-hover/40 pb-3">
+                            <dt class="text-alma-text-muted">{{ 'stones.lustre_label'|trans }}</dt>
+                            <dd class="text-alma-text font-medium text-right">{{ stone.lustre }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if stone.origin %}
+                        <div class="flex justify-between items-baseline border-b border-alma-hover/40 pb-3">
+                            <dt class="text-alma-text-muted">{{ 'stones.origin_label'|trans }}</dt>
+                            <dd class="text-alma-text font-medium text-right max-w-[55%]">{{ stone.origin }}</dd>
+                        </div>
+                    {% endif %}
+                    {% if stone.chakra %}
+                        <div class="flex justify-between items-baseline">
+                            <dt class="text-alma-text-muted">{{ 'stones.chakra_label'|trans }}</dt>
+                            <dd class="text-alma-text font-medium text-right">{{ stone.chakra }}</dd>
+                        </div>
+                    {% endif %}
+                </dl>
+            </div>
+
+            {# Care card #}
+            {% set care = app.request.locale == 'fr' ? stone.careFr : stone.care %}
+            {% if care %}
+                <div>
+                    <h3 class="flex items-center gap-3 font-serif text-sm uppercase tracking-[0.2em] text-alma-text-muted mb-6">
+                        <span class="w-6 h-px bg-alma-gold/50"></span>
+                        {{ 'stones.care_label'|trans }}
+                    </h3>
+                    <p class="font-sans text-sm text-alma-text-muted leading-[1.85]">{{ care }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════════════════════════════ #}
+    {#  PRODUCTS — Jewelry with this stone                          #}
+    {# ══════════════════════════════════════════════════════════════ #}
+    {% set visibleProducts = stone.products|filter(p => p.isVisibleInCatalog()) %}
+    {% if visibleProducts|length > 0 %}
+        <section class="border-t border-alma-hover/40">
+            <div class="max-w-7xl mx-auto px-6 py-16 md:py-24">
+                <div class="text-center mb-12 md:mb-16">
+                    <p class="text-alma-gold text-lg mb-3">✦</p>
+                    <h2 class="font-serif text-2xl md:text-3xl font-light text-alma-text mb-2">
+                        {{ 'stones.products_heading'|trans({'%stone%': stone|localized_name}) }}
+                    </h2>
+                    <p class="font-sans text-sm text-alma-text-muted">{{ 'stones.products_subtitle'|trans }}</p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+                    {% for product in visibleProducts|slice(0, 8) %}
+                        <article class="group">
+                            <a href="{{ path('shop_product', {slug: product|localized_slug}) }}" class="block">
+                                <div class="relative aspect-[4/5] bg-alma-surface overflow-hidden
+                                            border border-transparent group-hover:border-alma-gold/40
+                                            transition-all duration-300 flex items-center justify-center
+                                            {{ product.isSoldOut ? 'opacity-50 grayscale' : '' }}">
+                                    {% if product.thumbnail %}
+                                        <img src="{{ asset('uploads/products/' ~ product.thumbnail) }}"
+                                             alt="{{ product|localized_name }}"
+                                             class="w-full h-full object-cover transition-transform duration-700 ease-out
+                                                    group-hover:scale-[1.03]"
+                                             loading="lazy">
+                                    {% else %}
+                                        <div class="text-center px-4">
+                                            <p class="text-alma-gold text-2xl mb-2">✦</p>
+                                            <p class="text-[11px] text-alma-text-muted">{{ product|localized_name }}</p>
+                                        </div>
+                                    {% endif %}
+                                    {% if product.isSoldOut %}
+                                        <span class="absolute top-2 left-2 inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium tracking-wide bg-alma-text text-alma-bg">{{ 'badge.sold'|trans }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="mt-2.5">
+                                    <h3 class="font-serif text-sm text-alma-text group-hover:text-alma-gold transition-colors truncate">
+                                        {{ product|localized_name }}
+                                    </h3>
+                                    <p class="font-sans text-sm font-semibold text-alma-text mt-0.5">
+                                        {{ include('shop/_price_badge.html.twig', {product: product}) }}
+                                    </p>
+                                </div>
+                            </a>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                {# CTA to shop with filter #}
+                {% if visibleProducts|length > 8 %}
+                    <div class="text-center mt-10">
+                        <a href="{{ path('shop_catalog', {stone: stone|localized_slug}) }}"
+                           class="inline-block border border-alma-gold text-alma-gold px-8 py-3 font-sans text-sm
+                                  hover:bg-alma-gold hover:text-white transition-colors">
+                            {{ 'home.view_all'|trans }}
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    {% endif %}
+
+    {# ── Lithotherapy disclaimer ── #}
+    <div class="border-t border-alma-hover/40 py-10">
+        <p class="text-[11px] text-alma-text-muted leading-relaxed max-w-3xl mx-auto text-center italic px-6">
+            {{ 'stones.disclaimer'|trans }}
+        </p>
+    </div>
+{% endblock %}

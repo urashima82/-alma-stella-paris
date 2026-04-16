@@ -7,3 +7,7 @@ vich_uploader:
             uri_prefix: /uploads/products
             upload_destination: '%kernel.project_dir%/public/uploads/products'
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        stone_images:
+            uri_prefix: /uploads/stones
+            upload_destination: '%kernel.project_dir%/public/uploads/stones'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

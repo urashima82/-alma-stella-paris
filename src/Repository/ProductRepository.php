@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Product;
 use App\Entity\ProductCategory;
+use App\Entity\Stone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -97,7 +98,7 @@ class ProductRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findVisibleQuery(?ProductCategory $category = null, ?string $collection = null): QueryBuilder
+    public function findVisibleQuery(?ProductCategory $category = null, ?string $collection = null, ?Stone $stone = null, bool $noStone = false): QueryBuilder
     {
         $soldOutCutoff = new \DateTimeImmutable('-14 days');
 
@@ -124,6 +125,15 @@ class ProductRepository extends ServiceEntityRepository
         if ($collection !== null && $collection !== 'all') {
             $qb->andWhere('JSON_CONTAINS(p.availableIn, :collection) = 1')
                 ->setParameter('collection', \sprintf('"%s"', $collection));
+        }
+
+        if ($stone !== null) {
+            $qb->join('p.stones', 'st')
+                ->andWhere('st = :stone')
+                ->setParameter('stone', $stone);
+        } elseif ($noStone) {
+            $qb->leftJoin('p.stones', 'st_none')
+                ->andWhere('st_none.id IS NULL');
         }
 
         return $qb;

@@ -197,6 +197,12 @@ class ProductCrudController extends AbstractCrudController
                 ShippingTier::Set->value => 'info',
             ]);
 
+        yield FormField::addFieldset('Pierres', 'fa fa-diamond')
+            ->collapsible();
+        yield AssociationField::new('stones', 'Pierres naturelles')
+            ->setFormTypeOption('by_reference', false)
+            ->setHelp('Sélectionnez les pierres présentes dans ce bijou.');
+
         yield FormField::addFieldset('À porter avec', 'fa fa-gem')
             ->collapsible();
         yield AssociationField::new('relatedProducts', 'Produits associés')

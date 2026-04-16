@@ -126,8 +126,8 @@
 
                     {# Desktop nav links — right of logo (desktop only) #}
                     <div class="hidden md:flex items-center gap-8 absolute left-[calc(50%+3.5rem)]">
+                        <a href="{{ path('shop_stone_index') }}" class="font-sans text-xs uppercase tracking-[0.25em] font-light hover:text-alma-gold transition-colors {{ app.request.attributes.get('_route') starts with 'shop_stone' ? 'text-alma-gold-dark' : '' }}">{{ 'nav.stones'|trans }}</a>
                         <a href="{{ path('shop_about') }}" class="font-sans text-xs uppercase tracking-[0.25em] font-light hover:text-alma-gold transition-colors {{ app.request.attributes.get('_route') == 'shop_about' ? 'text-alma-gold-dark' : '' }}">{{ 'nav.about'|trans }}</a>
-                        <a href="{{ path('shop_contact') }}" class="font-sans text-xs uppercase tracking-[0.25em] font-light hover:text-alma-gold transition-colors {{ app.request.attributes.get('_route') == 'shop_contact' ? 'text-alma-gold-dark' : '' }}">{{ 'nav.contact'|trans }}</a>
                     </div>
 
                     {# Mobile logo — centered #}
@@ -228,8 +228,8 @@
 
                         <a href="{{ path('shop_catalog') }}" class="font-serif text-xl transition-colors {{ app.request.attributes.get('_route') == 'shop_catalog' ? 'text-alma-gold-dark' : 'text-alma-text hover:text-alma-gold' }}">{{ 'nav.shop'|trans }}</a>
 
+                        <a href="{{ path('shop_stone_index') }}" class="font-serif text-xl transition-colors {{ app.request.attributes.get('_route') starts with 'shop_stone' ? 'text-alma-gold-dark' : 'text-alma-text hover:text-alma-gold' }}">{{ 'nav.stones'|trans }}</a>
                         <a href="{{ path('shop_about') }}" class="font-serif text-xl transition-colors {{ app.request.attributes.get('_route') == 'shop_about' ? 'text-alma-gold-dark' : 'text-alma-text hover:text-alma-gold' }}">{{ 'nav.about'|trans }}</a>
-                        <a href="{{ path('shop_contact') }}" class="font-serif text-xl transition-colors {{ app.request.attributes.get('_route') == 'shop_contact' ? 'text-alma-gold-dark' : 'text-alma-text hover:text-alma-gold' }}">{{ 'nav.contact'|trans }}</a>
                         <div class="h-px bg-alma-gold-muted my-2"></div>
                         {# Currency #}
                         <div>
@@ -296,6 +296,7 @@
                                 <li><a href="{{ path('shop_terms') }}#shipping" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.shipping_returns'|trans }}</a></li>
                                 <li><a href="{{ path('shop_testimonials') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.testimonials'|trans }}</a></li>
                                 <li><a href="{{ path('shop_contact') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.contact'|trans }}</a></li>
+                                <li><a href="{{ path('shop_stone_index') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.stones'|trans }}</a></li>
                             </ul>
                         </div>
                         <div>

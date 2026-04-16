@@ -28,6 +28,12 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('ALTER TABLE product_related ADD CONSTRAINT FK_B18E6B203DF63ED7 FOREIGN KEY (product_source) REFERENCES product (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE product_related ADD CONSTRAINT FK_B18E6B2024136E58 FOREIGN KEY (product_target) REFERENCES product (id) ON DELETE CASCADE');
 
+        // Stone table
+        $this->addSql('CREATE TABLE stone (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(100) NOT NULL, name_fr VARCHAR(100) NOT NULL, slug VARCHAR(120) NOT NULL, slug_fr VARCHAR(120) NOT NULL, short_description VARCHAR(255) NOT NULL, short_description_fr VARCHAR(255) NOT NULL, description LONGTEXT NOT NULL, description_fr LONGTEXT NOT NULL, fun_fact LONGTEXT DEFAULT NULL, fun_fact_fr LONGTEXT DEFAULT NULL, traditions LONGTEXT DEFAULT NULL, traditions_fr LONGTEXT DEFAULT NULL, virtues LONGTEXT NOT NULL, virtues_fr LONGTEXT NOT NULL, chakra VARCHAR(100) DEFAULT NULL, color VARCHAR(50) NOT NULL, lustre VARCHAR(100) DEFAULT NULL, origin VARCHAR(255) DEFAULT NULL, care LONGTEXT DEFAULT NULL, care_fr LONGTEXT DEFAULT NULL, image_name VARCHAR(255) DEFAULT NULL, position INT NOT NULL, updated_at DATETIME NOT NULL, UNIQUE INDEX UNIQ_STONE_SLUG (slug), UNIQUE INDEX UNIQ_STONE_SLUG_FR (slug_fr), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE product_stone (product_id INT NOT NULL, stone_id INT NOT NULL, INDEX IDX_PRODUCT_STONE_PRODUCT (product_id), INDEX IDX_PRODUCT_STONE_STONE (stone_id), PRIMARY KEY (product_id, stone_id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('ALTER TABLE product_stone ADD CONSTRAINT FK_PRODUCT_STONE_PRODUCT FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE product_stone ADD CONSTRAINT FK_PRODUCT_STONE_STONE FOREIGN KEY (stone_id) REFERENCES stone (id) ON DELETE CASCADE');
+
         // Shipping settings table
         $this->addSql('CREATE TABLE shipping_settings (id INT AUTO_INCREMENT NOT NULL, tier VARCHAR(20) NOT NULL, label VARCHAR(100) NOT NULL, shipping_cost_eur NUMERIC(8, 2) NOT NULL, max_weight_grams INT NOT NULL, UNIQUE INDEX UNIQ_SHIPPING_TIER (tier), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
 
@@ -131,6 +137,10 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('DROP TABLE customer');
         $this->addSql('DROP TABLE customer_address');
         $this->addSql('DROP TABLE reset_password_request');
+        $this->addSql('ALTER TABLE product_stone DROP FOREIGN KEY FK_PRODUCT_STONE_PRODUCT');
+        $this->addSql('ALTER TABLE product_stone DROP FOREIGN KEY FK_PRODUCT_STONE_STONE');
+        $this->addSql('DROP TABLE product_stone');
+        $this->addSql('DROP TABLE stone');
         $this->addSql('DROP TABLE product');
         $this->addSql('DROP TABLE product_related');
         $this->addSql('DROP TABLE product_category');

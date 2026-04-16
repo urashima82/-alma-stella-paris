@@ -2,6 +2,7 @@
 nav:
     home: "Accueil"
     shop: "Boutique"
+    stones: "Nos Pierres"
     about: "À propos"
     contact: "Contact"
     language: "Langue"
@@ -118,6 +119,7 @@ footer:
     terms: "CGV"
     copyright: "© %year% Alma Stella Paris. Tous droits réservés."
     motto: '« Porter le monde. » ✦'
+    stones: "Nos pierres"
 
 # ── Error pages ──
 error:
@@ -594,6 +596,30 @@ testimonial:
         text_too_short: "Votre témoignage doit contenir au moins 10 caractères."
         first_name_required: "Veuillez saisir votre prénom."
         last_name_initial_required: "Veuillez saisir l'initiale de votre nom."
+
+# ── Guide des pierres ──
+stones:
+    title: "Guide des pierres | Alma Stella Paris"
+    title_suffix: "Alma Stella Paris"
+    meta_description: "Découvrez les pierres naturelles utilisées dans les bijoux Alma Stella Paris. Origines, vertus et signification de chaque pierre."
+    heading: "Nos Pierres"
+    intro: "Chaque pierre naturelle raconte une histoire façonnée par des millénaires. Découvrez les origines, traditions et vertus des pierres qui ornent nos bijoux."
+    empty: "Aucune pierre à afficher pour le moment."
+    guide_label: "Guide des pierres"
+    characteristics: "Caractéristiques"
+    color_label: "Couleur"
+    lustre_label: "Éclat"
+    origin_label: "Origine"
+    chakra_label: "Chakra"
+    fun_fact_label: "Le saviez-vous ?"
+    traditions_label: "Traditions"
+    virtues_label: "Vertus"
+    care_label: "Conseils d'entretien"
+    products_heading: "Bijoux avec %stone%"
+    products_subtitle: "Découvrez nos pièces ornées de cette pierre."
+    disclaimer: "Les propriétés énergétiques et spirituelles décrites dans ce guide relèvent de la lithothérapie (cristalothérapie), une pratique ancestrale non reconnue par la médecine conventionnelle. Ces vertus sont présentées à titre informatif et ne se substituent en aucun cas à un avis médical."
+    filter_heading: "Pierres"
+    filter_no_stone: "Sans pierre"
 
 # ── Language switcher ──
 locale:
