@@ -6,6 +6,7 @@
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js",
     "\/assets\/controllers\/wishlist_toggle_controller.js",
     "\/assets\/controllers\/turnstile_controller.js",
+    "\/assets\/controllers\/stone_filter_controller.js",
     "\/assets\/controllers\/checkout_identify_controller.js",
     "\/assets\/controllers\/billing_toggle_controller.js",
     "\/assets\/controllers\/address_selector_controller.js",

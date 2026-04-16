@@ -8,7 +8,7 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-8j2pj9Z.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-3s04EkX.js",
         "type": "js"
     },
     "\/assets\/controllers\/wishlist_toggle_controller.js": {
@@ -17,6 +17,10 @@
     },
     "\/assets\/controllers\/turnstile_controller.js": {
         "path": "\/assets\/controllers\/turnstile_controller-Rf0WHeB.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/stone_filter_controller.js": {
+        "path": "\/assets\/controllers\/stone_filter_controller-BTOqUhK.js",
         "type": "js"
     },
     "\/assets\/controllers\/checkout_identify_controller.js": {
@@ -88,7 +92,7 @@
         "type": "js"
     },
     "\/assets\/styles\/app.css": {
-        "path": "\/assets\/styles\/app-zdOJoJM.css",
+        "path": "\/assets\/styles\/app-MXj_ShZ.css",
         "type": "css"
     },
     "@hotwired\/stimulus": {

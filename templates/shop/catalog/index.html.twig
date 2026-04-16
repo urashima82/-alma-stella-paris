@@ -188,37 +188,85 @@
 
                 {# ── Stone filter ── #}
                 {% if stones|length > 0 %}
-                    <div class="h-px bg-alma-hover/50 my-4"></div>
-                    <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-4">
-                        {{ 'stones.filter_heading'|trans }}
-                    </p>
+                    {% set visibleStones = [] %}
                     {% for stone in stones %}
-                        {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
-                        {% set stoneCount = stone.availableProductCount %}
-                        {% if stoneCount > 0 %}
-                            {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
-                            <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
-                               class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors
-                                      {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                <span>{{ stone|localized_name }}</span>
-                                <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stoneCount }}</span>
-                            </a>
+                        {% if stone.availableProductCount > 0 %}
+                            {% set visibleStones = visibleStones|merge([stone]) %}
                         {% endif %}
                     {% endfor %}
-                    {# "Without stone" option #}
-                    {% set isNoStoneActive = noStoneFilter is defined and noStoneFilter %}
-                    {% set noStoneParams = app.request.attributes.get('_route_params')|merge({stone: 'none'}) %}
-                    <a href="{{ path(app.request.attributes.get('_route'), noStoneParams) }}"
-                       class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors italic
-                              {{ isNoStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                        <span>{{ 'stones.filter_no_stone'|trans }}</span>
-                    </a>
-                    {% if activeStone is not null or (noStoneFilter is defined and noStoneFilter) %}
-                        <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}"
-                           class="mt-1 text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover">
-                            {{ 'catalog.clear_filter'|trans }}
+                    {% set stoneLimit = 5 %}
+                    {% set hasStoneFilter = activeStone is not null or (noStoneFilter is defined and noStoneFilter) %}
+                    {% set needsOverflow = visibleStones|length > stoneLimit %}
+
+                    <div class="h-px bg-alma-hover/50 my-4"></div>
+                    <div data-controller="stone-filter"
+                         data-stone-filter-expanded-value="{{ hasStoneFilter and needsOverflow ? 'true' : 'false' }}"
+                         data-stone-filter-limit-value="{{ stoneLimit }}">
+                        <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-4">
+                            {{ 'stones.filter_heading'|trans }}
+                        </p>
+                        <div data-stone-filter-target="list">
+                            {# First N stones — always visible #}
+                            {% for stone in visibleStones|slice(0, stoneLimit) %}
+                                {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
+                                {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
+                                <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
+                                   class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors
+                                          {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                    <span>{{ stone|localized_name }}</span>
+                                    <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stone.availableProductCount }}</span>
+                                </a>
+                            {% endfor %}
+
+                            {# Remaining stones — hidden until "show more" #}
+                            {% if needsOverflow %}
+                                <div data-stone-filter-target="overflow"
+                                     class="{{ not hasStoneFilter ? 'hidden' }}"
+                                     style="{{ not hasStoneFilter ? 'max-height:0;opacity:0' : '' }}">
+                                    {% for stone in visibleStones|slice(stoneLimit) %}
+                                        {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
+                                        {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
+                                        <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
+                                           class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors
+                                                  {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                            <span>{{ stone|localized_name }}</span>
+                                            <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stone.availableProductCount }}</span>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# "Without stone" option — outside scrollable list #}
+                        {% set isNoStoneActive = noStoneFilter is defined and noStoneFilter %}
+                        {% set noStoneParams = app.request.attributes.get('_route_params')|merge({stone: 'none'}) %}
+                        <a href="{{ path(app.request.attributes.get('_route'), noStoneParams) }}"
+                           class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors italic
+                                  {{ isNoStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                            <span>{{ 'stones.filter_no_stone'|trans }}</span>
                         </a>
-                    {% endif %}
+
+                        {# "Show more / less" toggle #}
+                        {% if needsOverflow %}
+                            <button type="button"
+                                    class="mt-2 text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover cursor-pointer"
+                                    data-stone-filter-target="toggle"
+                                    data-action="click->stone-filter#toggle">
+                                <span data-label
+                                      data-more-label="{{ 'stones.filter_show_more'|trans({'%count%': visibleStones|length - stoneLimit}) }}"
+                                      data-less-label="{{ 'stones.filter_show_less'|trans }}">
+                                    {{ hasStoneFilter ? 'stones.filter_show_less'|trans : 'stones.filter_show_more'|trans({'%count%': visibleStones|length - stoneLimit}) }}
+                                </span>
+                            </button>
+                        {% endif %}
+
+                        {% if hasStoneFilter %}
+                            <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}"
+                               class="mt-1 block text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover">
+                                {{ 'catalog.clear_filter'|trans }}
+                            </a>
+                        {% endif %}
+                    </div>
                 {% endif %}
             </aside>
 
@@ -336,30 +384,77 @@
 
                         {# ── Stone filter (mobile) ── #}
                         {% if stones|length > 0 %}
-                            <div class="h-px bg-alma-hover/40 my-4"></div>
-                            <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-3">
-                                {{ 'stones.filter_heading'|trans }}
-                            </p>
+                            {% set visibleStonesMobile = [] %}
                             {% for stone in stones %}
-                                {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
-                                {% set stoneCount = stone.availableProductCount %}
-                                {% if stoneCount > 0 %}
-                                    {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
-                                    <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
-                                       class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors
-                                              {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                        <span>{{ stone|localized_name }}</span>
-                                        <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stoneCount }}</span>
-                                    </a>
+                                {% if stone.availableProductCount > 0 %}
+                                    {% set visibleStonesMobile = visibleStonesMobile|merge([stone]) %}
                                 {% endif %}
                             {% endfor %}
-                            {% set isNoStoneActive = noStoneFilter is defined and noStoneFilter %}
-                            {% set noStoneParams = app.request.attributes.get('_route_params')|merge({stone: 'none'}) %}
-                            <a href="{{ path(app.request.attributes.get('_route'), noStoneParams) }}"
-                               class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors italic
-                                      {{ isNoStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                <span>{{ 'stones.filter_no_stone'|trans }}</span>
-                            </a>
+                            {% set stoneLimitMobile = 5 %}
+                            {% set hasStoneFilterMobile = activeStone is not null or (noStoneFilter is defined and noStoneFilter) %}
+                            {% set needsOverflowMobile = visibleStonesMobile|length > stoneLimitMobile %}
+
+                            <div class="h-px bg-alma-hover/40 my-4"></div>
+                            <div data-controller="stone-filter"
+                                 data-stone-filter-expanded-value="{{ hasStoneFilterMobile and needsOverflowMobile ? 'true' : 'false' }}"
+                                 data-stone-filter-limit-value="{{ stoneLimitMobile }}">
+                                <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-3">
+                                    {{ 'stones.filter_heading'|trans }}
+                                </p>
+                                <div data-stone-filter-target="list">
+                                    {# First N stones #}
+                                    {% for stone in visibleStonesMobile|slice(0, stoneLimitMobile) %}
+                                        {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
+                                        {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
+                                        <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
+                                           class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors
+                                                  {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                            <span>{{ stone|localized_name }}</span>
+                                            <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stone.availableProductCount }}</span>
+                                        </a>
+                                    {% endfor %}
+
+                                    {# Remaining stones #}
+                                    {% if needsOverflowMobile %}
+                                        <div data-stone-filter-target="overflow"
+                                             class="{{ not hasStoneFilterMobile ? 'hidden' }}"
+                                             style="{{ not hasStoneFilterMobile ? 'max-height:0;opacity:0' : '' }}">
+                                            {% for stone in visibleStonesMobile|slice(stoneLimitMobile) %}
+                                                {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
+                                                {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
+                                                <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
+                                                   class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors
+                                                          {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                                    <span>{{ stone|localized_name }}</span>
+                                                    <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stone.availableProductCount }}</span>
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                {# "Without stone" option — outside scrollable list #}
+                                {% set isNoStoneActive = noStoneFilter is defined and noStoneFilter %}
+                                {% set noStoneParams = app.request.attributes.get('_route_params')|merge({stone: 'none'}) %}
+                                <a href="{{ path(app.request.attributes.get('_route'), noStoneParams) }}"
+                                   class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors italic
+                                          {{ isNoStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                    <span>{{ 'stones.filter_no_stone'|trans }}</span>
+                                </a>
+
+                                {% if needsOverflowMobile %}
+                                    <button type="button"
+                                            class="mt-2 text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover cursor-pointer"
+                                            data-stone-filter-target="toggle"
+                                            data-action="click->stone-filter#toggle">
+                                        <span data-label
+                                              data-more-label="{{ 'stones.filter_show_more'|trans({'%count%': visibleStonesMobile|length - stoneLimitMobile}) }}"
+                                              data-less-label="{{ 'stones.filter_show_less'|trans }}">
+                                            {{ hasStoneFilterMobile ? 'stones.filter_show_less'|trans : 'stones.filter_show_more'|trans({'%count%': visibleStonesMobile|length - stoneLimitMobile}) }}
+                                        </span>
+                                    </button>
+                                {% endif %}
+                            </div>
                         {% endif %}
                     </nav>
                 </div>

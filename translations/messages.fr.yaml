@@ -620,6 +620,8 @@ stones:
     disclaimer: "Les propriétés énergétiques et spirituelles décrites dans ce guide relèvent de la lithothérapie (cristalothérapie), une pratique ancestrale non reconnue par la médecine conventionnelle. Ces vertus sont présentées à titre informatif et ne se substituent en aucun cas à un avis médical."
     filter_heading: "Pierres"
     filter_no_stone: "Sans pierre"
+    filter_show_more: "+ %count% autres"
+    filter_show_less: "Voir moins"
 
 # ── Language switcher ──
 locale:

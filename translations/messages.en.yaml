@@ -620,6 +620,8 @@ stones:
     disclaimer: "The energetic and spiritual properties described in this guide are part of lithotherapy (crystal healing), an ancestral practice not recognized by conventional medicine. These virtues are presented for informational purposes and do not substitute for medical advice."
     filter_heading: "Stones"
     filter_no_stone: "Without stone"
+    filter_show_more: "+ %count% more"
+    filter_show_less: "Show less"
 
 # ── Language switcher ──
 locale:
