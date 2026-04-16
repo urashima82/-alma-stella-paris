@@ -42,7 +42,7 @@ private $tier_expedition;   // French variable name
 ```
 
 ### Code style
-- PSR-12 strictly enforced — run `./vendor/bin/php-cs-fixer fix` before any commit
+- PSR-12 strictly enforced — run `ddev exec vendor/bin/php-cs-fixer fix` before any commit
 - Strict types on every PHP file: `declare(strict_types=1);`
 - Type hints on all method signatures, including return types
 - No magic strings — use constants, enums, or configuration
@@ -75,6 +75,7 @@ via pre-commit hooks.
 | Layer | Technology | Version |
 |---|---|---|
 | Framework | Symfony | 7.4.x (LTS) |
+| PHP | PHP | 8.3 |
 | Database | MariaDB | 10.11+ |
 | ORM | Doctrine | 3.x |
 | CSS | Tailwind CSS | 4.x |
@@ -83,7 +84,12 @@ via pre-commit hooks.
 | Payment | Stripe PHP SDK | latest |
 | Email | Symfony Mailer | (built-in) |
 | Scheduler | Symfony Scheduler + Messenger | 7.2.x |
-| PHP | PHP | 8.3 |
+| PDF invoices | dompdf/dompdf | latest |
+| Image processing | Intervention Image (GD) | 4.x |
+| Password reset | symfonycasts/reset-password-bundle | latest |
+| Bot protection | Cloudflare Turnstile | (API) |
+| Instagram feed | Behold.so | (API, cached 6h) |
+| Exchange rates | open.er-api.com | (API, cached 6h) |
 
 **Drupal is not used in this project.** It is referenced only as the developer's
 background context.
@@ -130,7 +136,12 @@ ddev exec php bin/console asset-map:compile # Compile assets (always run after t
 # Scheduler (Symfony Scheduler + Messenger)
 ddev exec php bin/console messenger:consume scheduler_default  # Run scheduled tasks
 ddev exec php bin/console debug:scheduler                      # List scheduled tasks
-ddev exec php bin/console app:verify-pending-orders            # Manual run
+
+# Manual CLI commands (also run automatically by scheduler)
+ddev exec php bin/console app:verify-pending-orders            # Verify pending orders against Stripe
+ddev exec php bin/console app:clean-expired-reservations       # Release expired product reservations
+ddev exec php bin/console app:send-testimonial-requests        # Send J+14 testimonial emails
+ddev exec php bin/console app:clean-abandoned-orders           # Clean up stale pending orders
 
 # Code quality
 ddev exec vendor/bin/php-cs-fixer fix      # Fix code style
@@ -230,6 +241,5 @@ Hover:       #E8DDD0  (soft taupe)
 - Geo-pricing (different prices per country)
 - Direct Instagram API publishing (use deep link instead)
 - Multi-currency Stripe charges (always charge EUR)
-- Backend user accounts at launch (V2)
 - Complex shipping weight calculator (ShippingTier enum is sufficient)
 - Any Drupal dependency
