@@ -155,11 +155,12 @@ class ProductCrudController extends AbstractCrudController
         yield BooleanField::new('isSoldOut', 'Vendu');
         yield AssociationField::new('category', 'Catégorie')
             ->setQueryBuilder(static fn (QueryBuilder $qb): QueryBuilder => $qb
+                ->addSelect('COALESCE(p.position, entity.position) AS HIDDEN sortPosition')
                 ->leftJoin('entity.children', 'ch')
                 ->leftJoin('entity.parent', 'p')
                 ->groupBy('entity.id')
                 ->having('COUNT(ch.id) = 0')
-                ->orderBy('COALESCE(p.position, entity.position)', 'ASC')
+                ->orderBy('sortPosition', 'ASC')
                 ->addOrderBy('entity.position', 'ASC')
             );
 
