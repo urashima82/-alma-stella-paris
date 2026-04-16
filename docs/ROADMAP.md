@@ -993,10 +993,18 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
   - `shortDescriptionFr` (string) — accroche courte FR
   - `description` (text) — description complète EN (page guide)
   - `descriptionFr` (text) — description complète FR
+  - `funFact` (text, nullable) — « Le saviez-vous ? » EN
+  - `funFactFr` (text, nullable) — « Le saviez-vous ? » FR
+  - `traditions` (text, nullable) — traditions culturelles EN
+  - `traditionsFr` (text, nullable) — traditions culturelles FR
   - `virtues` (text) — vertus émotionnelles/spirituelles EN
   - `virtuesFr` (text) — vertus émotionnelles/spirituelles FR
+  - `chakra` (string, nullable) — chakra(s) associé(s) (ex: « Cœur », « Racine, Cœur »)
   - `color` (string) — couleur dominante (pour affichage visuel)
+  - `lustre` (string, nullable) — éclat de la pierre (ex: « Vitreux à cireux »)
   - `origin` (string, nullable) — origine géographique
+  - `care` (text, nullable) — conseils d'entretien EN
+  - `careFr` (text, nullable) — conseils d'entretien FR
   - `imageName` (string, nullable) — photo de la pierre
   - `position` (integer) — ordre d'affichage
 - [ ] Relation `ManyToMany` bidirectionnelle entre `Product` et `Stone`
