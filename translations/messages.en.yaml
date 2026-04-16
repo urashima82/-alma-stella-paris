@@ -2,7 +2,7 @@
 nav:
     home: Home
     shop: Shop
-    stones: "Our Stones"
+    stones: "The Stones"
     about: About
     contact: Contact
     language: Language
@@ -119,7 +119,7 @@ footer:
     terms: "Terms of Sale"
     copyright: "© %year% Alma Stella Paris. All rights reserved."
     motto: '"Porter le monde." ✦'
-    stones: "Our stones"
+    stones: "The stones"
 
 # ── Error pages ──
 error:
@@ -602,7 +602,7 @@ stones:
     title: "Stone Guide | Alma Stella Paris"
     title_suffix: "Alma Stella Paris"
     meta_description: "Discover the natural stones used in Alma Stella Paris jewelry. Origins, virtues, and meaning of each stone."
-    heading: "Our Stones"
+    heading: "The Stones"
     intro: "Each natural stone tells a story shaped by millennia. Discover the origins, traditions, and virtues of the stones that adorn our jewelry."
     empty: "No stones to display yet."
     guide_label: "Stone guide"

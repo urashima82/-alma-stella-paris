@@ -2,7 +2,7 @@
 nav:
     home: "Accueil"
     shop: "Boutique"
-    stones: "Nos Pierres"
+    stones: "Les Pierres"
     about: "À propos"
     contact: "Contact"
     language: "Langue"
@@ -119,7 +119,7 @@ footer:
     terms: "CGV"
     copyright: "© %year% Alma Stella Paris. Tous droits réservés."
     motto: '« Porter le monde. » ✦'
-    stones: "Nos pierres"
+    stones: "Les pierres"
 
 # ── Error pages ──
 error:
@@ -602,7 +602,7 @@ stones:
     title: "Guide des pierres | Alma Stella Paris"
     title_suffix: "Alma Stella Paris"
     meta_description: "Découvrez les pierres naturelles utilisées dans les bijoux Alma Stella Paris. Origines, vertus et signification de chaque pierre."
-    heading: "Nos Pierres"
+    heading: "Les Pierres"
     intro: "Chaque pierre naturelle raconte une histoire façonnée par des millénaires. Découvrez les origines, traditions et vertus des pierres qui ornent nos bijoux."
     empty: "Aucune pierre à afficher pour le moment."
     guide_label: "Guide des pierres"
