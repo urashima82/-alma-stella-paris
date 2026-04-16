@@ -27,7 +27,10 @@ alma-stella/
 │       ├── lightbox_controller.js           # Image lightbox / gallery view on product detail
 │       ├── mobile_menu_controller.js        # Mobile hamburger menu toggle
 │       ├── reservation_timer_controller.js  # Checkout countdown timer (mm:ss, auto-reload on expiry)
+│       ├── star_rating_controller.js        # Star rating input on testimonial submission form
+│       ├── stone_filter_controller.js       # Stone filter toggle in catalog sidebar
 │       ├── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
+│       ├── turnstile_controller.js          # Cloudflare Turnstile CAPTCHA integration
 │       └── wishlist_toggle_controller.js    # Heart toggle (AJAX POST, guest redirect to login)
 ├── config/
 ├── docs/
@@ -53,6 +56,8 @@ alma-stella/
 │   │   │   ├── ProductCrudController.php         # Product management with image uploads
 │   │   │   ├── PromotionCrudController.php      # Promotion management with targeting + stats
 │   │   │   ├── StoneCrudController.php          # Stone CRUD — bilingual, image upload, product links
+│   │   │   ├── TestimonialCrudController.php    # Testimonial moderation (pending/approved/rejected)
+│   │   │   ├── CategoryReorderController.php    # Drag & drop category reordering API
 │   │   │   ├── ShippingSettingsCrudController.php # Shipping tier cost overrides
 │   │   │   └── SiteSettingsCrudController.php    # Site-wide settings (active collection, maintenance mode)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
@@ -81,7 +86,8 @@ alma-stella/
 │   │   ├── DiscountType.php      # Percentage / FixedAmount
 │   │   ├── OrderStatus.php       # Pending / Processing / Shipped / Delivered / Cancelled
 │   │   ├── PromotionType.php     # ProductAutomatic / CartAutomatic / CartCode
-│   │   └── ShippingTier.php      # Standard / Heavy / Set
+│   │   ├── ShippingTier.php      # Standard / Heavy / Set
+│   │   └── TestimonialStatus.php # Pending / Approved / Rejected
 │   ├── Repository/
 │   ├── Service/
 │   │   ├── CartManager.php          # Hybrid cart: session+cookie (guests) / DB (customers)
@@ -96,14 +102,20 @@ alma-stella/
 │   │   ├── PromotionEngine.php      # Promotion calculation: product/cart promos, coupon validation, usage tracking
 │   │   ├── ReservationManager.php   # Product reservation: reserve, release, expiry check (15 min)
 │   │   ├── ShippingCostProvider.php # Shipping cost resolution (DB settings → enum fallback)
-│   │   └── StripeService.php        # PaymentIntent creation & retrieval
+│   │   ├── StripeService.php        # PaymentIntent creation & retrieval
+│   │   ├── TestimonialMailer.php    # J+14 testimonial request emails (scheduler, deduplication)
+│   │   ├── TurnstileVerifier.php    # Cloudflare Turnstile CAPTCHA verification
+│   │   └── AbandonedOrderCleaner.php # Cleans up stale pending orders (scheduler)
 │   ├── Twig/
 │   │   ├── CurrencyExtension.php         # |price filter — formats amount in selected currency
 │   │   ├── LocaleProductExtension.php    # |localized_name, |localized_description, |localized_slug
 │   │   ├── PromotionExtension.php        # product_promo(), product_promo_price(), product_compare_at_price()
 │   │   ├── ShippingExtension.php         # Shipping-related Twig helpers (promo-aware display_price)
 │   │   ├── WishlistExtension.php        # wishlist_product_ids(), wishlist_count()
-│   │   └── TrackingExtension.php         # tracking_url() — generates 17track URL from tracking number
+│   │   ├── TrackingExtension.php         # tracking_url() — generates 17track URL from tracking number
+│   │   ├── TurnstileExtension.php        # Turnstile CAPTCHA Twig helpers (site key, enabled flag)
+│   │   ├── AdminExtension.php            # Admin-specific Twig globals (pending counts, etc.)
+│   │   └── CategoryNavExtension.php      # Category navigation tree for catalog sidebar
 │   ├── Security/
 │   │   ├── AdminAuthenticationEntryPoint.php     # Redirects unauthenticated to /admin/login
 │   │   └── CustomerAuthenticationEntryPoint.php  # Redirects unauthenticated to /{locale}/login
@@ -120,12 +132,19 @@ alma-stella/
 │   │   └── SecurityHeadersSubscriber.php # Adds security headers (CSP, X-Frame-Options, HSTS, etc.) to all responses
 │   ├── Message/
 │   │   ├── CleanExpiredReservationsMessage.php
+│   │   ├── CleanAbandonedOrdersMessage.php
+│   │   ├── SendTestimonialRequestsMessage.php
 │   │   └── VerifyPendingOrdersMessage.php
 │   ├── MessageHandler/
 │   │   ├── CleanExpiredReservationsHandler.php
+│   │   ├── CleanAbandonedOrdersHandler.php
+│   │   ├── SendTestimonialRequestsHandler.php
 │   │   └── VerifyPendingOrdersHandler.php
 │   ├── Command/
-│   │   └── VerifyPendingOrdersCommand.php  # CLI: app:verify-pending-orders
+│   │   ├── CleanExpiredReservationsCommand.php  # CLI: app:clean-expired-reservations
+│   │   ├── CleanAbandonedOrdersCommand.php      # CLI: app:clean-abandoned-orders
+│   │   ├── SendTestimonialRequestsCommand.php   # CLI: app:send-testimonial-requests
+│   │   └── VerifyPendingOrdersCommand.php       # CLI: app:verify-pending-orders
 │   └── Schedule.php                        # Symfony Scheduler provider (default)
 ├── templates/
 │   ├── admin/
@@ -141,7 +160,9 @@ alma-stella/
 │   │   ├── order_delivered.html.twig     # Bilingual delivery notification + care instructions
 │   │   ├── order_shipped.html.twig       # Bilingual shipped notification with tracking
 │   │   ├── registration_otp.html.twig    # OTP verification code for registration
-│   │   └── reset_password.html.twig      # Bilingual password reset email
+│   │   ├── reset_password.html.twig      # Bilingual password reset email
+│   │   ├── testimonial_request.html.twig # J+14 testimonial request (bilingual, unique token link)
+│   │   └── admin_new_testimonial.html.twig # Admin notification when testimonial submitted
 │   ├── pdf/
 │   │   └── invoice.html.twig           # Invoice PDF template (bilingual, logo, legal footer)
 │   └── shop/
@@ -154,6 +175,8 @@ alma-stella/
 │       ├── cart/
 │       ├── checkout/            # Identify, checkout form, payment, confirmation, tracking
 │       ├── legal/               # Legal notice, terms of sale
+│       ├── stone/               # Stone guide: index grid + detail page
+│       ├── testimonial/         # Testimonial listing, submission form, thank you
 │       ├── security/            # Login, register, OTP verification, forgot/reset password
 │       └── account/             # Dashboard, orders, addresses, profile (authenticated)
 │   └── bundles/
@@ -750,8 +773,9 @@ class Testimonial
   3. Scheduler: `VerifyPendingOrdersMessage` runs every 5 min via Symfony Scheduler
   4. Scheduler: `CleanExpiredReservationsMessage` runs every 5 min (releases expired holds)
   5. Scheduler: `SendTestimonialRequestsMessage` runs every 6 hours (J+14 testimonial emails)
+  6. Scheduler: `CleanAbandonedOrdersMessage` runs periodically (cleans stale pending orders)
 
-### SocialPublisher
+### SocialPublisher *(planned — Milestone 12, not yet implemented)*
 
 Three channels, three integration levels:
 
@@ -761,11 +785,17 @@ Three channels, three integration levels:
 | TikTok Shop | Full API — creates/updates product in catalog | EasyAdmin action button |
 | Instagram | Deep link — opens mobile app with pre-filled caption | EasyAdmin generates link |
 
-Auto-generated content per product:
-- **Title:** `$product->getName()` (English)
-- **Description:** `$product->getDescription()` + auto hashtags
-- **Hashtags:** `#jewelry #bijoux #bohemian #frenchjewelry #almastellaparis`
-- **Link:** canonical product URL on the site
+### AbandonedOrderCleaner
+
+- Cleans up stale pending orders (status `Pending`, older than configurable threshold)
+- Triggered via Symfony Scheduler (`CleanAbandonedOrdersMessage`)
+- Releases associated product reservations when cleaning
+
+### TurnstileVerifier
+
+- Verifies Cloudflare Turnstile CAPTCHA tokens server-side
+- Used on public forms (contact, testimonial submission) for bot protection
+- Disabled gracefully when `TURNSTILE_SECRET_KEY` is empty (dev mode)
 
 ### OrderMailer
 
