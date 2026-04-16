@@ -41,8 +41,7 @@ class AppFixtures extends Fixture
         $customers = $this->loadCustomers($manager);
         $categories = $this->loadCategories($manager);
         $stones = $this->loadStones($manager);
-        $products = $this->loadProducts($manager, $categories, $stones);
-        $this->generateBulkProducts($manager, $categories, $stones);
+        $products = $this->loadCatalogueProducts($manager, $categories, $stones);
         $this->linkRelatedProducts($products);
         $this->loadOrders($manager, $products, $customers);
         $this->loadPromotions($manager, $products, $categories);
@@ -86,14 +85,13 @@ class AppFixtures extends Fixture
      */
     private function loadCategories(ObjectManager $manager): array
     {
-        // Parent categories (roots): [name, nameFr, slugFr, position, description, descriptionFr]
+        // Root categories: [name, nameFr, slugFr, position, description, descriptionFr]
         $roots = [
-            ['Necklaces', 'Colliers', 'colliers', 0, 'Pendants, chokers & chains — each piece curated between Paris and Mexico.', 'Pendentifs, ras-de-cou & chaînes — chaque pièce chinée entre Paris et le Mexique.'],
-            ['Earrings', 'Boucles d\'oreilles', 'boucles-d-oreilles', 1, 'Hoops, studs & drops to frame your face with effortless elegance.', 'Créoles, puces & pendantes pour sublimer votre visage avec élégance.'],
-            ['Bracelets', 'Bracelets', 'bracelets', 2, 'Chains, cuffs & beaded designs — water-resistant everyday companions.', 'Chaînes, manchettes & perles — des compagnons du quotidien résistants à l\'eau.'],
-            ['Rings', 'Bagues', 'bagues', 3, 'Natural stones & stackable bands to adorn every finger.', 'Pierres naturelles & anneaux empilables pour orner chaque doigt.'],
-            ['Anklets', 'Chaînes de cheville', 'chaines-de-cheville', 4, 'Delicate ankle chains for a sun-kissed bohemian touch.', 'Délicates chaînes de cheville pour une touche bohème ensoleillée.'],
-            ['Sets', 'Coffrets', 'coffrets', 5, 'Thoughtfully paired pieces, ready to give or to keep.', 'Des pièces assorties avec soin, à offrir ou à s\'offrir.'],
+            ['Rings', 'Bagues', 'bagues', 0, 'Signet rings, double rings, cuffs & delicate bands — each adorned with hand-selected stones.', 'Chevalières, bagues doubles, manchettes & fines — chaque pièce ornée de pierres sélectionnées à la main.'],
+            ['Earrings', 'Boucles d\'oreilles', 'boucles-d-oreilles', 1, 'Hoops, studs, drops & chains to frame your face with effortless elegance.', 'Créoles, puces, pendantes & chaînettes pour sublimer votre visage avec élégance.'],
+            ['Bracelets', 'Bracelets', 'bracelets', 2, 'Chains, bangles & stone sets — water-resistant everyday companions.', 'Chaînes, joncs & ensembles de pierres — des compagnons du quotidien résistants à l\'eau.'],
+            ['Necklaces', 'Colliers', 'colliers', 3, 'Pendants, chokers, multi-chains & long necklaces curated between Paris and Mexico.', 'Pendentifs, ras-de-cou, multi-chaînes & sautoirs chinés entre Paris et le Mexique.'],
+            ['Sets', 'Coffrets', 'coffrets', 4, 'Thoughtfully paired pieces, ready to give or to keep.', 'Des pièces assorties avec soin, à offrir ou à s\'offrir.'],
         ];
 
         $categories = [];
@@ -109,22 +107,49 @@ class AppFixtures extends Fixture
             $categories[$name] = $category;
         }
 
-        // Subcategories: [name, nameFr, slugFr, position, parentKey, description, descriptionFr]
+        // Subcategories: [name, nameFr, csvSubcategory, slugFr, position, parentKey, description, descriptionFr]
+        // csvSubcategory is the exact value from the CSV, used to map products to categories
         $children = [
-            ['Pendants', 'Pendentifs', 'pendentifs', 0, 'Necklaces', 'Statement pendants with natural stones and gold details.', 'Pendentifs affirmés aux pierres naturelles et détails dorés.'],
-            ['Chokers', 'Ras-de-cou', 'ras-de-cou', 1, 'Necklaces', 'Close-fitting necklaces for a refined, modern look.', 'Colliers ajustés pour un look raffiné et moderne.'],
-            ['Long & Chain', 'Sautoirs & Chaînes', 'sautoirs-chaines', 2, 'Necklaces', 'Layering-friendly long necklaces and fine chains.', 'Sautoirs et chaînes fines parfaits pour le layering.'],
-            ['Hoops', 'Créoles', 'creoles', 0, 'Earrings', 'Classic and textured hoops in every size.', 'Créoles classiques et texturées dans toutes les tailles.'],
-            ['Studs', 'Puces', 'puces', 1, 'Earrings', 'Minimal studs for understated everyday sparkle.', 'Puces minimalistes pour une touche d\'éclat au quotidien.'],
-            ['Drops', 'Pendantes', 'pendantes', 2, 'Earrings', 'Dangling earrings that catch the light and the eye.', 'Boucles pendantes qui captent la lumière et les regards.'],
-            ['Chain', 'Chaînes', 'chaines', 0, 'Bracelets', 'Fine chain bracelets in stainless steel.', 'Bracelets chaîne en acier inoxydable.'],
-            ['Cuffs', 'Manchettes', 'manchettes', 1, 'Bracelets', 'Bold cuff bracelets for a strong wrist statement.', 'Manchettes audacieuses pour affirmer votre poignet.'],
-            ['Beaded', 'Perles & Pierres', 'perles-pierres', 2, 'Bracelets', 'Natural stone and bead bracelets with artisan charm.', 'Bracelets en pierres naturelles et perles au charme artisanal.'],
-            ['Stone Rings', 'Pierres', 'pierres', 0, 'Rings', 'Rings featuring hand-selected natural gemstones.', 'Bagues ornées de pierres naturelles sélectionnées à la main.'],
-            ['Plain & Stackable', 'Simples & Empilables', 'simples-empilables', 1, 'Rings', 'Sleek bands to mix, match and stack your way.', 'Anneaux épurés à mixer et empiler selon vos envies.'],
+            // Rings
+            ['Signet Rings', 'Bagues chevalières', 'Bague chevalière', 'bagues-chevalieres', 0, 'Rings', 'Bold signet rings with enamel and stone accents.', 'Chevalières affirmées avec émail et pierres.'],
+            ['Double Rings', 'Bagues doubles', 'Bague double', 'bagues-doubles', 1, 'Rings', 'Striking double-band rings with crystals and onyx.', 'Bagues doubles saisissantes avec cristaux et onyx.'],
+            ['Delicate Rings', 'Bagues fines', 'Bague fine', 'bagues-fines', 2, 'Rings', 'Minimalist fine rings with natural stones.', 'Bagues fines minimalistes aux pierres naturelles.'],
+            ['Cuff Rings', 'Bagues manchettes', 'Bague manchette', 'bagues-manchettes', 3, 'Rings', 'Wide cuff rings with statement gemstones.', 'Bagues manchettes larges aux pierres imposantes.'],
+            ['Multi-Band Rings', 'Bagues multirangs', 'Bague multirang', 'bagues-multirangs', 4, 'Rings', 'Layered multi-band rings with textured details.', 'Bagues multirangs aux détails texturés.'],
+            ['Charm Rings', 'Bagues à pampilles', 'Bague à pampilles', 'bagues-a-pampilles', 5, 'Rings', 'Cuff rings with dangling stone charms.', 'Bagues manchettes avec pampilles en pierre.'],
+            ['Delicate Ring Duos', 'Duos de bagues fines', 'Duo de bague fine', 'duos-bagues-fines', 6, 'Rings', 'Paired fine rings for effortless stacking.', 'Duos de bagues fines à empiler avec style.'],
+            // Earrings
+            ['Chain Earrings', 'Boucles chaînette', 'Boucles d\'oreilles chaînette', 'boucles-chainette', 0, 'Earrings', 'Delicate chain earrings with dangling stones.', 'Boucles chaînette délicates avec pierres pendantes.'],
+            ['Hoop Earrings', 'Boucles créoles', 'Boucles d\'oreilles créole', 'boucles-creoles', 1, 'Earrings', 'Classic and textured hoops in every size.', 'Créoles classiques et texturées dans toutes les tailles.'],
+            ['Sleeper Earrings', 'Boucles dormeuses', 'Boucles d\'oreilles dormeuse', 'boucles-dormeuses', 2, 'Earrings', 'Elegant sleeper earrings with crystals and stones.', 'Dormeuses élégantes avec cristaux et pierres.'],
+            ['Long Earrings', 'Boucles longues', 'Boucles d\'oreilles longue', 'boucles-longues', 3, 'Earrings', 'Dramatic long earrings that catch the light.', 'Boucles longues qui captent la lumière.'],
+            ['Medallion Earrings', 'Boucles médaillon', 'Boucles d\'oreilles médaillon', 'boucles-medaillon', 4, 'Earrings', 'Medallion earrings with intricate openwork patterns.', 'Boucles médaillon aux motifs ajourés raffinés.'],
+            ['Basket Earrings', 'Boucles panier', 'Boucles d\'oreilles panier', 'boucles-panier', 5, 'Earrings', 'Basket-set earrings with natural stones.', 'Boucles panier serties de pierres naturelles.'],
+            ['Stone Earrings', 'Boucles pierres', 'Boucles d\'oreilles pierre', 'boucles-pierres', 6, 'Earrings', 'Hand-set stone earrings in gold-plated steel.', 'Boucles serties de pierres sur acier doré.'],
+            ['Stud Earrings', 'Boucles puces', 'Boucles d\'oreilles puce', 'boucles-puces', 7, 'Earrings', 'Minimal studs for understated everyday sparkle.', 'Puces minimalistes pour un éclat discret au quotidien.'],
+            ['Rectangle Earrings', 'Boucles rectangles', 'Boucles d\'oreilles rectangle', 'boucles-rectangles', 8, 'Earrings', 'Geometric rectangle earrings with stones and enamel.', 'Boucles rectangulaires géométriques aux pierres et émaux.'],
+            ['Snake Earrings', 'Boucles serpent', 'Boucles d\'oreilles serpent', 'boucles-serpent', 9, 'Earrings', 'Serpentine-style earrings with a bold silhouette.', 'Boucles style serpent à la silhouette affirmée.'],
+            // Bracelets
+            ['Chain Bracelets', 'Bracelets chaîne', 'Bracelet chaîne', 'bracelets-chaine', 0, 'Bracelets', 'Fine chain bracelets with stone accents.', 'Bracelets chaîne fins aux touches de pierre.'],
+            ['Fine Chain Bracelets', 'Bracelets fin chaîne', 'Bracelet fin chaîne', 'bracelets-fin-chaine', 1, 'Bracelets', 'Ultra-delicate fine chain bracelets.', 'Bracelets chaîne ultra-fins et délicats.'],
+            ['Double Bangles', 'Joncs doubles', 'Bracelet jonc double', 'joncs-doubles', 2, 'Bracelets', 'Paired bangle bracelets with onyx and moonstone.', 'Paires de joncs en onyx et pierre de lune.'],
+            ['Multi-Band Bangles', 'Joncs multirangs', 'Bracelet jonc multirang', 'joncs-multirangs', 3, 'Bracelets', 'Stacked multi-band bangle bracelets.', 'Joncs multirangs empilés et structurés.'],
+            ['Simple Bangles', 'Joncs simples', 'Bracelet jonc simple', 'joncs-simples', 4, 'Bracelets', 'Clean single-band bangles in gold-plated steel.', 'Joncs simples épurés en acier doré.'],
+            ['Chain Bracelet Duos', 'Duos de bracelets chaîne', 'Duo de bracelet chaîne', 'duos-bracelets-chaine', 5, 'Bracelets', 'Paired chain bracelets for layered styling.', 'Duos de bracelets chaîne pour un style superposé.'],
+            ['Stone Bracelet Duos', 'Duos de bracelets pierre', 'Duo de bracelet pierre', 'duos-bracelets-pierre', 6, 'Bracelets', 'Two-bracelet sets with natural stone beads.', 'Ensembles de deux bracelets en perles de pierre naturelle.'],
+            ['Stone Bracelet Trios', 'Trios de bracelets pierre', 'Trio de bracelet pierre', 'trios-bracelets-pierre', 7, 'Bracelets', 'Three-bracelet sets with harmonious stone pairings.', 'Trios de bracelets aux pierres harmonieusement assorties.'],
+            ['Stone Bracelet Quartets', 'Quatuors de bracelets pierre', 'Quatuor de bracelet pierre', 'quatuors-bracelets-pierre', 8, 'Bracelets', 'Four-bracelet stone sets for a bold stacking look.', 'Quatuors de bracelets de pierres pour un style affirmé.'],
+            // Necklaces
+            ['Bold Chain Necklaces', 'Colliers grosse chaîne', 'Collier grosse chaîne', 'colliers-grosse-chaine', 0, 'Necklaces', 'Statement necklaces with bold chain links.', 'Colliers imposants à grosses mailles.'],
+            ['Stone Pendant Necklaces', 'Colliers médaillon pierre', 'Collier médaillon pierre', 'colliers-medaillon-pierre', 1, 'Necklaces', 'Pendant necklaces with hand-set natural stones.', 'Colliers pendentifs sertis de pierres naturelles.'],
+            ['Simple Pendant Necklaces', 'Colliers médaillon simple', 'Collier médaillon simple', 'colliers-medaillon-simple', 2, 'Necklaces', 'Minimalist pendant necklaces with geometric motifs.', 'Colliers pendentifs minimalistes aux motifs géométriques.'],
+            ['Multi-Chain Necklaces', 'Colliers multi-chaîne', 'Collier multi-chaîne', 'colliers-multi-chaine', 3, 'Necklaces', 'Layered multi-chain necklaces with mixed elements.', 'Colliers multi-chaînes aux éléments variés.'],
+            ['Fine Chokers', 'Colliers ras-du-cou', 'Collier ras-du-cou fin', 'colliers-ras-du-cou', 4, 'Necklaces', 'Delicate close-fitting necklaces with stone beads.', 'Ras-de-cou délicats aux perles de pierres.'],
+            ['Long Necklaces', 'Sautoirs', 'Sautoir', 'sautoirs', 5, 'Necklaces', 'Elegant long necklaces with natural stone beads.', 'Élégants sautoirs aux perles de pierres naturelles.'],
         ];
 
-        foreach ($children as [$name, $nameFr, $slugFr, $position, $parentKey, $description, $descriptionFr]) {
+        // Build a CSV subcategory → category key lookup for product import
+        foreach ($children as [$name, $nameFr, $csvSubcategory, $slugFr, $position, $parentKey, $description, $descriptionFr]) {
             $category = new ProductCategory();
             $category->setName($name);
             $category->setNameFr($nameFr);
@@ -135,6 +160,8 @@ class AppFixtures extends Fixture
             $category->setDescriptionFr($descriptionFr);
             $manager->persist($category);
             $categories[$name] = $category;
+            // Also store by CSV subcategory name for easy lookup
+            $categories['csv:'.$csvSubcategory] = $category;
         }
 
         return $categories;
@@ -543,262 +570,340 @@ class AppFixtures extends Fixture
     }
 
     /**
+     * Import all 222 products from the official catalogue CSV.
+     *
      * @param array<string, ProductCategory> $categories
      * @param array<string, Stone>           $stones
      *
      * @return array<string, Product>
      */
-    private function loadProducts(ObjectManager $manager, array $categories, array $stones): array
+    private function loadCatalogueProducts(ObjectManager $manager, array $categories, array $stones): array
     {
-        $data = [
-            [
-                'Gold Star Pendant Necklace',
-                'Pendentif Étoile Doré',
-                'Delicate gold star pendant on a fine chain, inspired by the night sky over the Mexican desert. Made from water-resistant stainless steel.',
-                'Délicat pendentif étoile en acier doré, inspiré du ciel nocturne au-dessus du désert mexicain. Acier inoxydable résistant à l\'eau.',
-                35.00, 44.00, ShippingTier::Standard, 'Pendants', true, true, [Product::COUNTRY_MEXICO],
-            ],
-            [
-                'Turquoise Stone Ring',
-                'Bague Pierre Turquoise',
-                'Statement turquoise ring set in gold-plated stainless steel. Each stone is unique, hand-selected for its vibrant color.',
-                'Bague turquoise sertie dans de l\'acier inoxydable plaqué or. Chaque pierre est unique, sélectionnée à la main pour sa couleur vibrante.',
-                26.00, null, ShippingTier::Standard, 'Stone Rings', true, true, [Product::COUNTRY_MEXICO],
-            ],
-            [
-                'Black Onyx Drop Earrings',
-                'Boucles d\'Oreilles Onyx Noir',
-                'Elegant drop earrings featuring polished black onyx stones. A timeless piece that transitions effortlessly from day to night.',
-                'Élégantes boucles d\'oreilles pendantes en onyx noir poli. Une pièce intemporelle qui passe facilement du jour à la nuit.',
-                29.00, 39.00, ShippingTier::Standard, 'Drops', true, true, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
-            ],
-            [
-                'Layered Gold Chain Bracelet',
-                'Bracelet Chaînes Dorées Superposées',
-                'Multi-layered gold chain bracelet with a delicate bohemian feel. Water-resistant, perfect for everyday wear.',
-                'Bracelet multi-chaînes dorées à l\'esprit bohème délicat. Résistant à l\'eau, parfait pour le quotidien.',
-                24.00, null, ShippingTier::Standard, 'Chain', true, true, [Product::COUNTRY_FRANCE],
-            ],
-            [
-                'Mother of Pearl Choker',
-                'Ras-de-Cou Nacre',
-                'Stunning choker necklace featuring natural mother of pearl elements. A statement piece inspired by the coasts of Oaxaca.',
-                'Superbe ras-de-cou avec éléments en nacre naturelle. Une pièce forte inspirée des côtes d\'Oaxaca.',
-                37.00, null, ShippingTier::Heavy, 'Chokers', true, false, [Product::COUNTRY_MEXICO],
-            ],
-            [
-                'Lapis Lazuli Stud Earrings',
-                'Puces d\'Oreilles Lapis-Lazuli',
-                'Minimalist stud earrings with genuine lapis lazuli stones. The deep blue evokes the Mediterranean sky.',
-                'Puces d\'oreilles minimalistes en véritable lapis-lazuli. Le bleu profond évoque le ciel méditerranéen.',
-                22.00, null, ShippingTier::Standard, 'Studs', true, false, [Product::COUNTRY_FRANCE],
-            ],
-            [
-                'Hammered Gold Cuff',
-                'Manchette Dorée Martelée',
-                'Bold hammered gold cuff bracelet. Each piece is hand-finished, making every cuff subtly unique.',
-                'Manchette dorée martelée audacieuse. Chaque pièce est finie à la main, rendant chaque manchette subtilement unique.',
-                48.00, 60.00, ShippingTier::Heavy, 'Cuffs', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
-            ],
-            [
-                'Shell & Gold Anklet',
-                'Chaîne de Cheville Coquillage & Or',
-                'Dainty anklet combining natural shell elements with gold-plated chain. Summer-ready and water-resistant.',
-                'Chaîne de cheville délicate alliant coquillages naturels et chaîne plaquée or. Prête pour l\'été et résistante à l\'eau.',
-                17.00, null, ShippingTier::Standard, 'Anklets', true, false, [Product::COUNTRY_MEXICO],
-            ],
-            [
-                'Moonstone Solitaire Ring',
-                'Bague Solitaire Pierre de Lune',
-                'Ethereal moonstone solitaire ring with a luminous, milky glow. Set in brushed gold-plated steel.',
-                'Bague solitaire en pierre de lune éthérée avec un éclat lumineux et laiteux. Sertie dans de l\'acier plaqué or brossé.',
-                44.00, null, ShippingTier::Standard, 'Stone Rings', true, false, [Product::COUNTRY_FRANCE],
-            ],
-            [
-                'Coin Charm Necklace',
-                'Collier Médaillon',
-                'Vintage-inspired coin charm on a fine gold chain. A versatile everyday piece with old-world charm.',
-                'Médaillon d\'inspiration vintage sur une fine chaîne dorée. Une pièce polyvalente au charme d\'antan.',
-                31.00, null, ShippingTier::Standard, 'Long & Chain', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
-            ],
-            [
-                'Beaded Stone Bracelet',
-                'Bracelet Perles de Pierre',
-                'Natural stone bead bracelet with gold accent beads. Each stone carries its own unique pattern and energy.',
-                'Bracelet de perles en pierre naturelle avec perles dorées. Chaque pierre porte son propre motif et énergie unique.',
-                20.00, null, ShippingTier::Standard, 'Beaded', true, false, [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
-            ],
-            [
-                'Pearl & Gold Hoops',
-                'Créoles Perles & Or',
-                'Modern gold hoops adorned with freshwater pearls. A contemporary twist on a timeless classic.',
-                'Créoles dorées modernes ornées de perles d\'eau douce. Une touche contemporaine sur un classique intemporel.',
-                33.00, 41.00, ShippingTier::Standard, 'Hoops', true, false, [Product::COUNTRY_FRANCE],
-            ],
-        ];
+        $csvPath = \dirname(__DIR__, 2).'/docs/Catalogue/catalogue.csv';
+        $handle = \fopen($csvPath, 'r');
+        if ($handle === false) {
+            throw new \RuntimeException('Cannot open catalogue CSV at '.$csvPath);
+        }
+
+        // Skip header
+        \fgetcsv($handle, 0, ';');
 
         $products = [];
-        foreach ($data as [$name, $nameFr, $desc, $descFr, $price, $compareAtPrice, $tier, $cat, $published, $featured, $availableIn]) {
-            $product = new Product();
-            $product->setName($name);
-            $product->setNameFr($nameFr);
-            $product->setDescription($desc);
-            $product->setDescriptionFr($descFr);
-            $product->setBasePrice($price);
-            $product->setCompareAtPrice($compareAtPrice);
-            $product->setShippingTier($tier);
-            $product->setCategory($categories[$cat]);
-            $product->setIsPublished($published);
-            $product->setIsFeatured($featured);
-            $product->setIsSoldOut(false);
-            $product->setAvailableIn($availableIn);
-            $manager->persist($product);
-            $products[$name] = $product;
-        }
+        $index = 0;
+        $stoneNameMap = $this->getStoneNameMap();
+        $wordMap = $this->getTranslationWordMap();
 
-        // Associate stones to hand-crafted products
-        $stoneMap = [
-            'Turquoise Stone Ring' => ['Turquoise'],
-            'Black Onyx Drop Earrings' => ['Black Onyx'],
-            'Mother of Pearl Choker' => ['Mother of Pearl'],
-            'Lapis Lazuli Stud Earrings' => ['Lapis Lazuli'],
-            'Moonstone Solitaire Ring' => ['Moonstone'],
-            'Beaded Stone Bracelet' => ['Rose Quartz'],
-            'Pearl & Gold Hoops' => ['Pearl'],
-        ];
-
-        foreach ($stoneMap as $productName => $stoneNames) {
-            if (!isset($products[$productName])) {
+        while (($row = \fgetcsv($handle, 0, ';')) !== false) {
+            if (\count($row) < 8) {
                 continue;
             }
-            foreach ($stoneNames as $stoneName) {
-                if (isset($stones[$stoneName])) {
-                    $products[$productName]->addStone($stones[$stoneName]);
-                }
+
+            [, , $subcategory, $nameFr, $descriptionFr, $stoneCsv, , $price] = $row;
+
+            $category = $categories['csv:'.$subcategory] ?? null;
+            if ($category === null) {
+                continue;
             }
+
+            $nameEn = $this->translateProductName($nameFr, $subcategory, $wordMap);
+
+            $product = new Product();
+            $product->setName($nameEn);
+            $product->setNameFr($nameFr);
+            $product->setDescription($this->translateDescription($descriptionFr, $subcategory, $wordMap));
+            $product->setDescriptionFr($descriptionFr);
+            $product->setBasePrice((float) $price);
+            $product->setShippingTier(ShippingTier::Standard);
+            $product->setCategory($category);
+            $product->setIsPublished(true);
+            $product->setIsFeatured($index % 20 === 0);
+            $product->setIsSoldOut(false);
+            $product->setAvailableIn([Product::COUNTRY_FRANCE]);
+
+            // Associate stones
+            $this->associateStonesToProduct($product, $stoneCsv, $stoneNameMap, $stones);
+
+            $manager->persist($product);
+            $products[$nameFr] = $product;
+            ++$index;
         }
+
+        \fclose($handle);
 
         return $products;
     }
 
     /**
-     * Generate 288 additional products (300 total with the 12 hand-crafted ones).
+     * Map CSV stone French names to Stone entity English keys.
      *
-     * @param array<string, ProductCategory> $categories
-     * @param array<string, Stone>           $stoneEntities
+     * @return array<string, string>
      */
-    private function generateBulkProducts(ObjectManager $manager, array $categories, array $stoneEntities): void
+    private function getStoneNameMap(): array
     {
-        $stones = [
-            ['Agate', 'Agate'], ['Alexandrite', 'Alexandrite'], ['Amazonite', 'Amazonite'],
-            ['Amber', 'Ambre'], ['Amethyst', 'Améthyste'], ['Aquamarine', 'Aigue-marine'],
-            ['Aventurine', 'Aventurine'], ['Carnelian', 'Cornaline'], ['Chalcedony', 'Calcédoine'],
-            ['Chrysoprase', 'Chrysoprase'], ['Citrine', 'Citrine'], ['Coral', 'Corail'],
-            ['Emerald', 'Émeraude'], ['Fluorite', 'Fluorite'], ['Garnet', 'Grenat'],
-            ['Hematite', 'Hématite'], ['Howlite', 'Howlite'], ['Iolite', 'Iolite'],
-            ['Jade', 'Jade'], ['Jasper', 'Jaspe'], ['Kyanite', 'Cyanite'],
-            ['Labradorite', 'Labradorite'], ['Larimar', 'Larimar'], ['Malachite', 'Malachite'],
-            ['Obsidian', 'Obsidienne'], ['Opal', 'Opale'], ['Pearl', 'Perle'],
-            ['Peridot', 'Péridot'], ['Prehnite', 'Préhnite'], ['Pyrite', 'Pyrite'],
-            ['Rhodonite', 'Rhodonite'], ['Rose Quartz', 'Quartz Rose'], ['Ruby', 'Rubis'],
-            ['Sapphire', 'Saphir'], ['Serpentine', 'Serpentine'], ['Smoky Quartz', 'Quartz Fumé'],
-            ['Sodalite', 'Sodalite'], ['Sunstone', 'Pierre de Soleil'], ['Tanzanite', 'Tanzanite'],
-            ['Tiger Eye', 'Œil de Tigre'], ['Topaz', 'Topaze'], ['Turquoise', 'Turquoise'],
-            ['Unakite', 'Unakite'], ['Zoisite', 'Zoïsite'],
+        return [
+            'Onyx noir' => 'Black Onyx',
+            'Lapis Lazuli' => 'Lapis Lazuli',
+            'Turquoise' => 'Turquoise',
+            'Malachite' => 'Malachite',
+            'Cornaline' => 'Carnelian',
+            'Labradorite' => 'Labradorite',
+            'Amazonite' => 'Amazonite',
+            'Rhodonite' => 'Rhodonite',
+            'Pierre de Lune' => 'Moonstone',
+            'Péridot' => 'Peridot',
+            'Quartz Rose' => 'Rose Quartz',
+            'Smoky Quartz' => 'Smoky Quartz',
+            'Sodalite' => 'Sodalite',
+            'Nacre' => 'Mother of Pearl',
+            'Agate blanche' => 'White Agate',
         ];
+    }
 
-        // [nameTemplateEN, nameTemplateFR, count] — total = 288
-        $categoryConfig = [
-            'Pendants' => ['%s Pendant Necklace',  'Collier Pendentif %s',   23],
-            'Chokers' => ['%s Choker',            'Ras-de-Cou %s',          22],
-            'Long & Chain' => ['%s Chain Necklace',    'Sautoir %s',             22],
-            'Hoops' => ['%s Hoop Earrings',     'Créoles %s',             22],
-            'Studs' => ['%s Stud Earrings',     'Puces %s',               22],
-            'Drops' => ['%s Drop Earrings',     'Pendantes %s',           22],
-            'Chain' => ['%s Chain Bracelet',    'Bracelet Chaîne %s',     22],
-            'Cuffs' => ['%s Cuff Bracelet',     'Manchette %s',           22],
-            'Beaded' => ['%s Bead Bracelet',     'Bracelet Perles %s',     22],
-            'Stone Rings' => ['%s Statement Ring',    'Bague %s',               21],
-            'Plain & Stackable' => ['%s Stacking Ring',     'Anneau %s',              23],
-            'Anklets' => ['%s Anklet',            'Chaîne de Cheville %s',  22],
-            'Sets' => ['%s Jewelry Set',       'Coffret %s',             23],
-        ];
+    /**
+     * @param array<string, string> $stoneNameMap
+     * @param array<string, Stone>  $stones
+     */
+    private function associateStonesToProduct(Product $product, string $stoneCsv, array $stoneNameMap, array $stones): void
+    {
+        if ($stoneCsv === 'INCONNU' || $stoneCsv === '') {
+            return;
+        }
 
-        $descriptionsEn = [
-            'Handcrafted piece featuring genuine %s. Water-resistant stainless steel. Unique piece curated between Paris and Mexico.',
-            'A beautiful %s jewelry piece, hand-selected for its unique character and natural beauty. Durable, water-resistant, perfect for everyday wear.',
-            'Elegant design showcasing natural %s. Part of our exclusive collection bridging Parisian sophistication and Mexican bohemian spirit. Water-resistant stainless steel.',
-        ];
+        // Handle multi-stone entries like "Amazonite, Malachite" or "Nacre, Onyx noir"
+        $stoneNames = \array_map('trim', \explode(',', $stoneCsv));
 
-        $descriptionsFr = [
-            'Pièce unique en %s véritable. Acier inoxydable résistant à l\'eau. Sélectionnée avec soin entre Paris et le Mexique.',
-            'Bijou en %s naturel, choisi pour son caractère unique et sa beauté. Résistant à l\'eau, parfait pour le quotidien.',
-            'Bijou élégant en %s d\'exception. Collection exclusive entre Paris et le Mexique. Acier inoxydable résistant à l\'eau.',
-        ];
+        foreach ($stoneNames as $stoneFr) {
+            // Skip non-natural stones
+            if (\str_starts_with($stoneFr, 'Zirconium')) {
+                continue;
+            }
 
-        $prices = [18.00, 22.00, 24.00, 26.00, 28.00, 29.00, 31.00, 33.00, 35.00, 37.00, 39.00, 42.00, 44.00, 46.00, 48.00, 52.00];
-
-        $stoneCount = \count($stones);
-        $priceCount = \count($prices);
-        $stoneIndex = 0;
-        $globalIndex = 0;
-
-        foreach ($categoryConfig as $catKey => [$tplEn, $tplFr, $count]) {
-            for ($i = 0; $i < $count; ++$i) {
-                [$stoneEn, $stoneFr] = $stones[$stoneIndex % $stoneCount];
-
-                $price = $prices[$globalIndex % $priceCount];
-                $descIndex = $globalIndex % 3;
-
-                $product = new Product();
-                $product->setName(\sprintf($tplEn, $stoneEn));
-                $product->setNameFr(\sprintf($tplFr, $stoneFr));
-                $product->setDescription(\sprintf($descriptionsEn[$descIndex], \strtolower($stoneEn)));
-                $product->setDescriptionFr(\sprintf($descriptionsFr[$descIndex], \mb_strtolower($stoneFr)));
-                $product->setBasePrice($price);
-                $product->setCompareAtPrice($globalIndex % 5 === 0 ? $price + 12.00 : null);
-                $product->setShippingTier($catKey === 'Sets' ? ShippingTier::Set : ($price >= 44.00 ? ShippingTier::Heavy : ShippingTier::Standard));
-                $product->setCategory($categories[$catKey]);
-                $product->setIsPublished(true);
-                $product->setIsFeatured($globalIndex % 15 === 0);
-                $product->setIsSoldOut($globalIndex % 20 === 0);
-                $product->setAvailableIn(match ($globalIndex % 3) {
-                    0 => [Product::COUNTRY_FRANCE, Product::COUNTRY_MEXICO],
-                    1 => [Product::COUNTRY_FRANCE],
-                    default => [Product::COUNTRY_MEXICO],
-                });
-
-                // Associate stone entity if it exists
-                $stoneEntityMap = [
-                    'Agate' => null, 'Alexandrite' => null, 'Amazonite' => 'Amazonite',
-                    'Amber' => null, 'Amethyst' => null, 'Aquamarine' => null,
-                    'Aventurine' => 'Green Aventurine', 'Carnelian' => 'Carnelian',
-                    'Chalcedony' => null, 'Chrysoprase' => null, 'Citrine' => null,
-                    'Coral' => null, 'Emerald' => null, 'Fluorite' => null,
-                    'Garnet' => 'Garnet', 'Hematite' => null, 'Howlite' => null,
-                    'Iolite' => null, 'Jade' => null, 'Jasper' => 'Dalmatian Jasper',
-                    'Kyanite' => null, 'Labradorite' => 'Labradorite', 'Larimar' => null,
-                    'Malachite' => 'Malachite', 'Obsidian' => null, 'Opal' => 'Pink Opal',
-                    'Pearl' => 'Pearl', 'Peridot' => 'Peridot', 'Prehnite' => null,
-                    'Pyrite' => null, 'Rhodonite' => 'Rhodonite', 'Rose Quartz' => 'Rose Quartz',
-                    'Ruby' => null, 'Sapphire' => null, 'Serpentine' => null,
-                    'Smoky Quartz' => 'Smoky Quartz', 'Sodalite' => 'Sodalite',
-                    'Sunstone' => null, 'Tanzanite' => null, 'Tiger Eye' => null,
-                    'Topaz' => null, 'Turquoise' => 'Turquoise', 'Unakite' => null,
-                    'Zoisite' => null,
-                ];
-
-                $mappedStone = $stoneEntityMap[$stoneEn] ?? null;
-                if ($mappedStone !== null && isset($stoneEntities[$mappedStone])) {
-                    $product->addStone($stoneEntities[$mappedStone]);
-                }
-
-                $manager->persist($product);
-
-                ++$stoneIndex;
-                ++$globalIndex;
+            $stoneEn = $stoneNameMap[$stoneFr] ?? null;
+            if ($stoneEn !== null && isset($stones[$stoneEn])) {
+                $product->addStone($stones[$stoneEn]);
             }
         }
+    }
+
+    /**
+     * French-to-English word map for product name translation.
+     *
+     * @return array<string, string>
+     */
+    private function getTranslationWordMap(): array
+    {
+        return [
+            // Multi-word phrases (matched before single words)
+            'Pierre de Lune' => 'Moonstone',
+            'Quartz Rose' => 'Rose Quartz',
+            'Onyx Noir' => 'Black Onyx',
+            'Cristal Noir' => 'Black Crystal',
+            'Cristal Bronze' => 'Bronze Crystal',
+            'Zircon Noir' => 'Black Zircon',
+            'Lapis Lazuli' => 'Lapis Lazuli',
+            'Agate Blanche' => 'White Agate',
+            'Vert Pâle' => 'Pale Green',
+            'Émail Noir' => 'Black Enamel',
+            'Bleu Lagon' => 'Blue Lagoon',
+            'Smoky Quartz' => 'Smoky Quartz',
+            // Stones
+            'Turquoise' => 'Turquoise', 'Malachite' => 'Malachite',
+            'Cornaline' => 'Carnelian', 'Labradorite' => 'Labradorite',
+            'Amazonite' => 'Amazonite', 'Rhodonite' => 'Rhodonite',
+            'Sodalite' => 'Sodalite', 'Péridot' => 'Peridot',
+            'Nacre' => 'Mother of Pearl', 'Améthyste' => 'Amethyst',
+            'Zirconium' => 'Zirconium', 'Zircon' => 'Zircon',
+            'Onyx' => 'Onyx', 'Saphir' => 'Sapphire', 'Rubis' => 'Ruby',
+            'Cristal' => 'Crystal', 'Opale' => 'Opal',
+            // Colors
+            'Noir' => 'Black', 'Doré' => 'Golden', 'Dorée' => 'Golden',
+            'Dorés' => 'Golden', 'Dorées' => 'Golden',
+            'Blanc' => 'White', 'Blanche' => 'White', 'Blanches' => 'White',
+            'Vert' => 'Green', 'Verte' => 'Green',
+            'Bleu' => 'Blue', 'Bleue' => 'Blue',
+            'Rouge' => 'Red', 'Rose' => 'Rose',
+            'Gris' => 'Grey', 'Grise' => 'Grey',
+            'Brun' => 'Brown', 'Brune' => 'Brown',
+            'Bordeaux' => 'Burgundy', 'Bronze' => 'Bronze',
+            'Pâle' => 'Pale', 'Châtain' => 'Chestnut',
+            'Argenté' => 'Silver', 'Bicolore' => 'Two-Tone',
+            // Celestial / Nature
+            'Soleil' => 'Sun', 'Lune' => 'Moon', 'Étoile' => 'Star',
+            'Minuit' => 'Midnight', 'Céleste' => 'Celestial',
+            'Aube' => 'Dawn', 'Aurore' => 'Aurora',
+            'Noctambule' => 'Night Owl', 'Solaire' => 'Solar',
+            'Ciel' => 'Sky', 'Nuit' => 'Night', 'Nocturne' => 'Nocturnal',
+            'Fleur' => 'Flower', 'Feuille' => 'Leaf', 'Trèfle' => 'Clover',
+            'Forêt' => 'Forest', 'Tropical' => 'Tropical', 'Olivine' => 'Olive',
+            // Adjectives
+            'Brillant' => 'Brilliant', 'Brillante' => 'Brilliant',
+            'Scintillant' => 'Sparkling', 'Scintillante' => 'Sparkling',
+            'Facetté' => 'Faceted', 'Facettée' => 'Faceted',
+            'Perlé' => 'Beaded', 'Perlée' => 'Beaded', 'Perlés' => 'Beaded',
+            'Texturé' => 'Textured', 'Texturée' => 'Textured',
+            'Géométrique' => 'Geometric',
+            'Ajouré' => 'Openwork', 'Ajourée' => 'Openwork',
+            'Iridescent' => 'Iridescent', 'Iridescente' => 'Iridescent',
+            'Épurée' => 'Refined', 'Épuré' => 'Refined',
+            'Classique' => 'Classic', 'Discret' => 'Subtle', 'Discrète' => 'Subtle',
+            'Pure' => 'Pure', 'Apaisante' => 'Soothing',
+            'Protectrice' => 'Protective', 'Mystérieux' => 'Mysterious',
+            'Mystique' => 'Mystical', 'Romantique' => 'Romantic',
+            'Raffinée' => 'Refined', 'Délicate' => 'Delicate',
+            'Bohème' => 'Bohemian', 'Moderne' => 'Modern',
+            'Tendre' => 'Soft', 'Éclatante' => 'Radiant', 'Éclatant' => 'Radiant',
+            'Cristalline' => 'Crystalline', 'Rayonné' => 'Radiant',
+            'Torsadé' => 'Twisted', 'Minimaliste' => 'Minimalist',
+            'Sophistiqué' => 'Sophisticated', 'Pointilliste' => 'Pointillist',
+            'Fleuri' => 'Floral', 'Aérien' => 'Airy', 'Aérienne' => 'Airy',
+            'Étoilé' => 'Starry', 'Étoilée' => 'Starry', 'Poli' => 'Polished',
+            'Douce' => 'Soft',
+            // Shapes
+            'Goutte' => 'Drop', 'Gouttes' => 'Drops',
+            'Losange' => 'Diamond', 'Ovale' => 'Oval', 'Ovales' => 'Ovals',
+            'Rond' => 'Round', 'Ronde' => 'Round',
+            'Carré' => 'Square', 'Carrée' => 'Square',
+            'Rectangle' => 'Rectangle', 'Cœur' => 'Heart', 'Cubique' => 'Cubic',
+            // Craft / style
+            'Mandala' => 'Mandala', 'Médaillon' => 'Medallion', 'Médaillons' => 'Medallions',
+            'Monnaie' => 'Coin', 'Roue' => 'Wheel',
+            'Dentelle' => 'Lace', 'Motif' => 'Pattern',
+            'Harmonie' => 'Harmony', 'Luxe' => 'Luxe',
+            'Serties' => 'Set', 'Enchâssé' => 'Encased',
+            'Entrelacé' => 'Intertwined', 'Ciselé' => 'Chiseled',
+            'Chaîne' => 'Chain', 'Chainés' => 'Chained',
+            'Pavé' => 'Pavé', 'Miroir' => 'Mirror',
+            'Épingle' => 'Pin', 'Arachnée' => 'Spiderweb',
+            'Rayons' => 'Rays', 'Enamel' => 'Enamel',
+            // Numbers / Misc
+            'Double' => 'Double', 'Doubles' => 'Double',
+            'Triple' => 'Triple', 'Trois' => 'Three', 'Quatre' => 'Four',
+            'Rangs' => 'Bands', 'Grands' => 'Large', 'Petits' => 'Small',
+            'Fin' => 'Fine', 'Fine' => 'Fine', 'Inversé' => 'Reversed',
+            'Nord' => 'North', 'Perles' => 'Beads',
+            'Éclat' => 'Radiance', 'Mystère' => 'Mystery',
+            'Elegance' => 'Elegance', 'Mère' => 'Mother',
+        ];
+    }
+
+    /**
+     * @param array<string, string> $wordMap
+     */
+    private function translateProductName(string $frenchName, string $subcategory, array $wordMap): string
+    {
+        $typeSuffix = match ($subcategory) {
+            'Bague chevalière' => 'Signet Ring',
+            'Bague double' => 'Double Ring',
+            'Bague fine' => 'Ring',
+            'Bague manchette' => 'Cuff Ring',
+            'Bague multirang' => 'Multi-Band Ring',
+            'Bague à pampilles' => 'Charm Ring',
+            'Duo de bague fine' => 'Ring Duo',
+            'Boucles d\'oreilles chaînette' => 'Chain Earrings',
+            'Boucles d\'oreilles créole' => 'Hoop Earrings',
+            'Boucles d\'oreilles dormeuse' => 'Sleeper Earrings',
+            'Boucles d\'oreilles longue' => 'Long Earrings',
+            'Boucles d\'oreilles médaillon' => 'Medallion Earrings',
+            'Boucles d\'oreilles panier' => 'Basket Earrings',
+            'Boucles d\'oreilles pierre' => 'Stone Earrings',
+            'Boucles d\'oreilles puce' => 'Stud Earrings',
+            'Boucles d\'oreilles rectangle' => 'Rectangle Earrings',
+            'Boucles d\'oreilles serpent' => 'Snake Earrings',
+            'Bracelet chaîne' => 'Chain Bracelet',
+            'Bracelet fin chaîne' => 'Fine Chain Bracelet',
+            'Bracelet jonc double' => 'Double Bangle',
+            'Bracelet jonc multirang' => 'Multi-Band Bangle',
+            'Bracelet jonc simple' => 'Simple Bangle',
+            'Duo de bracelet chaîne' => 'Chain Bracelet Duo',
+            'Duo de bracelet pierre' => 'Stone Bracelet Duo',
+            'Trio de bracelet pierre' => 'Stone Bracelet Trio',
+            'Quatuor de bracelet pierre' => 'Stone Bracelet Set',
+            'Collier grosse chaîne' => 'Bold Chain Necklace',
+            'Collier médaillon pierre' => 'Stone Pendant Necklace',
+            'Collier médaillon simple' => 'Pendant Necklace',
+            'Collier multi-chaîne' => 'Multi-Chain Necklace',
+            'Collier ras-du-cou fin' => 'Choker',
+            'Sautoir' => 'Long Necklace',
+            default => 'Jewelry',
+        };
+
+        // French prefixes to strip from product names (replaced by the type suffix)
+        $prefixesToStrip = [
+            'Chevalière ', 'Bague Double ', 'Bague Fine ', 'Manchette ',
+            'Multirang ', 'Bague à Pampille ', 'Duo ', 'Créole ', 'Dormeuse ',
+            'Boucles Médaillon ', 'Boucles Étoile ', 'Boucles Rectangulaires ',
+            'Bracelet Chaîne ', 'Bracelet Fine Chaîne ', 'Bracelet Jonc Double ',
+            'Bracelet Jonc Multirang ', 'Fine Chaîne ', 'Chaîne ',
+            'Jonc Double ', 'Jonc Simple ', 'Jonc Multirang ',
+            'Duo Chaîne ', 'Trio Pierre ', 'Quatuor Pierre ',
+            'Collier Médaillon ', 'Collier ', 'Sautoir ',
+            'Médaillon ', 'Bague ',
+        ];
+
+        $descriptivePart = $frenchName;
+        foreach ($prefixesToStrip as $prefix) {
+            if (\str_starts_with($descriptivePart, $prefix)) {
+                $descriptivePart = \substr($descriptivePart, \strlen($prefix));
+                break;
+            }
+        }
+
+        // Translate multi-word phrases first, then single words
+        $translated = $descriptivePart;
+        foreach ($wordMap as $fr => $en) {
+            if (\mb_strlen($fr) <= 3) {
+                continue; // Skip short connectors for now
+            }
+            $translated = \str_replace($fr, $en, $translated);
+        }
+
+        // Remove remaining French connectors
+        $translated = (string) \preg_replace('/\b(de|du|et|en|aux|la|le|les|des|un|une)\b/iu', '', $translated);
+        // Clean up multiple spaces
+        $translated = \trim((string) \preg_replace('/\s+/', ' ', $translated));
+
+        if ($translated === '') {
+            return $typeSuffix;
+        }
+
+        return $translated.' '.$typeSuffix;
+    }
+
+    /**
+     * @param array<string, string> $wordMap
+     */
+    private function translateDescription(string $frenchDesc, string $subcategory, array $wordMap): string
+    {
+        $categoryEn = match (true) {
+            \str_starts_with($subcategory, 'Bague'), \str_starts_with($subcategory, 'Duo de bague') => 'ring',
+            \str_starts_with($subcategory, 'Boucles') => 'earrings',
+            \str_starts_with($subcategory, 'Bracelet'), \str_starts_with($subcategory, 'Duo de bracelet'), \str_starts_with($subcategory, 'Trio'), \str_starts_with($subcategory, 'Quatuor') => 'bracelet',
+            \str_starts_with($subcategory, 'Collier'), $subcategory === 'Sautoir' => 'necklace',
+            default => 'jewelry piece',
+        };
+
+        // Build an English description from the French first sentence
+        $sentences = \explode('.', $frenchDesc);
+        $firstSentence = \trim($sentences[0]);
+
+        $translated = $firstSentence;
+        foreach ($wordMap as $fr => $en) {
+            if (\mb_strlen($fr) <= 3) {
+                continue;
+            }
+            $translated = \str_replace($fr, $en, $translated);
+        }
+
+        // If translation is too similar to French (didn't translate enough), use a template
+        $frenchRatio = \similar_text($translated, $firstSentence) / \max(\mb_strlen($firstSentence), 1);
+        if ($frenchRatio > 0.7) {
+            return \sprintf(
+                'Handcrafted %s in water-resistant gold-plated stainless steel. Unique piece curated between Paris and Mexico.',
+                $categoryEn,
+            );
+        }
+
+        return $translated.'. Water-resistant stainless steel, curated between Paris and Mexico.';
     }
 
     /**
@@ -806,19 +911,27 @@ class AppFixtures extends Fixture
      */
     private function linkRelatedProducts(array $products): void
     {
-        $products['Gold Star Pendant Necklace']->addRelatedProduct($products['Mother of Pearl Choker']);
-        $products['Gold Star Pendant Necklace']->addRelatedProduct($products['Coin Charm Necklace']);
-        $products['Gold Star Pendant Necklace']->addRelatedProduct($products['Turquoise Stone Ring']);
+        // Products are now keyed by French name (nameFr) from the catalogue CSV
+        $relations = [
+            'Chevalière Soleil de Minuit' => ['Manchette Turquoise Éclatante', 'Bague Double Onyx Noir Soleil'],
+            'Manchette Turquoise Éclatante' => ['Bague Fine Amazonite', 'Manchette Lapis Lazuli'],
+            'Pierre de Lune Facette Pure' => ['Labradorite Goutte Iridescente', 'Amazonite Facettée Verte'],
+            'Créole Minuit Épurée' => ['Onyx Noir Créole Serties', 'Créole Zircon Noir Discret'],
+            'Nacre et Perles' => ['Malachite et Dorures', 'Sautoir Labradorite Miroir'],
+            'Sautoir Labradorite Miroir' => ['Sautoir Rhodonite Mystique', 'Sautoir Sodalite et Onyx'],
+            'Jonc Double Bicolore Lune' => ['Jonc Double Onyx Fleuri', 'Chaîne Turquoise Elegance'],
+        ];
 
-        $products['Turquoise Stone Ring']->addRelatedProduct($products['Moonstone Solitaire Ring']);
-        $products['Turquoise Stone Ring']->addRelatedProduct($products['Beaded Stone Bracelet']);
-
-        $products['Black Onyx Drop Earrings']->addRelatedProduct($products['Lapis Lazuli Stud Earrings']);
-        $products['Black Onyx Drop Earrings']->addRelatedProduct($products['Pearl & Gold Hoops']);
-
-        $products['Layered Gold Chain Bracelet']->addRelatedProduct($products['Hammered Gold Cuff']);
-        $products['Layered Gold Chain Bracelet']->addRelatedProduct($products['Beaded Stone Bracelet']);
-        $products['Layered Gold Chain Bracelet']->addRelatedProduct($products['Shell & Gold Anklet']);
+        foreach ($relations as $mainName => $relatedNames) {
+            if (!isset($products[$mainName])) {
+                continue;
+            }
+            foreach ($relatedNames as $relatedName) {
+                if (isset($products[$relatedName])) {
+                    $products[$mainName]->addRelatedProduct($products[$relatedName]);
+                }
+            }
+        }
     }
 
     /**
@@ -906,7 +1019,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => 'CF123456789FR',
                 'stripe_status' => 'succeeded',
-                'items' => [['Gold Star Pendant Necklace', 35.00, 10.00]],
+                'items' => [['Étoile Ajourée', 20.00, 10.00]],
                 'days_ago' => 21,
             ],
             [
@@ -924,8 +1037,8 @@ class AppFixtures extends Fixture
                 'tracking' => '6A12345678901',
                 'stripe_status' => 'succeeded',
                 'items' => [
-                    ['Black Onyx Drop Earrings', 29.00, 10.00],
-                    ['Layered Gold Chain Bracelet', 24.00, 10.00],
+                    ['Pierre de Lune Facette Pure', 29.00, 10.00],
+                    ['Chaîne Turquoise Elegance', 22.00, 10.00],
                 ],
                 'days_ago' => 5,
             ],
@@ -943,7 +1056,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => null,
                 'stripe_status' => 'succeeded',
-                'items' => [['Mother of Pearl Choker', 37.00, 15.00]],
+                'items' => [['Nacre et Perles', 40.00, 10.00]],
                 'days_ago' => 2,
             ],
             [
@@ -961,8 +1074,8 @@ class AppFixtures extends Fixture
                 'tracking' => 'MX987654321',
                 'stripe_status' => 'succeeded',
                 'items' => [
-                    ['Turquoise Stone Ring', 26.00, 10.00],
-                    ['Beaded Stone Bracelet', 20.00, 10.00],
+                    ['Manchette Turquoise Éclatante', 35.00, 10.00],
+                    ['Jonc Double Bicolore Lune', 35.00, 10.00],
                 ],
                 'days_ago' => 3,
             ],
@@ -981,36 +1094,14 @@ class AppFixtures extends Fixture
                 'tracking' => null,
                 'stripe_status' => 'succeeded',
                 'items' => [
-                    ['Gold Star Pendant Necklace', 35.00, 10.00],
-                    ['Turquoise Stone Ring', 26.00, 10.00],
-                    ['Black Onyx Drop Earrings', 29.00, 10.00],
-                    ['Layered Gold Chain Bracelet', 24.00, 10.00],
-                    ['Mother of Pearl Choker', 37.00, 15.00],
-                    ['Lapis Lazuli Stud Earrings', 22.00, 10.00],
-                    ['Hammered Gold Cuff', 48.00, 15.00],
-                    ['Shell & Gold Anklet', 17.00, 10.00],
-                    ['Moonstone Solitaire Ring', 44.00, 10.00],
-                    ['Coin Charm Necklace', 31.00, 10.00],
-                    ['Beaded Stone Bracelet', 20.00, 10.00],
-                    ['Pearl & Gold Hoops', 33.00, 10.00],
-                    ['Rose Quartz Pendant Necklace', 39.00, 10.00],
-                    ['Aventurine Twist Ring', 28.00, 10.00],
-                    ['Tiger Eye Huggie Earrings', 24.00, 10.00],
-                    ['Amethyst Chain Bracelet', 31.00, 10.00],
-                    ['Jade Teardrop Necklace', 42.00, 15.00],
-                    ['Garnet Cluster Studs', 26.00, 10.00],
-                    ['Citrine Wave Bangle', 35.00, 15.00],
-                    ['Coral & Gold Ankle Chain', 18.00, 10.00],
-                    ['Agate Slice Pendant', 40.00, 10.00],
-                    ['Opal Crescent Earrings', 46.00, 10.00],
-                    ['Malachite Signet Ring', 33.00, 10.00],
-                    ['Carnelian Sun Necklace', 37.00, 10.00],
-                    ['Labradorite Charm Bracelet', 29.00, 10.00],
-                    ['Amazonite Drop Earrings', 26.00, 10.00],
-                    ['Smoky Quartz Chain Ring', 22.00, 10.00],
-                    ['Rhodonite Heart Pendant', 35.00, 10.00],
-                    ['Peridot Vine Anklet', 20.00, 10.00],
-                    ['Jasper Bohemian Cuff', 52.00, 15.00],
+                    ['Chevalière Soleil de Minuit', 22.00, 10.00],
+                    ['Manchette Lapis Lazuli', 35.00, 10.00],
+                    ['Créole Minuit Épurée', 25.00, 10.00],
+                    ['Sautoir Labradorite Miroir', 45.00, 10.00],
+                    ['Bague Double Onyx Noir Soleil', 28.00, 10.00],
+                    ['Duo Nacre et Onyx Noir', 36.00, 10.00],
+                    ['Turquoise Perlée Bohème', 27.00, 10.00],
+                    ['Malachite et Dorures', 40.00, 10.00],
                 ],
                 'days_ago' => 1,
             ],
@@ -1028,7 +1119,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => null,
                 'stripe_status' => null,
-                'items' => [['Hammered Gold Cuff', 48.00, 15.00]],
+                'items' => [['Manchette Malachite Verte', 35.00, 10.00]],
                 'days_ago' => 0,
             ],
             [
@@ -1045,7 +1136,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => null,
                 'stripe_status' => 'canceled',
-                'items' => [['Pearl & Gold Hoops', 33.00, 10.00]],
+                'items' => [['Créole Cristal Noir Classique', 25.00, 10.00]],
                 'days_ago' => 10,
             ],
             // --- Abandoned order test cases (pending, no payment initiated) ---
@@ -1064,7 +1155,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => null,
                 'stripe_status' => null,
-                'items' => [['Turquoise Stone Ring', 26.00, 10.00]],
+                'items' => [['Bague Fine Sodalite Bleu', 20.00, 10.00]],
                 'days_ago' => 3,
             ],
             // Pending 7 days ago, no PaymentIntent → cleaner SHOULD delete
@@ -1083,8 +1174,8 @@ class AppFixtures extends Fixture
                 'tracking' => null,
                 'stripe_status' => null,
                 'items' => [
-                    ['Lapis Lazuli Stud Earrings', 22.00, 10.00],
-                    ['Shell & Gold Anklet', 17.00, 10.00],
+                    ['Sodalite Cubique Pierre Douce', 29.00, 10.00],
+                    ['Bracelet Fine Chaîne Nocturne', 16.00, 10.00],
                 ],
                 'days_ago' => 7,
             ],
@@ -1104,7 +1195,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => 'US123456789EN',
                 'stripe_status' => 'succeeded',
-                'items' => [['Lapis Lazuli Stud Earrings', 22.00, 10.00]],
+                'items' => [['Amazonite Bleue Apaisante', 29.00, 10.00]],
                 'days_ago' => 18,
             ],
             // Delivered 25 days ago, NO testimonial → scheduler SHOULD send email (FR)
@@ -1123,8 +1214,8 @@ class AppFixtures extends Fixture
                 'tracking' => 'CF987654321FR',
                 'stripe_status' => 'succeeded',
                 'items' => [
-                    ['Coin Charm Necklace', 31.00, 10.00],
-                    ['Shell & Gold Anklet', 17.00, 10.00],
+                    ['Mandala Doré', 20.00, 10.00],
+                    ['Péridot Éclat Naturel', 27.00, 10.00],
                 ],
                 'days_ago' => 25,
             ],
@@ -1143,7 +1234,7 @@ class AppFixtures extends Fixture
 
                 'tracking' => 'CA555666777',
                 'stripe_status' => 'succeeded',
-                'items' => [['Moonstone Solitaire Ring', 44.00, 10.00]],
+                'items' => [['Bague Double Pierre de Lune', 28.00, 10.00]],
                 'days_ago' => 10,
             ],
         ];

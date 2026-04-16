@@ -143,6 +143,8 @@ alma-stella/
 │   ├── Command/
 │   │   ├── CleanExpiredReservationsCommand.php  # CLI: app:clean-expired-reservations
 │   │   ├── CleanAbandonedOrdersCommand.php      # CLI: app:clean-abandoned-orders
+│   │   ├── ImportCatalogueImagesCommand.php     # CLI: app:import-catalogue-images
+│   │   ├── ImportStoneImagesCommand.php         # CLI: app:import-stone-images
 │   │   ├── SendTestimonialRequestsCommand.php   # CLI: app:send-testimonial-requests
 │   │   └── VerifyPendingOrdersCommand.php       # CLI: app:verify-pending-orders
 │   └── Schedule.php                        # Symfony Scheduler provider (default)
@@ -560,7 +562,7 @@ class Reservation
 
 | Entity | Purpose |
 |---|---|
-| `ProductCategory` | Two-level hierarchy: root categories (Necklaces, Earrings, Bracelets, Rings, Anklets, Sets) with optional subcategories (Pendants, Chokers, etc.). Self-referencing `parent` ManyToOne. Products attach to leaf categories only. |
+| `ProductCategory` | Two-level hierarchy: 5 root categories (Rings, Earrings, Bracelets, Necklaces, Sets) with 32 subcategories from the official catalogue. Self-referencing `parent` ManyToOne. Products attach to leaf categories only. |
 | ~~`ProductImage`~~ | **Removed** — replaced by 3 VichUploader fields on `Product`: `thumbnail`, `wornPhoto`, `contextPhoto` |
 | `OrderItem` | Snapshot of product + price + bilingual name at order time |
 | `Admin` | Admin users — passwordless auth via magic link |

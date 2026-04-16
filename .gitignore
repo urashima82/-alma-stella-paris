@@ -51,3 +51,7 @@
 /public/uploads/products/*
 !/public/uploads/products/.gitkeep
 ###< uploads ###
+
+###> catalogue source data ###
+/docs/Catalogue/
+###< catalogue source data ###

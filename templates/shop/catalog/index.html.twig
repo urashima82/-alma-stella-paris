@@ -555,7 +555,7 @@
                         {% set current = pagination.currentPageNumber %}
                         {% set last = pagination.pageCount %}
                         {% set route = app.request.attributes.get('_route') %}
-                        {% set params = app.request.attributes.get('_route_params') %}
+                        {% set params = app.request.attributes.get('_route_params')|merge(app.request.query.all) %}
                         <nav class="mt-14 flex items-center justify-center gap-2" aria-label="Pagination">
                             {# Previous #}
                             <a href="{{ current > 1 ? path(route, params|merge({page: current - 1})) : '#' }}"
