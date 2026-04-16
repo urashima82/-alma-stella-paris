@@ -87,7 +87,6 @@
                                     {% if product.isNew() %}
                                         <span class="px-2 py-1 bg-alma-surface text-alma-text text-[10px] font-sans font-medium leading-none border border-alma-hover">{{ 'badge.new'|trans }}</span>
                                     {% endif %}
-                                    <span class="px-2 py-1 bg-alma-gold text-white text-[10px] font-sans font-medium leading-none">{{ 'badge.unique'|trans }}</span>
                                     {% set discount = discount_percent(product) %}
                                     {% if discount %}
                                         <span class="px-2 py-1 bg-red-600 text-white text-[10px] font-sans font-medium leading-none">-{{ discount }}%</span>

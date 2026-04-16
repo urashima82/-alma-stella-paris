@@ -348,6 +348,16 @@
                             <p>{{ 'product.materials_stones'|trans }}</p>
                             <p>{{ 'product.materials_daily'|trans }}</p>
                             <p>{{ 'product.materials_care'|trans }}</p>
+
+                            {% for stone in product.stones %}
+                                {% set stoneCare = app.request.locale == 'fr' ? stone.careFr : stone.care %}
+                                {% if stoneCare %}
+                                    <div class="mt-3 pt-3 border-t border-alma-hover/40">
+                                        <p class="font-medium text-alma-text mb-1">{{ stone|localized_name }}</p>
+                                        <p>{{ stoneCare }}</p>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                     </details>
                 </div>
