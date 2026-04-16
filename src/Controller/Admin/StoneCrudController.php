@@ -113,7 +113,13 @@ class StoneCrudController extends AbstractCrudController
         yield FormField::addFieldset('Image', 'fa fa-camera');
         yield TextField::new('imageFile', 'Photo de la pierre')
             ->setFormType(VichImageType::class)
-            ->setRequired(false);
+            ->setRequired(false)
+            ->setFormTypeOption('row_attr', [
+                'class' => 'field-image-crop',
+                'data-crop-ratio' => '1/1',
+                'data-crop-max-width' => '800',
+                'data-crop-max-height' => '800',
+            ]);
 
         yield FormField::addFieldset('Ordre', 'fa fa-sort');
         yield IntegerField::new('position', 'Position');
