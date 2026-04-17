@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
 use App\Entity\Stone;
+use App\Enum\VisualWorkflowStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -165,5 +166,22 @@ class ProductRepository extends ServiceEntityRepository
             ->setParameter('category', $categoryId)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * Resets products stuck in PendingVisuals back to Draft.
+     *
+     * @return int number of products reset
+     */
+    public function resetStuckPendingVisuals(): int
+    {
+        return (int) $this->createQueryBuilder('p')
+            ->update()
+            ->set('p.visualStatus', ':draft')
+            ->where('p.visualStatus = :pending')
+            ->setParameter('draft', VisualWorkflowStatus::Draft)
+            ->setParameter('pending', VisualWorkflowStatus::PendingVisuals)
+            ->getQuery()
+            ->execute();
     }
 }

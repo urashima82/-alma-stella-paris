@@ -39,7 +39,7 @@ use Vich\UploaderBundle\Form\Type\VichImageType;
 /** @extends AbstractCrudController<Product> */
 class ProductCrudController extends AbstractCrudController
 {
-    private const int VARIANTS_PER_TYPE = 3;
+    private const int VARIANTS_PER_TYPE = 1;
 
     public function __construct(
         private readonly MessageBusInterface $messageBus,
@@ -68,6 +68,10 @@ class ProductCrudController extends AbstractCrudController
             ->linkToUrl(static fn (Product $product): string => '/en/product/'.$product->getSlug())
             ->setHtmlAttributes(['target' => '_blank']);
 
+        $manageSourcePhotos = Action::new('manageSourcePhotos', 'Photos sources', 'fa fa-camera')
+            ->linkToCrudAction('manageSourcePhotos')
+            ->setCssClass('btn btn-secondary btn-sm');
+
         $generateVisuals = Action::new('generateVisuals', 'Générer les visuels', 'fa fa-wand-magic-sparkles')
             ->linkToCrudAction('generateVisuals')
             ->setCssClass('btn btn-warning btn-sm')
@@ -81,8 +85,10 @@ class ProductCrudController extends AbstractCrudController
         return $actions
             ->add(Crud::PAGE_INDEX, $viewOnSite)
             ->add(Crud::PAGE_EDIT, $viewOnSite)
+            ->add(Crud::PAGE_INDEX, $manageSourcePhotos)
             ->add(Crud::PAGE_INDEX, $generateVisuals)
             ->add(Crud::PAGE_INDEX, $viewVisuals)
+            ->add(Crud::PAGE_EDIT, $manageSourcePhotos)
             ->add(Crud::PAGE_EDIT, $generateVisuals)
             ->add(Crud::PAGE_EDIT, $viewVisuals);
     }
@@ -267,6 +273,23 @@ class ProductCrudController extends AbstractCrudController
 
     /** @param AdminContext<Product> $context */
     #[AdminRoute]
+    public function manageSourcePhotos(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        return $this->redirect(
+            $this->adminUrlGenerator
+                ->setController(SourcePhotoCrudController::class)
+                ->setAction(Action::INDEX)
+                ->set('filters[product][comparison]', '=')
+                ->set('filters[product][value]', $product->getId())
+                ->generateUrl()
+        );
+    }
+
+    /** @param AdminContext<Product> $context */
+    #[AdminRoute]
     public function generateVisuals(AdminContext $context): Response
     {
         /** @var Product $product */
@@ -274,6 +297,17 @@ class ProductCrudController extends AbstractCrudController
 
         if ($product->getSourcePhotos()->isEmpty()) {
             $this->addFlash('danger', 'Aucune photo source. Uploadez des photos avant de générer les visuels.');
+
+            return $this->redirect(
+                $this->adminUrlGenerator
+                    ->setController(self::class)
+                    ->setAction(Action::INDEX)
+                    ->generateUrl()
+            );
+        }
+
+        if ($product->getVisualStatus() === VisualWorkflowStatus::PendingVisuals) {
+            $this->addFlash('warning', 'Une génération est déjà en cours pour ce produit. Veuillez patienter.');
 
             return $this->redirect(
                 $this->adminUrlGenerator

@@ -9,7 +9,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class GeminiImageClient
 {
-    private const string ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-image-generation:generateContent';
+    private const string ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
     private const int MAX_RETRIES = 3;
     private const array BACKOFF_SECONDS = [2, 4, 8];
 
@@ -87,6 +87,7 @@ final class GeminiImageClient
 
         $parts = $candidates[0]['content']['parts'] ?? [];
 
+        $textParts = [];
         foreach ($parts as $part) {
             if (isset($part['inlineData'])) {
                 return new GeminiResponse(
@@ -95,9 +96,15 @@ final class GeminiImageClient
                     requestId: $data['modelVersion'] ?? null,
                 );
             }
+            if (isset($part['text'])) {
+                $textParts[] = $part['text'];
+            }
         }
 
-        throw new GeminiApiException('No image data found in Gemini response');
+        $detail = $textParts !== [] ? \implode(' ', $textParts) : 'No parts in response';
+        $finishReason = $candidates[0]['finishReason'] ?? 'unknown';
+
+        throw new GeminiApiException(\sprintf('No image generated (reason: %s): %s', $finishReason, \substr($detail, 0, 500)));
     }
 
     /**

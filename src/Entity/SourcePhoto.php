@@ -7,6 +7,7 @@ namespace App\Entity;
 use App\Enum\PhotoAngle;
 use App\Repository\SourcePhotoRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 #[ORM\Entity(repositoryClass: SourcePhotoRepository::class)]
 class SourcePhoto
@@ -28,6 +29,9 @@ class SourcePhoto
 
     #[ORM\Column(length: 20, enumType: PhotoAngle::class)]
     private PhotoAngle $angle = PhotoAngle::Front;
+
+    /** Virtual property for EasyAdmin file upload — not persisted. */
+    private ?UploadedFile $sourceFile = null;
 
     public function __toString(): string
     {
@@ -83,6 +87,18 @@ class SourcePhoto
     public function setAngle(PhotoAngle $angle): static
     {
         $this->angle = $angle;
+
+        return $this;
+    }
+
+    public function getSourceFile(): ?UploadedFile
+    {
+        return $this->sourceFile;
+    }
+
+    public function setSourceFile(?UploadedFile $sourceFile): static
+    {
+        $this->sourceFile = $sourceFile;
 
         return $this;
     }

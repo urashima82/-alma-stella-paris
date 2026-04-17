@@ -142,6 +142,7 @@ class DashboardController extends AbstractDashboardController
         }
 
         yield MenuItem::section('Génération IA');
+        yield MenuItem::linkTo(SourcePhotoCrudController::class, 'Photos sources', 'fa fa-camera');
         yield MenuItem::linkTo(CategoryVisualPromptCrudController::class, 'Prompts visuels', 'fa fa-pen-fancy');
         yield MenuItem::linkTo(GeneratedVisualCrudController::class, $visualsLabel, 'fa fa-images');
         yield MenuItem::section('Ventes');
@@ -154,6 +155,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Réglages');
         yield MenuItem::linkTo(SiteSettingsCrudController::class, 'Paramètres du site', 'fa fa-cog');
         yield MenuItem::linkTo(AdminCrudController::class, 'Administrateurs', 'fa fa-users');
+        yield MenuItem::linkTo(MessengerMessageCrudController::class, 'File d\'attente', 'fa fa-inbox');
         yield MenuItem::section('');
         yield MenuItem::linkToUrl('Retour au site', 'fa fa-arrow-left', '/');
         yield MenuItem::linkToLogout('Déconnexion', 'fa fa-sign-out');

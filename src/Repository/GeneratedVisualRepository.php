@@ -48,7 +48,7 @@ class GeneratedVisualRepository extends ServiceEntityRepository
      */
     public function countByStatus(): array
     {
-        /** @var array<int, array{status: string, count: string}> $rows */
+        /** @var array<int, array{status: VisualStatus, count: string}> $rows */
         $rows = $this->createQueryBuilder('v')
             ->select('v.status AS status, COUNT(v.id) AS count')
             ->groupBy('v.status')
@@ -57,7 +57,7 @@ class GeneratedVisualRepository extends ServiceEntityRepository
 
         $counts = [];
         foreach ($rows as $row) {
-            $counts[$row['status']] = (int) $row['count'];
+            $counts[$row['status']->value] = (int) $row['count'];
         }
 
         return $counts;
@@ -77,6 +77,20 @@ class GeneratedVisualRepository extends ServiceEntityRepository
             ->setParameter('status', VisualStatus::PendingReview)
             ->getQuery()
             ->getResult();
+    }
+
+    public function hasPendingGeneration(Product $product): bool
+    {
+        $count = (int) $this->createQueryBuilder('v')
+            ->select('COUNT(v.id)')
+            ->andWhere('v.product = :product')
+            ->andWhere('v.status = :status')
+            ->setParameter('product', $product)
+            ->setParameter('status', VisualStatus::Generating)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $count > 0;
     }
 
     public function hasApprovedForAllTypes(Product $product): bool
