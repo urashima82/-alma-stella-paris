@@ -52,6 +52,11 @@
 !/public/uploads/products/.gitkeep
 ###< uploads ###
 
+###> flysystem storage ###
+/var/storage/products/*
+!/var/storage/products/.gitkeep
+###< flysystem storage ###
+
 ###> catalogue source data ###
 /docs/Catalogue/
 ###< catalogue source data ###
