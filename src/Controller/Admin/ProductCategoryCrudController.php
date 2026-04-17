@@ -88,6 +88,17 @@ class ProductCategoryCrudController extends AbstractCrudController
         yield IntegerField::new('position', 'Ordre')
             ->onlyOnForms();
 
+        yield TextareaField::new('preservationInstructions', 'Instructions de préservation (EN)')
+            ->onlyOnForms()
+            ->setRequired(false)
+            ->setNumOfRows(4)
+            ->setHelp('Instructions en anglais pour l\'IA : quels éléments du bijou préserver absolument lors de la génération.');
+        yield TextareaField::new('specificFocus', 'Focus spécifique (EN)')
+            ->onlyOnForms()
+            ->setRequired(false)
+            ->setNumOfRows(3)
+            ->setHelp('Instructions en anglais : éléments à mettre en avant pour cette catégorie.');
+
         yield IntegerField::new('totalPublishedProductCount', 'Produits publiés')
             ->hideOnForm()
             ->setTemplatePath('admin/field/order_count.html.twig');

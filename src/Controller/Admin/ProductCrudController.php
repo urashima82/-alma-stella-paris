@@ -7,11 +7,16 @@ namespace App\Controller\Admin;
 use App\Admin\Filter\AvailableInFilter;
 use App\Entity\Product;
 use App\Enum\ShippingTier;
+use App\Enum\VisualType;
+use App\Enum\VisualWorkflowStatus;
+use App\Message\GenerateVisualMessage;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -25,11 +30,23 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\SlugField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Vich\UploaderBundle\Form\Type\VichImageType;
 
 /** @extends AbstractCrudController<Product> */
 class ProductCrudController extends AbstractCrudController
 {
+    private const int VARIANTS_PER_TYPE = 3;
+
+    public function __construct(
+        private readonly MessageBusInterface $messageBus,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly AdminUrlGenerator $adminUrlGenerator,
+    ) {
+    }
+
     public static function getEntityFqcn(): string
     {
         return Product::class;
@@ -50,9 +67,23 @@ class ProductCrudController extends AbstractCrudController
             ->linkToUrl(static fn (Product $product): string => '/en/product/'.$product->getSlug())
             ->setHtmlAttributes(['target' => '_blank']);
 
+        $generateVisuals = Action::new('generateVisuals', 'Générer les visuels', 'fa fa-wand-magic-sparkles')
+            ->linkToCrudAction('generateVisuals')
+            ->setCssClass('btn btn-warning btn-sm')
+            ->displayIf(static fn (Product $p): bool => $p->getSourcePhotos()->count() > 0);
+
+        $viewVisuals = Action::new('viewVisuals', 'Voir les visuels', 'fa fa-images')
+            ->linkToCrudAction('viewVisuals')
+            ->setCssClass('btn btn-info btn-sm')
+            ->displayIf(static fn (Product $p): bool => $p->getGeneratedVisuals()->count() > 0);
+
         return $actions
             ->add(Crud::PAGE_INDEX, $viewOnSite)
-            ->add(Crud::PAGE_EDIT, $viewOnSite);
+            ->add(Crud::PAGE_EDIT, $viewOnSite)
+            ->add(Crud::PAGE_INDEX, $generateVisuals)
+            ->add(Crud::PAGE_INDEX, $viewVisuals)
+            ->add(Crud::PAGE_EDIT, $generateVisuals)
+            ->add(Crud::PAGE_EDIT, $viewVisuals);
     }
 
     public function configureFilters(Filters $filters): Filters
@@ -208,6 +239,22 @@ class ProductCrudController extends AbstractCrudController
         yield AssociationField::new('relatedProducts', 'Produits associés')
             ->setFormTypeOption('by_reference', false);
 
+        yield FormField::addFieldset('Génération IA', 'fa fa-wand-magic-sparkles')
+            ->collapsible();
+        yield ChoiceField::new('visualStatus', 'Statut visuels')
+            ->setChoices([
+                VisualWorkflowStatus::Draft->label() => VisualWorkflowStatus::Draft,
+                VisualWorkflowStatus::PendingVisuals->label() => VisualWorkflowStatus::PendingVisuals,
+                VisualWorkflowStatus::ReadyForReview->label() => VisualWorkflowStatus::ReadyForReview,
+                VisualWorkflowStatus::VisualsApproved->label() => VisualWorkflowStatus::VisualsApproved,
+            ])
+            ->renderAsBadges([
+                VisualWorkflowStatus::Draft->value => 'secondary',
+                VisualWorkflowStatus::PendingVisuals->value => 'primary',
+                VisualWorkflowStatus::ReadyForReview->value => 'warning',
+                VisualWorkflowStatus::VisualsApproved->value => 'success',
+            ]);
+
         yield FormField::addFieldset('Informations', 'fa fa-clock')
             ->collapsible()
             ->renderCollapsed();
@@ -215,5 +262,64 @@ class ProductCrudController extends AbstractCrudController
             ->setFormTypeOption('disabled', true);
         yield DateTimeField::new('updatedAt', 'Modifié le')
             ->setFormTypeOption('disabled', true);
+    }
+
+    /** @param AdminContext<Product> $context */
+    public function generateVisuals(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        if ($product->getSourcePhotos()->isEmpty()) {
+            $this->addFlash('danger', 'Aucune photo source. Uploadez des photos avant de générer les visuels.');
+
+            return $this->redirect(
+                $this->adminUrlGenerator
+                    ->setController(self::class)
+                    ->setAction(Action::INDEX)
+                    ->generateUrl()
+            );
+        }
+
+        $dispatched = 0;
+        foreach (VisualType::cases() as $type) {
+            for ($variant = 1; $variant <= self::VARIANTS_PER_TYPE; ++$variant) {
+                $this->messageBus->dispatch(
+                    new GenerateVisualMessage($product->getId(), $type, $variant)
+                );
+                ++$dispatched;
+            }
+        }
+
+        $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', \sprintf(
+            '%d visuels en cours de génération pour « %s ».',
+            $dispatched,
+            $product->getNameFr() ?: $product->getName(),
+        ));
+
+        return $this->redirect(
+            $this->adminUrlGenerator
+                ->setController(self::class)
+                ->setAction(Action::INDEX)
+                ->generateUrl()
+        );
+    }
+
+    /** @param AdminContext<Product> $context */
+    public function viewVisuals(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        return $this->redirect(
+            $this->adminUrlGenerator
+                ->setController(GeneratedVisualCrudController::class)
+                ->setAction(Action::INDEX)
+                ->set('filters[product]', $product->getId())
+                ->generateUrl()
+        );
     }
 }

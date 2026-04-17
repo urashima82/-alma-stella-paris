@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Controller\Admin;
 
 use App\Enum\OrderStatus;
+use App\Enum\VisualStatus;
 use App\Repository\ContactMessageRepository;
+use App\Repository\GeneratedVisualRepository;
 use App\Repository\OrderRepository;
 use App\Repository\ProductRepository;
 use App\Repository\SiteSettingsRepository;
@@ -31,6 +33,7 @@ class DashboardController extends AbstractDashboardController
         private readonly ContactMessageRepository $contactMessageRepository,
         private readonly TestimonialRepository $testimonialRepository,
         private readonly SiteSettingsRepository $siteSettingsRepository,
+        private readonly GeneratedVisualRepository $generatedVisualRepository,
     ) {
     }
 
@@ -131,6 +134,16 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(ProductCategoryCrudController::class, 'Catégories', 'fa fa-tags');
         yield MenuItem::linkTo(StoneCrudController::class, 'Pierres', 'fa fa-diamond');
         yield MenuItem::linkTo(ShippingSettingsCrudController::class, 'Frais de port', 'fa fa-truck');
+        $statusCounts = $this->generatedVisualRepository->countByStatus();
+        $pendingVisuals = $statusCounts[VisualStatus::PendingReview->value] ?? 0;
+        $visualsLabel = 'Visuels générés';
+        if ($pendingVisuals > 0) {
+            $visualsLabel .= \sprintf(' (%d)', $pendingVisuals);
+        }
+
+        yield MenuItem::section('Génération IA');
+        yield MenuItem::linkTo(CategoryVisualPromptCrudController::class, 'Prompts visuels', 'fa fa-pen-fancy');
+        yield MenuItem::linkTo(GeneratedVisualCrudController::class, $visualsLabel, 'fa fa-images');
         yield MenuItem::section('Ventes');
         yield MenuItem::linkTo(OrderCrudController::class, $ordersLabel, 'fa fa-shopping-bag');
         yield MenuItem::linkTo(CustomerCrudController::class, 'Clients', 'fa fa-user');

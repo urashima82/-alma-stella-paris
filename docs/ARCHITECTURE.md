@@ -59,7 +59,9 @@ alma-stella/
 │   │   │   ├── TestimonialCrudController.php    # Testimonial moderation (pending/approved/rejected)
 │   │   │   ├── CategoryReorderController.php    # Drag & drop category reordering API
 │   │   │   ├── ShippingSettingsCrudController.php # Shipping tier cost overrides
-│   │   │   └── SiteSettingsCrudController.php    # Site-wide settings (active collection, maintenance mode)
+│   │   │   ├── SiteSettingsCrudController.php    # Site-wide settings (active collection, maintenance mode)
+│   │   │   ├── CategoryVisualPromptCrudController.php # AI prompt management per category × visual type
+│   │   │   └── GeneratedVisualCrudController.php      # AI visual validation (approve/reject/regenerate)
 │   │   ├── LocaleRedirectController.php  # Root / → /{locale}/ redirect
 │   │   ├── SitemapController.php         # /sitemap.xml — auto-generated XML sitemap (no locale prefix)
 │   │   └── Shop/             # Public-facing controllers (locale-prefixed)
@@ -820,6 +822,13 @@ Three channels, three integration levels:
 - Store structure: `{productId}/sources/` and `{productId}/generated/`
 - Methods: `storeSourcePhoto`, `storeGeneratedVisual`, `read`, `delete`, `getPublicUrl`
 - Local adapter: `var/storage/products/` (configurable via `IMAGE_STORAGE_PATH`)
+
+### VisualApprovalHandler
+
+- Copies approved AI-generated visuals from Flysystem to VichUploader (`public/uploads/products/`)
+- Processes images via `ImageProcessor` (WebP conversion, crop to 4:5 ratio)
+- Maps `VisualType` to Product fields: Vignette → `thumbnail`, Worn → `wornPhoto`, Lifestyle → `contextPhoto`
+- Called from `GeneratedVisualCrudController::approveVisual()` action
 
 ### GenerateVisualHandler (Messenger)
 

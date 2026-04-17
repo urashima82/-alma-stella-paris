@@ -1138,12 +1138,12 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 - [x] Config Messenger async + Rate Limiter + .env
 
 ### Phase 3 — Back-office EasyAdmin
-- [ ] CategoryVisualPromptCrudController (CRUD prompts visuels)
-- [ ] GeneratedVisualCrudController (validation approve/reject/regenerate)
-- [ ] VisualApprovalHandler (copie Flysystem → VichUploader)
-- [ ] Enrichir ProductCrudController (upload SourcePhoto, bouton Générer, visuels)
-- [ ] Enrichir ProductCategoryCrudController (champs IA)
-- [ ] Section "Génération IA" dans le menu admin
+- [x] CategoryVisualPromptCrudController (CRUD prompts visuels)
+- [x] GeneratedVisualCrudController (validation approve/reject/regenerate)
+- [x] VisualApprovalHandler (copie Flysystem → VichUploader)
+- [x] Enrichir ProductCrudController (upload SourcePhoto, bouton Générer, visuels)
+- [x] Enrichir ProductCategoryCrudController (champs IA)
+- [x] Section "Génération IA" dans le menu admin
 
 ### Phase 4 — Import adapté + finitions
 - [ ] Adapter ImportCatalogueImagesCommand (SourcePhoto via Flysystem)
