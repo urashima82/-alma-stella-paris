@@ -12,6 +12,7 @@ use App\Enum\VisualWorkflowStatus;
 use App\Message\GenerateVisualMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -265,6 +266,7 @@ class ProductCrudController extends AbstractCrudController
     }
 
     /** @param AdminContext<Product> $context */
+    #[AdminRoute]
     public function generateVisuals(AdminContext $context): Response
     {
         /** @var Product $product */
@@ -309,6 +311,7 @@ class ProductCrudController extends AbstractCrudController
     }
 
     /** @param AdminContext<Product> $context */
+    #[AdminRoute]
     public function viewVisuals(AdminContext $context): Response
     {
         /** @var Product $product */

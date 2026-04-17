@@ -12,6 +12,7 @@ use App\Message\GenerateVisualMessage;
 use App\Repository\GeneratedVisualRepository;
 use App\Service\Visual\VisualApprovalHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminRoute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -150,6 +151,7 @@ class GeneratedVisualCrudController extends AbstractCrudController
     }
 
     /** @param AdminContext<GeneratedVisual> $context */
+    #[AdminRoute]
     public function approveVisual(AdminContext $context): Response
     {
         /** @var GeneratedVisual $visual */
@@ -176,6 +178,7 @@ class GeneratedVisualCrudController extends AbstractCrudController
     }
 
     /** @param AdminContext<GeneratedVisual> $context */
+    #[AdminRoute]
     public function rejectVisual(AdminContext $context): Response
     {
         /** @var GeneratedVisual $visual */
@@ -195,6 +198,7 @@ class GeneratedVisualCrudController extends AbstractCrudController
     }
 
     /** @param AdminContext<GeneratedVisual> $context */
+    #[AdminRoute]
     public function regenerateVisual(AdminContext $context): Response
     {
         /** @var GeneratedVisual $visual */
