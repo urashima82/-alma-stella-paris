@@ -1105,6 +1105,67 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 
 ---
 
+## Milestone 16 — Catalogue IA (génération visuels)
+*Estimated effort: 20-25h*
+
+> **Génération automatique de visuels produits par IA (Gemini 2.5 Flash Image).**
+> La gérante uploade des photos smartphone "brutes" d'un bijou et obtient
+> 3 visuels professionnels (vignette, porté, lifestyle) × 3 variantes chacun.
+> Validation humaine obligatoire avant publication.
+>
+> **Specs complètes :** `docs/CATALOGUE-IA-SPECS.md`
+> **Audit :** `docs/CATALOGUE_IA_AUDIT.md`
+> **Plan d'adaptation :** `docs/CATALOGUE_IA_PLAN.md`
+>
+> Cette feature est découpée en **4 phases** (voir plan d'adaptation).
+> Chaque phase se termine par un commit et un résumé dans `docs/milestones/`.
+
+### Phase 1 — Modèle de données
+- [ ] 4 enums (VisualType, VisualStatus, VisualWorkflowStatus, PhotoAngle)
+- [ ] 4 entités (CategoryVisualPrompt, SourcePhoto, GeneratedVisual, GeminiUsageLog)
+- [ ] Enrichir ProductCategory (preservationInstructions, specificFocus)
+- [ ] Enrichir Product (visualStatus, relations SourcePhoto/GeneratedVisual)
+- [ ] Installer + configurer `league/flysystem-bundle`
+- [ ] Modifier migration existante, recréer environnement DDEV
+- [ ] Fixtures : CategoryVisualPromptFixtures (12 prompts)
+
+### Phase 2 — Cerveau IA + Client Gemini + Queue
+- [ ] Services Prompt (PromptBuilder, BrandStyleProvider, TechnicalSpecsProvider, PromptFallbackProvider)
+- [ ] Client Gemini (GeminiImageClient, GeminiResponse, GeminiApiException)
+- [ ] BudgetGuard (contrôle budget mensuel)
+- [ ] ImageStorage (Flysystem)
+- [ ] Message + Handler (GenerateVisualMessage, GenerateVisualHandler)
+- [ ] Config Messenger async + Rate Limiter + .env
+
+### Phase 3 — Back-office EasyAdmin
+- [ ] CategoryVisualPromptCrudController (CRUD prompts visuels)
+- [ ] GeneratedVisualCrudController (validation approve/reject/regenerate)
+- [ ] VisualApprovalHandler (copie Flysystem → VichUploader)
+- [ ] Enrichir ProductCrudController (upload SourcePhoto, bouton Générer, visuels)
+- [ ] Enrichir ProductCategoryCrudController (champs IA)
+- [ ] Section "Génération IA" dans le menu admin
+
+### Phase 4 — Import adapté + finitions
+- [ ] Adapter ImportCatalogueImagesCommand (SourcePhoto via Flysystem)
+- [ ] Vérification end-to-end complète
+- [ ] Test pipeline : fixtures → import → génération → approbation
+
+### Definition of Done
+- Upload de photos sources via ProductCrud → SourcePhoto créées en BDD + Flysystem
+- Bouton "Générer" dispatche 9 messages Messenger (3 types × 3 variantes)
+- Worker consomme les messages → appel Gemini → GeneratedVisual créés
+- Interface de validation : approve → copie vers VichUploader, reject, regenerate
+- BudgetGuard bloque si budget mensuel dépassé
+- Rate limiter respecte 15 req/min
+- Prompts éditables dans EasyAdmin par la gérante
+- Fallback prompt si catégorie non configurée
+- Import images existantes → SourcePhoto (une seule commande)
+- PHPStan niveau 6 passe, CS Fixer clean
+
+---
+
+---
+
 ## V2 backlog (post-launch, not in current scope)
 
 - ~~Wishlist persistence (tied to customer account)~~ ✅ Implemented
