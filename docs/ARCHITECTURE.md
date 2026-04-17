@@ -791,6 +791,45 @@ Three channels, three integration levels:
 | TikTok Shop | Full API — creates/updates product in catalog | EasyAdmin action button |
 | Instagram | Deep link — opens mobile app with pre-filled caption | EasyAdmin generates link |
 
+### PromptBuilder (AI Visual Generation)
+
+- Composes full Gemini prompts from multiple fragments: product metadata, brand style, preservation instructions, category framing/staging, technical specs
+- Uses `CategoryVisualPromptRepository` to find the active prompt for a category × visual type
+- Falls back to `PromptFallbackProvider` (in-memory `CategoryVisualPrompt`, version 0) if no prompt configured
+- Returns `PromptResult` DTO: content, categoryPromptVersion, usedFallback flag
+- Supporting providers: `BrandStyleProvider` (brand identity), `TechnicalSpecsProvider` (4:5 ratio, 819×1024)
+
+### GeminiImageClient
+
+- HTTP client for Gemini 2.5 Flash Image API (`generateContent` endpoint)
+- Sends prompt text + source photos (base64) → receives generated image (base64)
+- Retry with exponential backoff on HTTP 429 (2s, 4s, 8s — max 3 retries)
+- Returns `GeminiResponse` DTO (imageData, mimeType, requestId)
+- Throws `GeminiApiException` on definitive errors
+
+### BudgetGuard
+
+- Monthly spending control for Gemini API calls
+- `ensureBudgetAvailable()` — throws `BudgetExceededException` if monthly limit reached
+- `recordCall(float $costUsd)` — persists a `GeminiUsageLog` entry
+- Budget threshold from env: `GEMINI_MONTHLY_BUDGET_USD` (default: 30)
+
+### ImageStorage (Flysystem)
+
+- Abstraction for source photo and generated visual storage via Flysystem
+- Store structure: `{productId}/sources/` and `{productId}/generated/`
+- Methods: `storeSourcePhoto`, `storeGeneratedVisual`, `read`, `delete`, `getPublicUrl`
+- Local adapter: `var/storage/products/` (configurable via `IMAGE_STORAGE_PATH`)
+
+### GenerateVisualHandler (Messenger)
+
+- Async message handler for `GenerateVisualMessage` (dispatched via `gemini_async` transport)
+- Pipeline: rate limit → budget check → load product + sources → build prompt → call Gemini → store image → persist `GeneratedVisual` (status: `PendingReview`)
+- On failure: creates `GeneratedVisual` with status `Failed` + error message
+- Checks if all 9 variants generated → transitions product to `ReadyForReview`
+- Rate limited: 15 req/min via Symfony RateLimiter (`gemini_api` policy)
+- Retry strategy: 2 retries, 5s initial delay, 2× multiplier, 30s max
+
 ### AbandonedOrderCleaner
 
 - Cleans up stale pending orders (status `Pending`, older than configurable threshold)

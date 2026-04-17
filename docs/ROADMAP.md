@@ -1130,12 +1130,12 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 - [x] Fixtures : CategoryVisualPromptFixtures (12 prompts)
 
 ### Phase 2 — Cerveau IA + Client Gemini + Queue
-- [ ] Services Prompt (PromptBuilder, BrandStyleProvider, TechnicalSpecsProvider, PromptFallbackProvider)
-- [ ] Client Gemini (GeminiImageClient, GeminiResponse, GeminiApiException)
-- [ ] BudgetGuard (contrôle budget mensuel)
-- [ ] ImageStorage (Flysystem)
-- [ ] Message + Handler (GenerateVisualMessage, GenerateVisualHandler)
-- [ ] Config Messenger async + Rate Limiter + .env
+- [x] Services Prompt (PromptBuilder, BrandStyleProvider, TechnicalSpecsProvider, PromptFallbackProvider)
+- [x] Client Gemini (GeminiImageClient, GeminiResponse, GeminiApiException)
+- [x] BudgetGuard (contrôle budget mensuel)
+- [x] ImageStorage (Flysystem)
+- [x] Message + Handler (GenerateVisualMessage, GenerateVisualHandler)
+- [x] Config Messenger async + Rate Limiter + .env
 
 ### Phase 3 — Back-office EasyAdmin
 - [ ] CategoryVisualPromptCrudController (CRUD prompts visuels)

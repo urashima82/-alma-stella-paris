@@ -12,6 +12,8 @@ parameters:
     turnstile.site_key: '%env(TURNSTILE_SITE_KEY)%'
     turnstile.secret_key: '%env(TURNSTILE_SECRET_KEY)%'
     behold.feed_id: '%env(BEHOLD_FEED_ID)%'
+    gemini.api_key: '%env(GEMINI_API_KEY)%'
+    gemini.monthly_budget_usd: '%env(float:GEMINI_MONTHLY_BUDGET_USD)%'
 
 services:
     # default configuration for services in *this* file
@@ -27,6 +29,8 @@ services:
             string $turnstileSiteKey: '%turnstile.site_key%'
             string $turnstileSecretKey: '%turnstile.secret_key%'
             string $beholdFeedId: '%behold.feed_id%'
+            string $geminiApiKey: '%gemini.api_key%'
+            float $monthlyBudgetUsd: '%gemini.monthly_budget_usd%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name

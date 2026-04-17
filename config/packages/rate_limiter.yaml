@@ -16,3 +16,7 @@ framework:
             policy: fixed_window
             limit: 10
             interval: '15 minutes'
+        gemini_api:
+            policy: token_bucket
+            limit: 15
+            rate: { interval: '1 minute', amount: 15 }
