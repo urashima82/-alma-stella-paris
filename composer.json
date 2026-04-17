@@ -15,6 +15,7 @@
         "gedmo/doctrine-extensions": "^3.22",
         "intervention/image": "^4.0.1",
         "knplabs/knp-paginator-bundle": "^6.10",
+        "league/flysystem-bundle": "^3.7",
         "stof/doctrine-extensions-bundle": "^1.15",
         "stripe/stripe-php": "^20.0",
         "symfony/apache-pack": ">=1.0.1",

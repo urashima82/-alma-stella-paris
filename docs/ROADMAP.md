@@ -1121,13 +1121,13 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 > Chaque phase se termine par un commit et un résumé dans `docs/milestones/`.
 
 ### Phase 1 — Modèle de données
-- [ ] 4 enums (VisualType, VisualStatus, VisualWorkflowStatus, PhotoAngle)
-- [ ] 4 entités (CategoryVisualPrompt, SourcePhoto, GeneratedVisual, GeminiUsageLog)
-- [ ] Enrichir ProductCategory (preservationInstructions, specificFocus)
-- [ ] Enrichir Product (visualStatus, relations SourcePhoto/GeneratedVisual)
-- [ ] Installer + configurer `league/flysystem-bundle`
-- [ ] Modifier migration existante, recréer environnement DDEV
-- [ ] Fixtures : CategoryVisualPromptFixtures (12 prompts)
+- [x] 4 enums (VisualType, VisualStatus, VisualWorkflowStatus, PhotoAngle)
+- [x] 4 entités (CategoryVisualPrompt, SourcePhoto, GeneratedVisual, GeminiUsageLog)
+- [x] Enrichir ProductCategory (preservationInstructions, specificFocus)
+- [x] Enrichir Product (visualStatus, relations SourcePhoto/GeneratedVisual)
+- [x] Installer + configurer `league/flysystem-bundle`
+- [x] Modifier migration existante, recréer environnement DDEV
+- [x] Fixtures : CategoryVisualPromptFixtures (12 prompts)
 
 ### Phase 2 — Cerveau IA + Client Gemini + Queue
 - [ ] Services Prompt (PromptBuilder, BrandStyleProvider, TechnicalSpecsProvider, PromptFallbackProvider)

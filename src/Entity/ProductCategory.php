@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\VisualType;
 use App\Repository\ProductCategoryRepository;
 use App\Validator\MaxCategoryDepth;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\String\Slugger\AsciiSlugger;
@@ -57,10 +59,21 @@ class ProductCategory
     #[ORM\OneToMany(targetEntity: Product::class, mappedBy: 'category')]
     private Collection $products;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $preservationInstructions = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $specificFocus = null;
+
+    /** @var Collection<int, CategoryVisualPrompt> */
+    #[ORM\OneToMany(targetEntity: CategoryVisualPrompt::class, mappedBy: 'category', cascade: ['persist'])]
+    private Collection $visualPrompts;
+
     public function __construct()
     {
         $this->children = new ArrayCollection();
         $this->products = new ArrayCollection();
+        $this->visualPrompts = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -223,6 +236,73 @@ class ProductCategory
     public function isRoot(): bool
     {
         return $this->parent === null;
+    }
+
+    public function getPreservationInstructions(): ?string
+    {
+        return $this->preservationInstructions;
+    }
+
+    public function setPreservationInstructions(?string $preservationInstructions): static
+    {
+        $this->preservationInstructions = $preservationInstructions;
+
+        return $this;
+    }
+
+    public function getSpecificFocus(): ?string
+    {
+        return $this->specificFocus;
+    }
+
+    public function setSpecificFocus(?string $specificFocus): static
+    {
+        $this->specificFocus = $specificFocus;
+
+        return $this;
+    }
+
+    /** @return Collection<int, CategoryVisualPrompt> */
+    public function getVisualPrompts(): Collection
+    {
+        return $this->visualPrompts;
+    }
+
+    public function addVisualPrompt(CategoryVisualPrompt $prompt): static
+    {
+        if (!$this->visualPrompts->contains($prompt)) {
+            $this->visualPrompts->add($prompt);
+            $prompt->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVisualPrompt(CategoryVisualPrompt $prompt): static
+    {
+        if ($this->visualPrompts->removeElement($prompt)) {
+            if ($prompt->getCategory() === $this) {
+                $prompt->setCategory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getVisualPromptFor(VisualType $type): ?CategoryVisualPrompt
+    {
+        foreach ($this->visualPrompts as $prompt) {
+            if ($prompt->getVisualType() === $type && $prompt->isActive()) {
+                return $prompt;
+            }
+        }
+
+        return null;
+    }
+
+    public function hasVisualPromptFor(VisualType $type): bool
+    {
+        return $this->getVisualPromptFor($type) !== null;
     }
 
     public function getPublishedProductCount(): int

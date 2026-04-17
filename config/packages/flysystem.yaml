@@ -1,0 +1,6 @@
+flysystem:
+    storages:
+        default.storage:
+            adapter: 'local'
+            options:
+                directory: '%env(IMAGE_STORAGE_PATH)%'

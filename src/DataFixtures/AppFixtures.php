@@ -105,6 +105,7 @@ class AppFixtures extends Fixture
             $category->setDescriptionFr($descriptionFr);
             $manager->persist($category);
             $categories[$name] = $category;
+            $this->addReference('category-'.$name, $category);
         }
 
         // Subcategories: [name, nameFr, csvSubcategory, slugFr, position, parentKey, description, descriptionFr]

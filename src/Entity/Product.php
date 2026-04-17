@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\ShippingTier;
+use App\Enum\VisualStatus;
+use App\Enum\VisualType;
+use App\Enum\VisualWorkflowStatus;
 use App\Repository\ProductRepository;
 use App\Validator\LeafCategory;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -108,6 +111,19 @@ class Product
     #[ORM\JoinTable(name: 'product_stone')]
     private Collection $stones;
 
+    #[ORM\Column(length: 30, enumType: VisualWorkflowStatus::class)]
+    private VisualWorkflowStatus $visualStatus = VisualWorkflowStatus::Draft;
+
+    /** @var Collection<int, SourcePhoto> */
+    #[ORM\OneToMany(targetEntity: SourcePhoto::class, mappedBy: 'product', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    private Collection $sourcePhotos;
+
+    /** @var Collection<int, GeneratedVisual> */
+    #[ORM\OneToMany(targetEntity: GeneratedVisual::class, mappedBy: 'product', cascade: ['persist', 'remove'])]
+    #[ORM\OrderBy(['type' => 'ASC', 'variant' => 'ASC'])]
+    private Collection $generatedVisuals;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -118,6 +134,8 @@ class Product
     {
         $this->relatedProducts = new ArrayCollection();
         $this->stones = new ArrayCollection();
+        $this->sourcePhotos = new ArrayCollection();
+        $this->generatedVisuals = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -493,6 +511,83 @@ class Product
         $this->stones->removeElement($stone);
 
         return $this;
+    }
+
+    public function getVisualStatus(): VisualWorkflowStatus
+    {
+        return $this->visualStatus;
+    }
+
+    public function setVisualStatus(VisualWorkflowStatus $visualStatus): static
+    {
+        $this->visualStatus = $visualStatus;
+
+        return $this;
+    }
+
+    /** @return Collection<int, SourcePhoto> */
+    public function getSourcePhotos(): Collection
+    {
+        return $this->sourcePhotos;
+    }
+
+    public function addSourcePhoto(SourcePhoto $sourcePhoto): static
+    {
+        if (!$this->sourcePhotos->contains($sourcePhoto)) {
+            $this->sourcePhotos->add($sourcePhoto);
+            $sourcePhoto->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSourcePhoto(SourcePhoto $sourcePhoto): static
+    {
+        if ($this->sourcePhotos->removeElement($sourcePhoto)) {
+            if ($sourcePhoto->getProduct() === $this) {
+                $sourcePhoto->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /** @return Collection<int, GeneratedVisual> */
+    public function getGeneratedVisuals(): Collection
+    {
+        return $this->generatedVisuals;
+    }
+
+    public function addGeneratedVisual(GeneratedVisual $visual): static
+    {
+        if (!$this->generatedVisuals->contains($visual)) {
+            $this->generatedVisuals->add($visual);
+            $visual->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGeneratedVisual(GeneratedVisual $visual): static
+    {
+        if ($this->generatedVisuals->removeElement($visual)) {
+            if ($visual->getProduct() === $this) {
+                $visual->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getApprovedVisualFor(VisualType $type): ?GeneratedVisual
+    {
+        foreach ($this->generatedVisuals as $visual) {
+            if ($visual->getType() === $type && $visual->getStatus() === VisualStatus::Approved) {
+                return $visual;
+            }
+        }
+
+        return null;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

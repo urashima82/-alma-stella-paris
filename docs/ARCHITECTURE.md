@@ -579,6 +579,10 @@ class Reservation
 | `Promotion` | Promotions & coupons — product auto, cart auto, code, private link |
 | `PromotionUsage` | Tracks promotion usage per order (discount amount, email, timestamp) |
 | `Stone` | Natural stone guide — bilingual content, virtues, origin, ManyToMany with Product |
+| `CategoryVisualPrompt` | AI visual generation prompts per category × visual type (vignette/worn/lifestyle), versioned, editable in EasyAdmin |
+| `SourcePhoto` | Raw smartphone photos uploaded for AI generation, stored in Flysystem (ManyToOne → Product) |
+| `GeneratedVisual` | AI-generated visuals with approval workflow (generating → pending_review → approved/rejected/failed) |
+| `GeminiUsageLog` | Tracks Gemini API costs per call for monthly budget enforcement |
 
 ---
 

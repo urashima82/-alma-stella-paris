@@ -93,11 +93,46 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('CREATE TABLE wishlist_item (id INT AUTO_INCREMENT NOT NULL, customer_id INT NOT NULL, product_id INT NOT NULL, added_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_6424F4E99395C3F3 (customer_id), INDEX IDX_6424F4E94584665A (product_id), UNIQUE INDEX UNIQ_WISHLIST_CUSTOMER_PRODUCT (customer_id, product_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('ALTER TABLE wishlist_item ADD CONSTRAINT FK_6424F4E99395C3F3 FOREIGN KEY (customer_id) REFERENCES customer (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE wishlist_item ADD CONSTRAINT FK_6424F4E94584665A FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE');
+
+        // --- Milestone 16: AI Visual Generation ---
+
+        // Add visual_status column to product
+        $this->addSql('ALTER TABLE product ADD visual_status VARCHAR(30) NOT NULL DEFAULT \'draft\'');
+
+        // Add preservation_instructions and specific_focus to product_category
+        $this->addSql('ALTER TABLE product_category ADD preservation_instructions LONGTEXT DEFAULT NULL, ADD specific_focus LONGTEXT DEFAULT NULL');
+
+        // CategoryVisualPrompt table
+        $this->addSql('CREATE TABLE category_visual_prompt (id INT AUTO_INCREMENT NOT NULL, category_id INT NOT NULL, visual_type VARCHAR(20) NOT NULL, framing LONGTEXT NOT NULL, staging LONGTEXT NOT NULL, props JSON NOT NULL, active TINYINT NOT NULL, version INT NOT NULL, INDEX IDX_CVP_CATEGORY (category_id), UNIQUE INDEX UNIQ_CATEGORY_VISUAL_PROMPT (category_id, visual_type, version), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('ALTER TABLE category_visual_prompt ADD CONSTRAINT FK_CVP_CATEGORY FOREIGN KEY (category_id) REFERENCES product_category (id)');
+
+        // SourcePhoto table
+        $this->addSql('CREATE TABLE source_photo (id INT AUTO_INCREMENT NOT NULL, product_id INT NOT NULL, path VARCHAR(500) NOT NULL, position INT NOT NULL, angle VARCHAR(20) NOT NULL, INDEX IDX_SOURCE_PHOTO_PRODUCT (product_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('ALTER TABLE source_photo ADD CONSTRAINT FK_SOURCE_PHOTO_PRODUCT FOREIGN KEY (product_id) REFERENCES product (id)');
+
+        // GeneratedVisual table
+        $this->addSql('CREATE TABLE generated_visual (id INT AUTO_INCREMENT NOT NULL, product_id INT NOT NULL, type VARCHAR(20) NOT NULL, path VARCHAR(500) NOT NULL, prompt_used LONGTEXT NOT NULL, category_prompt_version INT NOT NULL, status VARCHAR(20) NOT NULL, variant INT NOT NULL, gemini_request_id VARCHAR(100) DEFAULT NULL, error_message LONGTEXT DEFAULT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_GEN_VISUAL_PRODUCT (product_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('ALTER TABLE generated_visual ADD CONSTRAINT FK_GEN_VISUAL_PRODUCT FOREIGN KEY (product_id) REFERENCES product (id)');
+
+        // GeminiUsageLog table
+        $this->addSql('CREATE TABLE gemini_usage_log (id INT AUTO_INCREMENT NOT NULL, cost_usd NUMERIC(8, 4) NOT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
+
+        // --- Milestone 16: AI Visual Generation (reverse) ---
+        $this->addSql('DROP TABLE gemini_usage_log');
+        $this->addSql('ALTER TABLE generated_visual DROP FOREIGN KEY FK_GEN_VISUAL_PRODUCT');
+        $this->addSql('DROP TABLE generated_visual');
+        $this->addSql('ALTER TABLE source_photo DROP FOREIGN KEY FK_SOURCE_PHOTO_PRODUCT');
+        $this->addSql('DROP TABLE source_photo');
+        $this->addSql('ALTER TABLE category_visual_prompt DROP FOREIGN KEY FK_CVP_CATEGORY');
+        $this->addSql('DROP TABLE category_visual_prompt');
+        $this->addSql('ALTER TABLE product_category DROP preservation_instructions, DROP specific_focus');
+        $this->addSql('ALTER TABLE product DROP visual_status');
+
         $this->addSql('ALTER TABLE product DROP FOREIGN KEY FK_D34A04AD12469DE2');
         $this->addSql('ALTER TABLE product_related DROP FOREIGN KEY FK_B18E6B203DF63ED7');
         $this->addSql('ALTER TABLE product_related DROP FOREIGN KEY FK_B18E6B2024136E58');
