@@ -1146,9 +1146,13 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 - [x] Section "Génération IA" dans le menu admin
 
 ### Phase 4 — Import adapté + finitions
-- [ ] Adapter ImportCatalogueImagesCommand (SourcePhoto via Flysystem)
-- [ ] Vérification end-to-end complète
-- [ ] Test pipeline : fixtures → import → génération → approbation
+- [x] Adapter ImportCatalogueImagesCommand (SourcePhoto via Flysystem)
+- [x] Vérification end-to-end complète
+- [x] Test pipeline : fixtures → import → génération → approbation
+
+### Vérification du milestone (en cours)
+> Les 4 phases de développement sont terminées. Le milestone est en phase
+> de vérification manuelle avant validation finale.
 
 ### Definition of Done
 - Upload de photos sources via ProductCrud → SourcePhoto créées en BDD + Flysystem

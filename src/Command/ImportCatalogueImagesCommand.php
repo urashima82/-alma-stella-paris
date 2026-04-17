@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\SourcePhoto;
+use App\Enum\PhotoAngle;
+use App\Enum\VisualWorkflowStatus;
 use App\Repository\ProductRepository;
-use App\Service\ImageProcessor;
+use App\Service\Visual\ImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -16,25 +19,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:import-catalogue-images',
-    description: 'Import product images from docs/Catalogue/photos/ into public/uploads/products/.',
+    description: 'Import product images from docs/Catalogue/photos/ as SourcePhoto entities via Flysystem.',
 )]
 final class ImportCatalogueImagesCommand extends Command
 {
-    /** wornPhoto: 4:5 ratio, max 800×1000 */
-    private const WORN_MAX_WIDTH = 800;
-    private const WORN_MAX_HEIGHT = 1000;
-
-    /** thumbnail: 4:5 ratio, max 600×750 */
-    private const THUMB_MAX_WIDTH = 600;
-    private const THUMB_MAX_HEIGHT = 750;
-
-    /** contextPhoto: 4:5 ratio, max 800×1000 */
-    private const CONTEXT_MAX_WIDTH = 800;
-    private const CONTEXT_MAX_HEIGHT = 1000;
-
     public function __construct(
         private readonly ProductRepository $productRepository,
-        private readonly ImageProcessor $imageProcessor,
+        private readonly ImageStorage $imageStorage,
         private readonly EntityManagerInterface $em,
         private readonly string $projectDir,
     ) {
@@ -53,7 +44,6 @@ final class ImportCatalogueImagesCommand extends Command
 
         $csvPath = $this->projectDir.'/docs/Catalogue/catalogue.csv';
         $photosDir = $this->projectDir.'/docs/Catalogue/photos';
-        $targetDir = $this->projectDir.'/public/uploads/products';
 
         if (!\file_exists($csvPath)) {
             $io->error('Catalogue CSV not found: '.$csvPath);
@@ -67,10 +57,6 @@ final class ImportCatalogueImagesCommand extends Command
             return Command::FAILURE;
         }
 
-        if (!$dryRun && !\is_dir($targetDir)) {
-            \mkdir($targetDir, 0o755, true);
-        }
-
         // Index products by nameFr
         $products = $this->productRepository->findAll();
         $productsByNameFr = [];
@@ -78,12 +64,13 @@ final class ImportCatalogueImagesCommand extends Command
             $productsByNameFr[$product->getNameFr()] = $product;
         }
 
-        // Read CSV to build product → photo directory mapping
+        // Read CSV to build product -> photo directory mapping
         $catalogue = $this->parseCsv($csvPath);
 
         $processed = 0;
         $skipped = 0;
         $errors = 0;
+        $totalPhotos = 0;
 
         foreach ($catalogue as $entry) {
             $nameFr = $entry['name'];
@@ -108,7 +95,7 @@ final class ImportCatalogueImagesCommand extends Command
                 continue;
             }
 
-            // List photos sorted by filename (timestamp-based, oldest first)
+            // List all photos sorted by filename (timestamp-based, oldest first)
             $photos = $this->getPhotosSorted($photoDir);
 
             if ($photos === []) {
@@ -118,44 +105,46 @@ final class ImportCatalogueImagesCommand extends Command
                 continue;
             }
 
-            $slug = $product->getSlug();
+            $io->text(\sprintf('<info>%s</info> — %d photo(s)', $nameFr, \count($photos)));
 
-            // Photo assignment: 1st → wornPhoto, 2nd → thumbnail, 3rd → contextPhoto
-            $assignments = [
-                ['index' => 0, 'field' => 'wornPhoto', 'setter' => 'setWornPhoto', 'maxW' => self::WORN_MAX_WIDTH, 'maxH' => self::WORN_MAX_HEIGHT],
-                ['index' => 1, 'field' => 'thumbnail', 'setter' => 'setThumbnail', 'maxW' => self::THUMB_MAX_WIDTH, 'maxH' => self::THUMB_MAX_HEIGHT],
-                ['index' => 2, 'field' => 'contextPhoto', 'setter' => 'setContextPhoto', 'maxW' => self::CONTEXT_MAX_WIDTH, 'maxH' => self::CONTEXT_MAX_HEIGHT],
-            ];
-
-            foreach ($assignments as $assignment) {
-                if (!isset($photos[$assignment['index']])) {
-                    continue;
-                }
-
-                $sourcePath = $photos[$assignment['index']];
-                $webpFilename = \sprintf('%s-%s.webp', $slug, $assignment['field']);
-                $targetPath = $targetDir.'/'.$webpFilename;
+            // Import each photo as a SourcePhoto
+            foreach ($photos as $position => $sourcePath) {
+                $angle = $position === 0 ? PhotoAngle::Front : PhotoAngle::Other;
 
                 if ($dryRun) {
-                    $io->text(\sprintf('  [DRY-RUN] %s → %s (%s)', \basename($sourcePath), $webpFilename, $assignment['field']));
+                    $io->text(\sprintf('  [DRY-RUN] #%d %s → %s', $position + 1, \basename($sourcePath), $angle->label()));
+                    ++$totalPhotos;
 
                     continue;
                 }
 
                 try {
-                    $this->imageProcessor->processWithCrop(
+                    $flysystemPath = $this->imageStorage->storeSourcePhotoFromPath(
                         $sourcePath,
-                        $targetPath,
-                        $assignment['maxW'],
-                        $assignment['maxH'],
+                        $product,
+                        $position + 1,
                     );
 
-                    $product->{$assignment['setter']}($webpFilename);
-                    $io->text(\sprintf('  ✓ %s → %s (%s)', \basename($sourcePath), $webpFilename, $assignment['field']));
+                    $sourcePhoto = new SourcePhoto();
+                    $sourcePhoto->setProduct($product);
+                    $sourcePhoto->setPath($flysystemPath);
+                    $sourcePhoto->setPosition($position + 1);
+                    $sourcePhoto->setAngle($angle);
+
+                    $this->em->persist($sourcePhoto);
+                    $product->addSourcePhoto($sourcePhoto);
+
+                    $io->text(\sprintf('  + #%d %s → %s (%s)', $position + 1, \basename($sourcePath), $flysystemPath, $angle->label()));
+                    ++$totalPhotos;
                 } catch (\RuntimeException $e) {
-                    $io->error(\sprintf('Failed: %s — %s', $nameFr, $e->getMessage()));
+                    $io->error(\sprintf('Failed: %s photo #%d — %s', $nameFr, $position + 1, $e->getMessage()));
                     ++$errors;
                 }
+            }
+
+            // Update visual workflow status
+            if (!$dryRun && $product->getSourcePhotos()->count() > 0) {
+                $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
             }
 
             ++$processed;
@@ -167,9 +156,10 @@ final class ImportCatalogueImagesCommand extends Command
 
         $io->newLine();
         $io->success(\sprintf(
-            '%s%d products processed, %d skipped, %d errors.',
+            '%s%d products processed (%d source photos), %d skipped, %d errors.',
             $dryRun ? '[DRY-RUN] ' : '',
             $processed,
+            $totalPhotos,
             $skipped,
             $errors,
         ));

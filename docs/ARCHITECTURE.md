@@ -145,7 +145,7 @@ alma-stella/
 │   ├── Command/
 │   │   ├── CleanExpiredReservationsCommand.php  # CLI: app:clean-expired-reservations
 │   │   ├── CleanAbandonedOrdersCommand.php      # CLI: app:clean-abandoned-orders
-│   │   ├── ImportCatalogueImagesCommand.php     # CLI: app:import-catalogue-images
+│   │   ├── ImportCatalogueImagesCommand.php     # CLI: app:import-catalogue-images (SourcePhoto via Flysystem)
 │   │   ├── ImportStoneImagesCommand.php         # CLI: app:import-stone-images
 │   │   ├── SendTestimonialRequestsCommand.php   # CLI: app:send-testimonial-requests
 │   │   └── VerifyPendingOrdersCommand.php       # CLI: app:verify-pending-orders
