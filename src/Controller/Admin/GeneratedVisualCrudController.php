@@ -97,7 +97,8 @@ class GeneratedVisualCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->hideOnForm();
 
-        yield AssociationField::new('product', 'Produit');
+        yield AssociationField::new('product', 'Produit')
+            ->setTemplatePath('admin/generated_visual/_product_link.html.twig');
 
         yield ChoiceField::new('type', 'Type')
             ->setChoices([

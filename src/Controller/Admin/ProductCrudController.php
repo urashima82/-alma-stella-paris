@@ -70,7 +70,10 @@ class ProductCrudController extends AbstractCrudController
             ->setEntityLabelInSingular('Produit')
             ->setEntityLabelInPlural('Produits')
             ->setSearchFields(['name', 'nameFr', 'slug', 'description', 'descriptionFr'])
-            ->setDefaultSort(['createdAt' => 'DESC'])
+            // Tie-breaker on id: createdAt alone is not deterministic when many rows
+            // share the same timestamp (bulk fixtures, scripted imports), which makes
+            // LIMIT/OFFSET pagination return overlapping pages.
+            ->setDefaultSort(['createdAt' => 'DESC', 'id' => 'DESC'])
             ->overrideTemplate('crud/edit', 'admin/product/edit.html.twig');
     }
 

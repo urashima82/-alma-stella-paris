@@ -25,10 +25,33 @@
                     target.appendChild(source.content.cloneNode(true));
                     source.remove();
                 };
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', inject);
-                } else {
+
+                // Activate the tab pointed to by the URL hash (e.g. #tab-visuels-ia)
+                // so links from the GeneratedVisual index land directly on the AI tab.
+                const activateHashTab = () => {
+                    const hash = window.location.hash;
+                    if (!hash || !hash.startsWith('#tab-')) {
+                        return;
+                    }
+                    const trigger = document.querySelector(
+                        '[data-bs-toggle="tab"][data-bs-target="' + hash + '"], '
+                        + '[data-bs-toggle="tab"][href="' + hash + '"]'
+                    );
+                    if (trigger && window.bootstrap && window.bootstrap.Tab) {
+                        window.bootstrap.Tab.getOrCreateInstance(trigger).show();
+                    } else if (trigger) {
+                        trigger.click();
+                    }
+                };
+
+                const run = () => {
                     inject();
+                    activateHashTab();
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', run);
+                } else {
+                    run();
                 }
             })();
         </script>
