@@ -427,7 +427,7 @@ body {
 
 /* Compound selector .btn.X to beat EA's .btn-sm:not(:has(.btn-label)) (0,2,0) */
 .btn.ai-workspace__generate-all {
-    padding: 0.45rem 1.1rem;
+    padding: 0.45rem 0.65rem;
     font-size: 0.75rem;
     font-weight: 600;
     display: inline-flex;
@@ -661,7 +661,7 @@ body {
 }
 
 .btn.ai-visual-column__generate {
-    padding: 0.35rem 0.95rem;
+    padding: 0.35rem 0.55rem;
     font-size: 0.7rem;
     display: inline-flex;
     align-items: center;
@@ -1087,4 +1087,305 @@ body {
     object-fit: contain;
     border-radius: 4px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AI Content Workspace — Contenu IA tab on Product edit page (M17)
+   Independent from the Visuels IA workspace.
+   ══════════════════════════════════════════════════════════════ */
+
+#tab-contenu-ia .ai-content-workspace-target,
+#tab-contenu-ia .form-fieldset {
+    background: transparent;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+}
+
+#tab-contenu-ia legend {
+    display: none;
+}
+
+.ai-content-workspace {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem 1.25rem 1.25rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ea-dark-scheme .ai-content-workspace {
+    background: #1f1f1f;
+    border-color: #2e2e2e;
+}
+
+.ai-content-workspace__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Compound selectors .btn.X to beat EA's .btn-sm:not(:has(.btn-label)) (0,2,0) */
+.btn.ai-content-workspace__generate,
+.btn.ai-content-card__btn {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    block-size: auto; /* override EA's fixed --button-height */
+}
+
+.btn.ai-content-workspace__generate i,
+.btn.ai-content-card__btn i {
+    font-size: 0.8rem;
+}
+
+.ai-content-workspace__title h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-content-workspace__hint {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+    max-width: 60ch;
+}
+
+.ea-dark-scheme .ai-content-workspace__hint {
+    color: #9ca3af;
+}
+
+/* ── Pre-flight banners ── */
+.ai-content-banner {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    border: 1px solid;
+}
+
+.ai-content-banner i {
+    margin-top: 2px;
+    font-size: 1.1rem;
+}
+
+.ai-content-banner--warn {
+    background: #fef3c7;
+    border-color: #fcd34d;
+    color: #78350f;
+}
+
+.ai-content-banner--blocking {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #7f1d1d;
+}
+
+.ea-dark-scheme .ai-content-banner--warn {
+    background: rgba(217, 119, 6, 0.18);
+    border-color: rgba(217, 119, 6, 0.45);
+    color: #fcd34d;
+}
+
+.ea-dark-scheme .ai-content-banner--blocking {
+    background: rgba(220, 38, 38, 0.18);
+    border-color: rgba(220, 38, 38, 0.45);
+    color: #fecaca;
+}
+
+/* ── Active suggestion card ── */
+.ai-content-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    background: #fafafa;
+}
+
+.ea-dark-scheme .ai-content-card {
+    background: #161616;
+    border-color: #2e2e2e;
+}
+
+.ai-content-card--empty {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #6b7280;
+}
+
+.ai-content-card--generating {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ai-content-card__spinner {
+    font-size: 1.5rem;
+    color: #6366f1;
+}
+
+.ai-content-card__hint {
+    margin: 0.25rem 0 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.ai-content-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.ai-content-card__meta {
+    margin-left: 0.5rem;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.ai-content-card__actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.ai-content-card__fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem 1rem;
+}
+
+@media (max-width: 720px) {
+    .ai-content-card__fields {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ai-content-field--full {
+    grid-column: 1 / -1;
+}
+
+.ai-content-field label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+.ea-dark-scheme .ai-content-field label {
+    color: #d1d5db;
+}
+
+.ai-content-card__snapshot {
+    margin-top: 1rem;
+}
+
+.ai-content-card__snapshot summary {
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 0.85rem;
+    padding: 0.25rem 0;
+}
+
+.ai-content-card__snapshot pre {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background: #f3f4f6;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    overflow-x: auto;
+}
+
+.ea-dark-scheme .ai-content-card__snapshot pre {
+    background: #0f0f0f;
+    color: #d1d5db;
+}
+
+/* ── History list ── */
+.ai-content-history h4 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ai-content-history__empty {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.ai-content-history__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ea-dark-scheme .ai-content-history__list {
+    border-color: #2e2e2e;
+}
+
+.ai-content-history__item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+}
+
+.ea-dark-scheme .ai-content-history__item {
+    border-bottom-color: #2a2a2a;
+}
+
+.ai-content-history__item:last-child {
+    border-bottom: none;
+}
+
+.ai-content-history__name {
+    flex: 1;
+    color: #111827;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ea-dark-scheme .ai-content-history__name {
+    color: #f3f4f6;
+}
+
+.ai-content-history__date {
+    color: #6b7280;
+    font-variant-numeric: tabular-nums;
+}
+
+.ai-content-history__applied {
+    color: #15803d;
+    font-size: 0.8rem;
+}
+
+.ai-content-history__error {
+    color: #b91c1c;
+    font-size: 0.8rem;
+    cursor: help;
 }

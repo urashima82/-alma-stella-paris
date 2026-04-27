@@ -115,12 +115,22 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('ALTER TABLE generated_visual ADD CONSTRAINT FK_GEN_VISUAL_PRODUCT FOREIGN KEY (product_id) REFERENCES product (id)');
 
         // GeminiUsageLog table
-        $this->addSql('CREATE TABLE gemini_usage_log (id INT AUTO_INCREMENT NOT NULL, cost_usd NUMERIC(8, 4) NOT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE gemini_usage_log (id INT AUTO_INCREMENT NOT NULL, cost_usd NUMERIC(8, 4) NOT NULL, operation VARCHAR(20) NOT NULL DEFAULT \'visual\', created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+
+        // --- Milestone 17: AI Content Filling ---
+
+        // ProductContentSuggestion table
+        $this->addSql('CREATE TABLE product_content_suggestion (id INT AUTO_INCREMENT NOT NULL, product_id INT NOT NULL, name_en VARCHAR(255) DEFAULT NULL, name_fr VARCHAR(255) DEFAULT NULL, description_en LONGTEXT DEFAULT NULL, description_fr LONGTEXT DEFAULT NULL, status VARCHAR(20) NOT NULL, model_used VARCHAR(50) DEFAULT NULL, request_id VARCHAR(100) DEFAULT NULL, context_snapshot JSON DEFAULT NULL, additional_context LONGTEXT DEFAULT NULL, error_message LONGTEXT DEFAULT NULL, generated_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', applied_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_CONTENT_SUGGESTION_PRODUCT (product_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('ALTER TABLE product_content_suggestion ADD CONSTRAINT FK_CONTENT_SUGGESTION_PRODUCT FOREIGN KEY (product_id) REFERENCES product (id)');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
+
+        // --- Milestone 17: AI Content Filling (reverse) ---
+        $this->addSql('ALTER TABLE product_content_suggestion DROP FOREIGN KEY FK_CONTENT_SUGGESTION_PRODUCT');
+        $this->addSql('DROP TABLE product_content_suggestion');
 
         // --- Milestone 16: AI Visual Generation (reverse) ---
         $this->addSql('DROP TABLE gemini_usage_log');

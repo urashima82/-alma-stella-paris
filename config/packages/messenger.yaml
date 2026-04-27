@@ -20,6 +20,7 @@ framework:
 
         routing:
             App\Message\GenerateVisualMessage: gemini_async
+            App\Message\FillProductContentMessage: gemini_async
 
 when@test:
     framework:

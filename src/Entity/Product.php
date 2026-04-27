@@ -124,6 +124,11 @@ class Product
     #[ORM\OrderBy(['type' => 'ASC', 'variant' => 'ASC'])]
     private Collection $generatedVisuals;
 
+    /** @var Collection<int, ProductContentSuggestion> */
+    #[ORM\OneToMany(targetEntity: ProductContentSuggestion::class, mappedBy: 'product', cascade: ['persist', 'remove'])]
+    #[ORM\OrderBy(['generatedAt' => 'DESC'])]
+    private Collection $contentSuggestions;
+
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
@@ -136,6 +141,7 @@ class Product
         $this->stones = new ArrayCollection();
         $this->sourcePhotos = new ArrayCollection();
         $this->generatedVisuals = new ArrayCollection();
+        $this->contentSuggestions = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
@@ -588,6 +594,33 @@ class Product
         }
 
         return null;
+    }
+
+    /** @return Collection<int, ProductContentSuggestion> */
+    public function getContentSuggestions(): Collection
+    {
+        return $this->contentSuggestions;
+    }
+
+    public function addContentSuggestion(ProductContentSuggestion $suggestion): static
+    {
+        if (!$this->contentSuggestions->contains($suggestion)) {
+            $this->contentSuggestions->add($suggestion);
+            $suggestion->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContentSuggestion(ProductContentSuggestion $suggestion): static
+    {
+        if ($this->contentSuggestions->removeElement($suggestion)) {
+            if ($suggestion->getProduct() === $this) {
+                $suggestion->setProduct(null);
+            }
+        }
+
+        return $this;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

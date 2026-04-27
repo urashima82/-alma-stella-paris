@@ -585,7 +585,8 @@ class Reservation
 | `CategoryVisualPrompt` | AI visual generation prompts per category × visual type (vignette/worn/lifestyle), versioned, editable in EasyAdmin |
 | `SourcePhoto` | Raw smartphone photos uploaded for AI generation, stored in Flysystem (ManyToOne → Product) |
 | `GeneratedVisual` | AI-generated visuals with approval workflow (generating → pending_review → approved/rejected/failed) |
-| `GeminiUsageLog` | Tracks Gemini API costs per call for monthly budget enforcement |
+| `GeminiUsageLog` | Tracks Gemini API costs per call (with `operation` enum: `visual` for M16 / `text_fill` for M17) for monthly budget enforcement |
+| `ProductContentSuggestion` | AI-generated product copy (FR + EN, name + description) with review workflow (generating → pending → applied/rejected). Captures `contextSnapshot` (category, stones at call time) for traceability — Milestone 17 |
 
 ---
 
@@ -839,6 +840,18 @@ Three channels, three integration levels:
 - Checks if all 9 variants generated → transitions product to `ReadyForReview`
 - Rate limited: 15 req/min via Symfony RateLimiter (`gemini_api` policy)
 - Retry strategy: 2 retries, 5s initial delay, 2× multiplier, 30s max
+
+### AI Content Filling (M17 — independent from visual pipeline)
+
+A second Gemini-powered pipeline generates product copy (FR + EN names + descriptions) from the same source photos. It runs on a different model (`gemini-2.5-flash`), through a separate Messenger message and handler, with its own EasyAdmin tab. The two pipelines never share state beyond the budget cap and rate limiter — see [`AI_CONTENT_FILL.md`](AI_CONTENT_FILL.md) for the full design.
+
+Key services (`src/Service/Content/`):
+
+- `GeminiTextClient` — multimodal vision → strict JSON via `responseSchema`.
+- `ContentBrandVoiceProvider` / `ContentFewShotProvider` — editorial voice + 4 textual few-shot pairs.
+- `ContentPromptBuilder` — composes brand voice + few-shot + dynamic taxonomy (category, stones) + fallback strategy + optional regeneration steering, plus the JSON schema.
+- `ProductContentFiller` — orchestrator: load sources, snapshot context, build prompt, call Gemini, parse, return `ContentSuggestionResult`.
+- `FillProductContentHandler` — async worker. Pre-creates a `ProductContentSuggestion` (status `Generating`), calls the filler, transitions to `Pending` for human review. Reuses the shared rate limiter and `BudgetGuard` (`GeminiOperation::TextFill`).
 
 ### AbandonedOrderCleaner
 

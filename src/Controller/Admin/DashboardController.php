@@ -145,6 +145,7 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkTo(SourcePhotoCrudController::class, 'Photos sources', 'fa fa-camera');
         yield MenuItem::linkTo(CategoryVisualPromptCrudController::class, 'Prompts visuels', 'fa fa-pen-fancy');
         yield MenuItem::linkTo(GeneratedVisualCrudController::class, $visualsLabel, 'fa fa-images');
+        yield MenuItem::linkTo(ProductContentSuggestionCrudController::class, 'Suggestions de contenu', 'fa fa-pen-to-square');
         yield MenuItem::section('Ventes');
         yield MenuItem::linkTo(OrderCrudController::class, $ordersLabel, 'fa fa-shopping-bag');
         yield MenuItem::linkTo(CustomerCrudController::class, 'Clients', 'fa fa-user');
@@ -172,7 +173,8 @@ class DashboardController extends AbstractDashboardController
             ->addJsFile('js/admin-toast.js')
             ->addJsFile('js/admin-lightbox.js')
             ->addJsFile('js/admin-ai-poll.js')
-            ->addJsFile('js/admin-ai-actions.js');
+            ->addJsFile('js/admin-ai-actions.js')
+            ->addJsFile('js/admin-ai-content.js');
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu

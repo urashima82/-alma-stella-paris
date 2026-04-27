@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Gemini;
 
 use App\Entity\GeminiUsageLog;
+use App\Enum\GeminiOperation;
 use App\Exception\BudgetExceededException;
 use App\Repository\GeminiUsageLogRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,10 +28,11 @@ final class BudgetGuard
         }
     }
 
-    public function recordCall(float $costUsd): void
+    public function recordCall(float $costUsd, GeminiOperation $operation = GeminiOperation::Visual): void
     {
         $log = new GeminiUsageLog();
         $log->setCostUsd($costUsd);
+        $log->setOperation($operation);
 
         $this->entityManager->persist($log);
         $this->entityManager->flush();

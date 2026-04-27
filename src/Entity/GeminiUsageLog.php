@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\GeminiOperation;
 use App\Repository\GeminiUsageLogRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -18,6 +19,9 @@ class GeminiUsageLog
 
     #[ORM\Column(type: Types::DECIMAL, precision: 8, scale: 4)]
     private string $costUsd = '0.0000';
+
+    #[ORM\Column(length: 20, enumType: GeminiOperation::class)]
+    private GeminiOperation $operation = GeminiOperation::Visual;
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
@@ -40,6 +44,18 @@ class GeminiUsageLog
     public function setCostUsd(float $costUsd): static
     {
         $this->costUsd = \number_format($costUsd, 4, '.', '');
+
+        return $this;
+    }
+
+    public function getOperation(): GeminiOperation
+    {
+        return $this->operation;
+    }
+
+    public function setOperation(GeminiOperation $operation): static
+    {
+        $this->operation = $operation;
 
         return $this;
     }

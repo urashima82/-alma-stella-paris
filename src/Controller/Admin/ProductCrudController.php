@@ -7,14 +7,18 @@ namespace App\Controller\Admin;
 use App\Admin\Filter\AvailableInFilter;
 use App\Entity\GeneratedVisual;
 use App\Entity\Product;
+use App\Entity\ProductContentSuggestion;
 use App\Entity\SourcePhoto;
+use App\Enum\ContentSuggestionStatus;
 use App\Enum\PhotoAngle;
 use App\Enum\ShippingTier;
 use App\Enum\VisualStatus;
 use App\Enum\VisualType;
 use App\Enum\VisualWorkflowStatus;
+use App\Message\FillProductContentMessage;
 use App\Message\GenerateVisualMessage;
 use App\Repository\GeneratedVisualRepository;
+use App\Repository\ProductContentSuggestionRepository;
 use App\Service\Visual\ImageStorage;
 use App\Service\Visual\VisualApprovalHandler;
 use Doctrine\ORM\EntityManagerInterface;
@@ -56,6 +60,7 @@ class ProductCrudController extends AbstractCrudController
         private readonly GeneratedVisualRepository $generatedVisualRepository,
         private readonly VisualApprovalHandler $visualApprovalHandler,
         private readonly ImageStorage $imageStorage,
+        private readonly ProductContentSuggestionRepository $contentSuggestionRepository,
     ) {
     }
 
@@ -246,6 +251,14 @@ class ProductCrudController extends AbstractCrudController
         yield FormField::addFieldset('')
             ->setCssClass('ai-workspace-target')
             ->setHelp('');
+
+        // ══════════════════════════════════════════════
+        //  Tab: Contenu IA — content workspace, independent from visuals
+        // ══════════════════════════════════════════════
+        yield FormField::addTab('Contenu IA', 'fa fa-pen-to-square');
+        yield FormField::addFieldset('')
+            ->setCssClass('ai-content-workspace-target')
+            ->setHelp('');
     }
 
     public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore
@@ -275,6 +288,17 @@ class ProductCrudController extends AbstractCrudController
             'groupedVisuals' => $this->generatedVisualRepository->findByProductGroupedByType($product),
             'visualTypes' => VisualType::cases(),
             'photoAngles' => PhotoAngle::cases(),
+        ]);
+
+        $responseParameters->set('ai_content_workspace', [
+            'product' => $product,
+            'sourcePhotosCount' => \count($sourcePhotos),
+            'activeSuggestion' => $this->contentSuggestionRepository->findLatestActiveForProduct($product),
+            'recentSuggestions' => $this->contentSuggestionRepository->findBy(
+                ['product' => $product],
+                ['generatedAt' => 'DESC'],
+                10,
+            ),
         ]);
 
         return $responseParameters;
@@ -696,6 +720,246 @@ class ProductCrudController extends AbstractCrudController
         $product = $context->getEntity()->getInstance();
 
         return $this->json($this->buildAiStatusPayload($product, $twig));
+    }
+
+    // ══════════════════════════════════════════════
+    //  AI content workspace — independent from visuals (M17)
+    // ══════════════════════════════════════════════
+
+    /** @param AdminContext<Product> $context */
+    #[AdminRoute(options: ['methods' => ['POST']])]
+    public function inlineGenerateContent(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        if ($product->getSourcePhotos()->isEmpty()) {
+            $this->addFlash('danger', 'Ajoutez au moins une photo source avant de générer le contenu.');
+
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        // Reject any prior active suggestion (Generating or Pending) to honour
+        // the "one active suggestion at a time" UI invariant.
+        $priorActive = $this->contentSuggestionRepository->findActiveForProduct($product);
+        foreach ($priorActive as $prior) {
+            $prior->setStatus(ContentSuggestionStatus::Rejected);
+        }
+
+        $suggestion = new ProductContentSuggestion();
+        $suggestion->setProduct($product);
+        $suggestion->setStatus(ContentSuggestionStatus::Generating);
+        $this->entityManager->persist($suggestion);
+        $this->entityManager->flush();
+
+        $this->messageBus->dispatch(new FillProductContentMessage(
+            $product->getId(),
+            $suggestion->getId(),
+        ));
+
+        $this->addFlash('success', 'Génération de contenu lancée.');
+
+        return $this->inlineAjaxResponse($context, $product);
+    }
+
+    /** @param AdminContext<Product> $context */
+    #[AdminRoute(options: ['methods' => ['POST']])]
+    public function inlineRegenerateContent(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        $suggestion = $this->resolveSuggestionForProduct($context, $product);
+        if ($suggestion === null) {
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        $additionalContext = (string) $context->getRequest()->request->get('additionalContext', '');
+        $additionalContext = \trim($additionalContext);
+
+        $suggestion->setStatus(ContentSuggestionStatus::Rejected);
+
+        $newSuggestion = new ProductContentSuggestion();
+        $newSuggestion->setProduct($product);
+        $newSuggestion->setStatus(ContentSuggestionStatus::Generating);
+        $this->entityManager->persist($newSuggestion);
+        $this->entityManager->flush();
+
+        $this->messageBus->dispatch(new FillProductContentMessage(
+            $product->getId(),
+            $newSuggestion->getId(),
+            $additionalContext !== '' ? $additionalContext : null,
+        ));
+
+        $this->addFlash('success', 'Régénération de contenu lancée.');
+
+        return $this->inlineAjaxResponse($context, $product);
+    }
+
+    /** @param AdminContext<Product> $context */
+    #[AdminRoute(options: ['methods' => ['POST']])]
+    public function inlineUpdateContent(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        $suggestion = $this->resolveSuggestionForProduct($context, $product);
+        if ($suggestion === null) {
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        if ($suggestion->getStatus() !== ContentSuggestionStatus::Pending) {
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        $request = $context->getRequest();
+        $suggestion->setNameFr((string) $request->request->get('nameFr', ''));
+        $suggestion->setNameEn((string) $request->request->get('nameEn', ''));
+        $suggestion->setDescriptionFr((string) $request->request->get('descriptionFr', ''));
+        $suggestion->setDescriptionEn((string) $request->request->get('descriptionEn', ''));
+
+        $this->entityManager->flush();
+
+        return $this->inlineAjaxResponse($context, $product);
+    }
+
+    /** @param AdminContext<Product> $context */
+    #[AdminRoute(options: ['methods' => ['POST']])]
+    public function inlineApproveContent(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        $suggestion = $this->resolveSuggestionForProduct($context, $product);
+        if ($suggestion === null) {
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        if ($suggestion->getStatus() !== ContentSuggestionStatus::Pending) {
+            $this->addFlash('warning', 'Cette suggestion ne peut plus être appliquée.');
+
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        if ($suggestion->getNameFr() !== null && $suggestion->getNameFr() !== '') {
+            $product->setNameFr($suggestion->getNameFr());
+        }
+        if ($suggestion->getNameEn() !== null && $suggestion->getNameEn() !== '') {
+            $product->setName($suggestion->getNameEn());
+        }
+        if ($suggestion->getDescriptionFr() !== null && $suggestion->getDescriptionFr() !== '') {
+            $product->setDescriptionFr($suggestion->getDescriptionFr());
+        }
+        if ($suggestion->getDescriptionEn() !== null && $suggestion->getDescriptionEn() !== '') {
+            $product->setDescription($suggestion->getDescriptionEn());
+        }
+
+        $suggestion->setStatus(ContentSuggestionStatus::Applied);
+        $suggestion->setAppliedAt(new \DateTimeImmutable());
+
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Contenu appliqué au produit.');
+
+        return $this->inlineAjaxResponse($context, $product);
+    }
+
+    /** @param AdminContext<Product> $context */
+    #[AdminRoute(options: ['methods' => ['POST']])]
+    public function inlineRejectContent(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        $suggestion = $this->resolveSuggestionForProduct($context, $product);
+        if ($suggestion === null) {
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        if (\in_array($suggestion->getStatus(), [ContentSuggestionStatus::Applied, ContentSuggestionStatus::Rejected], true)) {
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        $suggestion->setStatus(ContentSuggestionStatus::Rejected);
+        $this->entityManager->flush();
+
+        $this->addFlash('info', 'Suggestion de contenu rejetée.');
+
+        return $this->inlineAjaxResponse($context, $product);
+    }
+
+    /**
+     * Polling endpoint for the AI content workspace — independent from aiStatus
+     * (visual workspace) so the two pipelines never interfere.
+     *
+     * @param AdminContext<Product> $context
+     */
+    #[AdminRoute]
+    public function aiContentStatus(
+        AdminContext $context,
+        Environment $twig,
+    ): JsonResponse {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        return $this->json($this->buildAiContentStatusPayload($product, $twig));
+    }
+
+    /** @param AdminContext<Product> $context */
+    private function resolveSuggestionForProduct(AdminContext $context, Product $product): ?ProductContentSuggestion
+    {
+        $suggestionId = (int) $context->getRequest()->query->get('suggestionId', 0);
+        $suggestion = $this->entityManager->getRepository(ProductContentSuggestion::class)->find($suggestionId);
+        if ($suggestion === null || $suggestion->getProduct() !== $product) {
+            $this->addFlash('danger', 'Suggestion introuvable pour ce produit.');
+
+            return null;
+        }
+
+        return $suggestion;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildAiContentStatusPayload(Product $product, Environment $twig): array
+    {
+        $active = $this->contentSuggestionRepository->findLatestActiveForProduct($product);
+
+        /** @var ProductContentSuggestion[] $recent */
+        $recent = $this->contentSuggestionRepository->findBy(
+            ['product' => $product],
+            ['generatedAt' => 'DESC'],
+            10,
+        );
+
+        $signature = [];
+        foreach ($recent as $suggestion) {
+            $signature[] = $suggestion->getId().':'.$suggestion->getStatus()->value;
+        }
+
+        $isGenerating = $active !== null && $active->getStatus() === ContentSuggestionStatus::Generating;
+
+        $cardHtml = $twig->render('admin/product/_ai_content_card.html.twig', [
+            'product_id' => $product->getId(),
+            'suggestion' => $active,
+            'is_generating' => $isGenerating,
+        ]);
+
+        $historyHtml = $twig->render('admin/product/_ai_content_history.html.twig', [
+            'recent' => $recent,
+        ]);
+
+        return [
+            'productId' => $product->getId(),
+            'hasActive' => $active !== null,
+            'isGenerating' => $isGenerating,
+            'sourcePhotosCount' => $product->getSourcePhotos()->count(),
+            'cardHtml' => $cardHtml,
+            'historyHtml' => $historyHtml,
+            'signature' => \implode('|', $signature).'#'.($isGenerating ? '1' : '0'),
+            'pending' => $isGenerating,
+        ];
     }
 
     /**

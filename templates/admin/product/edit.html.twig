@@ -1,33 +1,39 @@
 {% extends '@EasyAdmin/crud/edit.html.twig' %}
 
-{# The AI workspace is rendered hidden in `<template>`, then JS moves its content
-   into the EasyAdmin tab pane #tab-visuels-ia (slugged from the FormField::addTab label). #}
+{# The AI workspaces are rendered hidden in `<template>` blocks, then JS moves
+   their content into the EasyAdmin tab panes (slugged from the FormField::addTab labels). #}
 
 {% block main %}
     {{ parent() }}
 
     {% set product = entity.instance %}
-    {% if product.id is not null and ai_workspace is defined %}
-        <template id="ai-workspace-source">
-            {% include 'admin/product/_ai_workspace.html.twig' with ai_workspace only %}
-        </template>
+    {% if product.id is not null %}
+        {% if ai_workspace is defined %}
+            <template id="ai-workspace-source">
+                {% include 'admin/product/_ai_workspace.html.twig' with ai_workspace only %}
+            </template>
+        {% endif %}
+        {% if ai_content_workspace is defined %}
+            <template id="ai-content-workspace-source">
+                {% include 'admin/product/_ai_content_workspace.html.twig' with ai_content_workspace only %}
+            </template>
+        {% endif %}
 
         <script>
             (function () {
-                const inject = () => {
-                    const source = document.getElementById('ai-workspace-source');
-                    const target = document.getElementById('tab-visuels-ia');
+                const injectInto = (sourceId, targetId) => {
+                    const source = document.getElementById(sourceId);
+                    const target = document.getElementById(targetId);
                     if (!source || !target) {
                         return;
                     }
-                    // Replace the empty placeholder fieldset with the workspace
                     target.innerHTML = '';
                     target.appendChild(source.content.cloneNode(true));
                     source.remove();
                 };
 
                 // Activate the tab pointed to by the URL hash (e.g. #tab-visuels-ia)
-                // so links from the GeneratedVisual index land directly on the AI tab.
+                // so links from the index controllers land directly on the AI tab.
                 const activateHashTab = () => {
                     const hash = window.location.hash;
                     if (!hash || !hash.startsWith('#tab-')) {
@@ -45,7 +51,8 @@
                 };
 
                 const run = () => {
-                    inject();
+                    injectInto('ai-workspace-source', 'tab-visuels-ia');
+                    injectInto('ai-content-workspace-source', 'tab-contenu-ia');
                     activateHashTab();
                 };
                 if (document.readyState === 'loading') {

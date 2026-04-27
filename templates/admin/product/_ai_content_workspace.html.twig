@@ -1,0 +1,104 @@
+{# templates/admin/product/_ai_content_workspace.html.twig
+   Inline AI content workspace embedded in the Product edit page (Contenu IA tab).
+   Independent from the visual workspace — separate polling, separate state.
+
+   Variables expected:
+   - product: App\Entity\Product
+   - sourcePhotosCount: int
+   - activeSuggestion: ProductContentSuggestion|null
+   - recentSuggestions: ProductContentSuggestion[]
+#}
+
+{% set product_id = product.id %}
+{% set has_sources = sourcePhotosCount > 0 %}
+{% set category = product.category %}
+{% set has_category = category is not null %}
+{% set has_stones = product.stones|length > 0 %}
+{% set is_generating = activeSuggestion is not null and activeSuggestion.status.value == 'generating' %}
+{% set initial_signature %}
+    {%- for s in recentSuggestions -%}
+        {{ s.id }}:{{ s.status.value }}{% if not loop.last %}|{% endif %}
+    {%- endfor -%}
+    #{{ is_generating ? '1' : '0' }}
+{% endset %}
+
+<div id="ai-content-poll-config"
+     data-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('aiContentStatus').setEntityId(product_id).generateUrl() }}"
+     data-pending="{{ is_generating ? '1' : '0' }}"
+     data-signature="{{ initial_signature|trim }}"
+     hidden></div>
+
+<div class="ai-content-workspace">
+
+    {# ── Header ── #}
+    <header class="ai-content-workspace__header">
+        <div class="ai-content-workspace__title">
+            <h3>
+                <i class="fa fa-pen-to-square"></i>
+                Remplissage IA — contenu produit
+            </h3>
+            <p class="ai-content-workspace__hint">
+                À partir des photos sources et du contexte taxonomique, l'IA propose un nom et une description en français et en anglais. Tout reste éditable avant d'être appliqué au produit.
+            </p>
+        </div>
+        <button type="button"
+                class="btn btn-primary btn-sm ai-content-workspace__generate"
+                data-ai-action="post"
+                data-ai-content-generate
+                data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineGenerateContent').setEntityId(product_id).generateUrl() }}"
+                {% if not has_sources or is_generating %}disabled{% endif %}
+                title="{{ has_sources ? 'Lancer la génération de contenu' : 'Ajoutez d\'abord une photo source' }}">
+            <i class="fa fa-wand-magic-sparkles"></i>
+            Générer le contenu
+        </button>
+    </header>
+
+    {# ── Pre-flight banners (non-blocking warnings) ── #}
+    {% if not has_sources %}
+        <div class="ai-content-banner ai-content-banner--blocking">
+            <i class="fa fa-circle-info"></i>
+            <div>
+                <strong>Aucune photo source.</strong>
+                Le remplissage IA a besoin d'au moins une photo pour décrire le produit. Ajoutez une photo dans l'onglet « Visuels IA » avant de générer.
+            </div>
+        </div>
+    {% endif %}
+    {% if has_sources and not has_category %}
+        <div class="ai-content-banner ai-content-banner--warn">
+            <i class="fa fa-triangle-exclamation"></i>
+            <div>
+                <strong>Catégorie non renseignée.</strong>
+                L'IA tentera d'identifier le type de bijou depuis les photos. Pour un résultat plus précis, sélectionnez une catégorie dans l'onglet « Fiche produit ».
+            </div>
+        </div>
+    {% endif %}
+    {% if has_sources and not has_stones %}
+        <div class="ai-content-banner ai-content-banner--warn">
+            <i class="fa fa-triangle-exclamation"></i>
+            <div>
+                <strong>Pierres non renseignées.</strong>
+                L'IA décrira la pierre par sa couleur et son apparence sans la nommer (risque d'erreur d'identification). Indiquez les pierres dans la fiche produit pour un résultat plus riche.
+            </div>
+        </div>
+    {% endif %}
+
+    {# ── Active suggestion card (Generating or Pending) ── #}
+    <div data-ai-content-card class="ai-content-card-slot">
+        {% include 'admin/product/_ai_content_card.html.twig' with {
+            product_id: product_id,
+            suggestion: activeSuggestion,
+            is_generating: is_generating,
+        } only %}
+    </div>
+
+    {# ── History of recent suggestions ── #}
+    <section class="ai-content-history">
+        <h4>
+            <i class="fa fa-clock-rotate-left"></i>
+            Historique récent
+        </h4>
+        <div data-ai-content-history>
+            {% include 'admin/product/_ai_content_history.html.twig' with { recent: recentSuggestions } only %}
+        </div>
+    </section>
+</div>

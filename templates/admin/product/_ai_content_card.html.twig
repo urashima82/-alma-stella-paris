@@ -1,0 +1,118 @@
+{# templates/admin/product/_ai_content_card.html.twig
+   Active suggestion card: Generating spinner OR Pending review form.
+   Variables expected:
+   - product_id: int
+   - suggestion: ProductContentSuggestion|null
+   - is_generating: bool
+#}
+
+{% if suggestion is null %}
+    <div class="ai-content-card ai-content-card--empty">
+        <i class="fa fa-circle-question"></i>
+        <p>Aucune suggestion en cours. Cliquez sur « Générer le contenu » pour démarrer.</p>
+    </div>
+{% elseif is_generating %}
+    <div class="ai-content-card ai-content-card--generating">
+        <div class="ai-content-card__spinner">
+            <i class="fa fa-spinner fa-spin"></i>
+        </div>
+        <div>
+            <strong>Génération en cours…</strong>
+            <p class="ai-content-card__hint">L'IA analyse les photos et rédige le contenu. Cela prend en général 10 à 30 secondes.</p>
+        </div>
+    </div>
+{% else %}
+    {# Pending review — editable fields, action buttons #}
+    <article class="ai-content-card ai-content-card--pending"
+             data-suggestion-id="{{ suggestion.id }}">
+        <header class="ai-content-card__header">
+            <div>
+                <span class="ai-badge"
+                      style="background: {{ suggestion.status.badgeColor }}; color: #fff;">
+                    {{ suggestion.status.label }}
+                </span>
+                <span class="ai-content-card__meta">
+                    Généré le {{ suggestion.generatedAt|date('d/m/Y H:i') }} · {{ suggestion.modelUsed ?: '—' }}
+                </span>
+            </div>
+            <div class="ai-content-card__actions">
+                <button type="button"
+                        class="btn btn-info btn-sm ai-content-card__btn"
+                        data-ai-content-regenerate
+                        data-ai-content-suggestion-id="{{ suggestion.id }}"
+                        data-ai-content-regenerate-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineRegenerateContent').setEntityId(product_id).set('suggestionId', suggestion.id).generateUrl() }}"
+                        title="Relancer une génération avec une instruction additionnelle">
+                    <i class="fa fa-rotate"></i>
+                    Régénérer
+                </button>
+                <button type="button"
+                        class="btn btn-danger btn-sm ai-content-card__btn"
+                        data-ai-action="post"
+                        data-ai-content-action
+                        data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineRejectContent').setEntityId(product_id).set('suggestionId', suggestion.id).generateUrl() }}"
+                        data-ai-confirm="Rejeter cette suggestion ?"
+                        title="Rejeter la suggestion (gardée en historique)">
+                    <i class="fa fa-times"></i>
+                    Rejeter
+                </button>
+                <button type="button"
+                        class="btn btn-success btn-sm ai-content-card__btn"
+                        data-ai-content-apply
+                        data-ai-content-suggestion-id="{{ suggestion.id }}"
+                        data-ai-content-update-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineUpdateContent').setEntityId(product_id).set('suggestionId', suggestion.id).generateUrl() }}"
+                        data-ai-content-apply-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineApproveContent').setEntityId(product_id).set('suggestionId', suggestion.id).generateUrl() }}"
+                        title="Sauvegarder les modifications puis appliquer au produit">
+                    <i class="fa fa-check"></i>
+                    Appliquer au produit
+                </button>
+            </div>
+        </header>
+
+        <div class="ai-content-card__fields">
+            <div class="ai-content-field">
+                <label for="ai-content-name-fr-{{ suggestion.id }}">Nom (FR)</label>
+                <input type="text"
+                       id="ai-content-name-fr-{{ suggestion.id }}"
+                       name="nameFr"
+                       data-ai-content-field
+                       value="{{ suggestion.nameFr ?? '' }}"
+                       class="form-control">
+            </div>
+            <div class="ai-content-field">
+                <label for="ai-content-name-en-{{ suggestion.id }}">Nom (EN)</label>
+                <input type="text"
+                       id="ai-content-name-en-{{ suggestion.id }}"
+                       name="nameEn"
+                       data-ai-content-field
+                       value="{{ suggestion.nameEn ?? '' }}"
+                       class="form-control">
+            </div>
+            <div class="ai-content-field ai-content-field--full">
+                <label for="ai-content-desc-fr-{{ suggestion.id }}">Description (FR)</label>
+                <textarea id="ai-content-desc-fr-{{ suggestion.id }}"
+                          name="descriptionFr"
+                          data-ai-content-field
+                          rows="6"
+                          class="form-control">{{ suggestion.descriptionFr ?? '' }}</textarea>
+            </div>
+            <div class="ai-content-field ai-content-field--full">
+                <label for="ai-content-desc-en-{{ suggestion.id }}">Description (EN)</label>
+                <textarea id="ai-content-desc-en-{{ suggestion.id }}"
+                          name="descriptionEn"
+                          data-ai-content-field
+                          rows="6"
+                          class="form-control">{{ suggestion.descriptionEn ?? '' }}</textarea>
+            </div>
+        </div>
+
+        {% if suggestion.contextSnapshot is not null %}
+            <details class="ai-content-card__snapshot">
+                <summary>
+                    <i class="fa fa-info-circle"></i>
+                    Contexte utilisé par l'IA
+                </summary>
+                <pre>{{ suggestion.contextSnapshot|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</pre>
+            </details>
+        {% endif %}
+    </article>
+{% endif %}

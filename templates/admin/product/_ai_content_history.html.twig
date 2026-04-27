@@ -1,0 +1,38 @@
+{# templates/admin/product/_ai_content_history.html.twig
+   Compact history list of recent suggestions (read-only).
+   Variables expected:
+   - recent: ProductContentSuggestion[]
+#}
+
+{% if recent|length == 0 %}
+    <p class="ai-content-history__empty">Aucune suggestion encore générée pour ce produit.</p>
+{% else %}
+    <ul class="ai-content-history__list">
+        {% for s in recent %}
+            <li class="ai-content-history__item">
+                <span class="ai-badge"
+                      style="background: {{ s.status.badgeColor }}; color: #fff;">
+                    {{ s.status.label }}
+                </span>
+                <span class="ai-content-history__name">
+                    {{ s.nameFr ?: '—' }}
+                </span>
+                <span class="ai-content-history__date">
+                    {{ s.generatedAt|date('d/m H:i') }}
+                </span>
+                {% if s.appliedAt is not null %}
+                    <span class="ai-content-history__applied">
+                        <i class="fa fa-check"></i>
+                        appliquée le {{ s.appliedAt|date('d/m H:i') }}
+                    </span>
+                {% endif %}
+                {% if s.errorMessage is not null %}
+                    <span class="ai-content-history__error" title="{{ s.errorMessage }}">
+                        <i class="fa fa-circle-exclamation"></i>
+                        Erreur
+                    </span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}

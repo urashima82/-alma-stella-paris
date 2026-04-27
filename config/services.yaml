@@ -16,6 +16,8 @@ parameters:
     gemini.monthly_budget_usd: '%env(float:GEMINI_MONTHLY_BUDGET_USD)%'
     gemini.pro_model: '%env(GEMINI_PRO_MODEL)%'
     gemini.pro_cost_usd: '%env(float:GEMINI_PRO_COST_USD)%'
+    gemini.flash_text_model: '%env(GEMINI_FLASH_TEXT_MODEL)%'
+    gemini.flash_text_cost_usd: '%env(float:GEMINI_FLASH_TEXT_COST_USD)%'
 
 services:
     # default configuration for services in *this* file
@@ -65,3 +67,15 @@ services:
     App\Service\Generator\GeminiVisualGenerator:
         arguments:
             $estimatedCostUsd: '%gemini.pro_cost_usd%'
+
+    # AI content filling — Gemini 2.5 Flash multimodal (vision → structured text)
+    App\Service\Gemini\GeminiTextClient:
+        arguments:
+            $httpClient: '@http_client'
+            $logger: '@logger'
+            $geminiApiKey: '%gemini.api_key%'
+            $modelName: '%gemini.flash_text_model%'
+
+    App\Service\Content\ProductContentFiller:
+        arguments:
+            $estimatedCostUsd: '%gemini.flash_text_cost_usd%'
