@@ -1,0 +1,167 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Génération en cours…{% endblock %}
+
+{% block content_header %}
+    <h1 class="title">
+        <i class="fa fa-wand-magic-sparkles" style="color: var(--primary);"></i>
+        Génération en cours
+    </h1>
+{% endblock %}
+
+{% block main %}
+    <style>
+        .wizard-wait {
+            max-width: 560px;
+            margin: 4rem auto;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            background: var(--body-bg, #fff);
+            border: 1px solid var(--border-color, #dee2e6);
+            border-radius: 12px;
+        }
+        .wizard-wait__spinner {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color, #e0e0e0);
+            border-top-color: var(--primary, #5a8dee);
+            border-radius: 50%;
+            animation: wizard-spin 0.9s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        @keyframes wizard-spin {
+            to { transform: rotate(360deg); }
+        }
+        .wizard-wait__line {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            margin: 0.5rem 0;
+            color: var(--text-color, #333);
+        }
+        .wizard-wait__line[data-state="done"] { color: var(--success, #28a745); }
+        .wizard-wait__line[data-state="failed"] { color: var(--danger, #dc3545); }
+        .wizard-wait__hint {
+            margin-top: 1.5rem;
+            color: var(--text-muted, #888);
+            font-size: 0.875rem;
+        }
+        .wizard-wait__error {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 6px;
+            color: #856404;
+            font-size: 0.875rem;
+            display: none;
+        }
+        .wizard-wait__cancel {
+            margin-top: 2rem;
+        }
+    </style>
+
+    <div class="wizard-wait"
+         data-wizard-wait
+         data-status-url="{{ statusUrl }}"
+         data-edit-url="{{ editUrl }}"
+         data-visuals-requested="{{ visualsRequested ? '1' : '0' }}">
+        <div class="wizard-wait__spinner"></div>
+
+        <div class="wizard-wait__line" data-line="content">
+            <span data-icon>⋯</span>
+            <span data-label>Génération du contenu en cours…</span>
+        </div>
+
+        {% if visualsRequested %}
+            <div class="wizard-wait__line" data-line="visuals">
+                <span data-icon>⋯</span>
+                <span data-label>Génération des visuels en cours…</span>
+            </div>
+        {% endif %}
+
+        <p class="wizard-wait__hint">
+            Cette page se rafraîchit toutes les 2 secondes et vous redirigera automatiquement
+            dès que le contenu est prêt à être revu.
+        </p>
+
+        <div class="wizard-wait__error" data-wizard-error></div>
+
+        <form method="post" action="{{ cancelUrl }}" class="wizard-wait__cancel">
+            <button type="submit" class="btn btn-link text-muted"
+                    onclick="return confirm('Annuler la génération et supprimer le brouillon ?');">
+                <i class="fa fa-times"></i> Annuler et supprimer le brouillon
+            </button>
+        </form>
+    </div>
+
+    <script>
+        (function () {
+            const root = document.querySelector('[data-wizard-wait]');
+            if (!root) return;
+
+            const statusUrl = root.dataset.statusUrl;
+            const editUrl = root.dataset.editUrl;
+            const visualsRequested = root.dataset.visualsRequested === '1';
+            const errorBox = root.querySelector('[data-wizard-error]');
+            const contentLine = root.querySelector('[data-line="content"]');
+            const visualsLine = root.querySelector('[data-line="visuals"]');
+
+            const setLine = (line, state, label) => {
+                if (!line) return;
+                line.dataset.state = state;
+                const icon = line.querySelector('[data-icon]');
+                const labelEl = line.querySelector('[data-label]');
+                icon.textContent = state === 'done' ? '✓' : (state === 'failed' ? '✗' : '⋯');
+                if (label) labelEl.textContent = label;
+            };
+
+            let stopped = false;
+
+            const tick = async () => {
+                if (stopped) return;
+                try {
+                    const response = await fetch(statusUrl, {
+                        headers: { 'Accept': 'application/json' },
+                        credentials: 'same-origin',
+                    });
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const data = await response.json();
+
+                    if (data.errorMessage) {
+                        setLine(contentLine, 'failed', 'Échec de la génération du contenu.');
+                        errorBox.textContent = data.errorMessage;
+                        errorBox.style.display = 'block';
+                        stopped = true;
+                        return;
+                    }
+
+                    if (data.contentReady) {
+                        setLine(contentLine, 'done', 'Contenu prêt à être revu.');
+                    }
+                    if (visualsRequested && data.visualsReady) {
+                        setLine(visualsLine, 'done', 'Visuels prêts.');
+                    }
+
+                    // Redirect as soon as the content is reviewable — visuals
+                    // continue generating in the background and show up live in
+                    // the AI workspace via its own poller.
+                    if (data.contentReady) {
+                        stopped = true;
+                        window.location.href = editUrl;
+                        return;
+                    }
+                } catch (err) {
+                    // Transient network error — keep polling.
+                    console.warn('Wizard status polling error:', err);
+                }
+                setTimeout(tick, 2000);
+            };
+
+            tick();
+        })();
+    </script>
+{% endblock %}

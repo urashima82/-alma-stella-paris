@@ -7,6 +7,7 @@ namespace App\Controller\Admin;
 use App\Admin\Filter\AvailableInFilter;
 use App\Entity\GeneratedVisual;
 use App\Entity\Product;
+use App\Entity\ProductCategory;
 use App\Entity\ProductContentSuggestion;
 use App\Entity\SourcePhoto;
 use App\Enum\ContentSuggestionStatus;
@@ -48,6 +49,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 use Twig\Environment;
 
 /** @extends AbstractCrudController<Product> */
@@ -102,12 +104,18 @@ class ProductCrudController extends AbstractCrudController
             ->setCssClass('btn btn-info btn-sm')
             ->displayIf(static fn (Product $p): bool => $p->getGeneratedVisuals()->count() > 0);
 
+        $newWithAi = Action::new('newWithAi', 'Nouveau (IA)', 'fa fa-wand-magic-sparkles')
+            ->createAsGlobalAction()
+            ->linkToUrl($this->generateUrl('admin_product_wizard_new'))
+            ->setCssClass('btn btn-primary');
+
         return $actions
             ->add(Crud::PAGE_INDEX, $viewOnSite)
             ->add(Crud::PAGE_EDIT, $viewOnSite)
             ->add(Crud::PAGE_INDEX, $manageSourcePhotos)
             ->add(Crud::PAGE_INDEX, $generateVisuals)
             ->add(Crud::PAGE_INDEX, $viewVisuals)
+            ->add(Crud::PAGE_INDEX, $newWithAi)
             // On the edit page, the inline AI workspace replaces these redirect-only buttons.
             ->add(Crud::PAGE_EDIT, $viewVisuals);
     }
@@ -190,7 +198,11 @@ class ProductCrudController extends AbstractCrudController
                 ->having('COUNT(ch.id) = 0')
                 ->orderBy('sortPosition', 'ASC')
                 ->addOrderBy('entity.position', 'ASC')
-            );
+            )
+            ->setFormTypeOption('choice_label', static fn (ProductCategory $c): string => $c->getTreeLabelFr())
+            ->setFormTypeOption('group_by', static fn (ProductCategory $c): string => $c->getParent() !== null
+                ? ($c->getParent()->getNameFr() !== '' ? $c->getParent()->getNameFr() : $c->getParent()->getName())
+                : 'Catégories principales');
 
         yield FormField::addFieldset('Disponibilité', 'fa fa-globe');
         yield ChoiceField::new('availableIn', 'Pays')
@@ -852,6 +864,16 @@ class ProductCrudController extends AbstractCrudController
         }
         if ($suggestion->getDescriptionEn() !== null && $suggestion->getDescriptionEn() !== '') {
             $product->setDescription($suggestion->getDescriptionEn());
+        }
+
+        // Wizard-created drafts have placeholder slugs (`draft-…`) until a content
+        // suggestion is approved — recompute them from the approved name so the
+        // product gets a real, browseable URL.
+        if (\str_starts_with($product->getSlug(), 'draft-')) {
+            $product->setSlug((string) (new AsciiSlugger())->slug($product->getName())->lower());
+        }
+        if (\str_starts_with($product->getSlugFr(), 'draft-')) {
+            $product->setSlugFr((string) (new AsciiSlugger('fr'))->slug($product->getNameFr())->lower());
         }
 
         $suggestion->setStatus(ContentSuggestionStatus::Applied);

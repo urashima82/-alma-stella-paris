@@ -195,6 +195,49 @@ GEMINI_FLASH_TEXT_COST_USD=0.005
 - `ContentPromptBuilderTest` — vérifie les quatre branches de fallback,
   l'injection du `additionalContext`, le schéma JSON forcé.
 - `tests/Enum/ContentSuggestionStatusTest` — vérifie label + badge + ordre.
+- `tests/Form/Admin/ProductWizardDataTest` — couvre la contrainte Callback
+  qui borne à 2..4 le nombre de photos uploadées (slots vides ignorés).
 
 Tests d'intégration end-to-end (worker + Gemini réel) effectués
 manuellement depuis l'admin — voir DoD du Milestone 17 dans `ROADMAP.md`.
+
+---
+
+## 10. Wizard de création (entry point alternatif — Milestone 18)
+
+Le `ProductWizardController` (`/admin/product/wizard/...`) est un parcours
+dédié à la création initiale d'un produit, conçu pour minimiser la saisie
+de la gérante.
+
+```
+ProductCrudController index
+        │  bouton « Nouveau (IA) »
+        ▼
+GET  /admin/product/wizard/new        ── ProductWizardType (form)
+POST /admin/product/wizard/create     ── persist Product (placeholders + slug `draft-…`)
+                                          + 2..4 SourcePhoto via ImageStorage
+                                          + ProductContentSuggestion(Generating)
+                                          + dispatch FillProductContentMessage
+                                          [optional] + 3 GeneratedVisual(Generating)
+                                                     + dispatch GenerateVisualMessage ×3
+                                                     + visualStatus = PendingVisuals
+        ▼
+GET  /admin/product/wizard/wait/{id}  ── page d'attente avec spinner
+GET  .../wait/{id}/status             ── JSON { contentReady, errorMessage,
+                                                visualsRequested, visualsReady }
+POST /admin/product/wizard/cancel/{id} ── supprime le brouillon (fichiers + entités)
+        │
+        │ JS poll 2s — redirige dès que `contentReady = true`
+        ▼
+ProductCrudController edit (#tab-contenu-ia)
+        │  inlineApproveContent — étendu : si `slug` commence par `draft-`,
+        │  recalcule `slug` et `slugFr` via AsciiSlugger sur le nom approuvé.
+        ▼
+Produit avec slug réel + contenu appliqué
+```
+
+Le wizard et la modale de revue inline restent **indépendants** des
+pipelines visuels (M16) et contenu (M17) sous-jacents : il ne fait que
+les déclencher. La case « Générer aussi les visuels » est la seule
+décision couplée à M16 ; en l'absence de coche, aucun `GeneratedVisual`
+n'est créé.

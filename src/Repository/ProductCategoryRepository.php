@@ -89,13 +89,18 @@ class ProductCategoryRepository extends ServiceEntityRepository
      */
     public function findLeafCategories(): array
     {
+        // Group leaves under their parent: roots-without-children sort by their
+        // own position; children sort first by parent position, then their own.
+        // COALESCE keeps both kinds in a single ORDER BY pass.
         return $this->createQueryBuilder('c')
             ->leftJoin('c.children', 'ch')
             ->leftJoin('c.parent', 'p')
             ->addSelect('p')
+            ->addSelect('COALESCE(p.position, c.position) AS HIDDEN sortPosition')
             ->groupBy('c.id')
             ->having('COUNT(ch.id) = 0')
-            ->orderBy('c.position', 'ASC')
+            ->orderBy('sortPosition', 'ASC')
+            ->addOrderBy('c.position', 'ASC')
             ->getQuery()
             ->getResult();
     }

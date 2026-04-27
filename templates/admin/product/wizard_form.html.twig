@@ -1,0 +1,453 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+{% form_theme form '@EasyAdmin/crud/form_theme.html.twig' %}
+
+{% block page_title %}Nouveau produit assisté par IA{% endblock %}
+
+{% block content_header %}
+    <h1 class="title">
+        <i class="fa fa-wand-magic-sparkles" style="color: var(--primary);"></i>
+        Nouveau produit assisté par IA
+    </h1>
+    <p class="text-muted" style="margin-top: 0.4rem;">
+        Renseignez le strict minimum. Le contenu (nom + description FR/EN) sera généré automatiquement à partir des photos et de la catégorie.
+    </p>
+{% endblock %}
+
+{% block main %}
+    <style>
+        .wiz { max-width: 960px; margin: 0 auto; padding: 1rem 0 6rem; }
+
+        .wiz-card {
+            background: var(--body-bg, #fff);
+            border: 1px solid var(--border-color, #e1e4e8);
+            border-radius: 10px;
+            padding: 1.5rem 1.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .wiz-card__head {
+            display: flex; align-items: baseline; justify-content: space-between;
+            gap: 1rem; margin-bottom: 1rem;
+        }
+        .wiz-card__title { font-size: 1.05rem; font-weight: 600; margin: 0; }
+        .wiz-card__hint  { color: var(--text-muted, #888); font-size: 0.85rem; margin: 0; }
+
+        /* ── Photos ─────────────────────────────────────────────────── */
+        .wiz-photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+        @media (max-width: 768px) { .wiz-photos { grid-template-columns: repeat(2, 1fr); } }
+
+        .wiz-slot {
+            position: relative;
+            aspect-ratio: 1;
+            border: 2px dashed var(--border-color, #d0d4d9);
+            border-radius: 8px;
+            background: var(--secondary-bg, #fafbfc);
+            cursor: pointer;
+            transition: all 0.15s;
+            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .wiz-slot:hover { border-color: var(--primary, #5a8dee); background: #fff; }
+        .wiz-slot.is-dragover { border-color: var(--primary, #5a8dee); background: rgba(90,141,238,0.05); border-style: solid; }
+        .wiz-slot.has-file { border-style: solid; border-color: var(--primary, #5a8dee); padding: 0; }
+        .wiz-slot.is-extra { display: none; }
+        .wiz-slot.is-extra.is-visible { display: flex; }
+
+        /* Hide the native file input, label drives the click */
+        .wiz-slot input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+        .wiz-slot__icon { font-size: 1.75rem; opacity: 0.4; margin-bottom: 0.25rem; }
+        .wiz-slot__label { font-size: 0.85rem; font-weight: 500; color: var(--text-color, #555); }
+        .wiz-slot__sub   { font-size: 0.7rem; color: var(--text-muted, #888); margin-top: 0.15rem; }
+        .wiz-slot.has-file .wiz-slot__icon,
+        .wiz-slot.has-file .wiz-slot__label,
+        .wiz-slot.has-file .wiz-slot__sub { display: none; }
+
+        .wiz-slot__preview {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%; object-fit: cover;
+            display: none;
+        }
+        .wiz-slot.has-file .wiz-slot__preview { display: block; }
+
+        .wiz-slot__angle {
+            position: absolute; bottom: 0.4rem; left: 0.4rem; right: 2.4rem;
+            background: rgba(255,255,255,0.95);
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.35rem;
+            display: none;
+        }
+        .wiz-slot.has-file .wiz-slot__angle { display: block; }
+
+        .wiz-slot__remove {
+            position: absolute; top: 0.4rem; right: 0.4rem;
+            width: 1.6rem; height: 1.6rem;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.65); color: #fff;
+            border: 0; cursor: pointer;
+            display: none; align-items: center; justify-content: center;
+            font-size: 0.85rem; line-height: 1;
+            z-index: 2;
+        }
+        .wiz-slot.has-file .wiz-slot__remove { display: flex; }
+        .wiz-slot__remove:hover { background: rgba(0,0,0,0.85); }
+
+        .wiz-photos-meta {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin-top: 0.75rem; font-size: 0.85rem;
+        }
+        .wiz-counter {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            background: var(--secondary-bg, #f1f3f5);
+            border-radius: 999px;
+            font-weight: 500;
+        }
+        .wiz-counter.is-valid { background: #d4edda; color: #155724; }
+        .wiz-counter.is-invalid { background: #fff3cd; color: #856404; }
+
+        /* ── Two-column row ─────────────────────────────────────────── */
+        .wiz-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        @media (max-width: 768px) { .wiz-row { grid-template-columns: 1fr; } }
+
+        /* ── Stones / Pays as pill checkboxes ──────────────────────── */
+        /* The Bootstrap 5 form theme wraps each expanded choice in a
+           `.form-check` block. We flatten that wrapper, hide the native
+           checkbox, and turn the label into a clickable pill. */
+        .wiz-pills {
+            display: flex; flex-wrap: wrap; gap: 0.4rem;
+            max-height: 240px; overflow-y: auto;
+            padding: 0.25rem 0;
+        }
+        .wiz-pills--countries { max-height: none; }
+        .wiz-pills > div { display: contents; }
+        .wiz-pills .form-check {
+            display: inline-flex;
+            margin: 0;
+            padding: 0;
+            min-height: 0;
+        }
+        .wiz-pills .form-check-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            margin: 0;
+        }
+        .wiz-pills .form-check-label {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            border: 1px solid var(--border-color, #d0d4d9);
+            border-radius: 999px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.12s;
+            user-select: none;
+            margin: 0;
+        }
+        .wiz-pills .form-check-label:hover { border-color: var(--primary, #5a8dee); }
+        .wiz-pills .form-check-input:checked ~ .form-check-label,
+        .wiz-pills .form-check-label.is-checked {
+            background: var(--primary, #5a8dee);
+            border-color: var(--primary, #5a8dee);
+            color: #fff;
+        }
+        .wiz-pills--countries .form-check-label { padding: 0.55rem 1.2rem; font-size: 0.95rem; }
+
+        /* ── Toggle (publish + generate visuals) ────────────────────── */
+        .wiz-toggle {
+            display: flex; align-items: center; gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            border: 1px solid var(--border-color, #e1e4e8);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.12s;
+            margin: 0;
+        }
+        .wiz-toggle:hover { border-color: var(--primary, #5a8dee); }
+        .wiz-toggle input[type="checkbox"] { position: absolute; opacity: 0; pointer-events: none; }
+        .wiz-toggle__switch {
+            flex: 0 0 auto;
+            width: 38px; height: 22px;
+            background: #d0d4d9;
+            border-radius: 999px;
+            position: relative;
+            transition: background 0.15s;
+        }
+        .wiz-toggle__switch::after {
+            content: ''; position: absolute;
+            top: 2px; left: 2px;
+            width: 18px; height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.15s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .wiz-toggle input:checked ~ .wiz-toggle__switch { background: var(--primary, #5a8dee); }
+        .wiz-toggle input:checked ~ .wiz-toggle__switch::after { transform: translateX(16px); }
+        .wiz-toggle__body { flex: 1; min-width: 0; }
+        .wiz-toggle__title { font-weight: 600; font-size: 0.95rem; line-height: 1.25; }
+        .wiz-toggle__hint  { color: var(--text-muted, #888); font-size: 0.82rem; margin-top: 0.15rem; }
+
+        /* ── Sticky action bar ──────────────────────────────────────── */
+        .wiz-actions {
+            position: sticky; bottom: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            background: var(--body-bg, #fff);
+            border: 1px solid var(--border-color, #e1e4e8);
+            border-radius: 10px;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+            margin-top: 1.5rem;
+        }
+        .wiz-actions .btn { min-width: 140px; }
+        .wiz-actions__primary { display: flex; align-items: center; gap: 0.85rem; }
+        .wiz-actions__pricing { font-size: 0.85rem; color: var(--text-muted, #888); }
+
+        /* form-control consistency */
+        .wiz-card .form-row { margin-bottom: 0; }
+        .wiz-card .form-row + .form-row { margin-top: 0.85rem; }
+    </style>
+
+    {{ form_start(form, { attr: { 'enctype': 'multipart/form-data', 'novalidate': 'novalidate', 'action': path('admin_product_wizard_create'), 'class': 'wiz' } }) }}
+
+    {# ─── Photos ────────────────────────────────────────────────── #}
+    <div class="wiz-card">
+        <div class="wiz-card__head">
+            <div>
+                <h2 class="wiz-card__title">Photos sources</h2>
+                <p class="wiz-card__hint">2 à 4 photos. Cliquez ou déposez un fichier sur un emplacement.</p>
+            </div>
+            <span class="wiz-counter" id="wiz-counter">0 / 4</span>
+        </div>
+
+        <div class="wiz-photos" data-wiz-photos>
+            {% for photoForm in form.photos %}
+                {% set angleValue = photoForm.angle.vars.value %}
+                {% set angleLabel = photoForm.angle.vars.choices|filter(c => c.value == angleValue)|first.label|default(angleValue) %}
+                <label class="wiz-slot{% if loop.index0 >= 2 %} is-extra{% endif %}" data-slot data-default-angle="{{ angleLabel }}">
+                    {{ form_widget(photoForm.file, { attr: { 'data-photo-input': true, 'accept': 'image/jpeg,image/png,image/webp' } }) }}
+                    <div class="wiz-slot__icon">📷</div>
+                    <div class="wiz-slot__label">Photo {{ loop.index }}</div>
+                    <div class="wiz-slot__sub">{{ angleLabel }}</div>
+                    <img alt="" class="wiz-slot__preview" data-photo-preview>
+                    <div class="wiz-slot__angle">
+                        {{ form_widget(photoForm.angle, { attr: { 'data-photo-angle': true } }) }}
+                    </div>
+                    <button type="button" class="wiz-slot__remove" data-photo-remove title="Retirer">✕</button>
+                </label>
+            {% endfor %}
+        </div>
+
+        <div class="wiz-photos-meta">
+            <button type="button" class="btn btn-link" data-wiz-add-slot style="padding: 0;">
+                <i class="fa fa-plus"></i> Ajouter un emplacement
+            </button>
+            {% if form.photos.vars.errors|length > 0 %}
+                <div class="invalid-feedback d-block" style="margin: 0;">
+                    {{ form_errors(form.photos) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ─── Catégorisation ────────────────────────────────────────── #}
+    <div class="wiz-card">
+        <h2 class="wiz-card__title" style="margin-bottom: 1rem;">Catégorisation</h2>
+        <div class="wiz-row">
+            <div>
+                {{ form_row(form.category) }}
+            </div>
+            <div>
+                <label class="form-label">{{ form.stones.vars.label }}</label>
+                <div class="wiz-pills" data-wiz-pills>
+                    {{ form_widget(form.stones) }}
+                </div>
+                <small class="form-text text-muted">Optionnel — sélectionnez les pierres présentes dans le bijou.</small>
+            </div>
+        </div>
+    </div>
+
+    {# ─── Tarif + dispo ─────────────────────────────────────────── #}
+    <div class="wiz-card">
+        <h2 class="wiz-card__title" style="margin-bottom: 1rem;">Tarif &amp; disponibilité</h2>
+        <div class="wiz-row">
+            <div>{{ form_row(form.basePrice) }}</div>
+            <div>{{ form_row(form.shippingTier) }}</div>
+        </div>
+
+        <div style="margin-top: 1.25rem;">
+            <label class="form-label">{{ form.availableIn.vars.label }}</label>
+            <div class="wiz-pills wiz-pills--countries" data-wiz-pills>
+                {{ form_widget(form.availableIn) }}
+            </div>
+        </div>
+    </div>
+
+    {# ─── IA + publication ──────────────────────────────────────── #}
+    <div class="wiz-card">
+        <h2 class="wiz-card__title" style="margin-bottom: 1rem;">Génération IA &amp; publication</h2>
+
+        {# Render the checkboxes as bare <input>s so the Bootstrap 5 form theme
+           does not wrap them in a `.form-check` block — we provide our own
+           switch markup around them. #}
+        <label class="wiz-toggle">
+            <input type="checkbox"
+                   id="{{ form.generateVisuals.vars.id }}"
+                   name="{{ form.generateVisuals.vars.full_name }}"
+                   value="1"
+                   {% if form.generateVisuals.vars.value %}checked{% endif %}>
+            <span class="wiz-toggle__switch"></span>
+            <span class="wiz-toggle__body">
+                <span class="wiz-toggle__title">Générer aussi les visuels</span>
+                <span class="wiz-toggle__hint">Lance la génération IA des 3 visuels (vignette, porté, lifestyle) en plus du contenu textuel.</span>
+            </span>
+        </label>
+
+        <label class="wiz-toggle" style="margin-top: 0.75rem;">
+            <input type="checkbox"
+                   id="{{ form.isPublished.vars.id }}"
+                   name="{{ form.isPublished.vars.full_name }}"
+                   value="1"
+                   {% if form.isPublished.vars.value %}checked{% endif %}>
+            <span class="wiz-toggle__switch"></span>
+            <span class="wiz-toggle__body">
+                <span class="wiz-toggle__title">Publier immédiatement</span>
+                <span class="wiz-toggle__hint">Décocher pour garder le produit en brouillon le temps de le revoir.</span>
+            </span>
+        </label>
+
+        {# Mark these as rendered so form_rest (called by form_end) does not
+           emit a duplicate widget for them. #}
+        {% do form.generateVisuals.setRendered %}
+        {% do form.isPublished.setRendered %}
+    </div>
+
+    {# ─── Sticky actions ────────────────────────────────────────── #}
+    <div class="wiz-actions">
+        <a href="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('index') }}" class="btn btn-link">
+            ← Annuler
+        </a>
+        <div class="wiz-actions__primary">
+            <span class="wiz-actions__pricing">Le contenu (nom + description FR/EN) sera généré.</span>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-wand-magic-sparkles"></i> Lancer la génération
+            </button>
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+
+    <script>
+        (function () {
+            const photoContainer = document.querySelector('[data-wiz-photos]');
+            if (photoContainer) initPhotoSlots(photoContainer);
+
+            document.querySelectorAll('[data-wiz-pills]').forEach(initPillGroup);
+        })();
+
+        function initPhotoSlots(container) {
+            const slots = Array.from(container.querySelectorAll('[data-slot]'));
+            const counter = document.getElementById('wiz-counter');
+            const addBtn = document.querySelector('[data-wiz-add-slot]');
+
+            const updateCounter = () => {
+                const filled = slots.filter(s => s.classList.contains('has-file')).length;
+                const visible = slots.filter(s => !s.classList.contains('is-extra') || s.classList.contains('is-visible')).length;
+                counter.textContent = filled + ' / ' + visible;
+                counter.classList.toggle('is-valid', filled >= 2 && filled <= 4);
+                counter.classList.toggle('is-invalid', filled < 2);
+                if (addBtn) {
+                    const remaining = slots.filter(s => s.classList.contains('is-extra') && !s.classList.contains('is-visible')).length;
+                    addBtn.style.display = remaining > 0 ? '' : 'none';
+                }
+            };
+
+            const showPreview = (slot, file) => {
+                const preview = slot.querySelector('[data-photo-preview]');
+                const reader = new FileReader();
+                reader.onload = e => { preview.src = e.target.result; };
+                reader.readAsDataURL(file);
+                slot.classList.add('has-file');
+            };
+
+            slots.forEach(slot => {
+                const input = slot.querySelector('[data-photo-input]');
+                const removeBtn = slot.querySelector('[data-photo-remove]');
+                if (!input) return;
+
+                input.addEventListener('change', () => {
+                    if (input.files && input.files[0]) {
+                        showPreview(slot, input.files[0]);
+                    } else {
+                        slot.classList.remove('has-file');
+                    }
+                    updateCounter();
+                });
+
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        input.value = '';
+                        slot.classList.remove('has-file');
+                        const preview = slot.querySelector('[data-photo-preview]');
+                        if (preview) preview.src = '';
+                        updateCounter();
+                    });
+                }
+
+                // Drag & drop
+                slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('is-dragover'); });
+                slot.addEventListener('dragleave', () => slot.classList.remove('is-dragover'));
+                slot.addEventListener('drop', e => {
+                    e.preventDefault();
+                    slot.classList.remove('is-dragover');
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                        const dt = new DataTransfer();
+                        dt.items.add(e.dataTransfer.files[0]);
+                        input.files = dt.files;
+                        input.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                // Stop click propagation from the embedded angle select
+                const angleSelect = slot.querySelector('[data-photo-angle]');
+                if (angleSelect) {
+                    angleSelect.addEventListener('click', e => e.stopPropagation());
+                    angleSelect.addEventListener('change', e => e.stopPropagation());
+                }
+            });
+
+            if (addBtn) {
+                addBtn.addEventListener('click', () => {
+                    const next = slots.find(s => s.classList.contains('is-extra') && !s.classList.contains('is-visible'));
+                    if (next) {
+                        next.classList.add('is-visible');
+                        updateCounter();
+                    }
+                });
+            }
+
+            updateCounter();
+        }
+
+        function initPillGroup(group) {
+            // Symfony renders expanded ChoiceType as a wrapping <div> with a stack of
+            // <input type=checkbox> + <label>. We hide the inputs (CSS) and toggle the
+            // `is-checked` class on labels so styling works without :has() support quirks.
+            const wrap = group.querySelector(':scope > div, :scope > fieldset') || group;
+            const labels = wrap.querySelectorAll('label');
+            labels.forEach(label => {
+                const input = label.querySelector('input[type="checkbox"]') || (label.htmlFor ? document.getElementById(label.htmlFor) : null);
+                if (!input) return;
+                const sync = () => label.classList.toggle('is-checked', input.checked);
+                sync();
+                input.addEventListener('change', sync);
+            });
+        }
+    </script>
+{% endblock %}

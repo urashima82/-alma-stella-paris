@@ -78,14 +78,26 @@ class ProductCategory
 
     public function __toString(): string
     {
-        return $this->parent !== null
-            ? $this->parent->getName().' → '.$this->name
-            : $this->name;
+        // Admin UI runs in French (DashboardController locale), and __toString() is
+        // what AssociationField and the product list rely on by default.
+        $self = $this->nameFr !== '' ? $this->nameFr : $this->name;
+        $parent = $this->parent;
+        if ($parent === null) {
+            return $self;
+        }
+        $parentLabel = $parent->getNameFr() !== '' ? $parent->getNameFr() : $parent->getName();
+
+        return $parentLabel.' → '.$self;
     }
 
     public function getTreeLabel(): string
     {
         return $this->name;
+    }
+
+    public function getTreeLabelFr(): string
+    {
+        return $this->nameFr !== '' ? $this->nameFr : $this->name;
     }
 
     /**

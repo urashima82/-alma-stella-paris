@@ -16,12 +16,16 @@ final class ImageStorage
     ) {
     }
 
-    public function storeSourcePhoto(UploadedFile $file, Product $product): string
+    public function storeSourcePhoto(UploadedFile $file, Product $product, ?int $position = null): string
     {
         $productId = $product->getId();
         $extension = $file->guessExtension() ?? 'jpg';
-        $position = $product->getSourcePhotos()->count() + 1;
-        $path = \sprintf('%d/sources/%02d.%s', $productId, $position, $extension);
+        // Callers that persist several uploads in one transaction (e.g. the
+        // creation wizard) must pass an explicit position — otherwise the
+        // in-memory collection count stays at 0 between iterations and every
+        // file ends up overwriting `01.{ext}`.
+        $resolvedPosition = $position ?? ($product->getSourcePhotos()->count() + 1);
+        $path = \sprintf('%d/sources/%02d.%s', $productId, $resolvedPosition, $extension);
 
         $this->defaultStorage->write($path, (string) \file_get_contents($file->getPathname()));
 
