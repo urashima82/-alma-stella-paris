@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace App\MessageHandler;
 
 use App\Entity\GeneratedVisual;
+use App\Entity\Product;
 use App\Enum\VisualStatus;
 use App\Enum\VisualWorkflowStatus;
 use App\Message\GenerateVisualMessage;
+use App\Repository\GeneratedVisualRepository;
 use App\Repository\ProductRepository;
 use App\Service\Gemini\BudgetGuard;
-use App\Service\Gemini\GeminiApiException;
-use App\Service\Gemini\GeminiImageClient;
+use App\Service\Generator\VisualGenerationException;
+use App\Service\Generator\VisualGeneratorRouter;
 use App\Service\Prompt\PromptBuilder;
 use App\Service\Visual\ImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,14 +25,13 @@ use Symfony\Component\RateLimiter\RateLimiterFactory;
 #[AsMessageHandler]
 final class GenerateVisualHandler
 {
-    private const float ESTIMATED_COST_PER_IMAGE = 0.039;
-
     public function __construct(
         private readonly RateLimiterFactory $geminiApiLimiter,
         private readonly BudgetGuard $budgetGuard,
         private readonly ProductRepository $productRepository,
+        private readonly GeneratedVisualRepository $visualRepository,
         private readonly PromptBuilder $promptBuilder,
-        private readonly GeminiImageClient $geminiClient,
+        private readonly VisualGeneratorRouter $generatorRouter,
         private readonly ImageStorage $imageStorage,
         private readonly EntityManagerInterface $entityManager,
         private readonly LoggerInterface $logger,
@@ -46,6 +47,8 @@ final class GenerateVisualHandler
 
         $this->budgetGuard->ensureBudgetAvailable();
 
+        $generator = $this->generatorRouter->for($message->type);
+
         $product = $this->productRepository->find($message->productId);
         if ($product === null) {
             $this->logger->error('Product not found for visual generation', ['productId' => $message->productId]);
@@ -60,6 +63,11 @@ final class GenerateVisualHandler
             return;
         }
 
+        // Resolve the GeneratedVisual entity: either the one pre-created by the
+        // controller (preferred — visualId is set) or fall back to creating a new
+        // one for legacy queued messages.
+        $visual = $this->resolveOrCreateVisual($message, $product);
+
         $promptResult = $this->promptBuilder->buildForVisual($product, $message->type);
 
         $sourcesBase64 = [];
@@ -69,33 +77,47 @@ final class GenerateVisualHandler
         }
 
         try {
-            $response = $this->geminiClient->generate($promptResult->content, $sourcesBase64);
-        } catch (GeminiApiException $e) {
-            $this->createFailedVisual($message, $promptResult->content, $promptResult->categoryPromptVersion, $e);
+            $result = $generator->generate($promptResult->content, $sourcesBase64, $message->type);
+        } catch (\Throwable $e) {
+            // Catch Throwable (not just VisualGenerationException) so any unexpected
+            // crash — HTTP timeout, parse error, OOM, etc. — still flips the visual
+            // to Failed with a readable error_message rather than leaving it stuck
+            // in `generating` forever.
+            $visual->setPromptUsed($promptResult->content);
+            $visual->setCategoryPromptVersion($promptResult->categoryPromptVersion);
+            $visual->setStatus(VisualStatus::Failed);
+            $visual->setErrorMessage($e->getMessage());
+            $this->entityManager->flush();
+
+            $this->logger->error('Visual generation failed', [
+                'productId' => $message->productId,
+                'type' => $message->type->value,
+                'variant' => $message->variantNumber,
+                'visualId' => $visual->getId(),
+                'error' => $e->getMessage(),
+                'httpStatus' => $e instanceof VisualGenerationException ? $e->getHttpStatusCode() : null,
+                'exception' => $e,
+            ]);
 
             return;
         }
 
         $path = $this->imageStorage->storeGeneratedVisual(
-            $response->imageData,
+            $result->imageBase64,
             $product,
             $message->type,
             $message->variantNumber,
         );
 
-        $visual = new GeneratedVisual();
-        $visual->setProduct($product);
-        $visual->setType($message->type);
         $visual->setPath($path);
         $visual->setPromptUsed($promptResult->content);
         $visual->setCategoryPromptVersion($promptResult->categoryPromptVersion);
         $visual->setStatus(VisualStatus::PendingReview);
-        $visual->setVariant($message->variantNumber);
-        $visual->setGeminiRequestId($response->requestId);
+        $visual->setGeminiRequestId($result->requestId);
+        $visual->setModelUsed($result->modelName);
+        $visual->setErrorMessage(null);
 
-        $this->entityManager->persist($visual);
-
-        $this->budgetGuard->recordCall(self::ESTIMATED_COST_PER_IMAGE);
+        $this->budgetGuard->recordCall($result->estimatedCostUsd);
 
         if ($this->allVariantsGenerated($product)) {
             $product->setVisualStatus(VisualWorkflowStatus::ReadyForReview);
@@ -107,43 +129,35 @@ final class GenerateVisualHandler
             'productId' => $message->productId,
             'type' => $message->type->value,
             'variant' => $message->variantNumber,
+            'visualId' => $visual->getId(),
             'usedFallback' => $promptResult->usedFallback,
         ]);
     }
 
-    private function createFailedVisual(
-        GenerateVisualMessage $message,
-        string $promptUsed,
-        int $categoryPromptVersion,
-        GeminiApiException $exception,
-    ): void {
-        $product = $this->productRepository->find($message->productId);
-        if ($product === null) {
-            return;
+    private function resolveOrCreateVisual(GenerateVisualMessage $message, Product $product): GeneratedVisual
+    {
+        if ($message->visualId !== null) {
+            $visual = $this->visualRepository->find($message->visualId);
+            if ($visual !== null) {
+                return $visual;
+            }
+            $this->logger->warning('GenerateVisualMessage references missing visualId, creating new entity', [
+                'visualId' => $message->visualId,
+            ]);
         }
 
         $visual = new GeneratedVisual();
         $visual->setProduct($product);
         $visual->setType($message->type);
-        $visual->setPromptUsed($promptUsed);
-        $visual->setCategoryPromptVersion($categoryPromptVersion);
-        $visual->setStatus(VisualStatus::Failed);
         $visual->setVariant($message->variantNumber);
-        $visual->setErrorMessage($exception->getMessage());
-
+        $visual->setStatus(VisualStatus::Generating);
         $this->entityManager->persist($visual);
         $this->entityManager->flush();
 
-        $this->logger->error('Visual generation failed', [
-            'productId' => $message->productId,
-            'type' => $message->type->value,
-            'variant' => $message->variantNumber,
-            'error' => $exception->getMessage(),
-            'httpStatus' => $exception->getHttpStatusCode(),
-        ]);
+        return $visual;
     }
 
-    private function allVariantsGenerated(\App\Entity\Product $product): bool
+    private function allVariantsGenerated(Product $product): bool
     {
         $total = 0;
         $generated = 0;

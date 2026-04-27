@@ -169,7 +169,10 @@ class DashboardController extends AbstractDashboardController
             ->addCssFile('css/admin-crop.css')
             ->addJsFile('vendor/cropperjs/cropper.min.js')
             ->addJsFile('js/admin-image-crop.js')
-            ->addJsFile('js/admin-toast.js');
+            ->addJsFile('js/admin-toast.js')
+            ->addJsFile('js/admin-lightbox.js')
+            ->addJsFile('js/admin-ai-poll.js')
+            ->addJsFile('js/admin-ai-actions.js');
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu

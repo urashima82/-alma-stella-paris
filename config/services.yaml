@@ -14,6 +14,8 @@ parameters:
     behold.feed_id: '%env(BEHOLD_FEED_ID)%'
     gemini.api_key: '%env(GEMINI_API_KEY)%'
     gemini.monthly_budget_usd: '%env(float:GEMINI_MONTHLY_BUDGET_USD)%'
+    gemini.pro_model: '%env(GEMINI_PRO_MODEL)%'
+    gemini.pro_cost_usd: '%env(float:GEMINI_PRO_COST_USD)%'
 
 services:
     # default configuration for services in *this* file
@@ -51,3 +53,15 @@ services:
     App\Controller\Shop\CheckoutController:
         arguments:
             $stripePublicKey: '%stripe.public_key%'
+
+    # AI visual generation — Gemini 3 Pro Image Preview for all visual types
+    App\Service\Gemini\GeminiImageClient:
+        arguments:
+            $httpClient: '@http_client'
+            $logger: '@logger'
+            $geminiApiKey: '%gemini.api_key%'
+            $modelName: '%gemini.pro_model%'
+
+    App\Service\Generator\GeminiVisualGenerator:
+        arguments:
+            $estimatedCostUsd: '%gemini.pro_cost_usd%'

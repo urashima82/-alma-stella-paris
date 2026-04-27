@@ -53,7 +53,8 @@ alma-stella/
 │   │   │   ├── OrderCrudController.php           # Order management with status workflow
 │   │   │   ├── OrderItemCrudController.php       # OrderItem sub-form (read-only)
 │   │   │   ├── ProductCategoryCrudController.php # Category management
-│   │   │   ├── ProductCrudController.php         # Product management with image uploads
+│   │   │   ├── ProductCrudController.php         # Product mgmt + inline AI workspace (sources upload, gallery, actions)
+│   │   │   ├── SourcePhotoCrudController.php     # Standalone source photo CRUD (also embedded in product page)
 │   │   │   ├── PromotionCrudController.php      # Promotion management with targeting + stats
 │   │   │   ├── StoneCrudController.php          # Stone CRUD — bilingual, image upload, product links
 │   │   │   ├── TestimonialCrudController.php    # Testimonial moderation (pending/approved/rejected)

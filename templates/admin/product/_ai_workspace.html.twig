@@ -1,0 +1,162 @@
+{# templates/admin/product/_ai_workspace.html.twig
+   Inline AI workspace embedded in the Product edit page (Visuels IA tab).
+   Variables expected:
+   - product: App\Entity\Product
+   - groupedVisuals: array<string, GeneratedVisual[]>  (keyed by VisualType value)
+   - sourcePhotos: SourcePhoto[]
+   - photoAngles: PhotoAngle[]
+   - visualTypes: VisualType[]
+#}
+
+{% set product_id = product.id %}
+{% set workflow_status = product.visualStatus %}
+{% set has_generating_visual = false %}
+{% for visual in product.generatedVisuals %}
+    {% if visual.status.value == 'generating' %}{% set has_generating_visual = true %}{% endif %}
+{% endfor %}
+{# `is_pending` (button disable) — only true while a visual is *actively* being
+   processed. The queue serialises additional dispatches anyway, so we don't lock
+   the UI just because the workflow is in `pending_visuals` state.
+   `should_poll` (polling start) — broader: also true between dispatch and the
+   moment the worker picks up the message, so the user sees progress. #}
+{% set is_pending = has_generating_visual %}
+{% set should_poll = has_generating_visual or workflow_status.value == 'pending_visuals' %}
+{# Same signature format as ProductCrudController::buildAiStatusPayload — keeps first
+   poll from missing transitions when SSR state already matches the backend state. #}
+{% set initial_signature %}{% for v in product.generatedVisuals|sort((a, b) => a.id <=> b.id) %}{{ v.id }}:{{ v.status.value }}{% if not loop.last %}|{% endif %}{% endfor %}#{{ workflow_status.value }}{% endset %}
+
+<div id="ai-poll-config"
+     data-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('aiStatus').setEntityId(product_id).generateUrl() }}"
+     data-pending="{{ should_poll ? '1' : '0' }}"
+     data-signature="{{ initial_signature }}"
+     hidden></div>
+
+<div class="ai-workspace">
+
+    {# ── Header (status only — title is the tab itself) ── #}
+    <header class="ai-workspace__header">
+        <div class="ai-workspace__status">
+            <span class="ai-workspace__status-label">Statut workflow</span>
+            <span class="ai-badge"
+                  data-ai-status-badge
+                  style="background: {{ workflow_status.badgeColor }}; color: #fff;">
+                {{ workflow_status.label }}
+            </span>
+        </div>
+    </header>
+
+    {# ── Two-column layout: sources (left) + generated (right) ── #}
+    <div class="ai-workspace__split">
+
+        {# ── LEFT: Source photos ── #}
+        <section class="ai-workspace__col ai-workspace__col--sources">
+            <header class="ai-workspace__col-header">
+                <h3>
+                    <i class="fa fa-camera"></i>
+                    Photos sources
+                    <span class="ai-count">{{ sourcePhotos|length }}</span>
+                </h3>
+            </header>
+
+            <div class="ai-source-grid">
+                {% for source in sourcePhotos %}
+                    <figure class="ai-source-tile">
+                        <button type="button" class="ai-source-tile__preview js-admin-lightbox-trigger"
+                               >
+                            <img src="/storage/products/{{ source.path }}"
+                                 alt="Source {{ source.position }}"
+                                >
+                        </button>
+                        <figcaption class="ai-source-tile__caption">
+                            <span class="ai-source-tile__angle">{{ source.angle.label }}</span>
+                            <span class="ai-source-tile__position">#{{ source.position }}</span>
+                        </figcaption>
+                        <button type="button"
+                                class="ai-source-tile__delete"
+                                data-ai-action="post"
+                                data-ai-reload="true"
+                                data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineDeleteSource').setEntityId(product_id).set('sourceId', source.id).generateUrl() }}"
+                                data-ai-confirm="Supprimer cette photo source ?"
+                                title="Supprimer">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </figure>
+                {% endfor %}
+
+                {# Upload tile — angle picked first, file change triggers AJAX upload #}
+                <div class="ai-source-upload"
+                     data-ai-upload-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineUploadSource').setEntityId(product_id).generateUrl() }}">
+                    <select class="ai-source-upload__angle" title="Angle" data-ai-upload-angle>
+                        {% for angle in photoAngles %}
+                            <option value="{{ angle.value }}">{{ angle.label }}</option>
+                        {% endfor %}
+                    </select>
+                    <label class="ai-source-upload__dropzone">
+                        <input type="file" accept="image/jpeg,image/png,image/webp" data-ai-upload-file>
+                        <i class="fa fa-plus"></i>
+                        <span>Ajouter</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        {# ── RIGHT: Generated visuals ── #}
+        <section class="ai-workspace__col ai-workspace__col--generated">
+            <header class="ai-workspace__col-header ai-workspace__col-header--with-cta">
+                <h3>
+                    <i class="fa fa-images"></i>
+                    Visuels générés
+                </h3>
+                <button type="button"
+                        class="btn btn-primary btn-sm ai-workspace__generate-all"
+                        data-ai-generate-btn
+                        data-ai-generate-type="all"
+                        data-ai-action="post"
+                        data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineGenerateAll').setEntityId(product_id).generateUrl() }}"
+                        {% if sourcePhotos|length == 0 or is_pending %}disabled{% endif %}
+                        title="Lancer une génération sur les 3 types simultanément">
+                    <i class="fa fa-wand-magic-sparkles"></i>
+                    Générer les 3 visuels
+                </button>
+            </header>
+
+            <div class="ai-visuals-grid">
+                {% for type in visualTypes %}
+                    {% set type_visuals = groupedVisuals[type.value] ?? [] %}
+                    <div class="ai-visual-column" data-ai-visual-type="{{ type.value }}">
+                        <header class="ai-visual-column__header">
+                            <h4>
+                                {{ type.label }}
+                                <span class="ai-visual-column__count" data-ai-visual-count>({{ type_visuals|length }})</span>
+                            </h4>
+                            <button type="button"
+                                    class="btn btn-warning btn-sm ai-visual-column__generate"
+                                    data-ai-generate-btn
+                                    data-ai-generate-type="{{ type.value }}"
+                                    data-ai-action="post"
+                                    data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineGenerateType').setEntityId(product_id).set('type', type.value).generateUrl() }}"
+                                    {% if sourcePhotos|length == 0 or is_pending %}disabled{% endif %}
+                                    title="Générer un nouveau visuel {{ type.label }}">
+                                <i class="fa fa-wand-magic-sparkles"></i>
+                                Générer
+                            </button>
+                        </header>
+
+                        <div class="ai-visual-column__items" data-ai-visual-items="{{ type.value }}">
+                            {% if type_visuals|length == 0 %}
+                                <div class="ai-visual-empty">
+                                    <i class="fa fa-image"></i>
+                                </div>
+                            {% else %}
+                                {% for visual in type_visuals %}
+                                    {% include 'admin/product/_ai_visual_tile.html.twig' with { visual: visual, product_id: product_id } only %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+    </div>
+</div>

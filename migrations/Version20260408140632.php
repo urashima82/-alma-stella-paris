@@ -111,7 +111,7 @@ final class Version20260408140632 extends AbstractMigration
         $this->addSql('ALTER TABLE source_photo ADD CONSTRAINT FK_SOURCE_PHOTO_PRODUCT FOREIGN KEY (product_id) REFERENCES product (id)');
 
         // GeneratedVisual table
-        $this->addSql('CREATE TABLE generated_visual (id INT AUTO_INCREMENT NOT NULL, product_id INT NOT NULL, type VARCHAR(20) NOT NULL, path VARCHAR(500) NOT NULL, prompt_used LONGTEXT NOT NULL, category_prompt_version INT NOT NULL, status VARCHAR(20) NOT NULL, variant INT NOT NULL, gemini_request_id VARCHAR(100) DEFAULT NULL, error_message LONGTEXT DEFAULT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_GEN_VISUAL_PRODUCT (product_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE generated_visual (id INT AUTO_INCREMENT NOT NULL, product_id INT NOT NULL, type VARCHAR(20) NOT NULL, path VARCHAR(500) NOT NULL, prompt_used LONGTEXT NOT NULL, category_prompt_version INT NOT NULL, status VARCHAR(20) NOT NULL, variant INT NOT NULL, gemini_request_id VARCHAR(100) DEFAULT NULL, model_used VARCHAR(50) DEFAULT NULL, error_message LONGTEXT DEFAULT NULL, created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\', INDEX IDX_GEN_VISUAL_PRODUCT (product_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('ALTER TABLE generated_visual ADD CONSTRAINT FK_GEN_VISUAL_PRODUCT FOREIGN KEY (product_id) REFERENCES product (id)');
 
         // GeminiUsageLog table

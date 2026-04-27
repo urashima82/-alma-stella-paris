@@ -156,9 +156,7 @@ class GeneratedVisualCrudController extends AbstractCrudController
     {
         /** @var GeneratedVisual $visual */
         $visual = $context->getEntity()->getInstance();
-        $visual->setStatus(VisualStatus::Approved);
-
-        $this->visualApprovalHandler->copyToProductImages($visual);
+        $this->visualApprovalHandler->approve($visual);
 
         $product = $visual->getProduct();
         if ($product !== null && $this->generatedVisualRepository->hasApprovedForAllTypes($product)) {

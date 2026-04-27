@@ -9,7 +9,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class GeminiImageClient
 {
-    private const string ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent';
+    private const string ENDPOINT_TEMPLATE = 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
     private const int MAX_RETRIES = 3;
     private const array BACKOFF_SECONDS = [2, 4, 8];
 
@@ -17,7 +17,13 @@ final class GeminiImageClient
         private readonly HttpClientInterface $httpClient,
         private readonly LoggerInterface $logger,
         private readonly string $geminiApiKey,
+        private readonly string $modelName,
     ) {
+    }
+
+    public function getModelName(): string
+    {
+        return $this->modelName;
     }
 
     /**
@@ -53,7 +59,9 @@ final class GeminiImageClient
      */
     private function doRequest(array $payload): GeminiResponse
     {
-        $response = $this->httpClient->request('POST', self::ENDPOINT, [
+        $endpoint = \sprintf(self::ENDPOINT_TEMPLATE, $this->modelName);
+
+        $response = $this->httpClient->request('POST', $endpoint, [
             'headers' => [
                 'x-goog-api-key' => $this->geminiApiKey,
                 'Content-Type' => 'application/json',

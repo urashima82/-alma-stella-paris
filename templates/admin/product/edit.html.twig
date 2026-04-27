@@ -1,0 +1,36 @@
+{% extends '@EasyAdmin/crud/edit.html.twig' %}
+
+{# The AI workspace is rendered hidden in `<template>`, then JS moves its content
+   into the EasyAdmin tab pane #tab-visuels-ia (slugged from the FormField::addTab label). #}
+
+{% block main %}
+    {{ parent() }}
+
+    {% set product = entity.instance %}
+    {% if product.id is not null and ai_workspace is defined %}
+        <template id="ai-workspace-source">
+            {% include 'admin/product/_ai_workspace.html.twig' with ai_workspace only %}
+        </template>
+
+        <script>
+            (function () {
+                const inject = () => {
+                    const source = document.getElementById('ai-workspace-source');
+                    const target = document.getElementById('tab-visuels-ia');
+                    if (!source || !target) {
+                        return;
+                    }
+                    // Replace the empty placeholder fieldset with the workspace
+                    target.innerHTML = '';
+                    target.appendChild(source.content.cloneNode(true));
+                    source.remove();
+                };
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', inject);
+                } else {
+                    inject();
+                }
+            })();
+        </script>
+    {% endif %}
+{% endblock %}

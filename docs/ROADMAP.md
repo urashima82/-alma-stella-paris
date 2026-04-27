@@ -1150,6 +1150,65 @@ Coffrets (Sets)                    ← no subcategories (leaf parent)
 - [x] Vérification end-to-end complète
 - [x] Test pipeline : fixtures → import → génération → approbation
 
+### Phase 5 — Améliorations IHM admin (en cours)
+> Refonte UX du back-office pour réduire la friction lors du workflow de
+> génération IA. Validée par la gérante le 2026-04-27.
+
+#### Groupe A — Page produit unifiée
+- [x] Workspace IA inline dans la page produit (galerie compacte, photos sources, actions)
+- [x] Affichage des visuels générés en grille 3 colonnes desktop (par type)
+- [x] Lightbox au clic (vanilla JS dédié à l'admin via `admin-lightbox.js`)
+- [x] Upload drag & drop des photos sources directement depuis la page produit
+- [x] Suppression d'une photo source en place
+- [x] Boutons d'action inline sur chaque visuel (approuver / rejeter / régénérer)
+- [x] Modale de prévisualisation du prompt utilisé (`<dialog>` natif)
+- [x] Génération sélective par type (3 boutons : Vignette / Porté / Lifestyle)
+- [x] Suppression du fieldset "Photos" Vich (workflow 100% piloté par l'IA)
+- [x] Bandeau "Images publiées" en haut du workspace (read-only, lightbox)
+- [x] Badges de statut colorés sur chaque vignette
+- [x] **Découpe en onglets** : "Fiche produit" / "Visuels IA" via `FormField::addTab()`
+- [x] **Workspace compact** : bandeau publiés horizontal + sources/générés en 2 colonnes côte à côte
+- [x] Suppression du fieldset "Génération IA" de la sidebar (doublon)
+- [x] **Polling hybride** : endpoint `/ai-status` consume 1 message par poll JS (2s) + lock flock contre les courses concurrentes
+- [x] Cron fallback `messenger:consume gemini_async --limit=10` documenté pour O2Switch
+- [x] Auto-reload de la page quand un statut visuel change (poll JS détecte la transition)
+
+#### Groupe A.ter — Refonte pipeline IA (modèle unifié Gemini 3 Pro)
+> Plan : `docs/AI_GENERATION_PIPELINE.md`. Validé le 2026-04-27.
+> Diagnostic initial : Gemini 2.5 Flash Image échouait avec `IMAGE_OTHER` sur ~80% des Vignettes/Lifestyle. Investigation Imagen 4 → text-to-image only (pas de référence subject). Bascule sur Gemini 3 Pro Image Preview (jusqu'à 14 reference images, préservation produit native).
+- [x] Architecture découplée : `VisualGeneratorInterface`, `GeneratedVisualResult`, `VisualGenerationException`
+- [x] `GeminiVisualGenerator` paramétrable (modèle + coût injectés via DI)
+- [x] `GeminiImageClient` paramétrable (endpoint construit dynamiquement à partir du modèle)
+- [x] `VisualGeneratorRouter` (extensible si re-différenciation par type plus tard)
+- [x] Champ `modelUsed` sur `GeneratedVisual` (traçabilité du modèle utilisé)
+- [x] `GenerateVisualHandler` branché sur le routeur, coût remonté dynamiquement
+- [x] Variables `.env` `GEMINI_PRO_MODEL` + `GEMINI_PRO_COST_USD`
+- [x] Migration unifiée mise à jour (colonne `model_used VARCHAR(50)`), DDEV recréé
+- [x] Tests manuels validés : Vignette, Porté, Lifestyle sur Chevalière Trèfle Bordeaux
+- [x] Prompt Rings/Vignette ajusté : suppression "floating" → ancrage au sol avec contact shadow
+- [x] PHPStan niveau 6 + CS Fixer + Twig lint clean
+
+#### Groupe B — Dashboard consommation IA
+- [ ] Page `Consommation IA` dans le menu admin
+- [ ] Coût mois en cours (€ + USD, conversion via `CurrencyConverter`)
+- [ ] Comparaison mois précédent + tendance %
+- [ ] Top 10 produits les plus coûteux
+- [ ] Ventilation par type de visuel
+- [ ] Graphique d'évolution sur 30 jours
+- [ ] Indicateur budget restant + alerte > 80%
+
+#### Groupe C — UX avancée
+- [ ] Comparaison côte à côte des variantes d'un même type
+- [ ] Preview du prompt complet avant lancement de la génération
+- [ ] Vue cross-produit "Visuels en attente" + badge notification dans le menu
+- [ ] Comparaison source ↔ généré côte à côte
+- [ ] Override de prompt spécifique par produit
+
+#### Groupe D — Robustesse & finitions
+- [ ] Polling temps réel pendant la génération (statut `Generating`)
+- [ ] Historique complet par produit (incluant rejets / échecs)
+- [ ] Téléchargement de l'image source haute résolution
+
 ### Vérification du milestone (en cours)
 > Les 4 phases de développement sont terminées. Le milestone est en phase
 > de vérification manuelle avant validation finale.

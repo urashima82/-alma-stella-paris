@@ -22,6 +22,10 @@ class GeneratedVisualRepository extends ServiceEntityRepository
     }
 
     /**
+     * Returns visuals grouped by type for display in the workspace.
+     * Rejected visuals are excluded — they remain in the database for traceability
+     * but are never shown in the UI.
+     *
      * @return array<string, GeneratedVisual[]>
      */
     public function findByProductGroupedByType(Product $product): array
@@ -29,9 +33,11 @@ class GeneratedVisualRepository extends ServiceEntityRepository
         /** @var GeneratedVisual[] $visuals */
         $visuals = $this->createQueryBuilder('v')
             ->andWhere('v.product = :product')
+            ->andWhere('v.status != :rejected')
             ->orderBy('v.type', 'ASC')
             ->addOrderBy('v.variant', 'ASC')
             ->setParameter('product', $product)
+            ->setParameter('rejected', VisualStatus::Rejected)
             ->getQuery()
             ->getResult();
 
@@ -41,6 +47,34 @@ class GeneratedVisualRepository extends ServiceEntityRepository
         }
 
         return $grouped;
+    }
+
+    /**
+     * Find Approved visuals for a given (product, type) pair, optionally
+     * excluding one. Used to auto-reject the previously published visual when
+     * a new one is approved.
+     *
+     * @return GeneratedVisual[]
+     */
+    public function findApprovedFor(Product $product, VisualType $type, ?GeneratedVisual $exclude = null): array
+    {
+        $qb = $this->createQueryBuilder('v')
+            ->andWhere('v.product = :product')
+            ->andWhere('v.type = :type')
+            ->andWhere('v.status = :status')
+            ->setParameter('product', $product)
+            ->setParameter('type', $type)
+            ->setParameter('status', VisualStatus::Approved);
+
+        if ($exclude !== null) {
+            $qb->andWhere('v.id != :excludeId')
+                ->setParameter('excludeId', $exclude->getId());
+        }
+
+        /** @var GeneratedVisual[] $result */
+        $result = $qb->getQuery()->getResult();
+
+        return $result;
     }
 
     /**
@@ -91,6 +125,34 @@ class GeneratedVisualRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
 
         return $count > 0;
+    }
+
+    /**
+     * Mark every Failed visual for (product, type) as Rejected, so they get
+     * filtered out of the workspace UI. Called whenever a fresh generation is
+     * launched or a new visual is approved — failed past attempts become
+     * irrelevant once a new outcome exists for that type.
+     *
+     * Returns the number of rows affected. Caller is responsible for flushing.
+     */
+    public function markFailedAsRejected(Product $product, VisualType $type): int
+    {
+        /** @var GeneratedVisual[] $failed */
+        $failed = $this->createQueryBuilder('v')
+            ->andWhere('v.product = :product')
+            ->andWhere('v.type = :type')
+            ->andWhere('v.status = :status')
+            ->setParameter('product', $product)
+            ->setParameter('type', $type)
+            ->setParameter('status', VisualStatus::Failed)
+            ->getQuery()
+            ->getResult();
+
+        foreach ($failed as $visual) {
+            $visual->setStatus(VisualStatus::Rejected);
+        }
+
+        return \count($failed);
     }
 
     public function hasApprovedForAllTypes(Product $product): bool

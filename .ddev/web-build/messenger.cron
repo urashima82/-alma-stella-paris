@@ -1,0 +1,13 @@
+# Messenger workers — runs every minute, mirrors the production O2Switch setup
+# documented in docs/DEPLOYMENT.md. Crontab is loaded via the ddev-cron add-on
+# and runs as the DDEV user (nicolas).
+
+# --no-debug avoids the Symfony TraceableEventDispatcher bug on WorkerStoppedEvent
+# in dev mode. Production (APP_ENV=prod) wouldn't load the profiler anyway, so the
+# flag is harmless when this crontab is mirrored to O2Switch.
+
+# AI visual generation queue (Gemini API consumer)
+* * * * * cd /var/www/html && /usr/bin/php bin/console messenger:consume gemini_async --limit=10 --time-limit=55 --memory-limit=256M --no-debug --quiet >> /tmp/messenger-gemini.log 2>&1
+
+# Symfony Scheduler (recurring app commands: pending orders, reservations, testimonials, abandoned orders)
+* * * * * cd /var/www/html && /usr/bin/php bin/console messenger:consume scheduler_default --time-limit=55 --memory-limit=128M --no-debug --quiet >> /tmp/messenger-scheduler.log 2>&1

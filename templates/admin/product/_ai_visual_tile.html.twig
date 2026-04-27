@@ -1,0 +1,106 @@
+{# templates/admin/product/_ai_visual_tile.html.twig
+   Renders a single GeneratedVisual tile.
+   Variables expected:
+   - visual: App\Entity\GeneratedVisual
+   - product_id: int (parent product id, used to build inline action URLs)
+#}
+<article class="ai-visual-tile ai-visual-tile--{{ visual.status.value }}"
+         data-ai-visual-id="{{ visual.id }}">
+    <div class="ai-visual-tile__media">
+        {% if visual.status.value == 'generating' %}
+            <div class="ai-visual-tile__loader">
+                <i class="fa fa-spinner fa-spin"></i>
+            </div>
+            {% if visual.id %}
+                <button type="button"
+                        class="ai-visual-tile__cancel"
+                        data-ai-action="post"
+                        data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineCancelGeneration').setEntityId(product_id).set('visualId', visual.id).generateUrl() }}"
+                        data-ai-confirm="Annuler cette génération en cours ?"
+                        title="Annuler — la génération est trop longue">
+                    <i class="fa fa-xmark"></i>
+                </button>
+            {% endif %}
+        {% elseif visual.status.value == 'failed' %}
+            <button type="button"
+                    class="ai-visual-tile__error"
+                    title="Cliquer pour voir le détail"
+                    onclick="document.getElementById('ai-prompt-modal-{{ visual.id }}').showModal();">
+                <i class="fa fa-triangle-exclamation"></i>
+                {% if visual.errorMessage %}
+                    <span class="ai-visual-tile__error-text">{{ visual.errorMessage|slice(0, 90) }}{% if visual.errorMessage|length > 90 %}…{% endif %}</span>
+                {% endif %}
+            </button>
+        {% else %}
+            <button type="button" class="ai-visual-tile__preview js-admin-lightbox-trigger">
+                <img src="/storage/products/{{ visual.path }}"
+                     alt="{{ visual.type.label }} v{{ visual.variant }}">
+            </button>
+        {% endif %}
+
+        <span class="ai-visual-tile__variant">v{{ visual.variant }}</span>
+        <span class="ai-visual-tile__status-badge"
+              style="background: {{ visual.status.badgeColor }}; color: #fff;">
+            {{ visual.status.label }}
+        </span>
+    </div>
+
+    <footer class="ai-visual-tile__actions">
+        {% if visual.status.value == 'pending_review' %}
+            <button type="button"
+                    class="btn btn-success btn-sm"
+                    data-ai-action="post"
+                    data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineApprove').setEntityId(product_id).set('visualId', visual.id).generateUrl() }}"
+                    title="Approuver">
+                <i class="fa fa-check"></i>
+            </button>
+            <button type="button"
+                    class="btn btn-danger btn-sm"
+                    data-ai-action="post"
+                    data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineReject').setEntityId(product_id).set('visualId', visual.id).generateUrl() }}"
+                    title="Rejeter">
+                <i class="fa fa-xmark"></i>
+            </button>
+        {% endif %}
+        {% if visual.status.value in ['rejected', 'failed'] %}
+            <button type="button"
+                    class="btn btn-warning btn-sm"
+                    data-ai-action="post"
+                    data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineRegenerate').setEntityId(product_id).set('visualId', visual.id).generateUrl() }}"
+                    title="Régénérer">
+                <i class="fa fa-rotate-right"></i>
+            </button>
+        {% endif %}
+        {% if visual.promptUsed %}
+            <button type="button"
+                    class="btn btn-secondary btn-sm"
+                    title="Voir le prompt"
+                    onclick="document.getElementById('ai-prompt-modal-{{ visual.id }}').showModal();">
+                <i class="fa fa-eye"></i>
+            </button>
+
+            <dialog id="ai-prompt-modal-{{ visual.id }}" class="ai-prompt-modal">
+                <header>
+                    <h4>{{ visual.type.label }} v{{ visual.variant }} — {{ visual.status.label }}</h4>
+                    <button type="button" onclick="this.closest('dialog').close();" aria-label="Fermer">
+                        <i class="fa fa-xmark"></i>
+                    </button>
+                </header>
+                {% if visual.errorMessage %}
+                    <div class="ai-prompt-modal__error">
+                        <strong><i class="fa fa-triangle-exclamation"></i> Erreur Gemini</strong>
+                        <p>{{ visual.errorMessage }}</p>
+                    </div>
+                {% endif %}
+                <h5 class="ai-prompt-modal__section">Prompt envoyé</h5>
+                <pre>{{ visual.promptUsed }}</pre>
+                <footer>
+                    <small>Version prompt catégorie : {{ visual.categoryPromptVersion }}</small>
+                    {% if visual.geminiRequestId %}
+                        <small>Request ID : {{ visual.geminiRequestId }}</small>
+                    {% endif %}
+                </footer>
+            </dialog>
+        {% endif %}
+    </footer>
+</article>

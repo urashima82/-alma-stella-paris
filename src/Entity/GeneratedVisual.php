@@ -43,6 +43,9 @@ class GeneratedVisual
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $geminiRequestId = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $modelUsed = null;
+
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $errorMessage = null;
 
@@ -156,6 +159,18 @@ class GeneratedVisual
     public function setGeminiRequestId(?string $geminiRequestId): static
     {
         $this->geminiRequestId = $geminiRequestId;
+
+        return $this;
+    }
+
+    public function getModelUsed(): ?string
+    {
+        return $this->modelUsed;
+    }
+
+    public function setModelUsed(?string $modelUsed): static
+    {
+        $this->modelUsed = $modelUsed;
 
         return $this;
     }

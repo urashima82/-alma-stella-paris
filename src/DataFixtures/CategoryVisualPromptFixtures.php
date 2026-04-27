@@ -84,8 +84,8 @@ class CategoryVisualPromptFixtures extends Fixture implements DependentFixtureIn
             [
                 'category' => 'Rings',
                 'type' => VisualType::Vignette,
-                'framing' => 'close-up, ring shown from frontal 3/4 angle, centered in frame',
-                'staging' => 'floating on subtle shadow with soft professional lighting, slight elevation',
+                'framing' => 'close-up, ring resting flat on the surface, shown from a slight 3/4 angle from above, centered in frame',
+                'staging' => 'ring physically placed on the surface with the band visibly in contact, realistic contact shadow directly underneath anchoring the piece, soft professional lighting — no levitation, no floating effect',
                 'props' => ['polished marble surface', 'draped silk fabric', 'velvet cushion'],
             ],
             [

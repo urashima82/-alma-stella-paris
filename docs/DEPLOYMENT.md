@@ -221,7 +221,9 @@ at runtime.
 a2enmod rewrite expires headers
 ```
 
-### Cron job (Symfony Scheduler)
+### Cron jobs
+
+#### Symfony Scheduler (background tasks)
 
 The application uses Symfony Scheduler for background tasks (pending order
 cleanup, OTP expiry). Add this cron entry:
@@ -229,6 +231,36 @@ cleanup, OTP expiry). Add this cron entry:
 ```cron
 * * * * * cd /path/to/project && php bin/console messenger:consume scheduler_default --time-limit=55 --memory-limit=128M
 ```
+
+#### AI image generation queue (`gemini_async`)
+
+Visuels IA generation messages are dispatched to the `gemini_async` Doctrine
+transport and consumed exclusively by the cron worker — the `/ai-status`
+polling endpoint is read-only (it does not consume messages, to avoid blocking
+PHP-FPM slots during 30-90s Gemini calls).
+
+```cron
+* * * * * cd /path/to/project && php bin/console messenger:consume gemini_async --limit=10 --time-limit=55 --memory-limit=256M --no-debug --quiet
+```
+
+Notes for shared hosting (e.g., **O2Switch**):
+- `messenger:consume` is a one-shot CLI invocation, no daemon required.
+- `--limit=10` caps the number of messages processed per cron run; the next
+  cron picks up the rest one minute later.
+- `--memory-limit=256M` accommodates Gemini base64 payloads.
+- `--no-debug` avoids the Symfony TraceableEventDispatcher bug on
+  WorkerStoppedEvent (only triggers in dev mode but keeping the flag is
+  harmless in prod).
+- Use the absolute path of the project's PHP binary in the cPanel cron UI
+  (e.g., `/usr/local/bin/ea-php83`), not the system `php` shim.
+
+#### Local development (DDEV)
+
+DDEV mirrors this setup via the [`ddev-cron` add-on](https://github.com/ddev/ddev-cron).
+The crontab is versioned at `.ddev/web-build/messenger.cron` and is loaded
+automatically on `ddev start` / `ddev restart`. Logs are written to
+`/tmp/messenger-gemini.log` and `/tmp/messenger-scheduler.log` inside the
+web container. Inspect with: `ddev exec tail -f /tmp/messenger-gemini.log`.
 
 ---
 
@@ -252,14 +284,18 @@ composer dump-env prod
 # 4. Run database migration
 php bin/console doctrine:migrations:migrate --no-interaction
 
-# 5. Build assets
+# 5. Set up Messenger transports (creates messenger_messages table for the
+#    Doctrine transport so the AI generation queue can accept messages)
+php bin/console messenger:setup-transports
+
+# 6. Build assets
 php bin/console tailwind:build --minify
 php bin/console asset-map:compile
 
-# 6. Warm up cache
+# 7. Warm up cache
 php bin/console cache:warmup
 
-# 7. Set permissions
+# 8. Set permissions
 chown -R www-data:www-data var/ public/uploads/
 ```
 
@@ -287,6 +323,7 @@ php bin/console cache:clear
 - [ ] Stripe webhook signing secret set in `STRIPE_WEBHOOK_SECRET`
 - [ ] Transactional email provider configured and DNS records added (SPF, DKIM, DMARC)
 - [ ] Cron job for `messenger:consume scheduler_default` running
+- [ ] Cron job for `messenger:consume gemini_async` running (AI visuals fallback)
 - [ ] Test contact form (Turnstile widget visible, email received)
 - [ ] Test checkout flow end-to-end (Stripe live mode)
 - [ ] Test admin login (magic link email received)
