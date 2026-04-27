@@ -444,10 +444,8 @@ class ProductCrudController extends AbstractCrudController
             ++$dispatched;
         }
 
-        if ($product->getVisualStatus() === VisualWorkflowStatus::Draft) {
-            $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
-            $this->entityManager->flush();
-        }
+        $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
+        $this->entityManager->flush();
 
         $this->addFlash('success', \sprintf('%d générations lancées (1 par type).', $dispatched));
 
@@ -485,10 +483,8 @@ class ProductCrudController extends AbstractCrudController
             $visual->getId(),
         ));
 
-        if ($product->getVisualStatus() === VisualWorkflowStatus::Draft) {
-            $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
-            $this->entityManager->flush();
-        }
+        $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
+        $this->entityManager->flush();
 
         $this->addFlash('success', \sprintf('Génération %s v%d lancée.', $type->label(), (int) $nextVariant));
 
@@ -509,7 +505,7 @@ class ProductCrudController extends AbstractCrudController
         $this->visualApprovalHandler->approve($visual);
 
         if ($this->generatedVisualRepository->hasApprovedForAllTypes($product)) {
-            $product->setVisualStatus(VisualWorkflowStatus::ReadyForReview);
+            $product->setVisualStatus(VisualWorkflowStatus::VisualsApproved);
         }
 
         $this->entityManager->flush();
@@ -586,6 +582,8 @@ class ProductCrudController extends AbstractCrudController
         // Hide siblings still in Failed for the same type — only the row we
         // just flipped to Generating should remain visible.
         $this->generatedVisualRepository->markFailedAsRejected($product, $visual->getType());
+
+        $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
 
         $this->entityManager->flush();
 

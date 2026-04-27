@@ -161,7 +161,7 @@ class GeneratedVisualCrudController extends AbstractCrudController
 
         $product = $visual->getProduct();
         if ($product !== null && $this->generatedVisualRepository->hasApprovedForAllTypes($product)) {
-            $product->setVisualStatus(VisualWorkflowStatus::ReadyForReview);
+            $product->setVisualStatus(VisualWorkflowStatus::VisualsApproved);
         }
 
         $this->entityManager->flush();
@@ -217,10 +217,11 @@ class GeneratedVisualCrudController extends AbstractCrudController
 
         $visual->setStatus(VisualStatus::Generating);
         $visual->setErrorMessage(null);
+        $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
         $this->entityManager->flush();
 
         $this->messageBus->dispatch(
-            new GenerateVisualMessage($product->getId(), $visual->getType(), $visual->getVariant())
+            new GenerateVisualMessage($product->getId(), $visual->getType(), $visual->getVariant(), $visual->getId())
         );
 
         $this->addFlash('success', \sprintf(
