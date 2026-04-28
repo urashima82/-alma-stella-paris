@@ -18,6 +18,7 @@ final class GeminiTextClient
     private const string ENDPOINT_TEMPLATE = 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
     private const int MAX_RETRIES = 3;
     private const array BACKOFF_SECONDS = [2, 4, 8];
+    private const array RETRYABLE_STATUS_CODES = [429, 500, 502, 503, 504];
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -44,12 +45,14 @@ final class GeminiTextClient
             try {
                 return $this->doRequest($payload);
             } catch (GeminiApiException $e) {
-                if ($e->getHttpStatusCode() !== 429 || $attempt >= self::MAX_RETRIES) {
+                $statusCode = $e->getHttpStatusCode();
+                if (!\in_array($statusCode, self::RETRYABLE_STATUS_CODES, true) || $attempt >= self::MAX_RETRIES) {
                     throw $e;
                 }
 
                 $delay = self::BACKOFF_SECONDS[$attempt];
-                $this->logger->warning('Gemini text API rate limited (429), retrying in {delay}s (attempt {attempt}/{max})', [
+                $this->logger->warning('Gemini text API transient error ({status}), retrying in {delay}s (attempt {attempt}/{max})', [
+                    'status' => $statusCode,
                     'delay' => $delay,
                     'attempt' => $attempt + 1,
                     'max' => self::MAX_RETRIES,
