@@ -71,6 +71,27 @@
         </div>
     </section>
 
+    {# ── Thin gold divider ── #}
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="h-px bg-alma-gold-muted"></div>
+    </div>
+
+    {# ── Contact banner ── #}
+    <section class="max-w-3xl mx-auto px-6 py-20 md:py-24 text-center">
+        <p class="text-alma-gold text-2xl mb-6">✦</p>
+        <h2 class="font-serif text-3xl md:text-4xl font-light text-alma-text leading-tight mb-5">
+            {{ 'about.contact_banner_heading'|trans }}
+        </h2>
+        <p class="text-sm text-alma-text-muted leading-relaxed max-w-xl mx-auto mb-8">
+            {{ 'about.contact_banner_subtitle'|trans }}
+        </p>
+        <a href="{{ path('shop_contact') }}"
+           class="inline-block bg-alma-gold hover:bg-alma-gold-dark text-white px-10 py-3
+                  font-sans text-sm uppercase tracking-[0.15em] transition-colors">
+            {{ 'about.contact_banner_cta'|trans }}
+        </a>
+    </section>
+
     {# ── Paris ✦ Mexico banner ── #}
     <section class="bg-alma-surface">
         <div class="max-w-7xl mx-auto px-6 py-16 md:py-20 text-center">

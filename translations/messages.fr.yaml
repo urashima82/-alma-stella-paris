@@ -112,6 +112,9 @@ about:
     value_3_text: "Acier inoxydable résistant à l'eau. Portez-les partout, tous les jours."
     banner_country: "Mexique"
     banner_subtitle: "Là où l'énergie du monde rencontre l'élégance française."
+    contact_banner_heading: "Une question ? Parlons-en."
+    contact_banner_subtitle: "Que ce soit à propos d'une commande, d'une collaboration ou simplement pour échanger un mot, nous serions ravies de vous lire."
+    contact_banner_cta: "Nous écrire"
 
 # ── Footer ──
 footer:

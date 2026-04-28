@@ -112,6 +112,9 @@ about:
     value_3_text: "Water-resistant stainless steel. Wear it everywhere, every day."
     banner_country: "Mexico"
     banner_subtitle: "Where the world's energy meets French elegance."
+    contact_banner_heading: "A question? Let's talk."
+    contact_banner_subtitle: "Whether it's about an order, a collaboration, or simply a kind word — we'd love to hear from you."
+    contact_banner_cta: "Write to us"
 
 # ── Footer ──
 footer:

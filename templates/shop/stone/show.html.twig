@@ -266,7 +266,7 @@
                 {# CTA to shop with filter #}
                 {% if visibleProducts|length > 8 %}
                     <div class="text-center mt-10">
-                        <a href="{{ path('shop_catalog', {stone: stone|localized_slug}) }}"
+                        <a href="{{ path('shop_catalog', {stones: stone|localized_slug}) }}"
                            class="inline-block border border-alma-gold text-alma-gold px-8 py-3 font-sans text-sm
                                   hover:bg-alma-gold hover:text-white transition-colors">
                             {{ 'home.view_all'|trans }}
