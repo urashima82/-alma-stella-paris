@@ -1,0 +1,11 @@
+{% set product = field.value %}
+{% if product is null %}
+    <span class="text-muted">—</span>
+{% else %}
+    {% set url = ea_url()
+        .setController('App\\Controller\\Admin\\ProductCrudController')
+        .setAction('edit')
+        .setEntityId(product.id)
+        .generateUrl() %}
+    <a href="{{ url }}#tab-contenu-ia">{{ product.nameFr|default(product.name) }}</a>
+{% endif %}

@@ -90,20 +90,6 @@ class ProductCrudController extends AbstractCrudController
             ->linkToUrl(static fn (Product $product): string => '/en/product/'.$product->getSlug())
             ->setHtmlAttributes(['target' => '_blank']);
 
-        $manageSourcePhotos = Action::new('manageSourcePhotos', 'Photos sources', 'fa fa-camera')
-            ->linkToCrudAction('manageSourcePhotos')
-            ->setCssClass('btn btn-secondary btn-sm');
-
-        $generateVisuals = Action::new('generateVisuals', 'Générer les visuels', 'fa fa-wand-magic-sparkles')
-            ->linkToCrudAction('generateVisuals')
-            ->setCssClass('btn btn-warning btn-sm')
-            ->displayIf(static fn (Product $p): bool => $p->getSourcePhotos()->count() > 0);
-
-        $viewVisuals = Action::new('viewVisuals', 'Voir les visuels', 'fa fa-images')
-            ->linkToCrudAction('viewVisuals')
-            ->setCssClass('btn btn-info btn-sm')
-            ->displayIf(static fn (Product $p): bool => $p->getGeneratedVisuals()->count() > 0);
-
         $newWithAi = Action::new('newWithAi', 'Nouveau (IA)', 'fa fa-wand-magic-sparkles')
             ->createAsGlobalAction()
             ->linkToUrl($this->generateUrl('admin_product_wizard_new'))
@@ -112,12 +98,7 @@ class ProductCrudController extends AbstractCrudController
         return $actions
             ->add(Crud::PAGE_INDEX, $viewOnSite)
             ->add(Crud::PAGE_EDIT, $viewOnSite)
-            ->add(Crud::PAGE_INDEX, $manageSourcePhotos)
-            ->add(Crud::PAGE_INDEX, $generateVisuals)
-            ->add(Crud::PAGE_INDEX, $viewVisuals)
-            ->add(Crud::PAGE_INDEX, $newWithAi)
-            // On the edit page, the inline AI workspace replaces these redirect-only buttons.
-            ->add(Crud::PAGE_EDIT, $viewVisuals);
+            ->add(Crud::PAGE_INDEX, $newWithAi);
     }
 
     public function configureFilters(Filters $filters): Filters
@@ -314,82 +295,6 @@ class ProductCrudController extends AbstractCrudController
         ]);
 
         return $responseParameters;
-    }
-
-    /** @param AdminContext<Product> $context */
-    #[AdminRoute]
-    public function manageSourcePhotos(AdminContext $context): Response
-    {
-        /** @var Product $product */
-        $product = $context->getEntity()->getInstance();
-
-        return $this->redirect(
-            $this->adminUrlGenerator
-                ->setController(SourcePhotoCrudController::class)
-                ->setAction(Action::INDEX)
-                ->set('filters[product][comparison]', '=')
-                ->set('filters[product][value]', $product->getId())
-                ->generateUrl()
-        );
-    }
-
-    /** @param AdminContext<Product> $context */
-    #[AdminRoute]
-    public function generateVisuals(AdminContext $context): Response
-    {
-        /** @var Product $product */
-        $product = $context->getEntity()->getInstance();
-
-        if ($product->getSourcePhotos()->isEmpty()) {
-            $this->addFlash('danger', 'Aucune photo source. Uploadez des photos avant de générer les visuels.');
-
-            return $this->redirectToProductIndex();
-        }
-
-        if ($product->getVisualStatus() === VisualWorkflowStatus::PendingVisuals) {
-            $this->addFlash('warning', 'Une génération est déjà en cours pour ce produit. Veuillez patienter.');
-
-            return $this->redirectToProductIndex();
-        }
-
-        $dispatched = 0;
-        foreach (VisualType::cases() as $type) {
-            $visual = $this->createGeneratingVisual($product, $type);
-            $this->messageBus->dispatch(new GenerateVisualMessage(
-                $product->getId(),
-                $type,
-                $visual->getVariant(),
-                $visual->getId(),
-            ));
-            ++$dispatched;
-        }
-
-        $product->setVisualStatus(VisualWorkflowStatus::PendingVisuals);
-        $this->entityManager->flush();
-
-        $this->addFlash('success', \sprintf(
-            '%d visuels en cours de génération pour « %s ».',
-            $dispatched,
-            $product->getNameFr() ?: $product->getName(),
-        ));
-
-        return $this->redirectToProductIndex();
-    }
-
-    /** @param AdminContext<Product> $context */
-    #[AdminRoute]
-    public function viewVisuals(AdminContext $context): Response
-    {
-        /** @var Product $product */
-        $product = $context->getEntity()->getInstance();
-
-        return $this->redirect(
-            $this->adminUrlGenerator
-                ->setController(GeneratedVisualCrudController::class)
-                ->setAction(Action::INDEX)
-                ->set('filters[product]', $product->getId())
-                ->generateUrl()
-        );
     }
 
     // ══════════════════════════════════════════════
@@ -701,16 +606,6 @@ class ProductCrudController extends AbstractCrudController
                 ->setController(self::class)
                 ->setAction(Action::EDIT)
                 ->setEntityId($product->getId())
-                ->generateUrl()
-        );
-    }
-
-    private function redirectToProductIndex(): Response
-    {
-        return $this->redirect(
-            $this->adminUrlGenerator
-                ->setController(self::class)
-                ->setAction(Action::INDEX)
                 ->generateUrl()
         );
     }

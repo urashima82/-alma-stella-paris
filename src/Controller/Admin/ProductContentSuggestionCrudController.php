@@ -61,7 +61,8 @@ class ProductContentSuggestionCrudController extends AbstractCrudController
     {
         yield IdField::new('id')->hideOnForm();
 
-        yield AssociationField::new('product', 'Produit');
+        yield AssociationField::new('product', 'Produit')
+            ->setTemplatePath('admin/product_content_suggestion/_product_link.html.twig');
 
         yield ChoiceField::new('status', 'Statut')
             ->setChoices([

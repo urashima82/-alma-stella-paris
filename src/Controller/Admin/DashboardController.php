@@ -142,7 +142,6 @@ class DashboardController extends AbstractDashboardController
         }
 
         yield MenuItem::section('Génération IA');
-        yield MenuItem::linkTo(SourcePhotoCrudController::class, 'Photos sources', 'fa fa-camera');
         yield MenuItem::linkTo(CategoryVisualPromptCrudController::class, 'Prompts visuels', 'fa fa-pen-fancy');
         yield MenuItem::linkTo(GeneratedVisualCrudController::class, $visualsLabel, 'fa fa-images');
         yield MenuItem::linkTo(ProductContentSuggestionCrudController::class, 'Suggestions de contenu', 'fa fa-pen-to-square');
