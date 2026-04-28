@@ -103,367 +103,606 @@
     </section>
 
 
+    {# ══════════════════════════════════════════════ #}
+    {# ── Filter helpers (computed once)          ── #}
+    {# ══════════════════════════════════════════════ #}
+    {% set visibleStones = [] %}
+    {% for stone in stones %}
+        {% if stone.availableProductCount > 0 %}
+            {% set visibleStones = visibleStones|merge([stone]) %}
+        {% endif %}
+    {% endfor %}
+    {% set hasStoneFilter = (activeStones is defined and activeStones|length > 0) or (noStoneFilter is defined and noStoneFilter) %}
+    {% set activeStoneIds = [] %}
+    {% if activeStones is defined %}
+        {% for s in activeStones %}{% set activeStoneIds = activeStoneIds|merge([s.id]) %}{% endfor %}
+    {% endif %}
+    {% set baseShopUrl = path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) %}
+    {% set categoryLabel = activeCategory ? activeCategory|localized_name : 'catalog.toolbar_category_all'|trans %}
+
     <div class="max-w-7xl mx-auto px-6 py-8 md:py-12">
-        <div class="flex flex-col md:flex-row gap-8 md:gap-10 lg:gap-14">
 
-            {# ══════════════════════════════════════════════ #}
-            {# ── Sidebar: category filters (desktop)      ── #}
-            {# ══════════════════════════════════════════════ #}
-            <aside class="hidden md:block w-52 lg:w-56 flex-shrink-0 sticky top-20 self-start"
-                   aria-label="{{ 'catalog.filter_categories'|trans|default('Categories') }}">
+        {# ══════════════════════════════════════════════ #}
+        {# ── Desktop toolbar + drawers (stone+category) ── #}
+        {# ══════════════════════════════════════════════ #}
+        <div class="hidden md:block"
+             data-controller="category-panel{{ visibleStones|length > 0 ? ' stone-drawer' : '' }}"
+             {% if visibleStones|length > 0 %}data-stone-drawer-base-url-value="{{ baseShopUrl }}"
+             data-stone-drawer-apply-label-many-value="{{ 'stones.drawer_apply_many'|trans({'%count%': '%count%'}) }}"
+             data-stone-drawer-apply-label-one-value="{{ 'stones.drawer_apply_one'|trans }}"
+             data-stone-drawer-apply-label-none-value="{{ 'stones.drawer_apply_no_stone'|trans }}"{% endif %}>
+        <div class="flex items-center gap-3 mb-6 pb-5 border-b border-alma-hover/40">
 
-                {# Section title #}
-                <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-5">
-                    {{ 'catalog.filter_categories'|trans|default('Categories') }}
-                </p>
+            {# Category drawer trigger #}
+            <button type="button"
+                    data-category-panel-target="button"
+                    data-action="click->category-panel#toggle"
+                    class="group inline-flex items-center gap-2.5 px-4 py-2.5 transition-colors text-sm font-sans rounded-full
+                           {{ activeCategory ? 'bg-alma-text text-alma-bg border border-alma-text' : 'bg-alma-bg text-alma-text border border-alma-hover/70 hover:border-alma-gold/60' }}"
+                    aria-expanded="false"
+                    aria-controls="category-panel">
+                <span class="text-[10px] font-sans uppercase tracking-[0.2em] {{ activeCategory ? 'text-alma-bg/60' : 'text-alma-text-muted' }}">
+                    {{ 'catalog.toolbar_category'|trans }}
+                </span>
+                <span class="font-medium">{{ categoryLabel }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
+            </button>
 
-                {# "All" link #}
-                <a href="{{ path('shop_catalog') }}"
-                   class="group flex items-center justify-between py-1.5 mb-1 text-sm font-sans transition-colors
-                          {{ activeCategory is null ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
-                    <span class="flex items-center gap-2.5">
-                        <span class="w-3.5 h-px transition-all duration-200 {{ activeCategory is null ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
-                        {{ 'catalog.filter_all'|trans }}
+            {# Stone drawer trigger #}
+            {% if visibleStones|length > 0 %}
+                <button type="button"
+                        data-stone-drawer-target="button"
+                        data-action="click->stone-drawer#toggle"
+                        class="group inline-flex items-center gap-2.5 px-4 py-2.5 transition-colors text-sm font-sans rounded-full
+                               {{ hasStoneFilter ? 'bg-alma-text text-alma-bg border border-alma-text' : 'bg-alma-bg text-alma-text border border-alma-hover/70 hover:border-alma-gold/60' }}"
+                        aria-expanded="false"
+                        aria-controls="stone-drawer-panel"
+                        form="">
+                    <span class="text-[10px] font-sans uppercase tracking-[0.2em] {{ hasStoneFilter ? 'text-alma-bg/60' : 'text-alma-text-muted' }}">
+                        {{ 'catalog.toolbar_stones'|trans }}
                     </span>
-                    <span class="text-[11px] tabular-nums {{ activeCategory is null ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ totalProductCount }}</span>
-                </a>
-
-                <div class="h-px bg-alma-hover/50 my-3"></div>
-
-                {% for root in rootCategories %}
-                    {% if root.hasChildren() %}
-                        {% set isParentActive = activeParent is not null and activeParent.id == root.id %}
-                        <div class="mb-1" data-controller="collapsible" data-collapsible-open-value="{{ isParentActive ? 'true' : 'false' }}">
-                            {# Parent row #}
-                            <div class="flex items-center">
-                                <a href="{{ category_path(root) }}"
-                                   class="group flex-1 flex items-center gap-2.5 py-1.5 text-sm font-sans transition-colors
-                                          {{ isParentActive and activeCategory.id == root.id ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
-                                    <span class="w-3.5 h-px transition-all duration-200 {{ isParentActive and activeCategory.id == root.id ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
-                                    {{ root|localized_name }}
-                                </a>
-                                <span class="text-[11px] tabular-nums {{ isParentActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }} mr-0.5">{{ root.totalPublishedProductCount }}</span>
-                                <button type="button"
-                                        class="p-1 text-alma-text-muted/50 hover:text-alma-gold transition-colors rounded-sm"
-                                        data-action="click->collapsible#toggle"
-                                        aria-label="Toggle {{ root|localized_name }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         class="h-3 w-3 transition-transform"
-                                         data-collapsible-target="icon"
-                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                    </svg>
-                                </button>
-                            </div>
-                            {# Children #}
-                            <ul class="ml-6 border-l border-alma-hover/40 pl-3 space-y-0.5"
-                                data-collapsible-target="content">
-                                {% for child in root.children %}
-                                    {% set isChildActive = activeCategory is not null and activeCategory.id == child.id %}
-                                    <li>
-                                        <a href="{{ category_path(child) }}"
-                                           class="flex items-center justify-between py-1 text-[13px] font-sans transition-colors
-                                                  {{ isChildActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                            <span>{{ child|localized_name }}</span>
-                                            <span class="text-[11px] tabular-nums {{ isChildActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ child.publishedProductCount }}</span>
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+                    {% if noStoneFilter %}
+                        <span class="font-medium italic">{{ 'stones.filter_no_stone'|trans }}</span>
                     {% else %}
-                        {# Childless parent: simple link #}
-                        {% set isActive = activeCategory is not null and activeCategory.id == root.id %}
-                        <a href="{{ category_path(root) }}"
-                           class="group flex items-center justify-between py-1.5 mb-1 text-sm font-sans transition-colors
-                                  {{ isActive ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
-                            <span class="flex items-center gap-2.5">
-                                <span class="w-3.5 h-px transition-all duration-200 {{ isActive ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
-                                {{ root|localized_name }}
-                            </span>
-                            <span class="text-[11px] tabular-nums {{ isActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ root.publishedProductCount }}</span>
-                        </a>
-                    {% endif %}
-                {% endfor %}
-
-                {# ── Stone filter ── #}
-                {% if stones|length > 0 %}
-                    {% set visibleStones = [] %}
-                    {% for stone in stones %}
-                        {% if stone.availableProductCount > 0 %}
-                            {% set visibleStones = visibleStones|merge([stone]) %}
-                        {% endif %}
-                    {% endfor %}
-                    {% set stoneLimit = 5 %}
-                    {% set hasStoneFilter = activeStone is not null or (noStoneFilter is defined and noStoneFilter) %}
-                    {% set needsOverflow = visibleStones|length > stoneLimit %}
-
-                    <div class="h-px bg-alma-hover/50 my-4"></div>
-                    <div data-controller="stone-filter"
-                         data-stone-filter-expanded-value="{{ hasStoneFilter and needsOverflow ? 'true' : 'false' }}"
-                         data-stone-filter-limit-value="{{ stoneLimit }}">
-                        <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-4">
-                            {{ 'stones.filter_heading'|trans }}
-                        </p>
-                        <div data-stone-filter-target="list">
-                            {# First N stones — always visible #}
-                            {% for stone in visibleStones|slice(0, stoneLimit) %}
-                                {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
-                                {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
-                                <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
-                                   class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors
-                                          {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                    <span>{{ stone|localized_name }}</span>
-                                    <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stone.availableProductCount }}</span>
-                                </a>
+                        {# Avatar stack (server-rendered for already-selected stones, refreshed by JS on toggle) #}
+                        <span data-stone-drawer-target="avatarStack" class="flex items-center {{ activeStoneIds|length == 0 ? 'hidden' : '' }}">
+                            {% for s in activeStones|slice(0, 3) %}
+                                {% if s.imageName %}
+                                    <img src="{{ asset('uploads/stones/' ~ s.imageName) }}"
+                                         alt=""
+                                         class="w-5 h-5 rounded-full object-cover ring-2 ring-alma-text -ml-1.5 first:ml-0">
+                                {% endif %}
                             {% endfor %}
-
-                            {# Remaining stones — hidden until "show more" #}
-                            {% if needsOverflow %}
-                                <div data-stone-filter-target="overflow"
-                                     class="{{ not hasStoneFilter ? 'hidden' }}"
-                                     style="{{ not hasStoneFilter ? 'max-height:0;opacity:0' : '' }}">
-                                    {% for stone in visibleStones|slice(stoneLimit) %}
-                                        {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
-                                        {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
-                                        <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
-                                           class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors
-                                                  {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                            <span>{{ stone|localized_name }}</span>
-                                            <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stone.availableProductCount }}</span>
-                                        </a>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-
-                        {# "Without stone" option — outside scrollable list #}
-                        {% set isNoStoneActive = noStoneFilter is defined and noStoneFilter %}
-                        {% set noStoneParams = app.request.attributes.get('_route_params')|merge({stone: 'none'}) %}
-                        <a href="{{ path(app.request.attributes.get('_route'), noStoneParams) }}"
-                           class="group flex items-center justify-between py-1 text-[13px] font-sans transition-colors italic
-                                  {{ isNoStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                            <span>{{ 'stones.filter_no_stone'|trans }}</span>
-                        </a>
-
-                        {# "Show more / less" toggle #}
-                        {% if needsOverflow %}
-                            <button type="button"
-                                    class="mt-2 text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover cursor-pointer"
-                                    data-stone-filter-target="toggle"
-                                    data-action="click->stone-filter#toggle">
-                                <span data-label
-                                      data-more-label="{{ 'stones.filter_show_more'|trans({'%count%': visibleStones|length - stoneLimit}) }}"
-                                      data-less-label="{{ 'stones.filter_show_less'|trans }}">
-                                    {{ hasStoneFilter ? 'stones.filter_show_less'|trans : 'stones.filter_show_more'|trans({'%count%': visibleStones|length - stoneLimit}) }}
-                                </span>
-                            </button>
-                        {% endif %}
-
-                        {% if hasStoneFilter %}
-                            <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}"
-                               class="mt-1 block text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover">
-                                {{ 'catalog.clear_filter'|trans }}
-                            </a>
-                        {% endif %}
-                    </div>
-                {% endif %}
-            </aside>
-
-            {# ══════════════════════════════════════════════ #}
-            {# ── Mobile filter bar + drawer               ── #}
-            {# ══════════════════════════════════════════════ #}
-            <div data-controller="category-drawer" class="md:contents">
-                <div class="md:hidden flex items-center gap-3">
-                    <button class="inline-flex items-center gap-2 px-4 py-2.5 bg-alma-surface/60 border border-alma-hover
-                                   text-sm font-sans text-alma-text hover:border-alma-gold hover:text-alma-gold
-                                   transition-all duration-200 active:scale-[0.98]"
-                            data-action="click->category-drawer#open">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-                        </svg>
-                        {{ 'catalog.filter_button'|trans }}
-                        {% if activeCategory %}
-                            <span class="w-1.5 h-1.5 rounded-full bg-alma-gold"></span>
-                        {% endif %}
-                    </button>
-                    {% if activeCategory %}
-                        <a href="{{ path('shop_catalog') }}"
-                           class="text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover">
-                            {{ 'catalog.clear_filter'|trans }}
-                        </a>
+                        </span>
+                        <span data-stone-drawer-target="badge"
+                              class="{{ activeStoneIds|length == 0 ? 'hidden' : '' }} ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-alma-gold text-alma-text text-[10px] font-bold tabular-nums">
+                            {{ activeStoneIds|length > 0 ? activeStoneIds|length : '' }}
+                        </span>
                     {% endif %}
-                    <span class="ml-auto text-xs font-sans text-alma-text-muted">
-                        {{ pagination.totalItemCount }} {{ pagination.totalItemCount > 1 ? 'catalog.results_plural'|trans : 'catalog.results_singular'|trans }}
-                    </span>
-                </div>
-                {# Overlay — starts invisible, JS fades it #}
-                <div class="fixed inset-0 z-40 bg-alma-text/40 backdrop-blur-sm"
-                     data-category-drawer-target="overlay"
-                     data-action="click->category-drawer#close"></div>
-                {# Slide-in panel #}
-                <div class="fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-alma-bg border-r border-alma-gold-muted
-                            shadow-2xl -translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
-                     data-category-drawer-target="panel">
-                    {# Drawer header #}
-                    <div class="flex items-center justify-between px-6 h-14 border-b border-alma-hover/40">
-                        <span class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted">{{ 'catalog.filter_categories'|trans|default('Catégories') }}</span>
-                        <button data-action="click->category-drawer#close"
-                                class="p-1.5 -mr-1.5 text-alma-text-muted hover:text-alma-gold transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform"
+                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+            {% endif %}
+
+            <span class="ml-auto text-xs font-sans text-alma-text-muted">
+                <strong class="text-alma-text font-medium tabular-nums">{{ pagination.totalItemCount }}</strong>
+                {{ pagination.totalItemCount > 1 ? 'catalog.results_plural'|trans : 'catalog.results_singular'|trans }}
+            </span>
+        </div>
+
+        {# Desktop category drawer panel — always starts closed #}
+        <div id="category-panel"
+             data-category-panel-target="panel"
+             class="hidden overflow-hidden bg-alma-surface/40 border border-alma-hover/60
+                    transition-[max-height,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] mb-8"
+             style="max-height:0;opacity:0">
+            <div class="p-7 lg:p-9">
+                {# Header: title + search + close #}
+                <div class="flex items-center justify-between gap-6 mb-6">
+                    <div class="min-w-0">
+                        <h3 class="font-serif text-xl lg:text-2xl text-alma-text leading-tight">
+                            {{ 'catalog.category_drawer_title_part1'|trans }}
+                            <em class="text-alma-gold not-italic font-normal">{{ 'catalog.category_drawer_title_part2'|trans }}</em>
+                        </h3>
+                        <p class="text-xs font-sans text-alma-text-muted mt-1">
+                            {{ 'catalog.category_drawer_subtitle'|trans({'%count%': totalProductCount}) }}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-3 flex-shrink-0">
+                        <label class="relative">
+                            <input type="search"
+                                   data-category-panel-target="search"
+                                   data-action="input->category-panel#filter"
+                                   placeholder="{{ 'catalog.category_drawer_search_placeholder'|trans }}"
+                                   class="w-56 pl-9 pr-3 py-2 bg-alma-bg border border-alma-hover/70 rounded-full
+                                          text-sm font-sans text-alma-text placeholder:text-alma-text-muted/60
+                                          focus:outline-none focus:border-alma-gold/60 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-alma-text-muted/60"
+                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                            </svg>
+                        </label>
+                        <button type="button"
+                                data-action="click->category-panel#close"
+                                class="p-2 text-alma-text-muted hover:text-alma-gold transition-colors"
+                                aria-label="{{ 'stones.drawer_close'|trans }}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
-                    {# Drawer body #}
-                    <nav class="px-6 py-5 overflow-y-auto max-h-[calc(100vh-3.5rem)]">
-                        <a href="{{ path('shop_catalog') }}"
-                           class="group flex items-center justify-between py-2 text-sm font-sans transition-colors
-                                  {{ activeCategory is null ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
-                            <span class="flex items-center gap-2.5">
-                                <span class="w-3.5 h-px transition-all duration-200 {{ activeCategory is null ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
-                                {{ 'catalog.filter_all'|trans }}
-                            </span>
-                            <span class="text-[11px] tabular-nums {{ activeCategory is null ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ totalProductCount }}</span>
-                        </a>
+                </div>
 
-                        <div class="h-px bg-alma-hover/40 my-3"></div>
+                {# Tile grid — 'Toutes' centred + each parent category card #}
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    {# 'Toutes' tile — special centred design #}
+                    <a href="{{ path('shop_catalog') }}"
+                       data-category-panel-target="tile"
+                       data-category-name="{{ 'catalog.filter_all'|trans }}"
+                       class="group flex flex-col items-center justify-center text-center bg-alma-bg border transition-all p-6 min-h-[200px]
+                              {{ activeCategory is null ? 'border-alma-gold ring-1 ring-alma-gold' : 'border-alma-hover/60 hover:border-alma-gold/60' }}">
+                        <span class="font-serif italic text-2xl lg:text-3xl text-alma-text mb-3 group-hover:text-alma-gold transition-colors leading-tight">
+                            {{ 'catalog.filter_all'|trans }}
+                        </span>
+                        <span class="text-alma-gold text-3xl mb-3 leading-none">✦</span>
+                        <span class="text-[11px] font-sans uppercase tracking-[0.18em] text-alma-text-muted tabular-nums">
+                            {{ totalProductCount }} {{ totalProductCount > 1 ? 'catalog.results_plural'|trans : 'catalog.results_singular'|trans }}
+                        </span>
+                    </a>
 
-                        {% for root in rootCategories %}
+                    {# Parent category tiles #}
+                    {% for root in rootCategories %}
+                        {% set isParentActive = activeParent is not null and activeParent.id == root.id %}
+                        <div data-category-panel-target="tile"
+                             data-category-name="{{ root|localized_name }}"
+                             class="group bg-alma-bg border transition-all min-h-[200px] flex flex-col
+                                    {{ isParentActive ? 'border-alma-gold' : 'border-alma-hover/60 hover:border-alma-gold/60' }}">
+                            {# Header — clickable parent #}
+                            <a href="{{ category_path(root) }}"
+                               class="group/parent flex items-baseline justify-between gap-3 px-5 pt-5 pb-4 border-b border-alma-hover/30
+                                      hover:bg-alma-surface/40 transition-colors
+                                      {{ isParentActive and activeCategory.id == root.id ? 'bg-alma-surface/40' : '' }}">
+                                <span class="font-serif italic text-xl lg:text-2xl leading-tight transition-colors
+                                             {{ isParentActive and activeCategory.id == root.id ? 'text-alma-gold' : 'text-alma-text group-hover/parent:text-alma-gold' }}">
+                                    {{ root|localized_name }}
+                                </span>
+                                <span class="flex items-baseline gap-1.5 flex-shrink-0">
+                                    <span class="text-alma-gold text-base">✦</span>
+                                    <span class="text-[11px] font-sans text-alma-text-muted tabular-nums">{{ root.totalPublishedProductCount }}</span>
+                                </span>
+                            </a>
+                            {# Subcategories list (or fallback) #}
                             {% if root.hasChildren() %}
-                                {% set isParentActive = activeParent is not null and activeParent.id == root.id %}
-                                <div class="mb-1" data-controller="collapsible" data-collapsible-open-value="{{ isParentActive ? 'true' : 'false' }}">
-                                    <div class="flex items-center">
-                                        <a href="{{ category_path(root) }}"
-                                           class="group flex-1 flex items-center gap-2.5 py-2 text-sm font-sans transition-colors
-                                                  {{ isParentActive and activeCategory.id == root.id ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
-                                            <span class="w-3.5 h-px transition-all duration-200 {{ isParentActive and activeCategory.id == root.id ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
-                                            {{ root|localized_name }}
-                                        </a>
-                                        <span class="text-[11px] tabular-nums {{ isParentActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }} mr-0.5">{{ root.totalPublishedProductCount }}</span>
-                                        <button type="button"
-                                                class="p-1.5 text-alma-text-muted/50 hover:text-alma-gold transition-colors"
-                                                data-action="click->collapsible#toggle"
-                                                aria-label="Toggle">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                 class="h-3.5 w-3.5 transition-transform"
-                                                 data-collapsible-target="icon"
-                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <ul class="ml-6 border-l border-alma-hover/40 pl-3.5 space-y-0.5"
-                                        data-collapsible-target="content">
-                                        {% for child in root.children %}
-                                            {% set isChildActive = activeCategory is not null and activeCategory.id == child.id %}
-                                            <li>
-                                                <a href="{{ category_path(child) }}"
-                                                   class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors
-                                                          {{ isChildActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                                    <span>{{ child|localized_name }}</span>
-                                                    <span class="text-[11px] tabular-nums {{ isChildActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ child.publishedProductCount }}</span>
-                                                </a>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            {% else %}
-                                {% set isActive = activeCategory is not null and activeCategory.id == root.id %}
-                                <a href="{{ category_path(root) }}"
-                                   class="group flex items-center justify-between py-2 mb-1 text-sm font-sans transition-colors
-                                          {{ isActive ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
-                                    <span class="flex items-center gap-2.5">
-                                        <span class="w-3.5 h-px transition-all duration-200 {{ isActive ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
-                                        {{ root|localized_name }}
-                                    </span>
-                                    <span class="text-[11px] tabular-nums {{ isActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ root.publishedProductCount }}</span>
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-
-                        {# ── Stone filter (mobile) ── #}
-                        {% if stones|length > 0 %}
-                            {% set visibleStonesMobile = [] %}
-                            {% for stone in stones %}
-                                {% if stone.availableProductCount > 0 %}
-                                    {% set visibleStonesMobile = visibleStonesMobile|merge([stone]) %}
-                                {% endif %}
-                            {% endfor %}
-                            {% set stoneLimitMobile = 5 %}
-                            {% set hasStoneFilterMobile = activeStone is not null or (noStoneFilter is defined and noStoneFilter) %}
-                            {% set needsOverflowMobile = visibleStonesMobile|length > stoneLimitMobile %}
-
-                            <div class="h-px bg-alma-hover/40 my-4"></div>
-                            <div data-controller="stone-filter"
-                                 data-stone-filter-expanded-value="{{ hasStoneFilterMobile and needsOverflowMobile ? 'true' : 'false' }}"
-                                 data-stone-filter-limit-value="{{ stoneLimitMobile }}">
-                                <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-3">
-                                    {{ 'stones.filter_heading'|trans }}
-                                </p>
-                                <div data-stone-filter-target="list">
-                                    {# First N stones #}
-                                    {% for stone in visibleStonesMobile|slice(0, stoneLimitMobile) %}
-                                        {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
-                                        {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
-                                        <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
-                                           class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors
-                                                  {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                            <span>{{ stone|localized_name }}</span>
-                                            <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stone.availableProductCount }}</span>
-                                        </a>
+                                <ul class="flex-1 px-5 py-3.5 space-y-1">
+                                    {% for child in root.children %}
+                                        {% set isChildActive = activeCategory is not null and activeCategory.id == child.id %}
+                                        <li data-category-panel-target="subcategory"
+                                            data-category-name="{{ child|localized_name }}">
+                                            <a href="{{ category_path(child) }}"
+                                               class="flex items-center justify-between py-1 text-[13px] font-sans transition-colors
+                                                      {{ isChildActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                                <span>{{ child|localized_name }}</span>
+                                                <span class="text-[11px] tabular-nums {{ isChildActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ child.publishedProductCount }}</span>
+                                            </a>
+                                        </li>
                                     {% endfor %}
-
-                                    {# Remaining stones #}
-                                    {% if needsOverflowMobile %}
-                                        <div data-stone-filter-target="overflow"
-                                             class="{{ not hasStoneFilterMobile ? 'hidden' }}"
-                                             style="{{ not hasStoneFilterMobile ? 'max-height:0;opacity:0' : '' }}">
-                                            {% for stone in visibleStonesMobile|slice(stoneLimitMobile) %}
-                                                {% set isStoneActive = activeStone is not null and activeStone.id == stone.id %}
-                                                {% set stoneFilterParams = app.request.attributes.get('_route_params')|merge({stone: stone|localized_slug}) %}
-                                                <a href="{{ path(app.request.attributes.get('_route'), stoneFilterParams) }}"
-                                                   class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors
-                                                          {{ isStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                                    <span>{{ stone|localized_name }}</span>
-                                                    <span class="text-[11px] tabular-nums {{ isStoneActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ stone.availableProductCount }}</span>
-                                                </a>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                </ul>
+                            {% else %}
+                                <div class="flex-1 flex items-center justify-center px-5 py-4">
+                                    <span class="text-xs italic font-serif text-alma-text-muted">
+                                        {{ 'catalog.category_drawer_view_all'|trans }}
+                                    </span>
                                 </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
 
-                                {# "Without stone" option — outside scrollable list #}
-                                {% set isNoStoneActive = noStoneFilter is defined and noStoneFilter %}
-                                {% set noStoneParams = app.request.attributes.get('_route_params')|merge({stone: 'none'}) %}
-                                <a href="{{ path(app.request.attributes.get('_route'), noStoneParams) }}"
-                                   class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors italic
-                                          {{ isNoStoneActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
-                                    <span>{{ 'stones.filter_no_stone'|trans }}</span>
-                                </a>
-
-                                {% if needsOverflowMobile %}
-                                    <button type="button"
-                                            class="mt-2 text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover cursor-pointer"
-                                            data-stone-filter-target="toggle"
-                                            data-action="click->stone-filter#toggle">
-                                        <span data-label
-                                              data-more-label="{{ 'stones.filter_show_more'|trans({'%count%': visibleStonesMobile|length - stoneLimitMobile}) }}"
-                                              data-less-label="{{ 'stones.filter_show_less'|trans }}">
-                                            {{ hasStoneFilterMobile ? 'stones.filter_show_less'|trans : 'stones.filter_show_more'|trans({'%count%': visibleStonesMobile|length - stoneLimitMobile}) }}
-                                        </span>
-                                    </button>
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                    </nav>
+                {# Empty search state #}
+                <div data-category-panel-target="emptyState"
+                     class="hidden text-center py-10">
+                    <p class="text-alma-gold text-2xl mb-2">✦</p>
+                    <p class="font-sans text-sm text-alma-text-muted">{{ 'catalog.category_drawer_no_results'|trans }}</p>
                 </div>
             </div>
+        </div>
 
-            {# ══════════════════════════════════════════════ #}
-            {# ── Product grid                             ── #}
-            {# ══════════════════════════════════════════════ #}
-            <div class="flex-1 min-w-0">
+        {# Desktop stone drawer (immersive panel) — always starts closed #}
+        {% if visibleStones|length > 0 %}
+            <div id="stone-drawer-panel"
+                 data-stone-drawer-target="panel"
+                 class="hidden overflow-hidden bg-alma-surface/40 border border-alma-hover/60
+                        transition-[max-height,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] mb-8"
+                 style="max-height:0;opacity:0">
+                <div class="p-7 lg:p-9">
+                        {# Header #}
+                        <div class="flex items-center justify-between gap-6 mb-6">
+                            <div class="min-w-0">
+                                <h3 class="font-serif text-xl lg:text-2xl text-alma-text leading-tight">
+                                    {{ 'stones.drawer_title_part1'|trans }}
+                                    <em class="text-alma-gold not-italic font-normal">{{ 'stones.drawer_title_part2'|trans }}</em>
+                                </h3>
+                                <p class="text-xs font-sans text-alma-text-muted mt-1">
+                                    {{ 'stones.drawer_subtitle'|trans({'%count%': visibleStones|length}) }}
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3 flex-shrink-0">
+                                <label class="relative">
+                                    <input type="search"
+                                           data-stone-drawer-target="search"
+                                           data-action="input->stone-drawer#filter"
+                                           placeholder="{{ 'stones.drawer_search_placeholder'|trans }}"
+                                           class="w-56 pl-9 pr-3 py-2 bg-alma-bg border border-alma-hover/70 rounded-full
+                                                  text-sm font-sans text-alma-text placeholder:text-alma-text-muted/60
+                                                  focus:outline-none focus:border-alma-gold/60 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-alma-text-muted/60"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    </svg>
+                                </label>
+                                <button type="button"
+                                        data-action="click->stone-drawer#close"
+                                        class="p-2 text-alma-text-muted hover:text-alma-gold transition-colors"
+                                        aria-label="{{ 'stones.drawer_close'|trans }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {# Tile grid #}
+                        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                            {% for stone in visibleStones %}
+                                {% set isStoneActive = stone.id in activeStoneIds %}
+                                <button type="button"
+                                        data-stone-drawer-target="tile"
+                                        data-stone-slug="{{ stone|localized_slug }}"
+                                        data-stone-name="{{ stone|localized_name }}"
+                                        {% if stone.imageName %}data-stone-image="{{ asset('uploads/stones/' ~ stone.imageName) }}"{% endif %}
+                                        data-action="click->stone-drawer#toggleStone"
+                                        aria-pressed="{{ isStoneActive ? 'true' : 'false' }}"
+                                        class="group relative aspect-square overflow-hidden bg-alma-surface text-left
+                                               focus:outline-none focus:ring-2 focus:ring-alma-gold focus:ring-offset-2 focus:ring-offset-alma-bg
+                                               transition-transform duration-200 hover:-translate-y-0.5
+                                               aria-pressed:ring-2 aria-pressed:ring-alma-gold aria-pressed:ring-offset-2 aria-pressed:ring-offset-alma-surface/40">
+                                    {% if stone.imageName %}
+                                        <img src="{{ asset('uploads/stones/' ~ stone.imageName) }}"
+                                             alt="{{ stone|localized_name }}"
+                                             loading="lazy"
+                                             class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]">
+                                    {% else %}
+                                        <div class="absolute inset-0 flex items-center justify-center text-alma-gold text-3xl">✦</div>
+                                    {% endif %}
+                                    {# Bottom overlay with name + count #}
+                                    <div class="absolute inset-x-0 bottom-0 px-3 pt-7 pb-2.5 bg-gradient-to-t from-alma-text/80 via-alma-text/40 to-transparent text-alma-bg">
+                                        <p class="font-serif italic text-sm leading-tight truncate">{{ stone|localized_name }}</p>
+                                        <p class="text-[10px] font-sans tracking-[0.05em] text-alma-bg/70 tabular-nums">
+                                            {{ stone.availableProductCount }} {{ stone.availableProductCount > 1 ? 'catalog.results_plural'|trans : 'catalog.results_singular'|trans }}
+                                        </p>
+                                    </div>
+                                    {# Selected checkmark #}
+                                    <span class="absolute top-2 right-2 flex items-center justify-center w-6 h-6 rounded-full bg-alma-gold text-alma-text font-bold text-xs
+                                                 opacity-0 scale-75 transition-all duration-150 group-aria-pressed:opacity-100 group-aria-pressed:scale-100">
+                                        ✓
+                                    </span>
+                                </button>
+                            {% endfor %}
+
+                            {# "No stone" tile — visually distinct (hatched pattern) #}
+                            <button type="button"
+                                    data-stone-drawer-target="noStoneTile"
+                                    data-action="click->stone-drawer#toggleNoStone"
+                                    aria-pressed="{{ noStoneFilter ? 'true' : 'false' }}"
+                                    class="group relative aspect-square overflow-hidden text-left
+                                           focus:outline-none focus:ring-2 focus:ring-alma-gold focus:ring-offset-2 focus:ring-offset-alma-bg
+                                           transition-transform duration-200 hover:-translate-y-0.5
+                                           aria-pressed:ring-2 aria-pressed:ring-alma-gold aria-pressed:ring-offset-2 aria-pressed:ring-offset-alma-surface/40
+                                           bg-[repeating-linear-gradient(45deg,#EDE7DA,#EDE7DA_10px,#E5DDCB_10px,#E5DDCB_20px)]">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="font-serif italic text-3xl text-alma-text-muted">—</span>
+                                </div>
+                                <div class="absolute inset-x-0 bottom-0 px-3 pt-7 pb-2.5 bg-gradient-to-t from-alma-text/80 via-alma-text/40 to-transparent text-alma-bg">
+                                    <p class="font-serif italic text-sm leading-tight">{{ 'stones.filter_no_stone'|trans }}</p>
+                                </div>
+                                <span class="absolute top-2 right-2 flex items-center justify-center w-6 h-6 rounded-full bg-alma-gold text-alma-text font-bold text-xs
+                                             opacity-0 scale-75 transition-all duration-150 group-aria-pressed:opacity-100 group-aria-pressed:scale-100">
+                                    ✓
+                                </span>
+                            </button>
+                        </div>
+
+                        {# Empty search state #}
+                        <div data-stone-drawer-target="emptyState"
+                             class="hidden text-center py-10">
+                            <p class="text-alma-gold text-2xl mb-2">✦</p>
+                            <p class="font-sans text-sm text-alma-text-muted">{{ 'stones.drawer_no_results'|trans }}</p>
+                        </div>
+
+                        {# Footer actions #}
+                        <div class="flex items-center justify-between gap-4 mt-7 pt-5 border-t border-alma-hover/40">
+                            <button type="button"
+                                    data-stone-drawer-target="clearButton"
+                                    data-action="click->stone-drawer#clearAll"
+                                    class="{{ not hasStoneFilter ? 'hidden' : '' }} text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors
+                                           underline underline-offset-4 decoration-alma-hover">
+                                {{ 'stones.drawer_clear_all'|trans }}
+                            </button>
+                            <button type="button"
+                                    data-stone-drawer-target="apply"
+                                    data-action="click->stone-drawer#apply"
+                                    class="ml-auto inline-flex items-center gap-2 px-6 py-2.5 bg-alma-text text-alma-bg
+                                           text-sm font-sans font-medium tracking-wide rounded-full
+                                           hover:bg-alma-gold hover:text-alma-text transition-colors">
+                                <span data-stone-drawer-target="applyCount">
+                                    {%- if noStoneFilter -%}
+                                        {{ 'stones.drawer_apply_no_stone'|trans }}
+                                    {%- elseif activeStoneIds|length == 1 -%}
+                                        {{ 'stones.drawer_apply_one'|trans }}
+                                    {%- else -%}
+                                        {{ 'stones.drawer_apply_many'|trans({'%count%': activeStoneIds|length}) }}
+                                    {%- endif -%}
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+        {% endif %}
+        </div> {# end desktop stone-drawer wrapper (hidden md:block) #}
+
+        {# ══════════════════════════════════════════════ #}
+        {# ── Mobile filter bar + drawer               ── #}
+        {# ══════════════════════════════════════════════ #}
+        <div data-controller="category-drawer" class="md:hidden">
+            <div class="flex items-center gap-3 mb-5">
+                <button class="inline-flex items-center gap-2 px-4 py-2.5 bg-alma-surface/60 border border-alma-hover
+                               text-sm font-sans text-alma-text hover:border-alma-gold hover:text-alma-gold
+                               transition-all duration-200 active:scale-[0.98] rounded-full"
+                        data-action="click->category-drawer#open">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                    </svg>
+                    {{ 'catalog.filter_button'|trans }}
+                    {% if activeCategory or hasStoneFilter %}
+                        {% set mobileBadgeCount = (activeCategory ? 1 : 0) + (noStoneFilter ? 1 : activeStoneIds|length) %}
+                        <span class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full bg-alma-gold text-alma-text text-[10px] font-bold tabular-nums">{{ mobileBadgeCount }}</span>
+                    {% endif %}
+                </button>
+                {% if activeCategory or hasStoneFilter %}
+                    <a href="{{ path('shop_catalog') }}"
+                       class="text-xs font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover">
+                        {{ 'catalog.clear_filter'|trans }}
+                    </a>
+                {% endif %}
+                <span class="ml-auto text-xs font-sans text-alma-text-muted tabular-nums">
+                    {{ pagination.totalItemCount }} {{ pagination.totalItemCount > 1 ? 'catalog.results_plural'|trans : 'catalog.results_singular'|trans }}
+                </span>
+            </div>
+            {# Overlay — starts invisible, JS fades it #}
+            <div class="fixed inset-0 z-40 bg-alma-text/40 backdrop-blur-sm"
+                 data-category-drawer-target="overlay"
+                 data-action="click->category-drawer#close"></div>
+            {# Slide-in panel #}
+            <div class="fixed top-0 left-0 z-50 h-full w-80 max-w-[85vw] bg-alma-bg border-r border-alma-gold-muted
+                        shadow-2xl -translate-x-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col"
+                 data-category-drawer-target="panel">
+                {# Drawer header #}
+                <div class="flex items-center justify-between px-6 h-14 border-b border-alma-hover/40 flex-shrink-0">
+                    <span class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted">{{ 'catalog.filter_button'|trans }}</span>
+                    <button data-action="click->category-drawer#close"
+                            class="p-1.5 -mr-1.5 text-alma-text-muted hover:text-alma-gold transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                {# Drawer body — scrollable with sticky apply at bottom #}
+                <nav class="px-6 pt-5 overflow-y-auto flex-1"
+                     data-controller="stone-drawer"
+                     data-stone-drawer-base-url-value="{{ baseShopUrl }}"
+                     data-stone-drawer-apply-label-many-value="{{ 'stones.drawer_apply_many'|trans({'%count%': '%count%'}) }}"
+                     data-stone-drawer-apply-label-one-value="{{ 'stones.drawer_apply_one'|trans }}"
+                     data-stone-drawer-apply-label-none-value="{{ 'stones.drawer_apply_no_stone'|trans }}">
+
+                    {# Categories section #}
+                    <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted mb-3">
+                        {{ 'catalog.filter_categories'|trans|default('Catégories') }}
+                    </p>
+
+                    <a href="{{ path('shop_catalog') }}"
+                       class="group flex items-center justify-between py-2 text-sm font-sans transition-colors
+                              {{ activeCategory is null ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
+                        <span class="flex items-center gap-2.5">
+                            <span class="w-3.5 h-px transition-all duration-200 {{ activeCategory is null ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
+                            {{ 'catalog.filter_all'|trans }}
+                        </span>
+                        <span class="text-[11px] tabular-nums {{ activeCategory is null ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ totalProductCount }}</span>
+                    </a>
+
+                    <div class="h-px bg-alma-hover/40 my-3"></div>
+
+                    {% for root in rootCategories %}
+                        {% if root.hasChildren() %}
+                            {% set isParentActive = activeParent is not null and activeParent.id == root.id %}
+                            <div class="mb-1" data-controller="collapsible" data-collapsible-open-value="{{ isParentActive ? 'true' : 'false' }}">
+                                <div class="flex items-center">
+                                    <a href="{{ category_path(root) }}"
+                                       class="group flex-1 flex items-center gap-2.5 py-2 text-sm font-sans transition-colors
+                                              {{ isParentActive and activeCategory.id == root.id ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
+                                        <span class="w-3.5 h-px transition-all duration-200 {{ isParentActive and activeCategory.id == root.id ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
+                                        {{ root|localized_name }}
+                                    </a>
+                                    <span class="text-[11px] tabular-nums {{ isParentActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }} mr-0.5">{{ root.totalPublishedProductCount }}</span>
+                                    <button type="button"
+                                            class="p-1.5 text-alma-text-muted/50 hover:text-alma-gold transition-colors"
+                                            data-action="click->collapsible#toggle"
+                                            aria-label="Toggle">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             class="h-3.5 w-3.5 transition-transform"
+                                             data-collapsible-target="icon"
+                                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <ul class="ml-6 border-l border-alma-hover/40 pl-3.5 space-y-0.5"
+                                    data-collapsible-target="content">
+                                    {% for child in root.children %}
+                                        {% set isChildActive = activeCategory is not null and activeCategory.id == child.id %}
+                                        <li>
+                                            <a href="{{ category_path(child) }}"
+                                               class="flex items-center justify-between py-1.5 text-[13px] font-sans transition-colors
+                                                      {{ isChildActive ? 'text-alma-gold font-medium' : 'text-alma-text-muted hover:text-alma-text' }}">
+                                                <span>{{ child|localized_name }}</span>
+                                                <span class="text-[11px] tabular-nums {{ isChildActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ child.publishedProductCount }}</span>
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            {% set isActive = activeCategory is not null and activeCategory.id == root.id %}
+                            <a href="{{ category_path(root) }}"
+                               class="group flex items-center justify-between py-2 mb-1 text-sm font-sans transition-colors
+                                      {{ isActive ? 'text-alma-gold font-medium' : 'text-alma-text hover:text-alma-gold' }}">
+                                <span class="flex items-center gap-2.5">
+                                    <span class="w-3.5 h-px transition-all duration-200 {{ isActive ? 'bg-alma-gold w-5' : 'bg-alma-hover group-hover:bg-alma-gold group-hover:w-5' }}"></span>
+                                    {{ root|localized_name }}
+                                </span>
+                                <span class="text-[11px] tabular-nums {{ isActive ? 'text-alma-gold/70' : 'text-alma-text-muted/40' }}">{{ root.publishedProductCount }}</span>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {# Stones section: tile grid #}
+                    {% if visibleStones|length > 0 %}
+                        <div class="h-px bg-alma-hover/40 my-5"></div>
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-[10px] font-sans uppercase tracking-[0.2em] text-alma-text-muted">
+                                {{ 'stones.filter_heading'|trans }}
+                            </p>
+                            <button type="button"
+                                    data-stone-drawer-target="clearButton"
+                                    data-action="click->stone-drawer#clearAll"
+                                    class="{{ not hasStoneFilter ? 'hidden' : '' }} text-[11px] font-sans text-alma-text-muted hover:text-alma-gold transition-colors underline underline-offset-2 decoration-alma-hover">
+                                {{ 'stones.drawer_clear_all'|trans }}
+                            </button>
+                        </div>
+
+                        <label class="relative block mb-3">
+                            <input type="search"
+                                   data-stone-drawer-target="search"
+                                   data-action="input->stone-drawer#filter"
+                                   placeholder="{{ 'stones.drawer_search_placeholder'|trans }}"
+                                   class="w-full pl-9 pr-3 py-2 bg-alma-surface/40 border border-alma-hover/70 rounded-full
+                                          text-sm font-sans text-alma-text placeholder:text-alma-text-muted/60
+                                          focus:outline-none focus:border-alma-gold/60 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-alma-text-muted/60"
+                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                            </svg>
+                        </label>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            {% for stone in visibleStones %}
+                                {% set isStoneActive = stone.id in activeStoneIds %}
+                                <button type="button"
+                                        data-stone-drawer-target="tile"
+                                        data-stone-slug="{{ stone|localized_slug }}"
+                                        data-stone-name="{{ stone|localized_name }}"
+                                        {% if stone.imageName %}data-stone-image="{{ asset('uploads/stones/' ~ stone.imageName) }}"{% endif %}
+                                        data-action="click->stone-drawer#toggleStone"
+                                        aria-pressed="{{ isStoneActive ? 'true' : 'false' }}"
+                                        class="group relative aspect-square overflow-hidden bg-alma-surface text-left
+                                               focus:outline-none focus:ring-2 focus:ring-alma-gold focus:ring-offset-2 focus:ring-offset-alma-bg
+                                               aria-pressed:ring-2 aria-pressed:ring-alma-gold aria-pressed:ring-offset-2 aria-pressed:ring-offset-alma-bg">
+                                    {% if stone.imageName %}
+                                        <img src="{{ asset('uploads/stones/' ~ stone.imageName) }}"
+                                             alt="{{ stone|localized_name }}"
+                                             loading="lazy"
+                                             class="absolute inset-0 w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="absolute inset-0 flex items-center justify-center text-alma-gold text-3xl">✦</div>
+                                    {% endif %}
+                                    <div class="absolute inset-x-0 bottom-0 px-2.5 pt-6 pb-2 bg-gradient-to-t from-alma-text/80 via-alma-text/40 to-transparent text-alma-bg">
+                                        <p class="font-serif italic text-[13px] leading-tight truncate">{{ stone|localized_name }}</p>
+                                        <p class="text-[10px] font-sans text-alma-bg/70 tabular-nums">{{ stone.availableProductCount }}</p>
+                                    </div>
+                                    <span class="absolute top-1.5 right-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-alma-gold text-alma-text font-bold text-[10px]
+                                                 opacity-0 scale-75 transition-all duration-150 group-aria-pressed:opacity-100 group-aria-pressed:scale-100">
+                                        ✓
+                                    </span>
+                                </button>
+                            {% endfor %}
+
+                            {# No stone tile (mobile) #}
+                            <button type="button"
+                                    data-stone-drawer-target="noStoneTile"
+                                    data-action="click->stone-drawer#toggleNoStone"
+                                    aria-pressed="{{ noStoneFilter ? 'true' : 'false' }}"
+                                    class="group relative aspect-square overflow-hidden text-left
+                                           focus:outline-none focus:ring-2 focus:ring-alma-gold focus:ring-offset-2 focus:ring-offset-alma-bg
+                                           aria-pressed:ring-2 aria-pressed:ring-alma-gold aria-pressed:ring-offset-2 aria-pressed:ring-offset-alma-bg
+                                           bg-[repeating-linear-gradient(45deg,#EDE7DA,#EDE7DA_8px,#E5DDCB_8px,#E5DDCB_16px)]">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="font-serif italic text-2xl text-alma-text-muted">—</span>
+                                </div>
+                                <div class="absolute inset-x-0 bottom-0 px-2.5 pt-6 pb-2 bg-gradient-to-t from-alma-text/80 via-alma-text/40 to-transparent text-alma-bg">
+                                    <p class="font-serif italic text-[13px] leading-tight">{{ 'stones.filter_no_stone'|trans }}</p>
+                                </div>
+                                <span class="absolute top-1.5 right-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-alma-gold text-alma-text font-bold text-[10px]
+                                             opacity-0 scale-75 transition-all duration-150 group-aria-pressed:opacity-100 group-aria-pressed:scale-100">
+                                    ✓
+                                </span>
+                            </button>
+                        </div>
+
+                        <div data-stone-drawer-target="emptyState"
+                             class="hidden text-center py-6">
+                            <p class="text-alma-gold text-xl mb-1">✦</p>
+                            <p class="font-sans text-xs text-alma-text-muted">{{ 'stones.drawer_no_results'|trans }}</p>
+                        </div>
+
+                        {# Sticky apply CTA at bottom of mobile drawer #}
+                        <button type="button"
+                                data-stone-drawer-target="apply"
+                                data-action="click->stone-drawer#apply"
+                                class="sticky bottom-0 mt-6 -mx-6 px-6 py-3.5 w-[calc(100%+3rem)] bg-alma-text text-alma-bg
+                                       text-sm font-sans font-medium tracking-wide
+                                       inline-flex items-center justify-center gap-2
+                                       hover:bg-alma-gold hover:text-alma-text transition-colors">
+                            <span data-stone-drawer-target="applyCount">
+                                {%- if noStoneFilter -%}
+                                    {{ 'stones.drawer_apply_no_stone'|trans }}
+                                {%- elseif activeStoneIds|length == 1 -%}
+                                    {{ 'stones.drawer_apply_one'|trans }}
+                                {%- else -%}
+                                    {{ 'stones.drawer_apply_many'|trans({'%count%': activeStoneIds|length}) }}
+                                {%- endif -%}
+                            </span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5"
+                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                            </svg>
+                        </button>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+
+        {# ══════════════════════════════════════════════ #}
+        {# ── Product grid                             ── #}
+        {# ══════════════════════════════════════════════ #}
+        <div class="min-w-0">
                 {% set wishlistedIds = wishlist_product_ids() %}
 
                 {% if pagination|length > 0 %}
@@ -622,5 +861,4 @@
                 {% endif %}
             </div>
         </div>
-    </div>
 {% endblock %}

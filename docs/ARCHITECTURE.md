@@ -17,7 +17,8 @@ alma-stella/
 │       ├── address_selector_controller.js   # Fills checkout form from saved customer address
 │       ├── billing_toggle_controller.js     # Shows/hides billing address fields (checkbox toggle)
 │       ├── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
-│       ├── category_drawer_controller.js   # Mobile category filter drawer (slide-in from left)
+│       ├── category_drawer_controller.js   # Mobile filter drawer (slide-in from left, holds categories + stones)
+│       ├── category_panel_controller.js    # Desktop toolbar Category drawer (full-width inline panel, tile cards w/ subcategory lists, ESC + sibling-close)
 │       ├── checkout_identify_controller.js  # Email detection: existing account → login, new → guest
 │       ├── collapsible_controller.js        # Collapsible/accordion sections (sidebar, mobile nav)
 │       ├── coupon_code_controller.js        # Async coupon code validation at checkout
@@ -28,7 +29,7 @@ alma-stella/
 │       ├── mobile_menu_controller.js        # Mobile hamburger menu toggle
 │       ├── reservation_timer_controller.js  # Checkout countdown timer (mm:ss, auto-reload on expiry)
 │       ├── star_rating_controller.js        # Star rating input on testimonial submission form
-│       ├── stone_filter_controller.js       # Stone filter toggle in catalog sidebar
+│       ├── stone_drawer_controller.js       # Immersive stones drawer (toolbar trigger, multi-select tiles, search, navigates to ?stones=slug1,slug2)
 │       ├── stripe_payment_controller.js     # Stripe Payment Element mount & confirm
 │       ├── turnstile_controller.js          # Cloudflare Turnstile CAPTCHA integration
 │       └── wishlist_toggle_controller.js    # Heart toggle (AJAX POST, guest redirect to login)
@@ -71,7 +72,7 @@ alma-stella/
 │   │       ├── AccountController.php       # Dashboard, orders, addresses, profile
 │   │       ├── CartController.php          # Cart API: add/remove/content (JSON responses)
 │   │       ├── WishlistController.php     # Wishlist: toggle (AJAX) + account page
-│   │       ├── CatalogController.php
+│   │       ├── CatalogController.php        # Shop listing: ?stones=slug1,slug2 (CSV) or ?stones=none for "without stone"
 │   │       ├── CheckoutController.php      # 3-step tunnel: identify → checkout → payment + tracking
 │   │       ├── ContactController.php       # Contact form with honeypot + rate limiter
 │   │       ├── CurrencyController.php      # POST /currency/switch — changes active currency

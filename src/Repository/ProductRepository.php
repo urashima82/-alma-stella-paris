@@ -99,7 +99,10 @@ class ProductRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findVisibleQuery(?ProductCategory $category = null, ?string $collection = null, ?Stone $stone = null, bool $noStone = false): QueryBuilder
+    /**
+     * @param list<Stone> $stones
+     */
+    public function findVisibleQuery(?ProductCategory $category = null, ?string $collection = null, array $stones = [], bool $noStone = false): QueryBuilder
     {
         $soldOutCutoff = new \DateTimeImmutable('-14 days');
 
@@ -128,10 +131,11 @@ class ProductRepository extends ServiceEntityRepository
                 ->setParameter('collection', \sprintf('"%s"', $collection));
         }
 
-        if ($stone !== null) {
+        if ($stones !== []) {
             $qb->join('p.stones', 'st')
-                ->andWhere('st = :stone')
-                ->setParameter('stone', $stone);
+                ->andWhere('st IN (:stones)')
+                ->setParameter('stones', $stones)
+                ->groupBy('p.id');
         } elseif ($noStone) {
             $qb->leftJoin('p.stones', 'st_none')
                 ->andWhere('st_none.id IS NULL');

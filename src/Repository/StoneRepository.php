@@ -41,6 +41,28 @@ class StoneRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param list<string> $slugs
+     *
+     * @return list<Stone>
+     */
+    public function findBySlugs(array $slugs, string $locale): array
+    {
+        if ($slugs === []) {
+            return [];
+        }
+
+        $field = $locale === 'fr' ? 's.slugFr' : 's.slug';
+
+        /* @var list<Stone> */
+        return $this->createQueryBuilder('s')
+            ->where(\sprintf('%s IN (:slugs)', $field))
+            ->setParameter('slugs', $slugs)
+            ->orderBy('s.nameFr', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @return Stone[]
      */
     public function findWithAvailableProducts(): array

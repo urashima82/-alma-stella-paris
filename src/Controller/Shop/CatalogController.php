@@ -59,13 +59,17 @@ class CatalogController extends AbstractController
 
         $activeCollection = $siteSettingsRepository->getActiveCollection();
 
-        $stoneSlug = $request->query->getString('stone');
-        $activeStone = null;
-        if ($stoneSlug !== '') {
-            $activeStone = $stoneRepository->findBySlug($stoneSlug, $locale);
+        $stonesParam = $request->query->getString('stones');
+        $noStoneFilter = $stonesParam === 'none';
+        $stoneSlugs = [];
+        $activeStones = [];
+
+        if ($stonesParam !== '' && !$noStoneFilter) {
+            $stoneSlugs = \array_values(\array_filter(\array_map('trim', \explode(',', $stonesParam))));
+            $activeStones = $stoneRepository->findBySlugs($stoneSlugs, $locale);
         }
 
-        $query = $productRepository->findVisibleQuery($activeCategory, $activeCollection, $activeStone, $stoneSlug === 'none');
+        $query = $productRepository->findVisibleQuery($activeCategory, $activeCollection, $activeStones, $noStoneFilter);
 
         $pagination = $paginator->paginate(
             $query,
@@ -86,8 +90,8 @@ class CatalogController extends AbstractController
             'totalProductCount' => (int) $totalProductCount,
             'reservedProductIds' => $reservationManager->getReservedProductIdsByOthers(),
             'stones' => $stoneRepository->findAllOrdered(),
-            'activeStone' => $activeStone,
-            'noStoneFilter' => $stoneSlug === 'none',
+            'activeStones' => $activeStones,
+            'noStoneFilter' => $noStoneFilter,
         ]);
     }
 }

@@ -6,7 +6,6 @@
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js",
     "\/assets\/controllers\/wishlist_toggle_controller.js",
     "\/assets\/controllers\/turnstile_controller.js",
-    "\/assets\/controllers\/stone_filter_controller.js",
     "\/assets\/controllers\/checkout_identify_controller.js",
     "\/assets\/controllers\/billing_toggle_controller.js",
     "\/assets\/controllers\/address_selector_controller.js",
@@ -19,8 +18,10 @@
     "\/assets\/controllers\/stripe_payment_controller.js",
     "\/assets\/controllers\/mobile_menu_controller.js",
     "\/assets\/controllers\/cart_drawer_controller.js",
+    "\/assets\/controllers\/stone_drawer_controller.js",
     "\/assets\/controllers\/currency_selector_controller.js",
     "\/assets\/controllers\/reservation_timer_controller.js",
     "\/assets\/controllers\/collapsible_controller.js",
+    "\/assets\/controllers\/category_panel_controller.js",
     "\/assets\/controllers\/account_dropdown_controller.js"
 ]

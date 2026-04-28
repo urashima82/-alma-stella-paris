@@ -1,0 +1,1319 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Refonte filtre Pierres — Alma Stella Paris</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF8F4;
+    --bg-deep: #F5F1E8;
+    --linen: #F0EBE1;
+    --hover: #E8DDD0;
+    --ink: #2C2418;
+    --ink-soft: #5C5142;
+    --ink-mute: #9A8E7B;
+    --gold: #C9A84C;
+    --gold-deep: #A8893A;
+    --line: rgba(44,36,24,.12);
+    --line-soft: rgba(44,36,24,.06);
+    --shadow-sm: 0 1px 2px rgba(44,36,24,.04), 0 2px 6px rgba(44,36,24,.06);
+    --shadow-md: 0 6px 24px -8px rgba(44,36,24,.18), 0 2px 8px rgba(44,36,24,.08);
+    --shadow-lg: 0 30px 60px -20px rgba(44,36,24,.25), 0 10px 30px -10px rgba(44,36,24,.15);
+    --serif: 'Cormorant Garamond', 'Times New Roman', serif;
+    --sans: 'Manrope', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg-deep); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  body { padding: 60px 32px 120px; }
+  a { color: inherit; }
+
+  /* ─── Document shell ─── */
+  .doc {
+    max-width: 1320px;
+    margin: 0 auto;
+  }
+  .doc-head {
+    text-align: center;
+    margin-bottom: 64px;
+    padding: 0 24px;
+  }
+  .doc-eyebrow {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+  .doc-eyebrow::before, .doc-eyebrow::after {
+    content: "";
+    display: inline-block;
+    width: 28px; height: 1px;
+    background: var(--gold);
+    vertical-align: middle;
+    margin: 0 14px;
+    transform: translateY(-2px);
+  }
+  .doc-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(40px, 5.4vw, 68px);
+    line-height: 1.04;
+    letter-spacing: -.01em;
+  }
+  .doc-title em {
+    font-style: italic;
+    color: var(--gold-deep);
+    font-weight: 400;
+  }
+  .doc-lede {
+    margin-top: 22px;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ─── Section frame ─── */
+  .section { margin-top: 96px; }
+  .section-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 0 8px 32px;
+    border-bottom: 1px solid var(--line-soft);
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+  .section-head-left { max-width: 720px; }
+  .section-no {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--gold-deep);
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(28px, 3.2vw, 42px);
+    line-height: 1.1;
+    letter-spacing: -.005em;
+  }
+  .section-desc {
+    margin-top: 14px;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .pill {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--linen);
+    color: var(--ink-soft);
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid var(--line-soft);
+  }
+  .pill.recommended {
+    background: var(--ink);
+    color: #F5E9C7;
+    border-color: var(--ink);
+  }
+
+  /* ─── Browser frame ─── */
+  .preview-row {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 1100px) {
+    .preview-row { grid-template-columns: 1fr; }
+  }
+  .browser {
+    background: var(--bg);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--line);
+  }
+  .browser-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, #F4EFE5, #EFE9DE);
+    border-bottom: 1px solid var(--line);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-mute); opacity: .35; }
+  .dot:nth-child(1){ background: #D9A574; opacity: .7;}
+  .dot:nth-child(2){ background: #D9C474; opacity: .7;}
+  .dot:nth-child(3){ background: #A8C58A; opacity: .7;}
+  .browser-url {
+    margin-left: 16px;
+    font-size: 11.5px;
+    letter-spacing: .04em;
+    color: var(--ink-mute);
+    font-family: var(--sans);
+  }
+
+  /* ─── Site header (mock) ─── */
+  .site-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 36px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .site-nav {
+    display: flex;
+    gap: 28px;
+    font-size: 11px;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .site-nav span.active { color: var(--ink); position: relative; }
+  .site-nav span.active::after {
+    content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: -8px; width: 18px; height: 1px; background: var(--gold);
+  }
+  .site-logo {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+  }
+  .site-logo .star { color: var(--gold); margin: 0 4px; }
+  .site-utility { display: flex; gap: 14px; color: var(--ink-soft); font-size: 12px; letter-spacing: .12em; }
+
+  /* ─── Shop hero ─── */
+  .shop-hero {
+    text-align: center;
+    padding: 56px 24px 40px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .shop-hero h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -.01em;
+  }
+  .shop-hero p {
+    margin-top: 18px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    letter-spacing: .04em;
+    max-width: 560px;
+    margin-left: auto; margin-right: auto;
+  }
+
+  /* ─── Layout shop ─── */
+  .shop-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 56px;
+    padding: 36px 36px 48px;
+  }
+  .shop-body.no-sidebar { grid-template-columns: 1fr; }
+  .sidebar h4 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 10.5px;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .sidebar ul { list-style: none; display: flex; flex-direction: column; gap: 4px; margin-bottom: 36px; }
+  .sidebar li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 0;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .sidebar li:hover { color: var(--ink); }
+  .sidebar li.is-active { color: var(--ink); font-weight: 500; }
+  .sidebar li.is-active::before {
+    content: ""; display: inline-block; width: 14px; height: 1px; background: var(--gold);
+    margin-right: 10px; transform: translateY(-3px);
+  }
+  .sidebar .count { color: var(--ink-mute); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+
+  /* ─── Result toolbar ─── */
+  .result-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line-soft);
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    letter-spacing: .04em;
+  }
+  .result-bar strong { color: var(--ink); font-weight: 500; }
+
+  /* ─── Product grid (placeholder) ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .card {
+    background: var(--linen);
+    border-radius: 6px;
+    aspect-ratio: 3/4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 32px;
+    font-family: var(--serif);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(120% 80% at 50% 0%, rgba(255,255,255,.5), transparent 60%),
+      radial-gradient(80% 60% at 50% 100%, rgba(201,168,76,.06), transparent 70%);
+    pointer-events: none;
+  }
+  .card .nouv {
+    position: absolute; top: 12px; left: 12px;
+    font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--ink); background: rgba(255,255,255,.7);
+    padding: 4px 8px; border-radius: 2px;
+    backdrop-filter: blur(4px);
+  }
+  .card-meta { position: absolute; bottom: -28px; left: 0; width: 100%; display: flex; justify-content: space-between; font-size: 11.5px; color: var(--ink-soft); padding: 0 2px; }
+  .card-meta strong { color: var(--ink); font-weight: 500; font-family: var(--serif); font-size: 13.5px; }
+  .card-wrap { padding-bottom: 36px; }
+
+  /* ═══════════════════════════════════════════════════════
+     PROPOSAL A — STONE GALLERY STRIP (recommended)
+     ═══════════════════════════════════════════════════════ */
+  .stone-strip {
+    position: relative;
+    margin-bottom: 32px;
+  }
+  .stone-strip-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .stone-strip-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--ink);
+  }
+  .stone-strip-title small {
+    font-family: var(--sans);
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-left: 14px;
+  }
+  .stone-strip-clear {
+    font-size: 12px;
+    color: var(--ink-mute);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--line);
+    cursor: pointer;
+    background: none;
+    border: 0;
+    font-family: var(--sans);
+    transition: color .15s;
+  }
+  .stone-strip-clear:hover { color: var(--gold-deep); text-decoration-color: var(--gold); }
+
+  .stone-track-wrap {
+    position: relative;
+    margin: 0 -8px;
+  }
+  .stone-track-wrap::before, .stone-track-wrap::after {
+    content: "";
+    position: absolute; top: 0; bottom: 22px; width: 48px;
+    pointer-events: none; z-index: 2;
+  }
+  .stone-track-wrap::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+  .stone-track-wrap::after { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
+
+  .stone-track {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 6px 8px 22px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  .stone-track::-webkit-scrollbar { height: 4px; }
+  .stone-track::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px;}
+
+  .stone-chip {
+    flex: 0 0 auto;
+    width: 92px;
+    scroll-snap-align: start;
+    cursor: pointer;
+    text-align: center;
+    background: none; border: 0;
+    padding: 0;
+    font-family: var(--sans);
+    transition: transform .25s cubic-bezier(.2,.7,.3,1);
+  }
+  .stone-chip:hover { transform: translateY(-2px); }
+  .stone-chip:hover .stone-photo::after { opacity: 1; }
+
+  .stone-photo {
+    position: relative;
+    width: 84px; height: 84px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--linen);
+    box-shadow: inset 0 0 0 1px var(--line-soft), 0 4px 14px -8px rgba(44,36,24,.25);
+    transition: box-shadow .25s, transform .25s;
+  }
+  .stone-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .stone-photo::after {
+    content: "";
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 0 var(--gold);
+    transition: box-shadow .25s, opacity .25s;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .stone-chip[aria-pressed="true"] .stone-photo {
+    transform: scale(1.04);
+  }
+  .stone-chip[aria-pressed="true"] .stone-photo::after {
+    box-shadow: inset 0 0 0 2.5px var(--gold), 0 0 0 4px var(--bg), 0 0 0 5px var(--gold);
+    opacity: 1;
+  }
+  .stone-chip[aria-pressed="true"] .stone-name { color: var(--ink); font-weight: 600; }
+  .stone-chip[aria-pressed="true"] .stone-name::after {
+    content: "✓";
+    margin-left: 5px;
+    color: var(--gold-deep);
+    font-weight: 700;
+  }
+
+  .stone-name {
+    display: block;
+    font-size: 11.5px;
+    line-height: 1.25;
+    color: var(--ink-soft);
+    letter-spacing: .01em;
+    transition: color .2s;
+  }
+  .stone-count {
+    display: block;
+    font-size: 10px;
+    color: var(--ink-mute);
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+  }
+  .stone-chip.no-stone .stone-photo {
+    background: repeating-linear-gradient(45deg, #EDE7DA, #EDE7DA 6px, #E5DDCB 6px, #E5DDCB 12px);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-mute);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+  }
+  .stone-chip.no-stone .stone-photo::before {
+    content: "—";
+  }
+
+  .active-tag-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-top: 4px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--line);
+  }
+  .active-tag-row[hidden] { display: none; }
+  .active-tag-row .label { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-mute); margin-right: 4px; }
+  .active-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--ink);
+    color: #F5E9C7;
+    padding: 5px 8px 5px 5px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+  .active-tag img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
+  .active-tag .x {
+    background: rgba(245,233,199,.15);
+    border: 0;
+    color: #F5E9C7;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 2px;
+    transition: background .15s;
+  }
+  .active-tag .x:hover { background: rgba(245,233,199,.3); }
+
+  /* ─── Phone preview ─── */
+  .phone {
+    background: #1a150d;
+    border-radius: 38px;
+    padding: 12px;
+    box-shadow: var(--shadow-lg);
+    width: 360px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 22px; left: 50%; transform: translateX(-50%);
+    width: 90px; height: 22px;
+    background: #1a150d;
+    border-radius: 999px;
+    z-index: 4;
+  }
+  .phone-screen {
+    background: var(--bg);
+    border-radius: 28px;
+    overflow: hidden;
+    height: 720px;
+    display: flex; flex-direction: column;
+  }
+  .phone-status {
+    height: 38px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .phone-status .glyphs { display: flex; gap: 5px; align-items: center; opacity: .6; font-size: 11px; }
+
+  .phone-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .phone-nav .icon-btn {
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--linen);
+    border-radius: 50%;
+    color: var(--ink);
+    font-size: 13px;
+    border: 0;
+  }
+  .phone-nav .logo {
+    font-family: var(--serif); font-style: italic; font-size: 17px;
+  }
+  .phone-nav .logo .star { color: var(--gold); }
+
+  .phone-content { flex: 1; overflow: hidden; position: relative; }
+  .phone-shop-title {
+    font-family: var(--serif); font-weight: 300; font-size: 32px;
+    text-align: center; margin: 22px 0 6px;
+  }
+  .phone-shop-sub {
+    font-size: 11px; letter-spacing: .14em; color: var(--ink-soft); text-align: center;
+  }
+
+  /* mobile filter trigger row */
+  .phone-filter-row {
+    display: flex; gap: 8px; padding: 18px 18px 8px;
+  }
+  .phone-filter-btn {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 11px 16px;
+    font-size: 12.5px;
+    font-family: var(--sans);
+    color: var(--ink);
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font-weight: 500;
+  }
+  .phone-filter-btn .badge {
+    background: var(--gold);
+    color: var(--ink);
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    font-size: 10px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-left: 4px;
+  }
+  .phone-filter-btn.active { background: var(--ink); color: #F5E9C7; border-color: var(--ink); }
+
+  /* horizontal stone scroll on mobile */
+  .phone-stone-scroll {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 14px 18px 18px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .phone-stone-scroll::-webkit-scrollbar { display: none; }
+  .phone-stone-scroll .stone-chip { width: 72px; }
+  .phone-stone-scroll .stone-photo { width: 64px; height: 64px; margin-bottom: 6px;}
+  .phone-stone-scroll .stone-name { font-size: 10px; }
+  .phone-stone-scroll .stone-count { display: none; }
+
+  .phone-grid {
+    padding: 8px 14px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .phone-grid .card { aspect-ratio: 3/4; font-size: 22px; border-radius: 4px; }
+  .phone-grid .card-wrap { padding-bottom: 28px; }
+  .phone-grid .card-meta { font-size: 10px; }
+  .phone-grid .card-meta strong { font-size: 11px; }
+
+  /* ═══════════════════════════════════════════════════════
+     PROPOSAL B — STONE DRAWER
+     ═══════════════════════════════════════════════════════ */
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .toolbar-btn {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 9px 16px 9px 14px;
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink);
+    display: inline-flex; align-items: center; gap: 8px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .toolbar-btn:hover { border-color: var(--gold); }
+  .toolbar-btn .ic {
+    width: 14px; height: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--gold-deep);
+  }
+  .toolbar-btn.is-primary {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #F5E9C7;
+    padding: 9px 8px 9px 14px;
+  }
+  .toolbar-btn.is-primary .ic { color: var(--gold); }
+  .toolbar-btn .stack {
+    display: inline-flex; padding-left: 4px;
+  }
+  .toolbar-btn .stack img {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    margin-left: -7px;
+    object-fit: cover;
+  }
+  .toolbar-sep { flex: 1; }
+  .toolbar-sort {
+    background: none; border: 0; font-family: var(--sans); font-size: 12.5px;
+    color: var(--ink-soft); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+
+  /* drawer panel */
+  .drawer-panel {
+    background: var(--bg);
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    padding: 28px 30px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+  }
+  .drawer-panel::before {
+    content: "";
+    position: absolute; top: -8px; left: 168px;
+    width: 14px; height: 14px;
+    background: var(--bg);
+    border-left: 1px solid var(--line);
+    border-top: 1px solid var(--line);
+    transform: rotate(45deg);
+  }
+  .drawer-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 22px;
+  }
+  .drawer-head h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 22px;
+  }
+  .drawer-head h3 em { font-style: italic; color: var(--gold-deep); }
+  .drawer-search {
+    background: var(--bg-deep);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    width: 220px;
+    color: var(--ink);
+    font-family: var(--sans);
+  }
+  .drawer-search::placeholder { color: var(--ink-mute); }
+
+  .stone-tile-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 1100px) {
+    .stone-tile-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .stone-tile {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--linen);
+    border: 0;
+    padding: 0;
+    transition: transform .25s;
+  }
+  .stone-tile img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .6s cubic-bezier(.2,.7,.3,1);
+  }
+  .stone-tile:hover img { transform: scale(1.06); }
+  .stone-tile-overlay {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 28px 12px 10px;
+    background: linear-gradient(180deg, transparent, rgba(20,16,8,.78));
+    color: #F5E9C7;
+    text-align: left;
+  }
+  .stone-tile-overlay strong {
+    display: block;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+  .stone-tile-overlay span {
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    color: rgba(245,233,199,.7);
+    font-variant-numeric: tabular-nums;
+  }
+  .stone-tile.selected {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+  .stone-tile.selected::after {
+    content: "✓";
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px;
+    background: var(--gold);
+    color: var(--ink);
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px;
+  }
+  .stone-tile.disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ═══════════════════════════════════════════════════════
+     PROPOSAL C — INLINE FACETS
+     ═══════════════════════════════════════════════════════ */
+  .facet-block {
+    background: var(--bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 28px;
+  }
+  .facet-block h4 {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .facet-pills {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .facet-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-deep);
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    padding: 5px 14px 5px 5px;
+    font-size: 12.5px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all .18s;
+    font-family: var(--sans);
+  }
+  .facet-pill:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .facet-pill img {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.4);
+  }
+  .facet-pill .ct {
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-variant-numeric: tabular-nums;
+  }
+  .facet-pill[aria-pressed="true"] {
+    background: var(--ink);
+    color: #F5E9C7;
+    border-color: var(--ink);
+  }
+  .facet-pill[aria-pressed="true"] .ct { color: rgba(245,233,199,.6); }
+  .facet-pill[aria-pressed="true"] img { box-shadow: inset 0 0 0 1px rgba(245,233,199,.2); }
+
+  /* ─── notes ─── */
+  .notes {
+    margin-top: 28px;
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 26px 30px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--line-soft);
+  }
+  .notes h5 {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .notes ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .notes li {
+    padding-left: 22px;
+    position: relative;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .notes li::before {
+    content: "";
+    position: absolute; left: 0; top: 11px;
+    width: 10px; height: 1px;
+    background: var(--gold);
+  }
+  .notes strong { color: var(--ink); font-weight: 600; }
+
+  /* footer */
+  .doc-foot {
+    margin-top: 120px;
+    text-align: center;
+    color: var(--ink-mute);
+    font-size: 12px;
+    letter-spacing: .12em;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 36px;
+  }
+  .doc-foot strong { color: var(--ink-soft); }
+
+  /* small util */
+  @media (max-width: 720px) {
+    body { padding: 32px 16px 80px; }
+    .shop-body { grid-template-columns: 1fr; padding: 24px; gap: 28px; }
+    .grid { grid-template-columns: 1fr 1fr; }
+    .site-head { flex-direction: column; gap: 14px; padding: 18px; }
+    .site-nav { font-size: 9px; gap: 16px; }
+    .shop-hero h1 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <header class="doc-head">
+    <div class="doc-eyebrow">Proposition design</div>
+    <h1 class="doc-title">Repenser le filtre <em>Pierres</em></h1>
+    <p class="doc-lede">
+      Le filtre actuel — une liste de noms et de chiffres — sous-exploite ce que la marque a de plus singulier&nbsp;:
+      la beauté de chaque pierre. Trois directions, de la plus immédiate à la plus immersive,
+      pour transformer un menu administratif en moment de découverte.
+    </p>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PROPOSAL A — STONE GALLERY STRIP
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="section">
+    <header class="section-head">
+      <div class="section-head-left">
+        <div class="section-no">Proposition i</div>
+        <h2 class="section-title">Galerie de pierres en bandeau</h2>
+        <p class="section-desc">
+          Les pierres quittent la sidebar et s'affichent en haut de la grille,
+          chacune représentée par sa <em>vraie photo</em>. Un clic pour activer,
+          anneau doré sur la sélection, scroll horizontal sur mobile. Ergonomie d'un
+          carousel d'app premium, lisibilité immédiate, plaisir du toucher.
+        </p>
+      </div>
+      <span class="pill recommended">⭐ Recommandée</span>
+    </header>
+
+    <div class="preview-row">
+      <!-- Desktop -->
+      <div class="browser">
+        <div class="browser-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="browser-url">almastellaparis.com / boutique</span>
+        </div>
+        <div class="site-head">
+          <div class="site-utility">EUR · FR</div>
+          <div class="site-nav"><span>Accueil</span><span class="active">Boutique</span><span>Les pierres</span><span>À propos</span></div>
+          <div class="site-logo">A<span class="star">✦</span>S</div>
+          <div class="site-utility">🛍 0</div>
+        </div>
+        <div class="shop-hero">
+          <h1>La Collection</h1>
+          <p>Bijoux attentionnés. Sourcés dans le monde entier. Portés au quotidien.</p>
+        </div>
+
+        <div class="shop-body">
+          <aside class="sidebar">
+            <h4>Catégories</h4>
+            <ul>
+              <li class="is-active">Tout <span class="count">225</span></li>
+              <li>Bagues <span class="count">57</span></li>
+              <li>Boucles d'oreilles <span class="count">78</span></li>
+              <li>Bracelets <span class="count">48</span></li>
+              <li>Colliers <span class="count">42</span></li>
+              <li>Coffrets <span class="count">0</span></li>
+            </ul>
+            <h4>Tri</h4>
+            <ul>
+              <li class="is-active">Nouveautés</li>
+              <li>Prix croissant</li>
+              <li>Prix décroissant</li>
+            </ul>
+          </aside>
+
+          <main>
+            <div class="stone-strip" id="stripA">
+              <div class="stone-strip-head">
+                <div class="stone-strip-title">Filtrer par pierre <small>22 pierres · cliquez pour combiner</small></div>
+                <button class="stone-strip-clear" data-clear-strip>Réinitialiser</button>
+              </div>
+              <div class="stone-track-wrap">
+                <div class="stone-track" data-strip>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Lapis Lazuli"><span class="stone-photo"><img src="../stones/Lapis Lazuli.png" alt=""></span><span class="stone-name">Lapis Lazuli</span><span class="stone-count">5</span></button>
+                  <button class="stone-chip" aria-pressed="true" data-stone="Labradorite"><span class="stone-photo"><img src="../stones/Labradorite.png" alt=""></span><span class="stone-name">Labradorite</span><span class="stone-count">9</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Cornaline"><span class="stone-photo"><img src="../stones/Cornaline.png" alt=""></span><span class="stone-name">Cornaline</span><span class="stone-count">5</span></button>
+                  <button class="stone-chip" aria-pressed="true" data-stone="Pierre de Lune"><span class="stone-photo"><img src="../stones/Pierre de Lune.png" alt=""></span><span class="stone-name">Pierre de Lune</span><span class="stone-count">11</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Onyx noir"><span class="stone-photo"><img src="../stones/Onyx noir.png" alt=""></span><span class="stone-name">Onyx noir</span><span class="stone-count">8</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Turquoise"><span class="stone-photo"><img src="../stones/Turquoise.png" alt=""></span><span class="stone-name">Turquoise</span><span class="stone-count">6</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Amazonite"><span class="stone-photo"><img src="../stones/Amazonite.png" alt=""></span><span class="stone-name">Amazonite</span><span class="stone-count">5</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Quartz Rose"><span class="stone-photo"><img src="../stones/Quartz Rose.png" alt=""></span><span class="stone-name">Quartz Rose</span><span class="stone-count">9</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Malachite"><span class="stone-photo"><img src="../stones/Malachite.png" alt=""></span><span class="stone-name">Malachite</span><span class="stone-count">4</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Agate blanche"><span class="stone-photo"><img src="../stones/Agate blanche.png" alt=""></span><span class="stone-name">Agate blanche</span><span class="stone-count">7</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Rhodonite"><span class="stone-photo"><img src="../stones/Rhodonite.png" alt=""></span><span class="stone-name">Rhodonite</span><span class="stone-count">3</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Sodalite"><span class="stone-photo"><img src="../stones/Sodalite.png" alt=""></span><span class="stone-name">Sodalite</span><span class="stone-count">4</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Nacre"><span class="stone-photo"><img src="../stones/Nacre.png" alt=""></span><span class="stone-name">Nacre</span><span class="stone-count">10</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Abalone"><span class="stone-photo"><img src="../stones/Abalone.png" alt=""></span><span class="stone-name">Abalone</span><span class="stone-count">3</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Aventurine verte"><span class="stone-photo"><img src="../stones/Aventurine verte.png" alt=""></span><span class="stone-name">Aventurine</span><span class="stone-count">4</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Quartz Vert"><span class="stone-photo"><img src="../stones/Quartz Vert.png" alt=""></span><span class="stone-name">Quartz Vert</span><span class="stone-count">3</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Péridot"><span class="stone-photo"><img src="../stones/Péridot.png" alt=""></span><span class="stone-name">Péridot</span><span class="stone-count">2</span></button>
+                  <button class="stone-chip" aria-pressed="false" data-stone="Jaspe Dalmatien"><span class="stone-photo"><img src="../stones/Jaspe Dalmatien.png" alt=""></span><span class="stone-name">Jaspe Dalmatien</span><span class="stone-count">2</span></button>
+                  <button class="stone-chip no-stone" aria-pressed="false" data-stone="Sans pierre"><span class="stone-photo"></span><span class="stone-name">Sans pierre</span><span class="stone-count">38</span></button>
+                </div>
+              </div>
+              <div class="active-tag-row" data-active-row>
+                <span class="label">Sélection</span>
+                <span class="active-tag"><img src="../stones/Labradorite.png" alt="">Labradorite<button class="x">×</button></span>
+                <span class="active-tag"><img src="../stones/Pierre de Lune.png" alt="">Pierre de Lune<button class="x">×</button></span>
+              </div>
+            </div>
+
+            <div class="result-bar">
+              <span><strong>20</strong> pièces — <span style="color:var(--gold-deep)">2 pierres sélectionnées</span></span>
+              <span>Trier&nbsp;: Nouveautés</span>
+            </div>
+            <div class="grid">
+              <div class="card-wrap"><div class="card"><span class="nouv">Nouveau</span>✦</div><div class="card-meta"><strong>Bague Pierre de Lune</strong><span>€32</span></div></div>
+              <div class="card-wrap"><div class="card"><span class="nouv">Nouveau</span>✦</div><div class="card-meta"><strong>Boucles Labradorite</strong><span>€28</span></div></div>
+              <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Collier Labradorite</strong><span>€48</span></div></div>
+              <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Bracelet Lune Argent</strong><span>€42</span></div></div>
+              <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Bague Reflets Bleu</strong><span>€38</span></div></div>
+              <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Boucles Lune Or</strong><span>€34</span></div></div>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      <!-- Mobile -->
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-status"><span>9:41</span><span class="glyphs">●●●●● ◐ 􀛨</span></div>
+          <div class="phone-nav">
+            <button class="icon-btn">☰</button>
+            <div class="logo">Alma <span class="star">✦</span> Stella</div>
+            <button class="icon-btn">🛍</button>
+          </div>
+          <div class="phone-content">
+            <div class="phone-shop-title">La Collection</div>
+            <div class="phone-shop-sub">225 pièces</div>
+            <div class="phone-filter-row">
+              <button class="phone-filter-btn">Catégorie</button>
+              <button class="phone-filter-btn active">Pierres <span class="badge">2</span></button>
+              <button class="phone-filter-btn">Tri</button>
+            </div>
+            <div class="phone-stone-scroll">
+              <button class="stone-chip" aria-pressed="true" data-stone="Labradorite"><span class="stone-photo"><img src="../stones/Labradorite.png" alt=""></span><span class="stone-name">Labradorite</span></button>
+              <button class="stone-chip" aria-pressed="true" data-stone="Pierre de Lune"><span class="stone-photo"><img src="../stones/Pierre de Lune.png" alt=""></span><span class="stone-name">Pierre de Lune</span></button>
+              <button class="stone-chip" aria-pressed="false" data-stone="Lapis Lazuli"><span class="stone-photo"><img src="../stones/Lapis Lazuli.png" alt=""></span><span class="stone-name">Lapis</span></button>
+              <button class="stone-chip" aria-pressed="false" data-stone="Cornaline"><span class="stone-photo"><img src="../stones/Cornaline.png" alt=""></span><span class="stone-name">Cornaline</span></button>
+              <button class="stone-chip" aria-pressed="false" data-stone="Onyx noir"><span class="stone-photo"><img src="../stones/Onyx noir.png" alt=""></span><span class="stone-name">Onyx</span></button>
+              <button class="stone-chip" aria-pressed="false" data-stone="Turquoise"><span class="stone-photo"><img src="../stones/Turquoise.png" alt=""></span><span class="stone-name">Turquoise</span></button>
+              <button class="stone-chip" aria-pressed="false" data-stone="Quartz Rose"><span class="stone-photo"><img src="../stones/Quartz Rose.png" alt=""></span><span class="stone-name">Quartz</span></button>
+              <button class="stone-chip" aria-pressed="false" data-stone="Malachite"><span class="stone-photo"><img src="../stones/Malachite.png" alt=""></span><span class="stone-name">Malachite</span></button>
+            </div>
+            <div class="phone-grid">
+              <div class="card-wrap"><div class="card"><span class="nouv">Nouveau</span>✦</div><div class="card-meta"><strong>Bague Lune</strong><span>€32</span></div></div>
+              <div class="card-wrap"><div class="card"><span class="nouv">Nouveau</span>✦</div><div class="card-meta"><strong>Boucles Lab.</strong><span>€28</span></div></div>
+              <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Collier Lab.</strong><span>€48</span></div></div>
+              <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Bracelet Lune</strong><span>€42</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h5>Pourquoi cette direction</h5>
+      <ul>
+        <li><strong>Met en scène le produit.</strong> La couleur d'une labradorite ou les éclats dorés d'un lapis se voient — un nom seul ne les vendra jamais.</li>
+        <li><strong>Découverte par le visuel.</strong> Une cliente qui ne sait pas ce qu'est l'<em>amazonite</em> peut désormais cliquer parce qu'elle aime le bleu-vert tendre. Reformule un filtre en moment d'inspiration.</li>
+        <li><strong>Multi-sélection sans friction.</strong> Le tag bar sous le bandeau résume la sélection et permet le retrait individuel — un détail Magento/Shopify Plus.</li>
+        <li><strong>Mobile gagnant.</strong> Le scroll horizontal pouce-amical remplace une liste qui occupait la moitié de l'écran. Le drawer historique disparaît au profit d'une bande toujours visible.</li>
+        <li><strong>Implémentation simple.</strong> Stimulus controller existant + Tailwind — les images sont déjà dans <code>docs/design/stones/</code>. Aucun nouveau bundle.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PROPOSAL B — STONE DRAWER (large editorial gallery)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="section">
+    <header class="section-head">
+      <div class="section-head-left">
+        <div class="section-no">Proposition ii</div>
+        <h2 class="section-title">Drawer immersif type lookbook</h2>
+        <p class="section-desc">
+          La sidebar disparaît au profit d'une barre d'outils. Un clic sur
+          <em>«&nbsp;Filtrer par pierre&nbsp;»</em> déploie une galerie de tuiles riches
+          (photo plein cadre, nom calligraphié, compteur). Plus d'espace pour respirer,
+          pour raconter chaque pierre, pour suggérer celles qu'on ne connaît pas.
+        </p>
+      </div>
+      <span class="pill">Plus immersive</span>
+    </header>
+
+    <div class="browser">
+      <div class="browser-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="browser-url">almastellaparis.com / boutique — drawer ouvert</span>
+      </div>
+      <div class="site-head">
+        <div class="site-utility">EUR · FR</div>
+        <div class="site-nav"><span>Accueil</span><span class="active">Boutique</span><span>Les pierres</span><span>À propos</span></div>
+        <div class="site-logo">A<span class="star">✦</span>S</div>
+        <div class="site-utility">🛍 0</div>
+      </div>
+      <div class="shop-hero">
+        <h1>La Collection</h1>
+        <p>Bijoux attentionnés. Sourcés dans le monde entier. Portés au quotidien.</p>
+      </div>
+      <div class="shop-body no-sidebar">
+        <main>
+          <div class="toolbar">
+            <button class="toolbar-btn">Toutes catégories <span class="ic">▾</span></button>
+            <button class="toolbar-btn is-primary">
+              Pierres
+              <span class="stack">
+                <img src="../stones/Labradorite.png" alt="">
+                <img src="../stones/Pierre de Lune.png" alt="">
+                <img src="../stones/Lapis Lazuli.png" alt="">
+              </span>
+              · 3
+              <span class="ic">▴</span>
+            </button>
+            <button class="toolbar-btn">Prix <span class="ic">▾</span></button>
+            <span class="toolbar-sep"></span>
+            <button class="toolbar-sort">Tri&nbsp;: Nouveautés <span>▾</span></button>
+          </div>
+
+          <div class="drawer-panel">
+            <div class="drawer-head">
+              <h3>Choisissez vos <em>pierres</em></h3>
+              <input class="drawer-search" placeholder="Rechercher une pierre…" type="search">
+            </div>
+            <div class="stone-tile-grid">
+              <button class="stone-tile selected"><img src="../stones/Labradorite.png" alt=""><span class="stone-tile-overlay"><strong>Labradorite</strong><span>9 pièces</span></span></button>
+              <button class="stone-tile selected"><img src="../stones/Pierre de Lune.png" alt=""><span class="stone-tile-overlay"><strong>Pierre de Lune</strong><span>11 pièces</span></span></button>
+              <button class="stone-tile selected"><img src="../stones/Lapis Lazuli.png" alt=""><span class="stone-tile-overlay"><strong>Lapis Lazuli</strong><span>5 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Cornaline.png" alt=""><span class="stone-tile-overlay"><strong>Cornaline</strong><span>5 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Onyx noir.png" alt=""><span class="stone-tile-overlay"><strong>Onyx noir</strong><span>8 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Turquoise.png" alt=""><span class="stone-tile-overlay"><strong>Turquoise</strong><span>6 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Amazonite.png" alt=""><span class="stone-tile-overlay"><strong>Amazonite</strong><span>5 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Quartz Rose.png" alt=""><span class="stone-tile-overlay"><strong>Quartz Rose</strong><span>9 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Malachite.png" alt=""><span class="stone-tile-overlay"><strong>Malachite</strong><span>4 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Agate blanche.png" alt=""><span class="stone-tile-overlay"><strong>Agate blanche</strong><span>7 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Rhodonite.png" alt=""><span class="stone-tile-overlay"><strong>Rhodonite</strong><span>3 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Sodalite.png" alt=""><span class="stone-tile-overlay"><strong>Sodalite</strong><span>4 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Nacre.png" alt=""><span class="stone-tile-overlay"><strong>Nacre</strong><span>10 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Abalone.png" alt=""><span class="stone-tile-overlay"><strong>Abalone</strong><span>3 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Aventurine verte.png" alt=""><span class="stone-tile-overlay"><strong>Aventurine</strong><span>4 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Quartz Vert.png" alt=""><span class="stone-tile-overlay"><strong>Quartz Vert</strong><span>3 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Péridot.png" alt=""><span class="stone-tile-overlay"><strong>Péridot</strong><span>2 pièces</span></span></button>
+              <button class="stone-tile"><img src="../stones/Jaspe Dalmatien.png" alt=""><span class="stone-tile-overlay"><strong>Jaspe Dalmatien</strong><span>2 pièces</span></span></button>
+            </div>
+          </div>
+
+          <div class="result-bar">
+            <span><strong>25</strong> pièces — 3 pierres sélectionnées</span>
+            <span>Trier&nbsp;: Nouveautés</span>
+          </div>
+          <div class="grid">
+            <div class="card-wrap"><div class="card"><span class="nouv">Nouveau</span>✦</div><div class="card-meta"><strong>Bague Lapis</strong><span>€42</span></div></div>
+            <div class="card-wrap"><div class="card"><span class="nouv">Nouveau</span>✦</div><div class="card-meta"><strong>Boucles Lab.</strong><span>€28</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Collier Lune</strong><span>€48</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Bracelet Or</strong><span>€42</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Bague Lune</strong><span>€38</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Boucles Lapis</strong><span>€34</span></div></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h5>Pour ou contre</h5>
+      <ul>
+        <li><strong>+ Effet « lookbook ».</strong> Idéal si la pierre est l'argument de vente principal. La photo en grand format raconte mieux que le mot.</li>
+        <li><strong>+ Toolbar fluide.</strong> Une seule rangée — catégorie, pierres, prix, tri. Très moderne, très Aesop / Mejuri.</li>
+        <li><strong>− Un clic de plus.</strong> Pour qui sait déjà ce qu'il cherche, le drawer ajoute une étape par rapport à la proposition i.</li>
+        <li><strong>− Mobile&nbsp;:</strong> ouvre un bottom sheet plein écran — efficace mais plus lourd que la bande horizontale.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PROPOSAL C — INLINE FACET PILLS
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="section">
+    <header class="section-head">
+      <div class="section-head-left">
+        <div class="section-no">Proposition iii</div>
+        <h2 class="section-title">Pastilles facettes inline</h2>
+        <p class="section-desc">
+          Variante minimaliste qui conserve la sidebar mais transforme la liste textuelle
+          en pastilles arrondies — chaque pierre a sa miniature ronde inline. C'est l'évolution
+          la plus prudente, à mi-chemin entre l'actuel et la proposition i.
+        </p>
+      </div>
+      <span class="pill">Évolution douce</span>
+    </header>
+
+    <div class="browser">
+      <div class="browser-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <span class="browser-url">almastellaparis.com / boutique — facettes inline</span>
+      </div>
+      <div class="site-head">
+        <div class="site-utility">EUR · FR</div>
+        <div class="site-nav"><span>Accueil</span><span class="active">Boutique</span><span>Les pierres</span><span>À propos</span></div>
+        <div class="site-logo">A<span class="star">✦</span>S</div>
+        <div class="site-utility">🛍 0</div>
+      </div>
+      <div class="shop-hero">
+        <h1>La Collection</h1>
+        <p>Bijoux attentionnés. Sourcés dans le monde entier. Portés au quotidien.</p>
+      </div>
+      <div class="shop-body no-sidebar">
+        <main>
+          <div class="facet-block">
+            <h4>Catégorie</h4>
+            <div class="facet-pills">
+              <button class="facet-pill" aria-pressed="true">Tout <span class="ct">225</span></button>
+              <button class="facet-pill">Bagues <span class="ct">57</span></button>
+              <button class="facet-pill">Boucles d'oreilles <span class="ct">78</span></button>
+              <button class="facet-pill">Bracelets <span class="ct">48</span></button>
+              <button class="facet-pill">Colliers <span class="ct">42</span></button>
+              <button class="facet-pill">Coffrets <span class="ct">0</span></button>
+            </div>
+          </div>
+
+          <div class="facet-block">
+            <h4>Pierre · 22 disponibles</h4>
+            <div class="facet-pills">
+              <button class="facet-pill" aria-pressed="true"><img src="../stones/Labradorite.png" alt="">Labradorite <span class="ct">9</span></button>
+              <button class="facet-pill" aria-pressed="true"><img src="../stones/Pierre de Lune.png" alt="">Pierre de Lune <span class="ct">11</span></button>
+              <button class="facet-pill"><img src="../stones/Lapis Lazuli.png" alt="">Lapis Lazuli <span class="ct">5</span></button>
+              <button class="facet-pill"><img src="../stones/Cornaline.png" alt="">Cornaline <span class="ct">5</span></button>
+              <button class="facet-pill"><img src="../stones/Onyx noir.png" alt="">Onyx noir <span class="ct">8</span></button>
+              <button class="facet-pill"><img src="../stones/Turquoise.png" alt="">Turquoise <span class="ct">6</span></button>
+              <button class="facet-pill"><img src="../stones/Amazonite.png" alt="">Amazonite <span class="ct">5</span></button>
+              <button class="facet-pill"><img src="../stones/Quartz Rose.png" alt="">Quartz Rose <span class="ct">9</span></button>
+              <button class="facet-pill"><img src="../stones/Malachite.png" alt="">Malachite <span class="ct">4</span></button>
+              <button class="facet-pill"><img src="../stones/Agate blanche.png" alt="">Agate blanche <span class="ct">7</span></button>
+              <button class="facet-pill"><img src="../stones/Rhodonite.png" alt="">Rhodonite <span class="ct">3</span></button>
+              <button class="facet-pill"><img src="../stones/Sodalite.png" alt="">Sodalite <span class="ct">4</span></button>
+              <button class="facet-pill"><img src="../stones/Nacre.png" alt="">Nacre <span class="ct">10</span></button>
+              <button class="facet-pill"><img src="../stones/Abalone.png" alt="">Abalone <span class="ct">3</span></button>
+              <button class="facet-pill"><img src="../stones/Aventurine verte.png" alt="">Aventurine <span class="ct">4</span></button>
+              <button class="facet-pill"><img src="../stones/Quartz Vert.png" alt="">Quartz Vert <span class="ct">3</span></button>
+              <button class="facet-pill"><img src="../stones/Péridot.png" alt="">Péridot <span class="ct">2</span></button>
+              <button class="facet-pill"><img src="../stones/Jaspe Dalmatien.png" alt="">Jaspe Dalmatien <span class="ct">2</span></button>
+            </div>
+          </div>
+
+          <div class="result-bar">
+            <span><strong>20</strong> pièces — 2 pierres sélectionnées</span>
+            <span>Trier&nbsp;: Nouveautés</span>
+          </div>
+          <div class="grid">
+            <div class="card-wrap"><div class="card"><span class="nouv">Nouveau</span>✦</div><div class="card-meta"><strong>Bague Pierre de Lune</strong><span>€32</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Boucles Lab.</strong><span>€28</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Collier Lab.</strong><span>€48</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Bracelet Lune</strong><span>€42</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Bague Reflets</strong><span>€38</span></div></div>
+            <div class="card-wrap"><div class="card">✦</div><div class="card-meta"><strong>Boucles Or</strong><span>€34</span></div></div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="notes">
+      <h5>Pour ou contre</h5>
+      <ul>
+        <li><strong>+ Familiarité totale.</strong> Reprend le pattern de Sephora, Etsy, ASOS&nbsp;: zéro courbe d'apprentissage.</li>
+        <li><strong>+ Lit toutes les pierres d'un coup.</strong> Pas de scroll horizontal&nbsp;; tout est visible immédiatement, à plat.</li>
+        <li><strong>− Moins évocateur.</strong> Les miniatures de 22px sont jolies mais ne « vendent » pas autant qu'un médaillon de 84px.</li>
+        <li><strong>− Densité élevée.</strong> Avec 22 pierres, le bloc devient dense, surtout sur tablette.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       Recap
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="section">
+    <header class="section-head">
+      <div class="section-head-left">
+        <div class="section-no">En résumé</div>
+        <h2 class="section-title">Mon vote</h2>
+        <p class="section-desc">
+          La <strong>proposition i (galerie en bandeau)</strong> est le meilleur compromis pour Alma Stella&nbsp;:
+          immédiat, mémorable, et il honore la beauté brute de tes pierres sans alourdir l'interface.
+          Elle se construit avec un Stimulus controller, les photos déjà présentes dans
+          <code>docs/design/stones/</code>, et zéro nouvelle dépendance. La proposition ii
+          devient pertinente si l'on souhaite plus tard mettre la pierre au cœur d'une page
+          <em>« Choisis ta pierre »</em> dédiée.
+        </p>
+      </div>
+    </header>
+  </section>
+
+  <footer class="doc-foot">
+    <strong>Alma Stella Paris</strong> — Maquette de proposition · 2026.04.28 · 3 directions, focus sur la galerie en bandeau
+  </footer>
+
+</div>
+
+<script>
+  // Toggle stone chip selection (proposal A)
+  document.querySelectorAll('.stone-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const pressed = chip.getAttribute('aria-pressed') === 'true';
+      chip.setAttribute('aria-pressed', String(!pressed));
+    });
+  });
+
+  // Toggle facet pill (proposal C)
+  document.querySelectorAll('.facet-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const pressed = pill.getAttribute('aria-pressed') === 'true';
+      pill.setAttribute('aria-pressed', String(!pressed));
+    });
+  });
+
+  // Toggle stone tiles (proposal B)
+  document.querySelectorAll('.stone-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      tile.classList.toggle('selected');
+    });
+  });
+
+  // Reset strip
+  document.querySelectorAll('[data-clear-strip]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.stone-strip').querySelectorAll('.stone-chip').forEach(c => c.setAttribute('aria-pressed', 'false'));
+    });
+  });
+
+  // Remove single active tag
+  document.querySelectorAll('.active-tag .x').forEach(x => {
+    x.addEventListener('click', e => {
+      e.stopPropagation();
+      x.closest('.active-tag').remove();
+    });
+  });
+</script>
+</body>
+</html>
