@@ -288,30 +288,32 @@
                                 {{ 'footer.tagline_sub'|trans }}
                             </p>
                         </div>
+                        {# Discovery links, in visitor-journey order: shop, stones, brand, social proof #}
                         <div>
                             <p class="text-xs uppercase tracking-widest mb-4 text-alma-hover">{{ 'footer.navigate'|trans }}</p>
                             <ul class="space-y-2 text-sm">
                                 <li><a href="{{ path('shop_catalog') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'nav.shop'|trans }}</a></li>
-                                <li><a href="{{ path('shop_about') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.our_story'|trans }}</a></li>
-                                <li><a href="{{ path('shop_terms') }}#shipping" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.shipping_returns'|trans }}</a></li>
-                                <li><a href="{{ path('shop_testimonials') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.testimonials'|trans }}</a></li>
-                                <li><a href="{{ path('shop_contact') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.contact'|trans }}</a></li>
                                 <li><a href="{{ path('shop_stone_index') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.stones'|trans }}</a></li>
+                                <li><a href="{{ path('shop_about') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.our_story'|trans }}</a></li>
+                                <li><a href="{{ path('shop_testimonials') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.testimonials'|trans }}</a></li>
                             </ul>
                         </div>
+                        {# Every way to reach or follow the brand #}
                         <div>
                             <p class="text-xs uppercase tracking-widest mb-4 text-alma-hover">{{ 'footer.connect'|trans }}</p>
                             <ul class="space-y-2 text-sm">
-                                <li><a href="https://www.instagram.com/alma_stella_paris/" target="_blank" rel="noopener" class="text-alma-hover hover:text-alma-gold transition-colors">Instagram</a></li>
-                                <li><a href="#" class="text-alma-hover hover:text-alma-gold transition-colors">Pinterest</a></li>
+                                <li><a href="{{ path('shop_contact') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.contact'|trans }}</a></li>
                                 <li><a href="mailto:hello@almastellaparis.com" class="text-alma-hover hover:text-alma-gold transition-colors">hello@almastellaparis.com</a></li>
+                                <li><a href="https://www.instagram.com/alma_stella_paris/" target="_blank" rel="noopener" class="text-alma-hover hover:text-alma-gold transition-colors">Instagram</a></li>
                             </ul>
                         </div>
+                        {# Practical & legal information #}
                         <div>
-                            <p class="text-xs uppercase tracking-widest mb-4 text-alma-hover">{{ 'footer.legal'|trans }}</p>
+                            <p class="text-xs uppercase tracking-widest mb-4 text-alma-hover">{{ 'footer.info'|trans }}</p>
                             <ul class="space-y-2 text-sm">
-                                <li><a href="{{ path('shop_legal_notice') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.legal_notice'|trans }}</a></li>
+                                <li><a href="{{ path('shop_terms') }}#shipping" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.shipping_returns'|trans }}</a></li>
                                 <li><a href="{{ path('shop_terms') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.terms'|trans }}</a></li>
+                                <li><a href="{{ path('shop_legal_notice') }}" class="text-alma-hover hover:text-alma-gold transition-colors">{{ 'footer.legal_notice'|trans }}</a></li>
                             </ul>
                         </div>
                     </div>
