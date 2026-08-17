@@ -44,6 +44,8 @@ catalog:
     filter_all: "All"
     pagination_previous: "&larr; Previous"
     pagination_next: "Next &rarr;"
+    load_more: "View more pieces"
+    load_more_progress: "%shown% of %total% pieces shown"
     filter_categories: "Categories"
     filter_button: "Filters"
     clear_filter: "Clear filters"

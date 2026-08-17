@@ -17,6 +17,7 @@ alma-stella/
 │       ├── address_selector_controller.js   # Fills checkout form from saved customer address
 │       ├── billing_toggle_controller.js     # Shows/hides billing address fields (checkbox toggle)
 │       ├── cart_drawer_controller.js        # Cart drawer slide-in (add/remove/display)
+│       ├── catalog_load_more_controller.js  # Catalog "load more" (auto ×3 via IntersectionObserver then manual button, AJAX append, back/forward restore via sessionStorage, no-JS pagination fallback)
 │       ├── category_drawer_controller.js   # Mobile filter drawer (slide-in from left, holds categories + stones)
 │       ├── category_panel_controller.js    # Desktop toolbar Category drawer (full-width inline panel, tile cards w/ subcategory lists, ESC + sibling-close)
 │       ├── checkout_identify_controller.js  # Email detection: existing account → login, new → guest
@@ -175,7 +176,7 @@ alma-stella/
 │   └── shop/
 │       ├── base.html.twig
 │       ├── home/
-│       ├── catalog/
+│       ├── catalog/             # index + _grid_items.html.twig partial (also served alone for AJAX "load more")
 │       ├── product/
 │       ├── about/
 │       ├── contact/

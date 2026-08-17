@@ -44,6 +44,8 @@ catalog:
     filter_all: "Tout"
     pagination_previous: "&larr; Précédent"
     pagination_next: "Suivant &rarr;"
+    load_more: "Voir plus de pièces"
+    load_more_progress: "%shown% pièces affichées sur %total%"
     filter_categories: "Catégories"
     filter_button: "Filtres"
     clear_filter: "Effacer les filtres"

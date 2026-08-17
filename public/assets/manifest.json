@@ -1,5 +1,5 @@
 {
-    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-NgkVmoD.js",
+    "@symfony\/stimulus-bundle\/controllers.js": "\/assets\/@symfony\/stimulus-bundle\/controllers-wM4rnaj.js",
     "@symfony\/stimulus-bundle\/loader.js": "\/assets\/@symfony\/stimulus-bundle\/loader-IOzBDLu.js",
     "app.js": "\/assets\/app--q683F4.js",
     "bundles\/easyadmin\/app.912702e5.css": "\/assets\/bundles\/easyadmin\/app.912702e5-e-OEP2a.css",
@@ -34,6 +34,7 @@
     "controllers\/address_selector_controller.js": "\/assets\/controllers\/address_selector_controller-_t0rh4g.js",
     "controllers\/billing_toggle_controller.js": "\/assets\/controllers\/billing_toggle_controller-CLhha_R.js",
     "controllers\/cart_drawer_controller.js": "\/assets\/controllers\/cart_drawer_controller-t_ckoxR.js",
+    "controllers\/catalog_load_more_controller.js": "\/assets\/controllers\/catalog_load_more_controller-w-7yTE4.js",
     "controllers\/category_drawer_controller.js": "\/assets\/controllers\/category_drawer_controller-r8xdSII.js",
     "controllers\/category_panel_controller.js": "\/assets\/controllers\/category_panel_controller-4-XO5ND.js",
     "controllers\/checkout_identify_controller.js": "\/assets\/controllers\/checkout_identify_controller-6uV6-Fi.js",
@@ -52,6 +53,6 @@
     "controllers\/turnstile_controller.js": "\/assets\/controllers\/turnstile_controller-Rf0WHeB.js",
     "controllers\/wishlist_toggle_controller.js": "\/assets\/controllers\/wishlist_toggle_controller-qStZpRD.js",
     "stimulus_bootstrap.js": "\/assets\/stimulus_bootstrap-xCO4u8H.js",
-    "styles\/app.css": "\/assets\/styles\/app--CW7odK.css",
+    "styles\/app.css": "\/assets\/styles\/app-05K7MEB.css",
     "vendor\/@hotwired\/stimulus\/stimulus.index.js": "\/assets\/vendor\/@hotwired\/stimulus\/stimulus.index-S4zNcea.js"
 }

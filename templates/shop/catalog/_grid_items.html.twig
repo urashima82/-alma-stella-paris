@@ -1,0 +1,79 @@
+{# Product cards only — rendered inside the catalog grid, and returned alone for AJAX "load more" requests. #}
+{% set wishlistedIds = wishlist_product_ids() %}
+{% for product in pagination %}
+    <article class="group">
+        <a href="{{ path('shop_product', {slug: product|localized_slug}) }}" class="block">
+            {% set isProductReserved = product.id in reservedProductIds %}
+            <div class="relative aspect-[4/5] bg-alma-surface overflow-hidden
+                        transition-all duration-300 flex items-center justify-center
+                        {{ product.isSoldOut ? 'opacity-50 grayscale' : (isProductReserved ? 'opacity-70' : '') }}">
+                {% if product.thumbnail %}
+                    <img src="{{ asset('uploads/products/' ~ product.thumbnail) }}"
+                         alt="{{ product|localized_name }}"
+                         class="w-full h-full object-cover transition-transform duration-700 ease-out
+                                group-hover:scale-[1.03]"
+                         loading="lazy">
+                {% else %}
+                    <div class="text-center px-4">
+                        <p class="text-alma-gold text-2xl sm:text-3xl mb-2">✦</p>
+                        <p class="text-[11px] text-alma-text-muted leading-snug">{{ product|localized_name }}</p>
+                    </div>
+                {% endif %}
+
+                {# Gold border — permanent for featured, on hover for others #}
+                <div class="absolute inset-0 border transition-colors duration-300 pointer-events-none
+                            {{ product.isFeatured ? 'border-alma-gold/50 group-hover:border-alma-gold/70' : 'border-transparent group-hover:border-alma-gold/40' }}"></div>
+
+                {# Badges #}
+                <div class="absolute top-2 left-2 flex flex-row gap-1 items-center">
+                    {% if product.isSoldOut %}
+                        <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium tracking-wide bg-alma-text text-alma-bg">{{ 'badge.sold'|trans }}</span>
+                    {% elseif isProductReserved %}
+                        <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium tracking-wide bg-alma-hover text-alma-text">{{ 'badge.reserved'|trans }}</span>
+                    {% endif %}
+                    {% if product.isNew() %}
+                        <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium tracking-wide bg-white/90 text-alma-text ring-1 ring-alma-hover/60">{{ 'badge.new'|trans }}</span>
+                    {% endif %}
+                    {% set discount = discount_percent(product) %}
+                    {% if discount and not product.isSoldOut %}
+                        <span class="inline-flex items-center px-2 h-[22px] text-[10px] leading-[22px] font-sans font-medium bg-red-600/90 text-white">-{{ discount }}%</span>
+                    {% endif %}
+                </div>
+                {# Wishlist heart #}
+                {% if not product.isSoldOut %}
+                    {% set isWishlisted = product.id in wishlistedIds %}
+                    <button class="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm
+                                   hover:bg-white transition-all duration-200 z-10 cursor-pointer
+                                   opacity-0 group-hover:opacity-100 sm:opacity-100"
+                            data-controller="wishlist-toggle"
+                            data-wishlist-toggle-url-value="{{ path('wishlist_toggle', {id: product.id}) }}"
+                            data-wishlist-toggle-authenticated-value="{{ app.user is not null ? 'true' : 'false' }}"
+                            data-wishlist-toggle-login-url-value="{{ path('shop_login') }}"
+                            data-action="click->wishlist-toggle#toggle"
+                            aria-label="Wishlist">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-alma-gold {{ isWishlisted ? 'hidden' : '' }}"
+                             data-wishlist-outline fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-alma-gold {{ isWishlisted ? '' : 'hidden' }}"
+                             data-wishlist-filled viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                        </svg>
+                    </button>
+                {% endif %}
+            </div>
+            <div class="mt-2.5 sm:mt-3">
+                <div class="sm:flex sm:justify-between sm:items-start sm:gap-2">
+                    <div class="min-w-0">
+                        <h3 class="font-serif text-sm sm:text-base text-alma-text group-hover:text-alma-gold transition-colors leading-snug truncate">
+                            {% if product.isFeatured %}<span class="text-alma-gold">✦</span> {% endif %}{{ product|localized_name }}
+                        </h3>
+                    </div>
+                    <p class="font-sans text-sm font-semibold text-alma-text mt-0.5 sm:mt-0 sm:whitespace-nowrap sm:flex-shrink-0">
+                        {{ include('shop/_price_badge.html.twig', {product: product}) }}
+                    </p>
+                </div>
+            </div>
+        </a>
+    </article>
+{% endfor %}

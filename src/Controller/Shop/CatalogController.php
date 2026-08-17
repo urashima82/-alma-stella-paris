@@ -34,7 +34,6 @@ class CatalogController extends AbstractController
         ?string $parentSlug = null,
         ?string $childSlug = null,
     ): Response {
-        $rootCategories = $categoryRepository->findRootCategories();
         $locale = $request->getLocale();
         $activeCategory = null;
         $activeParent = null;
@@ -76,6 +75,16 @@ class CatalogController extends AbstractController
             $request->query->getInt('page', 1),
             12,
         );
+
+        // "Load more" AJAX requests only need the product cards, not the full page.
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('shop/catalog/_grid_items.html.twig', [
+                'pagination' => $pagination,
+                'reservedProductIds' => $reservationManager->getReservedProductIdsByOthers(),
+            ]);
+        }
+
+        $rootCategories = $categoryRepository->findRootCategories();
 
         $totalProductCount = $productRepository->findVisibleQuery(null, $activeCollection)
             ->select('COUNT(p.id)')
