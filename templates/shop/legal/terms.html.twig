@@ -53,11 +53,28 @@
             </div>
 
             {# ── Returns & withdrawal ── #}
-            <div>
+            <div id="withdrawal" class="scroll-mt-16 md:scroll-mt-18">
                 <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.returns_heading'|trans }}</h2>
                 <p class="mb-3">{{ 'terms.returns_text_1'|trans }}</p>
                 <p class="mb-3">{{ 'terms.returns_text_2'|trans }}</p>
-                <p>{{ 'terms.returns_text_3'|trans }}</p>
+                <p class="mb-3">{{ 'terms.returns_text_3'|trans }}</p>
+                <p>{{ 'terms.returns_text_4'|trans }}</p>
+            </div>
+
+            {# ── Model withdrawal form (annex required by article R221-1 of the French Consumer Code) ── #}
+            <div id="withdrawal-form" class="scroll-mt-16 md:scroll-mt-18">
+                <h2 class="font-serif text-xl text-alma-text mb-3">{{ 'terms.withdrawal_form_heading'|trans }}</h2>
+                <div class="border border-alma-hover/60 bg-alma-surface/40 p-6 space-y-3">
+                    <p class="italic">{{ 'terms.withdrawal_form_intro'|trans }}</p>
+                    <p>{{ 'terms.withdrawal_form_recipient'|trans }}</p>
+                    <p>{{ 'terms.withdrawal_form_line_1'|trans }}</p>
+                    <p>{{ 'terms.withdrawal_form_line_2'|trans }}</p>
+                    <p>{{ 'terms.withdrawal_form_line_3'|trans }}</p>
+                    <p>{{ 'terms.withdrawal_form_line_4'|trans }}</p>
+                    <p>{{ 'terms.withdrawal_form_line_5'|trans }}</p>
+                    <p>{{ 'terms.withdrawal_form_line_6'|trans }}</p>
+                    <p>{{ 'terms.withdrawal_form_line_7'|trans }}</p>
+                </div>
             </div>
 
             {# ── Warranties ── #}

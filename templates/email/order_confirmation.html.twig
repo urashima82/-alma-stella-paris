@@ -160,6 +160,24 @@
                         </td>
                     </tr>
 
+                    {# Withdrawal right notice (durable-medium confirmation required by article L221-13 of the French Consumer Code) #}
+                    <tr>
+                        <td style="padding: 20px 0 30px;">
+                            <h3 style="margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #2C2418;">
+                                {% if locale == 'fr' %}Droit de rétractation{% else %}Right of withdrawal{% endif %}
+                            </h3>
+                            <p style="margin: 0; font-size: 12px; color: #8C8070; line-height: 1.6;">
+                                {% if locale == 'fr' %}
+                                    Vous disposez d'un délai de 14 jours à compter de la réception de votre commande pour vous rétracter, sans avoir à justifier de motif. Il vous suffit de nous en informer par une déclaration dénuée d'ambiguïté, par exemple en répondant à cet e-mail ou en écrivant à hello@almastellaparis.com. Vous pouvez utiliser le formulaire type de rétractation, disponible avec toutes les modalités dans nos
+                                    <a href="{{ url('shop_terms', {'_locale': locale}) }}#withdrawal" style="color: #C9A84C;">conditions générales de vente</a>.
+                                {% else %}
+                                    You have 14 days from the date you receive your order to withdraw from your purchase, without having to give any reason. Simply notify us with an unambiguous statement, for example by replying to this email or writing to hello@almastellaparis.com. You may use the model withdrawal form, available along with full details in our
+                                    <a href="{{ url('shop_terms', {'_locale': locale}) }}#withdrawal" style="color: #C9A84C;">terms of sale</a>.
+                                {% endif %}
+                            </p>
+                        </td>
+                    </tr>
+
                     {# Footer #}
                     <tr>
                         <td align="center" style="padding: 40px 0 0; border-top: 1px solid #E8DDD0; margin-top: 30px;">
