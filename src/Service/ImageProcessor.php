@@ -35,6 +35,7 @@ class ImageProcessor
 
         $image->scaleDown($maxWidth, $maxHeight);
 
+        $this->ensureTargetDirectory($targetPath);
         $image->encode(new WebpEncoder($this->webpQuality))->save($targetPath);
     }
 
@@ -55,6 +56,20 @@ class ImageProcessor
         $image->orient();
         $image->coverDown($maxWidth, $maxHeight);
 
+        $this->ensureTargetDirectory($targetPath);
         $image->encode(new WebpEncoder($this->webpQuality))->save($targetPath);
+    }
+
+    /**
+     * Upload directories are not versioned, so a fresh environment starts
+     * without them — Intervention Image refuses to write to a missing path.
+     */
+    private function ensureTargetDirectory(string $targetPath): void
+    {
+        $directory = \dirname($targetPath);
+
+        if (!\is_dir($directory) && !\mkdir($directory, 0o755, true) && !\is_dir($directory)) {
+            throw new \RuntimeException(\sprintf('Cannot create image target directory: %s', $directory));
+        }
     }
 }
