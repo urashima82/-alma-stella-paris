@@ -260,7 +260,6 @@ class ProductWizardController extends AbstractController
         }
         $product->setBasePrice((float) $data->basePrice);
         $product->setShippingTier($data->shippingTier);
-        $product->setAvailableIn($data->availableIn);
         $product->setIsPublished($data->isPublished);
 
         return $product;

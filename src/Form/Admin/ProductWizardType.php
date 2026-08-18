@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Form\Admin;
 
-use App\Entity\Product;
 use App\Entity\ProductCategory;
 use App\Entity\Stone;
 use App\Enum\ShippingTier;
@@ -13,7 +12,6 @@ use App\Repository\StoneRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
@@ -74,16 +72,6 @@ class ProductWizardType extends AbstractType
                 'label' => 'Tranche d\'expédition',
                 'class' => ShippingTier::class,
                 'choice_label' => static fn (ShippingTier $tier): string => $tier->label(),
-                'required' => true,
-            ])
-            ->add('availableIn', ChoiceType::class, [
-                'label' => 'Disponible en',
-                'choices' => [
-                    'France' => Product::COUNTRY_FRANCE,
-                    'Mexique' => Product::COUNTRY_MEXICO,
-                ],
-                'multiple' => true,
-                'expanded' => true,
                 'required' => true,
             ])
             ->add('isPublished', CheckboxType::class, [

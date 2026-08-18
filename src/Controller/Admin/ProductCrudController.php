@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller\Admin;
 
-use App\Admin\Filter\AvailableInFilter;
 use App\Entity\GeneratedVisual;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
@@ -106,8 +105,7 @@ class ProductCrudController extends AbstractCrudController
         return $filters
             ->add('category')
             ->add('isPublished')
-            ->add('isSoldOut')
-            ->add(AvailableInFilter::new('availableIn'));
+            ->add('isSoldOut');
     }
 
     public function configureFields(string $pageName): iterable
@@ -123,16 +121,6 @@ class ProductCrudController extends AbstractCrudController
                 ->formatValue(static fn (float $value): string => \number_format($value, 2).' €');
             yield TextField::new('category', 'Catégorie')
                 ->formatValue(static fn ($value, Product $entity): string => (string) $entity->getCategory());
-            yield ChoiceField::new('availableIn', 'Disponible en')
-                ->setChoices([
-                    'France' => Product::COUNTRY_FRANCE,
-                    'Mexique' => Product::COUNTRY_MEXICO,
-                ])
-                ->allowMultipleChoices()
-                ->renderAsBadges([
-                    Product::COUNTRY_FRANCE => 'primary',
-                    Product::COUNTRY_MEXICO => 'success',
-                ]);
             yield BooleanField::new('isFeatured', 'Coup de cœur');
             yield BooleanField::new('isPublished', 'Publié');
             yield BooleanField::new('isSoldOut', 'Vendu');
@@ -184,16 +172,6 @@ class ProductCrudController extends AbstractCrudController
             ->setFormTypeOption('group_by', static fn (ProductCategory $c): string => $c->getParent() !== null
                 ? ($c->getParent()->getNameFr() !== '' ? $c->getParent()->getNameFr() : $c->getParent()->getName())
                 : 'Catégories principales');
-
-        yield FormField::addFieldset('Disponibilité', 'fa fa-globe');
-        yield ChoiceField::new('availableIn', 'Pays')
-            ->setChoices([
-                'France' => Product::COUNTRY_FRANCE,
-                'Mexique' => Product::COUNTRY_MEXICO,
-            ])
-            ->allowMultipleChoices()
-            ->renderExpanded()
-            ->setHelp('Cochez les pays où ce produit est disponible.');
 
         yield FormField::addFieldset('Tarification', 'fa fa-tag');
         yield MoneyField::new('basePrice', 'Prix de base (EUR)')

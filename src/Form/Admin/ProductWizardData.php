@@ -35,12 +35,6 @@ class ProductWizardData
     #[Assert\NotNull(message: 'La tranche d\'expédition est obligatoire.')]
     public ShippingTier $shippingTier = ShippingTier::Standard;
 
-    /**
-     * @var string[]
-     */
-    #[Assert\Count(min: 1, minMessage: 'Sélectionnez au moins un pays.')]
-    public array $availableIn = [];
-
     public bool $isPublished = false;
 
     public bool $generateVisuals = false;

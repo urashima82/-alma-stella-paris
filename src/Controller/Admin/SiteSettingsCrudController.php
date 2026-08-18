@@ -14,7 +14,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -75,17 +74,6 @@ class SiteSettingsCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName): iterable
     {
-        yield FormField::addTab('Général', 'fa fa-cog');
-
-        yield ChoiceField::new('activeCollection', 'Collection affichée sur le site')
-            ->setChoices([
-                'Toutes les collections' => SiteSettings::COLLECTION_ALL,
-                'Collection France' => SiteSettings::COLLECTION_FRANCE,
-                'Collection Mexique' => SiteSettings::COLLECTION_MEXICO,
-            ])
-            ->renderExpanded()
-            ->setHelp('Choisissez quelle collection est visible pour les visiteurs du site.');
-
         yield FormField::addTab('Mode maintenance', 'fa fa-wrench');
 
         yield BooleanField::new('isMaintenanceMode', 'Activer le mode maintenance')
