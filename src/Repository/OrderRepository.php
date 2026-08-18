@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Order;
 use App\Enum\OrderStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -75,6 +76,8 @@ class OrderRepository extends ServiceEntityRepository
     {
         $prefix = \sprintf('ASP-%d-', $year);
 
+        // getOneOrNullResult, not getSingleScalarResult: the latter THROWS on
+        // an empty table — i.e. on the shop's very first order.
         $lastReference = $this->createQueryBuilder('o')
             ->select('o.reference')
             ->where('o.reference LIKE :prefix')
@@ -82,7 +85,7 @@ class OrderRepository extends ServiceEntityRepository
             ->orderBy('o.reference', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
 
         if ($lastReference === null) {
             return $prefix.'00001';
@@ -100,6 +103,7 @@ class OrderRepository extends ServiceEntityRepository
     {
         $prefix = \sprintf('FA-%d-', $year);
 
+        // Same as nextOrderReference: null on the year's first invoice, never throw.
         $lastNumber = $this->createQueryBuilder('o')
             ->select('o.invoiceNumber')
             ->where('o.invoiceNumber LIKE :prefix')
@@ -107,7 +111,7 @@ class OrderRepository extends ServiceEntityRepository
             ->orderBy('o.invoiceNumber', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
 
         if ($lastNumber === null) {
             return $prefix.'00001';
