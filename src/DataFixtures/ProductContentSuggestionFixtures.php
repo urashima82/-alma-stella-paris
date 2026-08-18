@@ -8,10 +8,11 @@ use App\Entity\Product;
 use App\Entity\ProductContentSuggestion;
 use App\Enum\ContentSuggestionStatus;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class ProductContentSuggestionFixtures extends Fixture implements DependentFixtureInterface
+class ProductContentSuggestionFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
     public function load(ObjectManager $manager): void
     {
@@ -70,6 +71,12 @@ class ProductContentSuggestionFixtures extends Fixture implements DependentFixtu
     /** @return list<class-string<Fixture>> */
     public function getDependencies(): array
     {
-        return [AppFixtures::class];
+        return [DemoFixtures::class];
+    }
+
+    /** @return list<string> */
+    public static function getGroups(): array
+    {
+        return [DemoFixtures::GROUP];
     }
 }

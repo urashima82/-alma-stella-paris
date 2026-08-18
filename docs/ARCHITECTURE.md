@@ -1038,9 +1038,26 @@ ddev start
 # Run migrations
 ddev exec php bin/console doctrine:migrations:migrate
 
-# Load fixtures (dev only)
+# Load fixtures (dev: everything — core + demo)
 ddev exec php bin/console doctrine:fixtures:load
 ```
+
+Fixtures are split into two groups:
+
+| Group | Classes | Content |
+|---|---|---|
+| `core` | `CoreFixtures`, `CategoryVisualPromptFixtures` | Admins, shipping & site settings, category tree, stones, AI visual prompts — safe for production |
+| `demo` | `DemoFixtures`, `ProductContentSuggestionFixtures` | Fake customers, 222 catalogue products, orders, promotions, testimonials — dev only, never in production |
+
+Production seeding (one-shot, on the server — the fixtures bundle is a dev
+dependency, so install it temporarily):
+```bash
+composer install                       # with dev dependencies
+APP_ENV=dev php bin/console doctrine:fixtures:load --group=core --append
+composer install --no-dev --optimize-autoloader
+php bin/console cache:clear
+```
+`--append` is mandatory: without it, fixtures:load PURGES the whole database.
 
 Migrations are generated, never hand-written:
 ```bash

@@ -8,10 +8,11 @@ use App\Entity\CategoryVisualPrompt;
 use App\Entity\ProductCategory;
 use App\Enum\VisualType;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class CategoryVisualPromptFixtures extends Fixture implements DependentFixtureInterface
+class CategoryVisualPromptFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
     public function load(ObjectManager $manager): void
     {
@@ -24,7 +25,13 @@ class CategoryVisualPromptFixtures extends Fixture implements DependentFixtureIn
     /** @return list<class-string<Fixture>> */
     public function getDependencies(): array
     {
-        return [AppFixtures::class];
+        return [CoreFixtures::class];
+    }
+
+    /** @return list<string> */
+    public static function getGroups(): array
+    {
+        return [CoreFixtures::GROUP];
     }
 
     private function loadPreservationInstructions(): void
