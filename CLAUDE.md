@@ -65,8 +65,8 @@ via pre-commit hooks.
   `native_function_invocation`
 - **Tailwind rebuild:** run `ddev exec php bin/console tailwind:build` after
   every template or CSS change
-- **Architecture updates:** update `docs/ARCHITECTURE.md` when adding entities,
-  controllers, routes, or Stimulus controllers
+- **Architecture updates:** see the doctrine in "Working method" below —
+  `docs/ARCHITECTURE.md` is an index of the non-derivable, not a mirror of the code
 
 ---
 
@@ -108,8 +108,22 @@ background context.
   both commands: `ddev exec php bin/console tailwind:build` then
   `ddev exec php bin/console asset-map:compile`. The CSS rebuild alone is not
   enough — assets must be recompiled for changes to be visible.
-- **Architecture updates:** Update `docs/ARCHITECTURE.md` when adding entities,
-  controllers, routes, or Stimulus controllers.
+- **Architecture updates:** Update `docs/ARCHITECTURE.md` when a change creates or
+  invalidates one of its entries. **It is an index, not a narrative.** One or two
+  lines per entry, never a paragraph.
+  - **The test for every line:** *would a competent developer reading the code reach
+    the wrong conclusion, or waste real time, without it?* If no, leave it out.
+  - **Belongs there:** deliberate absences (what was NOT built, and why — code cannot
+    show an absence), constraints that look arbitrary until you know the reason (the
+    PATCH workaround, the removed `Product::getDisplayPrice()`), invariants spanning
+    several files, cross-cutting conventions.
+  - **Does NOT belong there:** anything a `grep` answers — entity fields, service
+    method lists, Stimulus controller inventories, template trees, what a method
+    does. It rots the day someone edits the code, and a wrong doc costs more than a
+    missing one.
+  - **Feature design narratives go in `docs/milestones/`**, one file per milestone
+    sub-step; validated decisions stay in this file's "Architecture decisions"
+    section. Do not spill either into `ARCHITECTURE.md` or `ROADMAP.md`.
 - **Migrations:** The site is in production — schema changes go through new
   incremental migrations (`doctrine:migrations:diff`, then prune the generated
   file to the intended change only: the initial migration has hand-tuned index
