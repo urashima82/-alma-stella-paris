@@ -23,7 +23,18 @@ class PromotionEngine
     public function __construct(
         private readonly PromotionRepository $promotionRepository,
         private readonly EntityManagerInterface $entityManager,
+        private readonly ShippingCostProvider $shippingCostProvider,
     ) {
+    }
+
+    /**
+     * The customer-facing price: base price plus the shipping share of the
+     * product's tier, read from the admin-configured ShippingSettings — never
+     * from the ShippingTier enum defaults.
+     */
+    private function displayPrice(Product $product): float
+    {
+        return $this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier());
     }
 
     /**
@@ -36,7 +47,7 @@ class PromotionEngine
         $bestDiscount = 0.0;
         $bestPromo = null;
 
-        $displayPrice = $product->getDisplayPrice();
+        $displayPrice = $this->displayPrice($product);
 
         foreach ($promos as $promo) {
             if (!$promo->appliesToProduct($product)) {
@@ -74,7 +85,7 @@ class PromotionEngine
             return null;
         }
 
-        $displayPrice = $product->getDisplayPrice();
+        $displayPrice = $this->displayPrice($product);
 
         return \round($displayPrice - $promo->calculateDiscount($displayPrice), 2);
     }
@@ -91,7 +102,7 @@ class PromotionEngine
 
         foreach ($products as $product) {
             $discountedPrice = $this->getDiscountedDisplayPrice($product);
-            $total += $discountedPrice ?? $product->getDisplayPrice();
+            $total += $discountedPrice ?? $this->displayPrice($product);
         }
 
         return $total;
@@ -107,7 +118,7 @@ class PromotionEngine
         $promo = $this->getBestProductPromotion($product);
 
         if ($promo !== null) {
-            return $product->getDisplayPrice();
+            return $this->displayPrice($product);
         }
 
         if ($product->getCompareAtPrice() !== null) {
@@ -125,7 +136,7 @@ class PromotionEngine
         $promo = $this->getBestProductPromotion($product);
 
         if ($promo !== null) {
-            $displayPrice = $product->getDisplayPrice();
+            $displayPrice = $this->displayPrice($product);
             $discount = $promo->calculateDiscount($displayPrice);
 
             return (int) \round(($discount / $displayPrice) * 100);
@@ -326,7 +337,7 @@ class PromotionEngine
                 continue;
             }
 
-            $effectivePrice = $this->getDiscountedDisplayPrice($product) ?? $product->getDisplayPrice();
+            $effectivePrice = $this->getDiscountedDisplayPrice($product) ?? $this->displayPrice($product);
             $total += $effectivePrice;
         }
 
@@ -354,7 +365,7 @@ class PromotionEngine
                 continue;
             }
 
-            $total += $product->getDisplayPrice();
+            $total += $this->displayPrice($product);
         }
 
         return $total;

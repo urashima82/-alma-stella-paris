@@ -56,6 +56,7 @@ class ProductCrudController extends AbstractCrudController
 {
     public function __construct(
         private readonly AiGenerationDispatcher $aiDispatcher,
+        private readonly \App\Service\ShippingCostProvider $shippingCostProvider,
         private readonly EntityManagerInterface $entityManager,
         private readonly AdminUrlGenerator $adminUrlGenerator,
         private readonly GeneratedVisualRepository $generatedVisualRepository,
@@ -116,9 +117,12 @@ class ProductCrudController extends AbstractCrudController
             yield ImageField::new('thumbnail', 'Vignette')
                 ->setBasePath('/uploads/products');
             yield TextField::new('nameFr', 'Nom');
-            yield NumberField::new('displayPrice', 'Prix affiché (EUR)')
+            yield NumberField::new('basePrice', 'Prix affiché (EUR)')
                 ->setNumDecimals(2)
-                ->formatValue(static fn (float $value): string => \number_format($value, 2).' €');
+                ->formatValue(fn ($value, Product $entity): string => \number_format(
+                    $this->shippingCostProvider->getDisplayPrice($entity->getBasePrice(), $entity->getShippingTier()),
+                    2,
+                ).' €');
             yield TextField::new('category', 'Catégorie')
                 ->formatValue(static fn ($value, Product $entity): string => (string) $entity->getCategory());
             yield BooleanField::new('isFeatured', 'Coup de cœur');

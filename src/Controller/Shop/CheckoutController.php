@@ -698,7 +698,7 @@ class CheckoutController extends AbstractController
             $item = OrderItem::fromProduct($product, $shippingCost);
             $discountedPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
             if ($discountedPrice !== null) {
-                $item->setDiscountAmountEur($product->getDisplayPrice() - $discountedPrice);
+                $item->setDiscountAmountEur($this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier()) - $discountedPrice);
             }
             $order->addItem($item);
         }
@@ -726,7 +726,7 @@ class CheckoutController extends AbstractController
             $item = OrderItem::fromProduct($product, $shippingCost);
             $discountedPrice = $this->promotionEngine->getDiscountedDisplayPrice($product);
             if ($discountedPrice !== null) {
-                $item->setDiscountAmountEur($product->getDisplayPrice() - $discountedPrice);
+                $item->setDiscountAmountEur($this->shippingCostProvider->getDisplayPrice($product->getBasePrice(), $product->getShippingTier()) - $discountedPrice);
             }
             $order->addItem($item);
         }

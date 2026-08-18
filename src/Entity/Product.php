@@ -268,11 +268,6 @@ class Product
         return $this;
     }
 
-    public function getDisplayPrice(): float
-    {
-        return $this->getBasePrice() + $this->shippingTier->shippingCostEur();
-    }
-
     public function getDiscountPercent(): ?int
     {
         if ($this->compareAtPrice === null || (float) $this->compareAtPrice <= $this->getBasePrice()) {
