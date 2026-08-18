@@ -151,10 +151,18 @@
                     <tr>
                         <td style="padding: 20px; background-color: #F0EBE1; border: 1px solid #E8DDD0; margin-bottom: 30px;">
                             <p style="margin: 0; font-size: 13px; color: #2C2418; line-height: 1.6;">
-                                {% if locale == 'fr' %}
-                                    Livraison estimée : 7 à 14 jours ouvrés. Votre commande est expédiée depuis la France ou le Mexique selon les disponibilités.
+                                {% if order.shipsFromMexico %}
+                                    {% if locale == 'fr' %}
+                                        Livraison estimée : 7 à 14 jours ouvrés. Votre commande est expédiée depuis le Mexique.
+                                    {% else %}
+                                        Estimated delivery: 7–14 business days. Your order ships from Mexico.
+                                    {% endif %}
                                 {% else %}
-                                    Estimated delivery: 7–14 business days. Your order ships from France or Mexico depending on availability.
+                                    {% if locale == 'fr' %}
+                                        Livraison estimée : 3 à 5 jours ouvrés. Votre commande est expédiée depuis la France.
+                                    {% else %}
+                                        Estimated delivery: 3–5 business days. Your order ships from France.
+                                    {% endif %}
                                 {% endif %}
                             </p>
                         </td>

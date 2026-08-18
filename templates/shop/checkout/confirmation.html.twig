@@ -77,7 +77,7 @@
 
         {# Delivery note #}
         <div class="bg-alma-surface border border-alma-hover p-5 max-w-md mx-auto mb-10">
-            <p class="text-sm text-alma-text">{{ 'confirmation.delivery_note'|trans }}</p>
+            <p class="text-sm text-alma-text">{{ (order.shipsFromMexico ? 'confirmation.delivery_note_mexico' : 'confirmation.delivery_note_france')|trans }}</p>
         </div>
 
         {# Post-purchase account creation prompt — only for guests #}

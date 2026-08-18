@@ -529,6 +529,23 @@ class Order
         return $this->items;
     }
 
+    /**
+     * Whether any item ships from Mexico, which drives the longer delivery
+     * estimate on the confirmation page and transactional emails. Items whose
+     * product has since been deleted count as France (the common case, and by
+     * then the estimate is no longer actionable anyway).
+     */
+    public function shipsFromMexico(): bool
+    {
+        foreach ($this->items as $item) {
+            if ($item->getProduct()?->isLocatedInMexico() === true) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function addItem(OrderItem $item): static
     {
         if (!$this->items->contains($item)) {

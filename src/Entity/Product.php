@@ -75,7 +75,7 @@ class Product
 
     /** @var string[] */
     #[ORM\Column(type: Types::JSON)]
-    private array $availableIn = [self::COUNTRY_FRANCE, self::COUNTRY_MEXICO];
+    private array $availableIn = [self::COUNTRY_FRANCE];
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $soldAt = null;
@@ -362,6 +362,15 @@ class Product
         $this->availableIn = $availableIn;
 
         return $this;
+    }
+
+    /**
+     * Each unique piece sits in a single location; Mexico drives the longer
+     * delivery estimate shown across the shop and transactional emails.
+     */
+    public function isLocatedInMexico(): bool
+    {
+        return \in_array(self::COUNTRY_MEXICO, $this->availableIn, true);
     }
 
     public function getSoldAt(): ?\DateTimeImmutable
