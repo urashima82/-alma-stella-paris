@@ -1389,3 +1389,201 @@ body {
     font-size: 0.8rem;
     cursor: help;
 }
+
+/* ── Audience dashboard (admin/statistiques) ── */
+.asp-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 1100px;
+}
+
+.asp-stats-periods {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.asp-stats-periods__label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted, #6c757d);
+    margin-right: 0.25rem;
+}
+
+.asp-stats-periods__item {
+    padding: 0.3rem 0.9rem;
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 999px;
+    font-size: 0.85rem;
+    color: var(--text-color, #212529);
+    text-decoration: none;
+}
+
+.asp-stats-periods__item:hover {
+    border-color: #c9a84c;
+    color: #c9a84c;
+}
+
+.asp-stats-periods__item--active {
+    background: #c9a84c;
+    border-color: #c9a84c;
+    color: #fff;
+}
+
+.asp-stats-periods__item--active:hover {
+    color: #fff;
+}
+
+.asp-stats-range {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.asp-stats-card {
+    background: var(--content-panel-bg, #fff);
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 6px;
+    padding: 1.25rem;
+}
+
+.asp-stats-card__title {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.asp-stats-empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted, #6c757d);
+    font-style: italic;
+}
+
+.asp-stats-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 180px;
+}
+
+.asp-stats-chart__bar {
+    flex: 1 1 0;
+    display: flex;
+    align-items: flex-end;
+    height: 100%;
+    min-width: 2px;
+}
+
+.asp-stats-chart__fill {
+    display: block;
+    width: 100%;
+    min-height: 1px;
+    background: #c9a84c;
+    border-radius: 2px 2px 0 0;
+}
+
+.asp-stats-chart__bar:hover .asp-stats-chart__fill {
+    background: #a8893a;
+}
+
+.asp-stats-chart__axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.asp-stats-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+    .asp-stats-split {
+        grid-template-columns: 1fr;
+    }
+}
+
+.asp-stats-badges {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.asp-stats-badge {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.asp-stats-badge__value {
+    flex: 1;
+}
+
+.asp-stats-badge__count {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.asp-stats-badge__share {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted, #6c757d);
+    min-width: 3.5rem;
+    text-align: right;
+}
+
+.asp-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.asp-stats-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted, #6c757d);
+    padding: 0 0.5rem 0.5rem 0;
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+}
+
+.asp-stats-table td {
+    padding: 0.4rem 0.5rem 0.4rem 0;
+    border-bottom: 1px solid var(--border-color, #dee2e6);
+    vertical-align: top;
+}
+
+.asp-stats-table tr:last-child td {
+    border-bottom: none;
+}
+
+.asp-stats-table__value {
+    word-break: break-all;
+}
+
+.asp-stats-table__num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.asp-stats-note {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-muted, #6c757d);
+}
+
+.ea-dark-scheme .asp-stats-periods__item--active {
+    color: #1a1a1a;
+}

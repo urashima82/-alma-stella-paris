@@ -129,6 +129,7 @@ class DashboardController extends AbstractDashboardController
         }
 
         yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-home');
+        yield MenuItem::linkToRoute('Audience', 'fa fa-chart-line', 'admin_stats');
         yield MenuItem::section('Catalogue');
         yield MenuItem::linkTo(ProductCrudController::class, 'Produits', 'fa fa-gem');
         yield MenuItem::linkTo(ProductCategoryCrudController::class, 'Catégories', 'fa fa-tags');

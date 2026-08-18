@@ -110,9 +110,10 @@ background context.
   enough — assets must be recompiled for changes to be visible.
 - **Architecture updates:** Update `docs/ARCHITECTURE.md` when adding entities,
   controllers, routes, or Stimulus controllers.
-- **TEMPORARY (remove when in production):** Do NOT create new migration files.
-  Always modify the existing initial migration and recreate the DDEV environment
-  (`ddev delete --omit-snapshot && ddev start`) instead of running new migrations.
+- **Migrations:** The site is in production — schema changes go through new
+  incremental migrations (`doctrine:migrations:diff`, then prune the generated
+  file to the intended change only: the initial migration has hand-tuned index
+  names, so the diff always includes unrelated noise).
 
 ---
 

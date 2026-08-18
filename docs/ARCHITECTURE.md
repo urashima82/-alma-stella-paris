@@ -1042,6 +1042,27 @@ ddev exec php bin/console doctrine:migrations:migrate
 ddev exec php bin/console doctrine:fixtures:load
 ```
 
+### Audience analytics (privacy-first)
+
+Anonymous aggregate page-view counters — no IP, no cookie, no visitor
+identifier is ever stored, so no consent banner is needed:
+
+- `PageViewStat` entity: one `views` counter per `(day, dimension, value)`
+  triple; dimensions are `page`, `referrer` (host only), `locale`, `device`
+  (see `StatDimension`). Rows are upserted with a native
+  `INSERT … ON DUPLICATE KEY UPDATE` in `PageViewStatRepository::record()`.
+- `App\Analytics\PageViewCollector` (unit-tested): decides countability —
+  GET + 200 + `text/html` only; excludes bots, the back-office and its
+  logged-in admin browsing the shop, the catalog "load more" AJAX fetches
+  (`X-Requested-With`), and masks secret route parameters (reset-password,
+  invoice, testimonial tokens) out of stored paths.
+- `PageViewSubscriber`: decides on `kernel.response` (priority -900, before the
+  session closes), writes on `kernel.terminate` (outside visitor latency),
+  swallows and logs every failure.
+- Admin screen: `StatsController` → `/admin/statistiques` ("Audience" menu
+  entry) — daily bar chart, top pages/referrers, locale and device splits,
+  period selector (7/30/90/365 days).
+
 Fixtures are split into two groups:
 
 | Group | Classes | Content |

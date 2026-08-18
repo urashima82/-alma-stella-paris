@@ -1,0 +1,138 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block page_title %}Audience{% endblock %}
+{% block content_title %}Audience{% endblock %}
+
+{% block main %}
+    <div class="asp-stats">
+        <nav class="asp-stats-periods" aria-label="Période">
+            <span class="asp-stats-periods__label">Période</span>
+            {% for days in periods %}
+                <a href="{{ path('admin_stats', {period: days}) }}"
+                   class="asp-stats-periods__item{{ days == period ? ' asp-stats-periods__item--active' : '' }}">
+                    {{ days == 365 ? '12 mois' : days ~ ' jours' }}
+                </a>
+            {% endfor %}
+        </nav>
+
+        <p class="asp-stats-range">
+            Du {{ from|date('d/m/Y') }} au {{ to|date('d/m/Y') }} —
+            <strong>{{ total|number_format(0, ',', ' ') }}</strong> vue{{ total > 1 ? 's' : '' }} sur la période.
+        </p>
+
+        <section class="asp-stats-card">
+            <h3 class="asp-stats-card__title">Vues par jour</h3>
+            {% if peak == 0 %}
+                <p class="asp-stats-empty">Aucune vue enregistrée sur cette période.</p>
+            {% else %}
+                <div class="asp-stats-chart">
+                    {% for point in series %}
+                        <div class="asp-stats-chart__bar" title="{{ point.day|date('d/m/Y') }} : {{ point.views }} vue{{ point.views > 1 ? 's' : '' }}">
+                            <span class="asp-stats-chart__fill" style="height: {{ (point.views * 100 / peak)|round(2) }}%"></span>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="asp-stats-chart__axis">
+                    <span>{{ series|first.day|date('d/m') }}</span>
+                    <span>Maximum : {{ peak|number_format(0, ',', ' ') }} vue{{ peak > 1 ? 's' : '' }}/jour</span>
+                    <span>{{ series|last.day|date('d/m') }}</span>
+                </div>
+            {% endif %}
+        </section>
+
+        <div class="asp-stats-split">
+            <section class="asp-stats-card">
+                <h3 class="asp-stats-card__title">Langues</h3>
+                {% if locales is empty %}
+                    <p class="asp-stats-empty">Aucune donnée.</p>
+                {% else %}
+                    <ul class="asp-stats-badges">
+                        {% for row in locales %}
+                            <li class="asp-stats-badge">
+                                <span class="asp-stats-badge__value">{{ row.value == 'fr' ? 'Français' : (row.value == 'en' ? 'English' : row.value) }}</span>
+                                <span class="asp-stats-badge__count">{{ row.views|number_format(0, ',', ' ') }}</span>
+                                <span class="asp-stats-badge__share">{{ localesTotal > 0 ? (row.views * 100 / localesTotal)|round ~ ' %' : '—' }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+
+            <section class="asp-stats-card">
+                <h3 class="asp-stats-card__title">Appareils</h3>
+                {% if devices is empty %}
+                    <p class="asp-stats-empty">Aucune donnée.</p>
+                {% else %}
+                    <ul class="asp-stats-badges">
+                        {% for row in devices %}
+                            <li class="asp-stats-badge">
+                                <span class="asp-stats-badge__value">{{ row.value == 'mobile' ? 'Mobile' : (row.value == 'desktop' ? 'Ordinateur' : row.value) }}</span>
+                                <span class="asp-stats-badge__count">{{ row.views|number_format(0, ',', ' ') }}</span>
+                                <span class="asp-stats-badge__share">{{ devicesTotal > 0 ? (row.views * 100 / devicesTotal)|round ~ ' %' : '—' }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </section>
+        </div>
+
+        <div class="asp-stats-split">
+            <section class="asp-stats-card">
+                <h3 class="asp-stats-card__title">Pages les plus vues</h3>
+                {% if topPages is empty %}
+                    <p class="asp-stats-empty">Aucune donnée.</p>
+                {% else %}
+                    <table class="asp-stats-table">
+                        <thead>
+                            <tr>
+                                <th>Page</th>
+                                <th class="asp-stats-table__num">Vues</th>
+                                <th class="asp-stats-table__num">Part</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in topPages %}
+                                <tr>
+                                    <td class="asp-stats-table__value">{{ row.value }}</td>
+                                    <td class="asp-stats-table__num">{{ row.views|number_format(0, ',', ' ') }}</td>
+                                    <td class="asp-stats-table__num">{{ total > 0 ? (row.views * 100 / total)|round ~ ' %' : '—' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </section>
+
+            <section class="asp-stats-card">
+                <h3 class="asp-stats-card__title">Sites référents</h3>
+                {% if topReferrers is empty %}
+                    <p class="asp-stats-empty">Aucun référent enregistré — visites directes uniquement.</p>
+                {% else %}
+                    <table class="asp-stats-table">
+                        <thead>
+                            <tr>
+                                <th>Site</th>
+                                <th class="asp-stats-table__num">Vues</th>
+                                <th class="asp-stats-table__num">Part</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in topReferrers %}
+                                <tr>
+                                    <td class="asp-stats-table__value">{{ row.value }}</td>
+                                    <td class="asp-stats-table__num">{{ row.views|number_format(0, ',', ' ') }}</td>
+                                    <td class="asp-stats-table__num">{{ referrersTotal > 0 ? (row.views * 100 / referrersTotal)|round ~ ' %' : '—' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </section>
+        </div>
+
+        <p class="asp-stats-note">
+            Mesure agrégée et anonyme : aucune adresse IP, aucun cookie, aucun identifiant visiteur n'est enregistré.
+            Les visites d'un administrateur connecté et les robots ne sont pas comptés.
+        </p>
+    </div>
+{% endblock %}
