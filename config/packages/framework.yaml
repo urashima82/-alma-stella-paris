@@ -1,6 +1,11 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
+    # The o2switch front (LiteSpeed) drops PATCH requests before they reach
+    # the app, breaking every EasyAdmin index toggle. admin-method-override.js
+    # rewrites those PATCH fetches to POST + `_method=PATCH`, which this
+    # setting lets Symfony interpret as the original method.
+    http_method_override: true
 
     # Note that the session will be started ONLY if you read or write from it.
     session: true

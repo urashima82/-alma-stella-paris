@@ -165,6 +165,7 @@ class DashboardController extends AbstractDashboardController
     public function configureAssets(): Assets
     {
         return Assets::new()
+            ->addJsFile('js/admin-method-override.js')
             ->addCssFile('css/admin.css')
             ->addCssFile('vendor/cropperjs/cropper.min.css')
             ->addCssFile('css/admin-crop.css')
