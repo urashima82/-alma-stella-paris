@@ -60,3 +60,7 @@
 ###> catalogue source data ###
 /docs/Catalogue/
 ###< catalogue source data ###
+
+###> host-generated PHP error logs (o2switch/LiteSpeed) ###
+error_log
+###< host-generated PHP error logs ###

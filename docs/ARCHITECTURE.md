@@ -195,7 +195,16 @@ Two firewalls, two user entities, two auth models — never mix them:
 
 ## Hosting constraints (o2switch / LiteSpeed)
 
-Production runs on shared hosting; two things exist only because of it:
+Production runs on shared hosting; these things exist only because of it:
+
+- **Never build assets on production.** Compiled assets (`public/assets/`) are
+  tracked in git on purpose (see the `.gitignore` note): build in dev
+  (`tailwind:build` + `asset-map:compile`), commit, and production only pulls.
+  The Tailwind v4 binary cannot even run there (`/tmp` is mounted noexec —
+  Bun fails to map its native libraries), and `asset-map:compile` on the server
+  regenerates the Stimulus loader with a different debug flag, diverging from
+  the committed manifests. The host also drops `error_log` files at the webroot;
+  they are gitignored, not Symfony logs — read them on the server.
 
 - **The host kills PATCH requests** (HTTP/2 protocol error before the app), which broke
   every EasyAdmin index toggle. The fix has two halves that only work together:
