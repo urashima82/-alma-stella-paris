@@ -153,17 +153,23 @@
                     <tr>
                         <td style="padding: 20px; background-color: #F0EBE1; border: 1px solid #E8DDD0;">
                             <p style="margin: 0; font-size: 13px; color: #2C2418; line-height: 1.6;">
-                                {% if order.shipsFromMexico %}
+                                {% if order.shippingSurchargeEur > 0 %}
                                     {% if locale == 'fr' %}
-                                        Livraison estimée : 7 à 14 jours ouvrés. Vous recevrez un e-mail lorsque votre commande sera livrée.
+                                        Livraison estimée : 10 à 15 jours ouvrés. Vous recevrez un e-mail lorsque votre commande sera livrée.
                                     {% else %}
-                                        Estimated delivery: 7–14 business days. You'll receive an email when your order is delivered.
+                                        Estimated delivery: 10–15 business days. You'll receive an email when your order is delivered.
                                     {% endif %}
-                                {% else %}
+                                {% elseif order.shippingCountry == 'FR' %}
                                     {% if locale == 'fr' %}
                                         Livraison estimée : 3 à 5 jours ouvrés. Vous recevrez un e-mail lorsque votre commande sera livrée.
                                     {% else %}
                                         Estimated delivery: 3–5 business days. You'll receive an email when your order is delivered.
+                                    {% endif %}
+                                {% else %}
+                                    {% if locale == 'fr' %}
+                                        Livraison estimée : 5 à 10 jours ouvrés. Vous recevrez un e-mail lorsque votre commande sera livrée.
+                                    {% else %}
+                                        Estimated delivery: 5–10 business days. You'll receive an email when your order is delivered.
                                     {% endif %}
                                 {% endif %}
                             </p>

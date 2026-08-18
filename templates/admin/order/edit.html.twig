@@ -163,6 +163,11 @@
                 </div>
                 <div class="content-panel-body">
                     <dl class="row mb-0">
+                        {% if order.shippingSurchargeEur > 0 %}
+                            <dt class="col-5 text-body-secondary fw-normal">Frais de port intl.</dt>
+                            <dd class="col-7">€{{ order.shippingSurchargeEur|number_format(2, '.', ',') }}</dd>
+                        {% endif %}
+
                         <dt class="col-5 text-body-secondary fw-normal">Total</dt>
                         <dd class="col-7 fw-bold">€{{ order.totalEur|number_format(2, '.', ',') }}</dd>
 

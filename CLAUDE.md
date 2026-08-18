@@ -195,6 +195,14 @@ See `ARCHITECTURE.md` for full technical details.
   cached 6h) — Stripe always charges in EUR
 - **Shipping model:** `ShippingTier` enum with costs baked into display price —
   no dynamic shipping calculator at checkout
+- **Delivery zones:** worldwide shipping, everything shipped from France.
+  Included zone (shipping baked into display prices): EU-27 + United Kingdom +
+  Switzerland, metropolitan France only. Any other destination (DOM-TOM
+  included) pays each item's shipping tier a second time as a visible
+  "international shipping" line (`Order.shippingSurchargeEur`, included in
+  `totalEur`). The dual France/Mexico collection was retired as a sales model
+  in August 2026: Mexico remains the sourcing narrative, pieces come back to
+  France to be sold. `Product.availableIn` stays dormant in the codebase.
 - **Social publishing:** Pinterest and TikTok Shop via API (direct); Instagram
   via deep link (mobile app) — no direct Meta API publishing
 - **No geo-pricing:** identical prices for all countries — discrimination tarifaire

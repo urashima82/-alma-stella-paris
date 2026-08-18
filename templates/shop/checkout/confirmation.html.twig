@@ -43,6 +43,12 @@
                         <span class="text-green-600 font-medium">-{{ promo.discount|price }}</span>
                     </div>
                 {% endfor %}
+                {% if order.shippingSurchargeEur > 0 %}
+                    <div class="flex justify-between text-sm font-sans">
+                        <span class="text-alma-text-muted">{{ 'checkout.shipping_surcharge_label'|trans }}</span>
+                        <span class="text-alma-text font-medium">+{{ order.shippingSurchargeEur|price }}</span>
+                    </div>
+                {% endif %}
                 <div class="border-t border-alma-hover pt-3 flex justify-between font-sans">
                     <span class="text-alma-text font-medium">{{ 'checkout.total'|trans }}</span>
                     <span class="text-lg font-semibold text-alma-text">
@@ -77,7 +83,11 @@
 
         {# Delivery note #}
         <div class="bg-alma-surface border border-alma-hover p-5 max-w-md mx-auto mb-10">
-            <p class="text-sm text-alma-text">{{ (order.shipsFromMexico ? 'confirmation.delivery_note_mexico' : 'confirmation.delivery_note_france')|trans }}</p>
+            {# The stored surcharge encodes the zone: > 0 means out-of-zone international delivery #}
+            {% set deliveryNoteKey = order.shippingSurchargeEur > 0
+                ? 'confirmation.delivery_note_international'
+                : (order.shippingCountry == 'FR' ? 'confirmation.delivery_note_france' : 'confirmation.delivery_note_zone') %}
+            <p class="text-sm text-alma-text">{{ deliveryNoteKey|trans }}</p>
         </div>
 
         {# Post-purchase account creation prompt — only for guests #}

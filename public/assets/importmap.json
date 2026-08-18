@@ -8,7 +8,7 @@
         "type": "js"
     },
     "\/assets\/@symfony\/stimulus-bundle\/controllers.js": {
-        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-wM4rnaj.js",
+        "path": "\/assets\/@symfony\/stimulus-bundle\/controllers-nlPdKq-.js",
         "type": "js"
     },
     "\/assets\/controllers\/wishlist_toggle_controller.js": {
@@ -28,7 +28,7 @@
         "type": "js"
     },
     "\/assets\/controllers\/address_selector_controller.js": {
-        "path": "\/assets\/controllers\/address_selector_controller-_t0rh4g.js",
+        "path": "\/assets\/controllers\/address_selector_controller-p0tn3aU.js",
         "type": "js"
     },
     "\/assets\/controllers\/email_check_controller.js": {
@@ -45,6 +45,10 @@
     },
     "\/assets\/controllers\/star_rating_controller.js": {
         "path": "\/assets\/controllers\/star_rating_controller-ZTm3wzB.js",
+        "type": "js"
+    },
+    "\/assets\/controllers\/shipping_surcharge_controller.js": {
+        "path": "\/assets\/controllers\/shipping_surcharge_controller-K-fXJkS.js",
         "type": "js"
     },
     "\/assets\/controllers\/category_drawer_controller.js": {

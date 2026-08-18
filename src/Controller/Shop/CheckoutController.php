@@ -141,7 +141,12 @@ class CheckoutController extends AbstractController
                 $emailForOrder = $this->getCheckoutEmail($request);
                 $promoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalEur, $couponCodeForOrder, $emailForOrder);
                 $orderDiscountEur = $promoResult['totalDiscount'];
-                $orderFinalTotal = \max(0.0, $effectiveSubtotalEur - $orderDiscountEur);
+                $shippingSurchargeEur = $this->computeShippingSurchargeEur(
+                    \trim((string) $request->request->get('country', '')),
+                    \trim((string) $request->request->get('postal_code', '')),
+                    $products,
+                );
+                $orderFinalTotal = \max(0.0, $effectiveSubtotalEur - $orderDiscountEur) + $shippingSurchargeEur;
 
                 // Reuse existing Pending order if available, otherwise create new
                 $pendingRef = $request->getSession()->get('_pending_order');
@@ -156,8 +161,9 @@ class CheckoutController extends AbstractController
                     $this->entityManager->persist($order);
                 }
 
-                // Store discount info on order
+                // Store discount and surcharge info on order
                 $order->setDiscountAmountEur($orderDiscountEur);
+                $order->setShippingSurchargeEur($shippingSurchargeEur);
                 $order->setPromotionCode($couponCodeForOrder !== '' ? \strtoupper($couponCodeForOrder) : null);
                 $order->setAppliedPromotions(\array_map(
                     static fn (array $entry) => [
@@ -271,6 +277,12 @@ class CheckoutController extends AbstractController
             'discountAmountEur' => $discountAmountEur,
             'discountConverted' => $this->currencyConverter->convert($discountAmountEur, $currency),
             'finalTotalConverted' => $this->currencyConverter->convert($finalTotalEur, $currency),
+            // Out-of-zone surcharge preview: amounts are precomputed so the
+            // summary can switch lines client-side when the country changes;
+            // the authoritative amount is recomputed server-side on POST.
+            'surchargeConverted' => $this->currencyConverter->convert($this->sumShippingCosts($products), $currency),
+            'finalTotalWithSurchargeConverted' => $this->currencyConverter->convert($finalTotalEur + $this->sumShippingCosts($products), $currency),
+            'includedZoneCountries' => self::INCLUDED_ZONE_COUNTRY_CODES,
             'currency' => $currency,
             'errors' => $errors,
             'formData' => $this->getFormData($request),
@@ -558,7 +570,7 @@ class CheckoutController extends AbstractController
             $errors['postal_code'] = 'checkout.error.postal_code_required';
         }
 
-        if ($country === '' || \strlen($country) !== 2) {
+        if ($country === '' || !Countries::exists($country)) {
             $errors['country'] = 'checkout.error.country_required';
         }
 
@@ -819,26 +831,64 @@ class CheckoutController extends AbstractController
         return 'Address '.($count + 1);
     }
 
-    private const SHIPPING_COUNTRY_CODES = [
-        'US', 'CA', 'FR', 'GB', 'MX', 'DE', 'ES', 'IT', 'NL', 'BE',
-        'CH', 'AT', 'PT', 'IE', 'AU', 'NZ', 'JP', 'KR', 'SG', 'AE',
-        'BR', 'CO', 'CL', 'AR', 'SE', 'DK', 'NO', 'FI', 'PL', 'CZ',
-        'GR', 'IL', 'TH', 'MY', 'PH', 'IN',
+    /**
+     * Included zone: the 27 EU member states, the United Kingdom and
+     * Switzerland — shipping is baked into display prices for these
+     * destinations. Everything ships from France; metropolitan France only —
+     * DOM-TOM postal codes (97x/98x) are rejected in validateCheckoutForm().
+     */
+    private const INCLUDED_ZONE_COUNTRY_CODES = [
+        'AT', 'BE', 'BG', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES',
+        'FI', 'FR', 'GB', 'GR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU',
+        'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK',
     ];
+
+    /**
+     * Shipping is worldwide: any other destination (DOM-TOM included) is
+     * charged each cart item's shipping tier a second time, as a visible
+     * "international shipping" line — display prices already include one
+     * zone-level shipping share.
+     */
 
     /**
      * @return array<string, string>
      */
     private static function getShippingCountries(string $locale): array
     {
-        $countries = [];
-        foreach (self::SHIPPING_COUNTRY_CODES as $code) {
-            $countries[$code] = Countries::getName($code, $locale);
-        }
+        $countries = Countries::getNames($locale);
 
         \asort($countries, \SORT_LOCALE_STRING);
 
         return $countries;
+    }
+
+    /**
+     * The out-of-zone shipping surcharge for a destination: the sum of every
+     * cart item's shipping tier, or zero inside the included zone. Metropolitan
+     * France only — a DOM-TOM postal code under the FR country code is out of
+     * the included zone.
+     *
+     * @param Product[] $products
+     */
+    private function computeShippingSurchargeEur(string $country, string $postalCode, array $products): float
+    {
+        $insideIncludedZone = \in_array($country, self::INCLUDED_ZONE_COUNTRY_CODES, true)
+            && !($country === 'FR' && \preg_match('/^\s*9[78]/', $postalCode) === 1);
+
+        return $insideIncludedZone ? 0.0 : $this->sumShippingCosts($products);
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    private function sumShippingCosts(array $products): float
+    {
+        $total = 0.0;
+        foreach ($products as $product) {
+            $total += $this->shippingCostProvider->getCost($product->getShippingTier());
+        }
+
+        return $total;
     }
 
     #[Route(

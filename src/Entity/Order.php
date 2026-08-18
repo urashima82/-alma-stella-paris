@@ -86,6 +86,15 @@ class Order
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private string $discountAmountEur = '0.00';
 
+    /**
+     * Out-of-zone shipping surcharge, already included in `totalEur`. Shipping
+     * is baked into display prices for the EU/UK/Switzerland zone; deliveries
+     * to Mexico, Canada and the USA are charged each item's shipping tier a
+     * second time, as a visible line.
+     */
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private string $shippingSurchargeEur = '0.00';
+
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $promotionCode = null;
 
@@ -424,6 +433,18 @@ class Order
     public function getDiscountAmountEur(): float
     {
         return (float) $this->discountAmountEur;
+    }
+
+    public function getShippingSurchargeEur(): float
+    {
+        return (float) $this->shippingSurchargeEur;
+    }
+
+    public function setShippingSurchargeEur(float $shippingSurchargeEur): static
+    {
+        $this->shippingSurchargeEur = \number_format($shippingSurchargeEur, 2, '.', '');
+
+        return $this;
     }
 
     public function setDiscountAmountEur(float $discountAmountEur): static

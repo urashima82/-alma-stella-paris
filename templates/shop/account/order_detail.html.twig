@@ -65,6 +65,12 @@
                         <td class="px-5 py-3 text-right font-medium text-green-600">-{{ promo.discount|price }}</td>
                     </tr>
                 {% endfor %}
+                {% if order.shippingSurchargeEur > 0 %}
+                    <tr class="border-b border-alma-hover/50">
+                        <td class="px-5 py-3 text-right text-alma-text-muted">{{ 'checkout.shipping_surcharge_label'|trans }}</td>
+                        <td class="px-5 py-3 text-right font-medium text-alma-text">+{{ order.shippingSurchargeEur|price }}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <td class="px-5 py-4 text-right font-medium text-alma-text">{{ 'orders.detail.order_total'|trans }}</td>
                     <td class="px-5 py-4 text-right font-medium text-alma-text text-base">{{ order.totalEur|price }}</td>

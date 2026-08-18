@@ -24,7 +24,11 @@
             </h1>
         </div>
 
-        <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
+        <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16"
+              data-controller="shipping-surcharge"
+              data-shipping-surcharge-included-countries-value="{{ includedZoneCountries|json_encode|e('html_attr') }}"
+              data-shipping-surcharge-total-included-value="{{ finalTotalConverted|price_format(currency) }}"
+              data-shipping-surcharge-total-with-surcharge-value="{{ finalTotalWithSurchargeConverted|price_format(currency) }}">
             <input type="hidden" name="_token" value="{{ csrf_token('submit') }}">
 
             {# ── Left: Shipping & billing forms (2 cols) ── #}
@@ -142,6 +146,8 @@
                                    value="{{ formData.postal_code }}"
                                    required
                                    data-address-selector-target="postalCode"
+                                   data-shipping-surcharge-target="postal"
+                                   data-action="input->shipping-surcharge#update"
                                    class="w-full border {{ errors.postal_code is defined ? 'border-red-400' : 'border-alma-hover' }}
                                           bg-white px-4 py-3 text-sm font-sans text-alma-text
                                           focus:border-alma-gold focus:outline-none transition-colors">
@@ -156,6 +162,8 @@
                             <select id="country" name="country"
                                     required
                                     data-address-selector-target="country"
+                                    data-shipping-surcharge-target="country"
+                                    data-action="change->shipping-surcharge#update"
                                     class="w-full border {{ errors.country is defined ? 'border-red-400' : 'border-alma-hover' }}
                                            bg-white px-4 py-3 text-sm font-sans text-alma-text
                                            focus:border-alma-gold focus:outline-none transition-colors">
@@ -373,6 +381,11 @@
                             <span class="text-alma-text-muted">{{ 'checkout.shipping_label'|trans }}</span>
                             <span class="text-alma-text">{{ 'checkout.shipping_included'|trans }}</span>
                         </div>
+                        {# Out-of-zone surcharge — toggled by shipping_surcharge_controller.js when the destination requires it #}
+                        <div class="hidden justify-between text-sm font-sans" data-shipping-surcharge-target="line">
+                            <span class="text-alma-text-muted">{{ 'checkout.shipping_surcharge_label'|trans }}</span>
+                            <span class="text-alma-text font-medium">+{{ surchargeConverted|price_format(currency) }}</span>
+                        </div>
                         {% for discount in appliedDiscounts|default([]) %}
                             <div class="flex justify-between text-sm font-sans">
                                 <span class="text-green-600">{{ discount.label }}</span>
@@ -383,7 +396,7 @@
                         {% endfor %}
                         <div class="flex justify-between font-sans">
                             <span class="text-alma-text font-medium">{{ 'checkout.total'|trans }}</span>
-                            <span class="text-lg font-semibold text-alma-text">
+                            <span class="text-lg font-semibold text-alma-text" data-shipping-surcharge-target="total">
                                 {{ finalTotalConverted|default(subtotalConverted)|price_format(currency) }}
                             </span>
                         </div>

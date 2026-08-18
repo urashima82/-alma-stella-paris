@@ -248,7 +248,13 @@
     <table class="totals-table">
         <tr>
             <td class="total-label">{% if locale == 'fr' %}Livraison{% else %}Shipping{% endif %}</td>
-            <td class="total-value">{% if locale == 'fr' %}Offerte{% else %}Free{% endif %}</td>
+            <td class="total-value">
+                {%- if order.shippingSurchargeEur > 0 -%}
+                    €{{ '%.2f'|format(order.shippingSurchargeEur) }}
+                {%- else -%}
+                    {% if locale == 'fr' %}Offerte{% else %}Free{% endif %}
+                {%- endif -%}
+            </td>
         </tr>
         {% for promo in order.appliedPromotions %}
             <tr>
