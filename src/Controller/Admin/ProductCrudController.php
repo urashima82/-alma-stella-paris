@@ -20,6 +20,7 @@ use App\Message\FillProductContentMessage;
 use App\Message\GenerateVisualMessage;
 use App\Repository\GeneratedVisualRepository;
 use App\Repository\ProductContentSuggestionRepository;
+use App\Service\AiGenerationDispatcher;
 use App\Service\Visual\ImageStorage;
 use App\Service\Visual\VisualApprovalHandler;
 use Doctrine\ORM\EntityManagerInterface;
@@ -48,7 +49,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Twig\Environment;
 
@@ -56,7 +56,7 @@ use Twig\Environment;
 class ProductCrudController extends AbstractCrudController
 {
     public function __construct(
-        private readonly MessageBusInterface $messageBus,
+        private readonly AiGenerationDispatcher $aiDispatcher,
         private readonly EntityManagerInterface $entityManager,
         private readonly AdminUrlGenerator $adminUrlGenerator,
         private readonly GeneratedVisualRepository $generatedVisualRepository,
@@ -376,7 +376,7 @@ class ProductCrudController extends AbstractCrudController
         $dispatched = 0;
         foreach (VisualType::cases() as $type) {
             $visual = $this->createGeneratingVisual($product, $type);
-            $this->messageBus->dispatch(new GenerateVisualMessage(
+            $this->aiDispatcher->dispatchVisualGeneration($visual, new GenerateVisualMessage(
                 $product->getId(),
                 $type,
                 $visual->getVariant(),
@@ -417,7 +417,7 @@ class ProductCrudController extends AbstractCrudController
 
         $visual = $this->createGeneratingVisual($product, $type);
         $nextVariant = $visual->getVariant();
-        $this->messageBus->dispatch(new GenerateVisualMessage(
+        $this->aiDispatcher->dispatchVisualGeneration($visual, new GenerateVisualMessage(
             $product->getId(),
             $type,
             $nextVariant,
@@ -528,7 +528,7 @@ class ProductCrudController extends AbstractCrudController
 
         $this->entityManager->flush();
 
-        $this->messageBus->dispatch(new GenerateVisualMessage(
+        $this->aiDispatcher->dispatchVisualGeneration($visual, new GenerateVisualMessage(
             $product->getId(),
             $visual->getType(),
             $visual->getVariant(),
@@ -659,7 +659,7 @@ class ProductCrudController extends AbstractCrudController
         $this->entityManager->persist($suggestion);
         $this->entityManager->flush();
 
-        $this->messageBus->dispatch(new FillProductContentMessage(
+        $this->aiDispatcher->dispatchContentFill($suggestion, new FillProductContentMessage(
             $product->getId(),
             $suggestion->getId(),
         ));
@@ -692,7 +692,7 @@ class ProductCrudController extends AbstractCrudController
         $this->entityManager->persist($newSuggestion);
         $this->entityManager->flush();
 
-        $this->messageBus->dispatch(new FillProductContentMessage(
+        $this->aiDispatcher->dispatchContentFill($newSuggestion, new FillProductContentMessage(
             $product->getId(),
             $newSuggestion->getId(),
             $additionalContext !== '' ? $additionalContext : null,

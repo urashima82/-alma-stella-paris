@@ -19,6 +19,7 @@ use App\Form\Admin\ProductWizardType;
 use App\Message\FillProductContentMessage;
 use App\Message\GenerateVisualMessage;
 use App\Repository\ProductRepository;
+use App\Service\AiGenerationDispatcher;
 use App\Service\Visual\ImageStorage;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -29,7 +30,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -48,7 +48,7 @@ class ProductWizardController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly ImageStorage $imageStorage,
-        private readonly MessageBusInterface $messageBus,
+        private readonly AiGenerationDispatcher $aiDispatcher,
         private readonly ProductRepository $productRepository,
         private readonly AdminUrlGenerator $adminUrlGenerator,
         private readonly AdminContextFactory $adminContextFactory,
@@ -109,7 +109,7 @@ class ProductWizardController extends AbstractController
         $suggestion = $this->createContentSuggestion($product);
         $this->entityManager->flush();
 
-        $this->messageBus->dispatch(new FillProductContentMessage(
+        $this->aiDispatcher->dispatchContentFill($suggestion, new FillProductContentMessage(
             (int) $product->getId(),
             $suggestion->getId(),
         ));
@@ -312,7 +312,7 @@ class ProductWizardController extends AbstractController
             $this->entityManager->persist($visual);
             $this->entityManager->flush();
 
-            $this->messageBus->dispatch(new GenerateVisualMessage(
+            $this->aiDispatcher->dispatchVisualGeneration($visual, new GenerateVisualMessage(
                 (int) $product->getId(),
                 $type,
                 1,
