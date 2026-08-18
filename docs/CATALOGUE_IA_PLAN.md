@@ -1,5 +1,9 @@
 # Plan d'adaptation — Feature Catalogue IA
 
+> **⚠️ ARCHIVE — instantané d'avril 2026.** Checklist d'implémentation du
+> Milestone 16, aujourd'hui livrée. Ne décrit pas l'état courant du projet :
+> le code fait foi, les invariants sont dans `ARCHITECTURE.md`.
+
 > Croisement entre `CATALOGUE-IA-SPECS.md` et `CATALOGUE_IA_AUDIT.md`.
 > Checklist structurée pour l'implémentation.
 > Produit le 2026-04-17.

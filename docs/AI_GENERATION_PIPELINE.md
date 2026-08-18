@@ -1,5 +1,11 @@
 # Plan d'implémentation — Pipeline hybride de génération IA
 
+> **⚠️ RÉCIT DE CONCEPTION — figé à avril 2026.** Ce plan a été écrit *avant*
+> l'implémentation (le « Statut » ci-dessous date de cette époque) et n'a pas été
+> mis à jour depuis : le pipeline est livré et a divergé sur des détails. Le code
+> fait foi pour l'état courant ; ce document ne vaut que pour le *pourquoi* des
+> choix de conception.
+
 > **Statut** : Plan prêt à exécuter, code non démarré.
 > **Créé** : 2026-04-27.
 > **Référence Milestone** : 16 — Phase 5 (Améliorations IHM admin) Groupe A.ter.

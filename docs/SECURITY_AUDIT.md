@@ -1,5 +1,9 @@
 # Security Audit Report — Alma Stella Paris
 
+> **⚠️ ARCHIVE — snapshot of April 2026.** Findings and fixes reflect the codebase
+> at that date; everything shipped since (checkout changes, AI pipelines, worldwide
+> shipping…) is not covered. Do not treat this as the current security posture.
+
 > **Date:** 2026-04-14
 > **Last updated:** 2026-04-15
 > **Scope:** Full application security review (OWASP Top 10, Stripe, auth, headers, uploads, dependencies)

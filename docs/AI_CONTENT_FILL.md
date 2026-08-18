@@ -1,5 +1,10 @@
 # AI Content Fill (Milestone 17)
 
+> **⚠️ RÉCIT DE CONCEPTION — figé à avril 2026.** Écrit au moment de la conception
+> du Milestone 17, aujourd'hui livré, et non mis à jour depuis. Le code fait foi
+> pour l'état courant ; ce document ne vaut que pour le *pourquoi* des choix de
+> conception.
+
 > Génération automatique des contenus textuels d'un produit (FR + EN) par IA
 > multimodale (Gemini 2.5 Flash) à partir des photos sources et du contexte
 > taxonomique (catégorie, pierres). Validation humaine obligatoire avant

@@ -1,5 +1,10 @@
 # STONES.md : Guide des pierres Alma Stella Paris
 
+> **⚠️ SOURCE DE SEED — instantané d'avril 2026.** Ce contenu a servi à alimenter
+> les fixtures `Stone`. Depuis la mise en production, **la base de données (éditée
+> via EasyAdmin) fait foi** : une pierre modifiée dans l'admin n'est pas reportée
+> ici.
+
 > **Fichier de référence pour le contenu du guide des pierres.**
 > Sert de source pour les fixtures, les templates et la validation avec Estelle.
 > Toutes les informations minéralogiques et historiques sont factuelles et vérifiées.

@@ -1,5 +1,9 @@
 # Audit pre-implementation — Feature Catalogue IA
 
+> **⚠️ ARCHIVE — instantané d'avril 2026.** Audit réalisé *avant* l'implémentation
+> du Milestone 16, aujourd'hui livrée. Ne décrit pas l'état courant du projet :
+> le code fait foi, les invariants sont dans `ARCHITECTURE.md`.
+
 > **Document de référence** pour l'implémentation de la feature Catalogue IA.
 > Produit le 2026-04-17 après lecture des specs (`catalogue-ia-specs.md`)
 > et audit complet du projet existant.

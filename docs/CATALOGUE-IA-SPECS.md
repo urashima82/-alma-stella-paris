@@ -1,5 +1,10 @@
 # Spécifications — Feature Catalogue IA
 
+> **⚠️ ARCHIVE — instantané d'avril 2026.** Spécifications d'origine du
+> Milestone 16, aujourd'hui livré ; l'implémentation a divergé sur certains
+> points pendant le développement. Le code fait foi, les invariants sont dans
+> `ARCHITECTURE.md`.
+
 > Document de spécifications techniques pour l'intégration de la génération de visuels produits par IA (Gemini 2.5 Flash Image) dans la boutique e-commerce.
 >
 > **Destinataire** : Claude Code

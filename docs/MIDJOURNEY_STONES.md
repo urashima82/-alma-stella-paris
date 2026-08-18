@@ -1,5 +1,9 @@
 # Prompts Midjourney — Pierres Alma Stella Paris
 
+> **⚠️ ARCHIVE — instantané d'avril 2026.** Recette ponctuelle utilisée pour
+> générer les images de pierres existantes ; réutilisable telle quelle si une
+> nouvelle pierre est ajoutée, mais non maintenue depuis.
+
 > Prompts pour générer les photos de chaque pierre naturelle utilisée dans les
 > bijoux Alma Stella Paris. Toutes les images sont au ratio **1:1** et respectent
 > la charte graphique de la marque.

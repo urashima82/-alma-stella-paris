@@ -103,7 +103,10 @@ background context.
 - **Current milestone:** Check `docs/ROADMAP.md` for the next unchecked sub-step.
 - **Roadmap tracking:** After completing each task or sub-task, immediately
   check it off in `docs/ROADMAP.md` (`- [ ]` → `- [x]`). This keeps the
-  roadmap as the single source of truth for project progress.
+  roadmap as the single source of truth for project progress. When a milestone
+  is fully checked and validated, move its checklist to `docs/milestones/` and
+  add it to the "Completed milestones" table — `ROADMAP.md` only carries the
+  milestones still open.
 - **Tailwind rebuild + asset compile:** After every template or CSS change, run
   both commands: `ddev exec php bin/console tailwind:build` then
   `ddev exec php bin/console asset-map:compile`. The CSS rebuild alone is not
