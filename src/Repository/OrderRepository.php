@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Order;
 use App\Enum\OrderStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -71,21 +72,30 @@ class OrderRepository extends ServiceEntityRepository
 
     /**
      * Generate the next sequential order reference for the given year: ASP-YYYY-XXXXX.
+     *
+     * Pass $lock = true (requires an open transaction) to take a pessimistic
+     * write lock on the current max row, so two concurrent callers cannot
+     * generate the same value and explode on the unique constraint at flush.
      */
-    public function nextOrderReference(int $year): string
+    public function nextOrderReference(int $year, bool $lock = false): string
     {
         $prefix = \sprintf('ASP-%d-', $year);
 
         // getOneOrNullResult, not getSingleScalarResult: the latter THROWS on
         // an empty table — i.e. on the shop's very first order.
-        $lastReference = $this->createQueryBuilder('o')
+        $query = $this->createQueryBuilder('o')
             ->select('o.reference')
             ->where('o.reference LIKE :prefix')
             ->setParameter('prefix', $prefix.'%')
             ->orderBy('o.reference', 'DESC')
             ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
+            ->getQuery();
+
+        if ($lock) {
+            $query->setLockMode(LockMode::PESSIMISTIC_WRITE);
+        }
+
+        $lastReference = $query->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
 
         if ($lastReference === null) {
             return $prefix.'00001';
@@ -98,20 +108,27 @@ class OrderRepository extends ServiceEntityRepository
 
     /**
      * Generate the next sequential invoice number for the given year: FA-YYYY-XXXXX.
+     *
+     * Same locking contract as nextOrderReference().
      */
-    public function nextInvoiceNumber(int $year): string
+    public function nextInvoiceNumber(int $year, bool $lock = false): string
     {
         $prefix = \sprintf('FA-%d-', $year);
 
         // Same as nextOrderReference: null on the year's first invoice, never throw.
-        $lastNumber = $this->createQueryBuilder('o')
+        $query = $this->createQueryBuilder('o')
             ->select('o.invoiceNumber')
             ->where('o.invoiceNumber LIKE :prefix')
             ->setParameter('prefix', $prefix.'%')
             ->orderBy('o.invoiceNumber', 'DESC')
             ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
+            ->getQuery();
+
+        if ($lock) {
+            $query->setLockMode(LockMode::PESSIMISTIC_WRITE);
+        }
+
+        $lastNumber = $query->getOneOrNullResult(AbstractQuery::HYDRATE_SINGLE_SCALAR);
 
         if ($lastNumber === null) {
             return $prefix.'00001';

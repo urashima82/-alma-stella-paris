@@ -16,6 +16,10 @@ framework:
             policy: fixed_window
             limit: 10
             interval: '15 minutes'
+        email_check:
+            policy: sliding_window
+            limit: 15
+            interval: '5 minutes'
         gemini_api:
             policy: token_bucket
             limit: 15

@@ -49,14 +49,18 @@ final class ReservationManager
             }
         }
 
-        $reservation = Reservation::create($product, $sessionId);
-        $this->entityManager->persist($reservation);
-        $this->entityManager->flush();
+        // Atomic insert: a concurrent session may win the unique constraint
+        // on product_id — in that case the product is reserved by someone else.
+        $expiresAt = new \DateTimeImmutable(\sprintf('+%d minutes', Reservation::DEFAULT_DURATION_MINUTES));
+
+        if (!$this->reservationRepository->tryInsert($product, $sessionId, $expiresAt)) {
+            return false;
+        }
 
         $this->logger->info('Product {id} reserved for session {session} until {expires}.', [
             'id' => $product->getId(),
             'session' => \substr($sessionId, 0, 8).'...',
-            'expires' => $reservation->getExpiresAt()->format('H:i:s'),
+            'expires' => $expiresAt->format('H:i:s'),
         ]);
 
         return true;

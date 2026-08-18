@@ -9,12 +9,13 @@ use App\Entity\CustomerAddress;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Product;
+use App\Enum\OrderConfirmationOutcome;
 use App\Enum\OrderStatus;
 use App\Repository\CustomerRepository;
 use App\Repository\OrderRepository;
 use App\Service\CartManager;
 use App\Service\CurrencyConverter;
-use App\Service\OrderMailer;
+use App\Service\OrderConfirmer;
 use App\Service\PromotionEngine;
 use App\Service\ReservationManager;
 use App\Service\ShippingCostProvider;
@@ -26,6 +27,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Intl\Countries;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -38,9 +41,10 @@ class CheckoutController extends AbstractController
         private readonly OrderRepository $orderRepository,
         private readonly ShippingCostProvider $shippingCostProvider,
         private readonly StripeService $stripeService,
-        private readonly OrderMailer $orderMailer,
         private readonly ReservationManager $reservationManager,
         private readonly PromotionEngine $promotionEngine,
+        private readonly OrderConfirmer $orderConfirmer,
+        private readonly LockFactory $lockFactory,
         private readonly LoggerInterface $logger,
         private readonly TranslatorInterface $translator,
         private readonly string $stripePublicKey,
@@ -85,6 +89,10 @@ class CheckoutController extends AbstractController
 
                 return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
             }
+
+            // Server-side feedback for the no-JS fallback (the normal flow
+            // validates the email client-side before submitting).
+            $this->addFlash('warning', $this->translator->trans('identify.error.email_invalid'));
         }
 
         return $this->render('shop/checkout/identify.html.twig', [
@@ -136,17 +144,25 @@ class CheckoutController extends AbstractController
             $errors = $this->validateCheckoutForm($request);
 
             if ($errors === []) {
-                // Evaluate promotions for the order
+                // Evaluate promotions for the order. The submitted email is
+                // authoritative: it is what gets recorded on the order and in
+                // PromotionUsage, so per-email limits must be checked against
+                // it — not against the identification-step session email.
                 $couponCodeForOrder = (string) $request->request->get('coupon_code', '');
-                $emailForOrder = $this->getCheckoutEmail($request);
+                $emailForOrder = \trim((string) $request->request->get('customer_email', ''));
                 $promoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalEur, $couponCodeForOrder, $emailForOrder);
-                $orderDiscountEur = $promoResult['totalDiscount'];
                 $shippingSurchargeEur = $this->computeShippingSurchargeEur(
                     \trim((string) $request->request->get('country', '')),
                     \trim((string) $request->request->get('postal_code', '')),
                     $products,
                 );
-                $orderFinalTotal = \max(0.0, $effectiveSubtotalEur - $orderDiscountEur) + $shippingSurchargeEur;
+                // Free orders are not supported: clamp the discount so the
+                // total stays chargeable by Stripe (minimum 0,50 €).
+                $orderDiscountEur = $this->clampDiscount($promoResult['totalDiscount'], $effectiveSubtotalEur + $shippingSurchargeEur);
+                $orderFinalTotal = $effectiveSubtotalEur + $shippingSurchargeEur - $orderDiscountEur;
+                // The per-promotion shares must add up to the clamped total —
+                // they feed the PDF invoice lines and PromotionUsage.
+                $promotionShares = $this->scalePromotionShares($promoResult['promotions'], $promoResult['totalDiscount'], $orderDiscountEur);
 
                 // Reuse existing Pending order if available, otherwise create new
                 $pendingRef = $request->getSession()->get('_pending_order');
@@ -154,11 +170,14 @@ class CheckoutController extends AbstractController
                     ? $this->orderRepository->findByReference($pendingRef)
                     : null;
 
+                $isNewOrder = false;
+
                 if ($existingOrder !== null && $existingOrder->getStatus() === OrderStatus::Pending) {
                     $order = $this->updateExistingOrder($existingOrder, $request, $products, $orderFinalTotal);
                 } else {
                     $order = $this->createOrder($request, $products, $orderFinalTotal);
                     $this->entityManager->persist($order);
+                    $isNewOrder = true;
                 }
 
                 // Store discount and surcharge info on order
@@ -172,16 +191,34 @@ class CheckoutController extends AbstractController
                         'discount' => $entry['discount'],
                         'code' => $entry['promotion']->getCode(),
                     ],
-                    $promoResult['promotions'],
+                    $promotionShares,
                 ));
 
                 // Store promo result in session for tracking on payment confirmation
                 $request->getSession()->set('_order_promotions', \array_map(
                     static fn (array $entry) => ['id' => $entry['promotion']->getId(), 'discount' => $entry['discount']],
-                    $promoResult['promotions'],
+                    $promotionShares,
                 ));
 
-                $this->entityManager->flush();
+                if ($isNewOrder) {
+                    // Process-level lock + locked read in one transaction: the
+                    // DB gap locks alone do not conflict on an empty prefix
+                    // (the year's first order), so two concurrent checkouts
+                    // could otherwise mint the same reference.
+                    $sequenceLock = $this->lockFactory->createLock('order-reference-sequence', ttl: 10.0);
+                    $sequenceLock->acquire(blocking: true);
+
+                    try {
+                        $this->entityManager->wrapInTransaction(function () use ($order): void {
+                            $order->setReference($this->orderRepository->nextOrderReference((int) \date('Y'), lock: true));
+                            $this->entityManager->flush();
+                        });
+                    } finally {
+                        $sequenceLock->release();
+                    }
+                } else {
+                    $this->entityManager->flush();
+                }
 
                 // Save shipping address to address book for logged-in customers
                 $this->saveNewAddressIfNeeded($request);
@@ -237,8 +274,8 @@ class CheckoutController extends AbstractController
         $couponCode = $request->getSession()->get('_promo_code');
         $customerEmail = $this->getCheckoutEmail($request);
         $cartPromoResult = $this->promotionEngine->evaluateCartPromotions($products, $effectiveSubtotalEur, $couponCode, $customerEmail);
-        $discountAmountEur = $cartPromoResult['totalDiscount'];
-        $finalTotalEur = \max(0.0, $effectiveSubtotalEur - $discountAmountEur);
+        $discountAmountEur = $this->clampDiscount($cartPromoResult['totalDiscount'], $effectiveSubtotalEur);
+        $finalTotalEur = $effectiveSubtotalEur - $discountAmountEur;
 
         // Build applied discounts list for template (with clear labels)
         $appliedDiscounts = [];
@@ -267,6 +304,13 @@ class CheckoutController extends AbstractController
                     'code' => $couponCode,
                     'label' => $validatedPromo->getDiscountLabel(),
                 ];
+            } else {
+                // The stored coupon is no longer valid (expired, deactivated,
+                // minimum no longer met). Purge it — a stale session code can
+                // never reach the order (the not-applied branch submits an
+                // empty coupon_code), so isOrderStale() would otherwise bounce
+                // the customer between checkout and payment forever.
+                $request->getSession()->remove('_promo_code');
             }
         }
 
@@ -309,34 +353,80 @@ class CheckoutController extends AbstractController
     )]
     public function payment(Request $request): Response
     {
+        $locale = $request->getLocale();
         $orderRef = $request->getSession()->get('_pending_order');
 
         if ($orderRef === null) {
-            return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
+            return $this->redirectToRoute('shop_checkout', ['_locale' => $locale]);
         }
 
         $order = $this->orderRepository->findByReference($orderRef);
 
         if ($order === null) {
-            return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
+            $request->getSession()->remove('_pending_order');
+
+            return $this->redirectToRoute('shop_checkout', ['_locale' => $locale]);
+        }
+
+        // The scheduler may have confirmed or cancelled the order meanwhile
+        // (e.g. the customer comes back long after a 3DS redirect).
+        if ($order->getStatus() !== OrderStatus::Pending) {
+            if ($order->getStatus() === OrderStatus::Cancelled) {
+                $request->getSession()->remove('_pending_order');
+                $this->addFlash('warning', $this->translator->trans('checkout.order_cancelled_restart'));
+
+                return $this->redirectToRoute('shop_checkout', ['_locale' => $locale]);
+            }
+
+            $this->cartManager->clear();
+            $this->clearCheckoutSession($request);
+
+            return $this->redirectToRoute(
+                $locale === 'fr' ? 'shop_order_confirmation_fr' : 'shop_order_confirmation',
+                ['_locale' => $locale, 'reference' => $order->getReference(), 'token' => $order->getInvoiceToken()],
+            );
         }
 
         // Create or reuse Stripe PaymentIntent
         $paymentIntentId = $order->getStripePaymentIntentId();
 
         try {
-            if ($paymentIntentId !== null) {
-                $paymentIntent = $this->stripeService->retrievePaymentIntent($paymentIntentId);
-            } else {
+            $paymentIntent = $paymentIntentId !== null
+                ? $this->stripeService->retrievePaymentIntent($paymentIntentId)
+                : null;
+
+            // Availability and staleness only matter while nothing has been
+            // charged yet: a succeeded intent (e.g. back from a 3DS redirect)
+            // must reach confirmPayment(), whose conflict handling refunds.
+            if ($paymentIntent?->status !== 'succeeded') {
+                // Unique pieces: never take a payment for an item that was
+                // sold or reserved by another session since the order was built.
+                if (!$this->orderItemsStillAvailable($order)) {
+                    $this->addFlash('warning', $this->translator->trans('checkout.items_unavailable'));
+
+                    return $this->redirectToRoute('shop_checkout', ['_locale' => $locale]);
+                }
+
+                // A stale order (cart or coupon changed since the checkout
+                // POST, reached by direct navigation) must go through checkout
+                // again so its items and totals are rebuilt.
+                if ($this->isOrderStale($order, $request)) {
+                    $this->addFlash('warning', $this->translator->trans('checkout.order_needs_refresh'));
+
+                    return $this->redirectToRoute('shop_checkout', ['_locale' => $locale]);
+                }
+            }
+
+            if ($paymentIntent === null) {
                 $paymentIntent = $this->stripeService->createPaymentIntent($order);
                 $order->setStripePaymentIntentId($paymentIntent->id);
                 $this->entityManager->flush();
             }
         } catch (\Exception $e) {
             $this->logger->error('Stripe PaymentIntent error: {message}', ['message' => $e->getMessage()]);
-            $this->addFlash('error', 'checkout.payment_error');
+            $this->addFlash('error', $this->translator->trans('checkout.payment_error'));
 
-            return $this->redirectToRoute('shop_checkout', ['_locale' => $request->getLocale()]);
+            return $this->redirectToRoute('shop_checkout', ['_locale' => $locale]);
         }
 
         $currency = $request->getSession()->get('_currency', CurrencyConverter::BASE_CURRENCY);
@@ -390,67 +480,84 @@ class CheckoutController extends AbstractController
             return new JsonResponse(['error' => 'payment_not_completed', 'status' => $paymentIntent->status], Response::HTTP_BAD_REQUEST);
         }
 
-        // Mark order as processing and assign invoice number
-        $order->setStripePaymentStatus($paymentIntent->status);
-        $order->setStatus(OrderStatus::Processing);
-        $order->setPaidAt(new \DateTimeImmutable());
-        $order->setInvoiceNumber($this->orderRepository->nextInvoiceNumber((int) \date('Y')));
-
-        // Mark purchased products as sold (setIsSoldOut auto-sets soldAt)
-        foreach ($order->getItems() as $item) {
-            $product = $item->getProduct();
-            if ($product !== null && !$product->isSoldOut()) {
-                $product->setIsSoldOut(true);
-            }
+        // Tripwire, not a gate: the intent is always created server-side from
+        // the order total, so a mismatch can only be a bug worth loud logging.
+        $expectedCents = (int) \round($order->getTotalEur() * 100);
+        if ($paymentIntent->amount !== $expectedCents) {
+            $this->logger->critical('PaymentIntent amount mismatch for order {ref}: charged {charged}, expected {expected}.', [
+                'ref' => $order->getReference(),
+                'charged' => $paymentIntent->amount,
+                'expected' => $expectedCents,
+            ]);
         }
 
-        $this->entityManager->flush();
+        // Single confirmation path, shared with the scheduler: idempotence,
+        // unique-piece conflict detection and invoice numbering all happen
+        // atomically under locks inside the confirmer.
+        $outcome = $this->orderConfirmer->confirm($order, $paymentIntent->status, $request->getLocale());
 
-        // Send confirmation email
-        $locale = $request->getLocale();
+        switch ($outcome) {
+            case OrderConfirmationOutcome::AlreadyCancelled:
+                return new JsonResponse(
+                    ['error' => $this->translator->trans('checkout.order_cancelled_restart')],
+                    Response::HTTP_CONFLICT,
+                );
 
-        try {
-            $this->orderMailer->sendOrderConfirmation($order, $locale);
-        } catch (\Exception $e) {
-            $this->logger->error('Order confirmation email failed: {message}', ['message' => $e->getMessage()]);
+            case OrderConfirmationOutcome::CancelledFullConflict:
+                $this->cartManager->clear();
+                $this->clearCheckoutSession($request);
+
+                return new JsonResponse(
+                    ['error' => $this->translator->trans('checkout.conflict_full_refund')],
+                    Response::HTTP_CONFLICT,
+                );
+
+            case OrderConfirmationOutcome::AlreadyProcessed:
+                $this->cartManager->clear();
+                $this->clearCheckoutSession($request);
+
+                return $this->confirmationRedirectResponse($order, $request->getLocale());
+
+            case OrderConfirmationOutcome::Confirmed:
+            case OrderConfirmationOutcome::ConfirmedPartialRefund:
+                $this->recordSessionPromotionUsage($order, $request);
+                $this->cartManager->clear();
+                $this->clearCheckoutSession($request);
+
+                return $this->confirmationRedirectResponse($order, $request->getLocale());
         }
+    }
 
-        try {
-            $this->orderMailer->sendNewOrderAdminNotification($order);
-        } catch (\Exception $e) {
-            $this->logger->error('Admin notification email failed: {message}', ['message' => $e->getMessage()]);
-        }
-
-        // Track promotion usage
+    /**
+     * Track promotion usage from the shares stored in session at checkout
+     * POST time (already clamped there). Session-bound, hence not part of
+     * OrderConfirmer — scheduler-confirmed orders skip usage tracking.
+     */
+    private function recordSessionPromotionUsage(Order $order, Request $request): void
+    {
         $sessionPromos = $request->getSession()->get('_order_promotions', []);
-        if (\is_array($sessionPromos) && $sessionPromos !== []) {
-            $promoRepo = $this->entityManager->getRepository(\App\Entity\Promotion::class);
-            $appliedPromotions = [];
-            foreach ($sessionPromos as $entry) {
-                $promo = $promoRepo->find($entry['id']);
-                if ($promo !== null) {
-                    $appliedPromotions[] = ['promotion' => $promo, 'discount' => (float) $entry['discount']];
-                }
-            }
-            if ($appliedPromotions !== []) {
-                $this->promotionEngine->recordUsage($order, $appliedPromotions);
+
+        if (!\is_array($sessionPromos) || $sessionPromos === []) {
+            return;
+        }
+
+        $promoRepo = $this->entityManager->getRepository(\App\Entity\Promotion::class);
+        $appliedPromotions = [];
+
+        foreach ($sessionPromos as $entry) {
+            $promo = $promoRepo->find($entry['id']);
+            if ($promo !== null) {
+                $appliedPromotions[] = ['promotion' => $promo, 'discount' => (float) $entry['discount']];
             }
         }
 
-        // Release reservations for purchased products
-        foreach ($order->getItems() as $item) {
-            $product = $item->getProduct();
-            if ($product !== null) {
-                $this->reservationManager->release($product);
-            }
+        if ($appliedPromotions !== []) {
+            $this->promotionEngine->recordUsage($order, $appliedPromotions);
         }
+    }
 
-        // Clear cart and checkout session data
-        $this->cartManager->clear();
-        $request->getSession()->remove('_pending_order');
-        $request->getSession()->remove('_checkout_email');
-        $request->getSession()->remove('_order_promotions');
-        $request->getSession()->remove('_promo_code');
+    private function confirmationRedirectResponse(Order $order, string $locale): JsonResponse
+    {
         $confirmationRoute = $locale === 'fr' ? 'shop_order_confirmation_fr' : 'shop_order_confirmation';
 
         return new JsonResponse([
@@ -458,27 +565,119 @@ class CheckoutController extends AbstractController
             'redirectUrl' => $this->generateUrl($confirmationRoute, [
                 '_locale' => $locale,
                 'reference' => $order->getReference(),
+                'token' => $order->getInvoiceToken(),
             ]),
         ]);
     }
 
+    private function clearCheckoutSession(Request $request): void
+    {
+        $request->getSession()->remove('_pending_order');
+        $request->getSession()->remove('_checkout_email');
+        $request->getSession()->remove('_order_promotions');
+        $request->getSession()->remove('_promo_code');
+    }
+
+    /**
+     * Whether every item of the order is still purchasable: product present,
+     * not sold, and not reserved by another session.
+     */
+    private function orderItemsStillAvailable(Order $order): bool
+    {
+        foreach ($order->getItems() as $item) {
+            $product = $item->getProduct();
+
+            if ($product === null || $product->isSoldOut() || $this->reservationManager->isReservedByOther($product)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * A pending order is stale when the cart content or the applied coupon
+     * changed since the checkout POST that built it.
+     */
+    private function isOrderStale(Order $order, Request $request): bool
+    {
+        $cartIds = $this->cartManager->getProductIds();
+        \sort($cartIds);
+
+        $orderIds = [];
+        foreach ($order->getItems() as $item) {
+            $orderIds[] = $item->getProduct()?->getId();
+        }
+        \sort($orderIds);
+
+        if ($cartIds !== $orderIds) {
+            return true;
+        }
+
+        $sessionCode = \strtoupper(\trim((string) $request->getSession()->get('_promo_code', '')));
+
+        return $sessionCode !== ($order->getPromotionCode() ?? '');
+    }
+
+    /**
+     * Free orders are not supported: the discount is capped so the amount to
+     * charge never drops below Stripe's minimum.
+     */
+    private function clampDiscount(float $discountEur, float $chargeableBaseEur): float
+    {
+        return \max(0.0, \min($discountEur, $chargeableBaseEur - StripeService::MINIMUM_CHARGE_EUR));
+    }
+
+    /**
+     * Scale each promotion's recorded discount so the shares add up to the
+     * clamped total (the last share absorbs rounding): these shares feed the
+     * PDF invoice lines and PromotionUsage, which must match what is charged.
+     *
+     * @param list<array{promotion: \App\Entity\Promotion, discount: float}> $promotions
+     *
+     * @return list<array{promotion: \App\Entity\Promotion, discount: float}>
+     */
+    private function scalePromotionShares(array $promotions, float $rawTotal, float $clampedTotal): array
+    {
+        if ($promotions === [] || $rawTotal <= 0.0 || $rawTotal === $clampedTotal) {
+            return $promotions;
+        }
+
+        $factor = $clampedTotal / $rawTotal;
+        $shares = [];
+        $allocated = 0.0;
+        $lastIndex = \count($promotions) - 1;
+
+        foreach ($promotions as $index => $entry) {
+            $share = $index === $lastIndex
+                ? \round($clampedTotal - $allocated, 2)
+                : \round((float) $entry['discount'] * $factor, 2);
+            $allocated += $share;
+            $shares[] = ['promotion' => $entry['promotion'], 'discount' => $share];
+        }
+
+        return $shares;
+    }
+
     #[Route(
-        path: '/order/{reference}/confirmation',
+        path: '/order/{reference}/confirmation/{token}',
         name: 'shop_order_confirmation',
         methods: ['GET'],
         requirements: ['_locale' => 'en'],
     )]
     #[Route(
-        path: '/commande/{reference}/confirmation',
+        path: '/commande/{reference}/confirmation/{token}',
         name: 'shop_order_confirmation_fr',
         methods: ['GET'],
         requirements: ['_locale' => 'fr'],
     )]
-    public function confirmation(string $reference, Request $request): Response
+    public function confirmation(string $reference, string $token, Request $request): Response
     {
         $order = $this->orderRepository->findByReference($reference);
 
-        if ($order === null) {
+        // References are sequential, hence guessable: the invoice token is
+        // required so order details never leak through enumeration.
+        if ($order === null || !\hash_equals($order->getInvoiceToken(), $token)) {
             throw $this->createNotFoundException();
         }
 
@@ -492,22 +691,23 @@ class CheckoutController extends AbstractController
     }
 
     #[Route(
-        path: '/order/{reference}/tracking',
+        path: '/order/{reference}/tracking/{token}',
         name: 'shop_order_tracking',
         methods: ['GET'],
         requirements: ['_locale' => 'en'],
     )]
     #[Route(
-        path: '/commande/{reference}/suivi',
+        path: '/commande/{reference}/suivi/{token}',
         name: 'shop_order_tracking_fr',
         methods: ['GET'],
         requirements: ['_locale' => 'fr'],
     )]
-    public function tracking(string $reference, Request $request): Response
+    public function tracking(string $reference, string $token, Request $request): Response
     {
         $order = $this->orderRepository->findByReference($reference);
 
-        if ($order === null) {
+        // Same enumeration guard as confirmation().
+        if ($order === null || !\hash_equals($order->getInvoiceToken(), $token)) {
             throw $this->createNotFoundException();
         }
 
@@ -525,8 +725,15 @@ class CheckoutController extends AbstractController
         name: 'shop_checkout_email_check',
         methods: ['POST'],
     )]
-    public function emailCheck(Request $request, CustomerRepository $customerRepository): JsonResponse
+    public function emailCheck(Request $request, CustomerRepository $customerRepository, RateLimiterFactoryInterface $emailCheckLimiter): JsonResponse
     {
+        // Guessable yes/no answers: throttle account enumeration by IP.
+        $limiter = $emailCheckLimiter->create($request->getClientIp() ?? 'anonymous');
+
+        if (!$limiter->consume()->isAccepted()) {
+            return new JsonResponse(['exists' => false], Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
         $email = \trim((string) $request->getPayload()->get('email', ''));
 
         if ($email === '' || \filter_var($email, \FILTER_VALIDATE_EMAIL) === false) {
@@ -598,7 +805,7 @@ class CheckoutController extends AbstractController
                 $errors['billing_postal_code'] = 'checkout.error.billing_postal_code_required';
             }
 
-            if ($billingCountry === '' || \strlen($billingCountry) !== 2) {
+            if ($billingCountry === '' || !Countries::exists($billingCountry)) {
                 $errors['billing_country'] = 'checkout.error.billing_country_required';
             }
         }
@@ -703,8 +910,20 @@ class CheckoutController extends AbstractController
             $order->addItem($item);
         }
 
-        // Reset Stripe PaymentIntent if total changed (new PI will be created at payment step)
+        // Reset Stripe PaymentIntent if total changed (new PI will be created
+        // at payment step). Cancel the obsolete intent at Stripe first: its
+        // client_secret would stay payable in an open tab, capturing money
+        // that no order references any more.
         if ($oldTotal !== $subtotalEur && $order->getStripePaymentIntentId() !== null) {
+            try {
+                $this->stripeService->cancelPaymentIntent($order->getStripePaymentIntentId());
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to cancel obsolete PaymentIntent for order {ref} — check it in the Stripe dashboard: {message}', [
+                    'ref' => $order->getReference(),
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
             $order->setStripePaymentIntentId(null);
         }
 
@@ -716,8 +935,8 @@ class CheckoutController extends AbstractController
      */
     private function createOrder(Request $request, array $products, float $subtotalEur): Order
     {
+        // The reference is assigned at flush time, under lock (see checkout()).
         $order = new Order();
-        $order->setReference($this->orderRepository->nextOrderReference((int) \date('Y')));
         $this->fillOrderFromRequest($order, $request);
         $order->setTotalEur($subtotalEur);
 
@@ -835,7 +1054,8 @@ class CheckoutController extends AbstractController
      * Included zone: the 27 EU member states, the United Kingdom and
      * Switzerland — shipping is baked into display prices for these
      * destinations. Everything ships from France; metropolitan France only —
-     * DOM-TOM postal codes (97x/98x) are rejected in validateCheckoutForm().
+     * a DOM-TOM postal code (97x/98x) under the FR country code is treated as
+     * out of the zone by computeShippingSurchargeEur() and pays the surcharge.
      */
     private const INCLUDED_ZONE_COUNTRY_CODES = [
         'AT', 'BE', 'BG', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'ES',

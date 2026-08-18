@@ -11,6 +11,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: PromotionRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -110,6 +112,24 @@ class Promotion
     public function onPreUpdate(): void
     {
         $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    #[Assert\Callback]
+    public function validateDiscountValue(ExecutionContextInterface $context): void
+    {
+        if ($this->getDiscountValue() <= 0) {
+            $context->buildViolation('La valeur de remise doit être supérieure à 0.')
+                ->atPath('discountValue')
+                ->addViolation();
+
+            return;
+        }
+
+        if ($this->discountType === DiscountType::Percentage && $this->getDiscountValue() > 100) {
+            $context->buildViolation('Un pourcentage de remise ne peut pas dépasser 100 %.')
+                ->atPath('discountValue')
+                ->addViolation();
+        }
     }
 
     public function getId(): ?int

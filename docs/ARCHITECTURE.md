@@ -104,7 +104,29 @@ docs/design/screenshots/   base44 prototype — the visual reference for the sto
   only at payment confirmation — French law requires invoice numbers sequential and
   gap-free (art. 242 nonies A du CGI), and abandoned orders would create gaps. Both are
   generated per-year in `OrderRepository`; a failed checkout must never consume an
-  invoice number.
+  invoice number. Both generators are max+1 reads guarded twice: a DB `lock: true`
+  read inside `wrapInTransaction` AND a process-level `LockFactory` flock — the DB
+  gap locks alone do not conflict on an empty prefix (the year's first number), so
+  dropping the flock reintroduces the duplicate race at every January rollover.
+- **`OrderConfirmer` is the only way an order becomes paid.** Both callers (the
+  `/payment/confirm` endpoint and the scheduler) delegate to it; inside ONE
+  transaction under pessimistic locks it re-reads the order status (idempotence — an
+  unlocked check-then-act let scheduler and controller both finalize: burned invoice
+  number, duplicate emails, even a wrongful full refund), re-reads the product rows
+  (double-sale detection), assigns the invoice number and flips the sold flags. A
+  unique-piece conflict is persisted BEFORE the Stripe refund call, which carries an
+  idempotency key: a crash between commit and refund can strand a `refund_pending`
+  order for the admin, never refund twice. Conflict refunds are proportional to what
+  was actually paid (order-level coupon included) — raw line totals over-refund.
+- **A cancelled order always gets its PaymentIntent cancelled at Stripe too**
+  (scheduler and manual admin cancellation, which asks Stripe for the intent's real
+  status — `paidAt` only proves a completed confirmation flow). An open client_secret
+  on a cancelled or superseded order is money captured that nothing will ever fulfil;
+  the same reasoning cancels the old intent when checkout resets it on a total change.
+- **Free orders are not supported — validated decision.** Stripe rejects intents under
+  0,50 €, so the checkout clamps promotion discounts to keep the total chargeable, and
+  entity validation refuses >100 % promotions and published 0 € products. Supporting a
+  100 %-coupon flow means reopening the decision, not relaxing the clamp.
 - **A pending order is reused, not duplicated**: the session's `_pending_order` is
   updated as long as its status is `Pending`. `AbandonedOrderCleaner` (scheduler) is
   what makes this safe — stale pending orders are cleaned and their reservations
@@ -115,7 +137,8 @@ docs/design/screenshots/   base44 prototype — the visual reference for the sto
   confirmation mail failed is still a paid order.
 - **Invoices are token-gated, not auth-gated** (`invoiceToken` UUID on Order): guests
   have no account, yet must reach their invoice from the delivered email. The same
-  reasoning gates the testimonial form and the tracking page.
+  token gates the confirmation and tracking pages — order references are sequential,
+  hence enumerable, and those pages show the customer's email and address.
 
 ## Reservation system (anti-double-sell)
 
@@ -123,7 +146,9 @@ The cross-file invariant that makes "pièce unique" safe under concurrency:
 
 - One `Reservation` per product (OneToOne, unique constraint), keyed by PHP session id,
   15 minutes, created for the whole cart when a visitor **enters checkout**
-  (identification step).
+  (identification step). Creation goes through `ReservationRepository::tryInsert()`
+  (raw `INSERT IGNORE`) so the unique constraint arbitrates concurrent checkouts —
+  a persist+flush path would 500 on the loser instead of telling it "reserved".
 - `CartManager` is reservation-aware on **both** paths: `add()` rejects products
   reserved by another session, and `getProducts()` filters them out and syncs the cart
   — a stale cart must not resurrect a reserved product at checkout.

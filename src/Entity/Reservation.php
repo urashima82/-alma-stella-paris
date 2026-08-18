@@ -40,6 +40,13 @@ class Reservation
         $this->createdAt = new \DateTimeImmutable();
     }
 
+    /**
+     * In-memory factory, currently without callers: production code inserts
+     * reservations atomically via ReservationRepository::tryInsert() (the
+     * unique constraint on product arbitrates concurrent checkouts) and this
+     * entity is otherwise only hydrated by Doctrine. Kept so the properties
+     * have a legitimate writer; never use it on a production insert path.
+     */
     public static function create(Product $product, string $sessionId, int $durationMinutes = self::DEFAULT_DURATION_MINUTES): self
     {
         $reservation = new self();

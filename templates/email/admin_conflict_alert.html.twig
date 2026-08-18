@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conflit pièce unique</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #FAF8F4; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2C2418;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAF8F4;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
+
+                    {# Header #}
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px; border-bottom: 1px solid #C9A84C;">
+                            <h1 style="margin: 0; font-family: 'Georgia', 'Times New Roman', serif; font-size: 28px; font-weight: 300; color: #2C2418; letter-spacing: 2px;">
+                                ALMA STELLA PARIS
+                            </h1>
+                        </td>
+                    </tr>
+
+                    {# Star + Heading #}
+                    <tr>
+                        <td align="center" style="padding: 40px 0 10px;">
+                            <p style="margin: 0; font-size: 36px; color: #C9A84C;">&#9888;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding-bottom: 8px;">
+                            <h2 style="margin: 0; font-family: 'Georgia', 'Times New Roman', serif; font-size: 24px; font-weight: 300; color: #2C2418;">
+                                Conflit pièce unique détecté
+                            </h2>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <p style="margin: 0; font-size: 14px; color: #8C8070;">
+                                Un conflit de pièce unique a été détecté sur la commande {{ order.reference }} :
+                                un client a payé un ou plusieurs articles déjà vendus à un autre client.
+                            </p>
+                        </td>
+                    </tr>
+
+                    {% if stripeError is not null %}
+                        {# Stripe failure alert #}
+                        <tr>
+                            <td style="padding: 20px; background-color: #FEF2F2; border: 1px solid #DC2626; margin-bottom: 20px;">
+                                <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #DC2626;">
+                                    Le remboursement automatique via Stripe a ÉCHOUÉ — action manuelle requise
+                                </p>
+                                <p style="margin: 0 0 8px; font-size: 13px; color: #2C2418; line-height: 1.6;">
+                                    Erreur Stripe : {{ stripeError }}
+                                </p>
+                                <p style="margin: 0; font-size: 13px; color: #2C2418; line-height: 1.6;">
+                                    Le client n'a pas été remboursé automatiquement. Effectuez le remboursement
+                                    manuellement depuis le dashboard Stripe dans les plus brefs délais.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr><td style="height: 20px; line-height: 20px; font-size: 0;">&nbsp;</td></tr>
+                    {% endif %}
+
+                    {# Customer info #}
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <h3 style="margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #2C2418;">
+                                Client
+                            </h3>
+                            <p style="margin: 0; font-size: 13px; color: #2C2418; line-height: 1.6;">
+                                {{ order.customerName }}<br>
+                                <a href="mailto:{{ order.customerEmail }}" style="color: #C9A84C;">{{ order.customerEmail }}</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    {# Conflict summary box #}
+                    <tr>
+                        <td style="padding: 0 0 20px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #F0EBE1; border: 1px solid #E8DDD0;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="font-size: 13px; color: #8C8070; padding-bottom: 12px;">
+                                                    Référence
+                                                </td>
+                                                <td align="right" style="font-size: 13px; font-weight: 600; color: #2C2418; padding-bottom: 12px;">
+                                                    {{ order.reference }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="font-size: 13px; color: #8C8070; padding-bottom: 12px;">
+                                                    Résolution
+                                                </td>
+                                                <td align="right" style="font-size: 13px; color: #2C2418; padding-bottom: 12px;">
+                                                    {% if orderCancelled %}
+                                                        Commande entièrement annulée
+                                                    {% else %}
+                                                        Remboursement partiel, reste de la commande maintenu
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" style="border-top: 1px solid #E8DDD0; padding-top: 12px;"></td>
+                                            </tr>
+                                        </table>
+
+                                        {# Conflicting items #}
+                                        {% for itemName in refundedItemNames %}
+                                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: {{ loop.last ? '0' : '10px' }};">
+                                                <tr>
+                                                    <td style="font-size: 14px; color: #2C2418; font-family: 'Georgia', 'Times New Roman', serif;">
+                                                        {{ itemName }}
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        {% endfor %}
+
+                                        {# Refunded amount #}
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 15px; border-top: 1px solid #E8DDD0; padding-top: 15px;">
+                                            <tr>
+                                                <td style="font-size: 15px; font-weight: 600; color: #2C2418;">
+                                                    {% if stripeError is not null %}
+                                                        Montant à rembourser manuellement
+                                                    {% else %}
+                                                        Montant remboursé
+                                                    {% endif %}
+                                                </td>
+                                                <td align="right" style="font-size: 18px; font-weight: 600; color: #2C2418;">
+                                                    €{{ '%.2f'|format(refundedAmountEur) }}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    {# CTA button #}
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <a href="{{ adminUrl }}" style="display: inline-block; padding: 14px 32px; background-color: #C9A84C; color: #FFFFFF; text-decoration: none; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; border-radius: 4px;">
+                                Voir la commande dans l'admin
+                            </a>
+                        </td>
+                    </tr>
+
+                    {# Footer #}
+                    <tr>
+                        <td align="center" style="padding: 30px 0 0; border-top: 1px solid #E8DDD0;">
+                            <p style="margin: 0 0 8px; font-size: 12px; color: #8C8070;">
+                                Cet email est envoyé automatiquement aux administrateurs d'Alma Stella Paris.
+                            </p>
+                            <p style="margin: 0; font-family: 'Georgia', 'Times New Roman', serif; font-size: 14px; color: #C9A84C; letter-spacing: 1px;">
+                                ALMA STELLA PARIS
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

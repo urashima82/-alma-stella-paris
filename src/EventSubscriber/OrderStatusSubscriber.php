@@ -7,6 +7,7 @@ namespace App\EventSubscriber;
 use App\Entity\Order;
 use App\Enum\OrderStatus;
 use App\Service\OrderMailer;
+use App\Service\StripeService;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use Psr\Log\LoggerInterface;
@@ -17,6 +18,7 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private readonly OrderMailer $orderMailer,
+        private readonly StripeService $stripeService,
         private readonly EntityManagerInterface $entityManager,
         private readonly LoggerInterface $logger,
         private readonly RequestStack $requestStack,
@@ -77,7 +79,60 @@ final class OrderStatusSubscriber implements EventSubscriberInterface
         }
 
         if ($newStatus === OrderStatus::Cancelled) {
+            $this->cancelPaymentIntent($entity);
             $this->sendNotification($entity, 'cancelled');
+        }
+    }
+
+    /**
+     * A cancelled order must not stay payable: its client_secret would still
+     * accept a charge that no verification pass will ever pick up again.
+     * The intent's REAL status is asked to Stripe — paidAt only proves a
+     * completed confirmation flow, and a Pending order whose 3DS payment
+     * succeeded minutes ago still has paidAt = null: cancelling it must warn
+     * about the captured money, not silently strand it.
+     */
+    private function cancelPaymentIntent(Order $order): void
+    {
+        $paymentIntentId = $order->getStripePaymentIntentId();
+
+        if ($paymentIntentId === null) {
+            return;
+        }
+
+        try {
+            $paymentIntent = $this->stripeService->retrievePaymentIntent($paymentIntentId);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to retrieve PaymentIntent for order {reference}: {error}', [
+                'reference' => $order->getReference(),
+                'error' => $e->getMessage(),
+            ]);
+            $this->addFlash('warning', 'Impossible de vérifier le paiement Stripe : contrôlez-le dans le dashboard Stripe.');
+
+            return;
+        }
+
+        if ($paymentIntent->status === 'succeeded') {
+            $this->addFlash('warning', 'Le paiement de cette commande a déjà été capturé par Stripe : effectuez le remboursement depuis le dashboard Stripe.');
+
+            return;
+        }
+
+        if ($paymentIntent->status === 'canceled') {
+            return;
+        }
+
+        try {
+            $this->stripeService->cancelPaymentIntent($paymentIntentId);
+            $this->logger->info('PaymentIntent cancelled at Stripe for order {reference}.', [
+                'reference' => $order->getReference(),
+            ]);
+        } catch (\Throwable $e) {
+            $this->logger->error('Failed to cancel PaymentIntent for order {reference}: {error}', [
+                'reference' => $order->getReference(),
+                'error' => $e->getMessage(),
+            ]);
+            $this->addFlash('warning', 'Le paiement Stripe n\'a pas pu être annulé automatiquement : vérifiez-le dans le dashboard Stripe.');
         }
     }
 

@@ -17,6 +17,15 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\HasLifecycleCallbacks]
 class Order
 {
+    /**
+     * Values of stripePaymentStatus beyond Stripe's own intent statuses,
+     * written by the conflict-refund flow (OrderConfirmer).
+     */
+    public const string PAYMENT_STATUS_REFUND_PENDING = 'refund_pending';
+    public const string PAYMENT_STATUS_REFUNDED = 'refunded';
+    public const string PAYMENT_STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
+    public const string PAYMENT_STATUS_REFUND_FAILED = 'refund_failed';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

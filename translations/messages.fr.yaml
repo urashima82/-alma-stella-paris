@@ -247,6 +247,10 @@ checkout:
     pay_now: "Payer %amount%"
     back_to_checkout: "Retour à la livraison"
     payment_error: "Une erreur est survenue lors de la préparation de votre paiement. Veuillez réessayer."
+    order_cancelled_restart: "Votre commande a été annulée faute de paiement. Veuillez recommencer votre commande."
+    items_unavailable: "Un article de votre commande n'est plus disponible. Votre panier a été mis à jour."
+    order_needs_refresh: "Votre panier ou votre code promo a changé : veuillez confirmer à nouveau vos informations de livraison."
+    conflict_full_refund: "Cette pièce unique vient malheureusement d'être vendue. Votre paiement a été intégralement remboursé — vous recevrez un e-mail de confirmation."
     error:
         name_required: "Veuillez entrer votre nom."
         email_invalid: "Veuillez entrer une adresse e-mail valide."

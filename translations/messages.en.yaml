@@ -247,6 +247,10 @@ checkout:
     pay_now: "Pay %amount%"
     back_to_checkout: "Back to shipping"
     payment_error: "An error occurred while preparing your payment. Please try again."
+    order_cancelled_restart: "Your order was cancelled because the payment was not completed. Please start your order again."
+    items_unavailable: "An item in your order is no longer available. Your cart has been updated."
+    order_needs_refresh: "Your cart or promo code has changed: please confirm your shipping details again."
+    conflict_full_refund: "Unfortunately this unique piece has just been sold. Your payment has been fully refunded — you will receive a confirmation email."
     error:
         name_required: "Please enter your name."
         email_invalid: "Please enter a valid email address."

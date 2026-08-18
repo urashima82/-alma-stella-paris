@@ -17,6 +17,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
@@ -155,6 +156,16 @@ class Product
     public function onPreUpdate(): void
     {
         $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    #[Assert\Callback]
+    public function validatePublishedPrice(ExecutionContextInterface $context): void
+    {
+        if ($this->isPublished && $this->getBasePrice() <= 0) {
+            $context->buildViolation('Un produit publié doit avoir un prix supérieur à 0 €.')
+                ->atPath('basePrice')
+                ->addViolation();
+        }
     }
 
     public function getId(): ?int

@@ -122,7 +122,7 @@ class PromotionEngine
         }
 
         if ($product->getCompareAtPrice() !== null) {
-            return $product->getCompareAtPrice() + $product->getShippingTier()->shippingCostEur();
+            return $product->getCompareAtPrice() + $this->shippingCostProvider->getCost($product->getShippingTier());
         }
 
         return null;

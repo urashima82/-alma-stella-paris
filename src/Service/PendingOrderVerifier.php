@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Enum\OrderConfirmationOutcome;
 use App\Enum\OrderStatus;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,7 +15,7 @@ final class PendingOrderVerifier
     public function __construct(
         private readonly OrderRepository $orderRepository,
         private readonly StripeService $stripeService,
-        private readonly OrderMailer $orderMailer,
+        private readonly OrderConfirmer $orderConfirmer,
         private readonly EntityManagerInterface $entityManager,
         private readonly LoggerInterface $logger,
     ) {
@@ -47,42 +48,44 @@ final class PendingOrderVerifier
             $order->setStripePaymentStatus($paymentIntent->status);
 
             if ($paymentIntent->status === 'succeeded') {
-                $order->setStatus(OrderStatus::Processing);
-                $order->setPaidAt(new \DateTimeImmutable());
-                $order->setInvoiceNumber($this->orderRepository->nextInvoiceNumber((int) \date('Y')));
+                // Same confirmation path as the payment endpoint: idempotence,
+                // unique-piece conflict refunds, invoice numbering and emails
+                // (in the customer's locale) all live in OrderConfirmer.
+                $outcome = $this->orderConfirmer->confirm($order, $paymentIntent->status, $order->getCustomerLocale() ?? 'en');
 
-                foreach ($order->getItems() as $item) {
-                    $product = $item->getProduct();
-                    if ($product !== null && !$product->isSoldOut()) {
-                        $product->setIsSoldOut(true);
-                    }
-                }
-
-                $this->entityManager->flush();
-
-                try {
-                    $this->orderMailer->sendOrderConfirmation($order);
-                } catch (\Exception $e) {
-                    $this->logger->error('Confirmation email failed for order {ref}: {message}', [
+                if ($outcome === OrderConfirmationOutcome::CancelledFullConflict) {
+                    $this->logger->warning('Order {ref} refunded and cancelled via scheduler (unique-piece conflict).', [
                         'ref' => $order->getReference(),
-                        'message' => $e->getMessage(),
                     ]);
+                    ++$result['cancelled'];
+                } elseif ($outcome === OrderConfirmationOutcome::Confirmed || $outcome === OrderConfirmationOutcome::ConfirmedPartialRefund) {
+                    $this->logger->info('Order {ref} confirmed via scheduler.', ['ref' => $order->getReference()]);
+                    ++$result['confirmed'];
+                } else {
+                    ++$result['skipped'];
                 }
-
-                try {
-                    $this->orderMailer->sendNewOrderAdminNotification($order);
-                } catch (\Exception $e) {
-                    $this->logger->error('Admin notification failed for order {ref}: {message}', [
-                        'ref' => $order->getReference(),
-                        'message' => $e->getMessage(),
-                    ]);
-                }
-
-                $this->logger->info('Order {ref} confirmed via scheduler.', ['ref' => $order->getReference()]);
-                ++$result['confirmed'];
             } elseif (\in_array($paymentIntent->status, ['canceled', 'requires_payment_method'], true)) {
                 $age = $order->getCreatedAt()->diff(new \DateTimeImmutable());
                 if ($age->h >= 1 || $age->days > 0) {
+                    // Cancel the PaymentIntent at Stripe first: a still-open
+                    // client_secret would let the customer pay a cancelled
+                    // order that no verification pass will ever look at again.
+                    if ($paymentIntent->status !== 'canceled') {
+                        try {
+                            $this->stripeService->cancelPaymentIntent((string) $order->getStripePaymentIntentId());
+                        } catch (\Exception $e) {
+                            // Leave the order Pending: the next run re-evaluates
+                            // it (the intent may just have succeeded).
+                            $this->logger->error('Failed to cancel PaymentIntent for order {ref}: {message}', [
+                                'ref' => $order->getReference(),
+                                'message' => $e->getMessage(),
+                            ]);
+                            ++$result['skipped'];
+
+                            continue;
+                        }
+                    }
+
                     $order->setStatus(OrderStatus::Cancelled);
                     $this->entityManager->flush();
 

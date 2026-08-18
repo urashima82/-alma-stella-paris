@@ -3,8 +3,8 @@
 {% block title %}{{ 'tracking.title'|trans({'%reference%': order.reference}) }}{% endblock %}
 
 {% block hreflang %}
-    <link rel="alternate" hreflang="en" href="{{ url('shop_order_tracking', {'reference': order.reference, '_locale': 'en'}) }}">
-    <link rel="alternate" hreflang="fr" href="{{ url('shop_order_tracking_fr', {'reference': order.reference, '_locale': 'fr'}) }}">
+    <link rel="alternate" hreflang="en" href="{{ url('shop_order_tracking', {'reference': order.reference, 'token': order.invoiceToken, '_locale': 'en'}) }}">
+    <link rel="alternate" hreflang="fr" href="{{ url('shop_order_tracking_fr', {'reference': order.reference, 'token': order.invoiceToken, '_locale': 'fr'}) }}">
 {% endblock %}
 
 {% block body %}

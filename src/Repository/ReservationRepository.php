@@ -19,6 +19,28 @@ class ReservationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reservation::class);
     }
 
+    /**
+     * Atomically insert a reservation, yielding to any concurrent winner:
+     * INSERT IGNORE lets the unique constraint on product_id arbitrate the
+     * race instead of surfacing it as an exception. Returns false when
+     * another session inserted first.
+     */
+    public function tryInsert(Product $product, string $sessionId, \DateTimeImmutable $expiresAt): bool
+    {
+        $affected = $this->getEntityManager()->getConnection()->executeStatement(
+            'INSERT IGNORE INTO reservation (product_id, session_id, expires_at, created_at, extension_count)
+             VALUES (:productId, :sessionId, :expiresAt, :createdAt, 0)',
+            [
+                'productId' => $product->getId(),
+                'sessionId' => $sessionId,
+                'expiresAt' => $expiresAt->format('Y-m-d H:i:s'),
+                'createdAt' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
+            ],
+        );
+
+        return $affected === 1;
+    }
+
     public function findActiveByProduct(Product $product): ?Reservation
     {
         return $this->createQueryBuilder('r')

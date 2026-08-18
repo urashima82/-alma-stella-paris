@@ -124,9 +124,9 @@
                             </a>
                             {% set locale = order.customerLocale ?? 'en' %}
                             {% if locale == 'fr' %}
-                                {% set tracking_path = path('shop_order_tracking_fr', {reference: order.reference, _locale: 'fr'}) %}
+                                {% set tracking_path = path('shop_order_tracking_fr', {reference: order.reference, token: order.invoiceToken, _locale: 'fr'}) %}
                             {% else %}
-                                {% set tracking_path = path('shop_order_tracking', {reference: order.reference, _locale: 'en'}) %}
+                                {% set tracking_path = path('shop_order_tracking', {reference: order.reference, token: order.invoiceToken, _locale: 'en'}) %}
                             {% endif %}
                             <a href="{{ tracking_path }}" target="_blank" rel="noopener" style="color: #C9A84C;">
                                 <i class="fa fa-link me-1"></i>Page suivi client

@@ -3,8 +3,8 @@
 {% block title %}{{ 'confirmation.title'|trans }}{% endblock %}
 
 {% block hreflang %}
-    <link rel="alternate" hreflang="en" href="{{ url('shop_order_confirmation', {'reference': order.reference, '_locale': 'en'}) }}">
-    <link rel="alternate" hreflang="fr" href="{{ url('shop_order_confirmation_fr', {'reference': order.reference, '_locale': 'fr'}) }}">
+    <link rel="alternate" hreflang="en" href="{{ url('shop_order_confirmation', {'reference': order.reference, 'token': order.invoiceToken, '_locale': 'en'}) }}">
+    <link rel="alternate" hreflang="fr" href="{{ url('shop_order_confirmation_fr', {'reference': order.reference, 'token': order.invoiceToken, '_locale': 'fr'}) }}">
 {% endblock %}
 
 {% block body %}

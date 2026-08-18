@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if locale == 'fr' %}{% if orderCancelled %}Commande annulée et remboursée{% else %}Remboursement partiel{% endif %}{% else %}{% if orderCancelled %}Order cancelled and refunded{% else %}Partial refund{% endif %}{% endif %}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #FAF8F4; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2C2418;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #FAF8F4;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
+
+                    {# Header #}
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px; border-bottom: 1px solid #C9A84C;">
+                            <h1 style="margin: 0; font-family: 'Georgia', 'Times New Roman', serif; font-size: 28px; font-weight: 300; color: #2C2418; letter-spacing: 2px;">
+                                ALMA STELLA PARIS
+                            </h1>
+                        </td>
+                    </tr>
+
+                    {# Star + Heading #}
+                    <tr>
+                        <td align="center" style="padding: 40px 0 10px;">
+                            <p style="margin: 0; font-size: 36px; color: #C9A84C;">&#10022;</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding-bottom: 8px;">
+                            <h2 style="margin: 0; font-family: 'Georgia', 'Times New Roman', serif; font-size: 24px; font-weight: 300; color: #2C2418;">
+                                {% if locale == 'fr' %}
+                                    {% if orderCancelled %}
+                                        Commande annulée et remboursée
+                                    {% else %}
+                                        Remboursement partiel
+                                    {% endif %}
+                                {% else %}
+                                    {% if orderCancelled %}
+                                        Order cancelled and refunded
+                                    {% else %}
+                                        Partial refund
+                                    {% endif %}
+                                {% endif %}
+                            </h2>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding-bottom: 30px;">
+                            <p style="margin: 0; font-size: 14px; color: #8C8070;">
+                                {% if locale == 'fr' %}
+                                    Concernant votre commande {{ order.reference }}.
+                                {% else %}
+                                    Regarding your order {{ order.reference }}.
+                                {% endif %}
+                            </p>
+                        </td>
+                    </tr>
+
+                    {# Explanation #}
+                    <tr>
+                        <td style="padding-bottom: 20px;">
+                            <p style="margin: 0; font-size: 14px; color: #2C2418; line-height: 1.6;">
+                                {% if locale == 'fr' %}
+                                    Chacun de nos bijoux est une pièce unique. Malheureusement, les articles ci-dessous
+                                    venaient tout juste d'être vendus à un autre client au moment de votre paiement
+                                    et ne sont plus disponibles. Nous sommes sincèrement désolés.
+                                {% else %}
+                                    Each of our jewelry pieces is one of a kind. Unfortunately, the items below had
+                                    just been sold to another customer at the time of your payment and are no longer
+                                    available. We are sincerely sorry.
+                                {% endif %}
+                            </p>
+                        </td>
+                    </tr>
+
+                    {# Refunded items box #}
+                    <tr>
+                        <td style="padding: 0 0 30px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: #F0EBE1; border: 1px solid #E8DDD0;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="font-size: 13px; color: #8C8070; padding-bottom: 12px;">
+                                                    {% if locale == 'fr' %}Articles remboursés{% else %}Refunded items{% endif %}
+                                                </td>
+                                                <td align="right" style="font-size: 13px; font-weight: 600; color: #2C2418; padding-bottom: 12px;">
+                                                    {{ order.reference }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" style="border-top: 1px solid #E8DDD0; padding-top: 12px;"></td>
+                                            </tr>
+                                        </table>
+
+                                        {# Items #}
+                                        {% for itemName in refundedItemNames %}
+                                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding-bottom: {{ loop.last ? '0' : '10px' }};">
+                                                <tr>
+                                                    <td style="font-size: 14px; color: #2C2418; font-family: 'Georgia', 'Times New Roman', serif;">
+                                                        {{ itemName }}
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        {% endfor %}
+
+                                        {# Refunded amount #}
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top: 15px; border-top: 1px solid #E8DDD0; padding-top: 15px;">
+                                            <tr>
+                                                <td style="font-size: 15px; font-weight: 600; color: #2C2418;">
+                                                    {% if locale == 'fr' %}Montant remboursé{% else %}Refunded amount{% endif %}
+                                                </td>
+                                                <td align="right" style="font-size: 18px; font-weight: 600; color: #2C2418;">
+                                                    €{{ '%.2f'|format(refundedAmountEur) }}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    {# Refund notice #}
+                    <tr>
+                        <td style="padding: 20px; background-color: #F0EBE1; border: 1px solid #E8DDD0; margin-bottom: 30px;">
+                            <p style="margin: 0; font-size: 13px; color: #2C2418; line-height: 1.6;">
+                                {% if locale == 'fr' %}
+                                    Un remboursement de €{{ '%.2f'|format(refundedAmountEur) }} a été émis sur votre
+                                    moyen de paiement. Il apparaîtra sous 5 à 10 jours ouvrés selon votre établissement bancaire.
+                                    {% if orderCancelled %}
+                                        Votre commande est intégralement annulée : aucun montant ne reste à votre charge.
+                                    {% else %}
+                                        Le reste de votre commande est bien confirmé et sera expédié dans les meilleurs délais.
+                                    {% endif %}
+                                {% else %}
+                                    A refund of €{{ '%.2f'|format(refundedAmountEur) }} has been issued to your
+                                    payment method. It will appear within 5–10 business days depending on your bank.
+                                    {% if orderCancelled %}
+                                        Your order has been cancelled in full: no amount remains charged to you.
+                                    {% else %}
+                                        The rest of your order is confirmed and will be shipped as soon as possible.
+                                    {% endif %}
+                                {% endif %}
+                            </p>
+                        </td>
+                    </tr>
+
+                    {# Footer #}
+                    <tr>
+                        <td align="center" style="padding: 40px 0 0; border-top: 1px solid #E8DDD0; margin-top: 30px;">
+                            <p style="margin: 0 0 8px; font-size: 12px; color: #8C8070;">
+                                {% if locale == 'fr' %}
+                                    Des questions ? Répondez à cet e-mail.
+                                {% else %}
+                                    Questions? Reply to this email.
+                                {% endif %}
+                            </p>
+                            <p style="margin: 0; font-family: 'Georgia', 'Times New Roman', serif; font-size: 14px; color: #C9A84C; letter-spacing: 1px;">
+                                ALMA STELLA PARIS
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
