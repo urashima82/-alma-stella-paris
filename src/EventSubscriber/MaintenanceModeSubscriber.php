@@ -36,8 +36,14 @@ class MaintenanceModeSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        // Always allow admin routes and profiler
-        if (\str_starts_with($path, '/admin') || \str_starts_with($path, '/_')) {
+        // Always allow admin routes and profiler. /storage must follow: product
+        // images are served by a Symfony route, not as static files, so without
+        // this the back office renders with every image replaced by the 503
+        // maintenance page — including the AI visuals under review.
+        if (\str_starts_with($path, '/admin')
+            || \str_starts_with($path, '/_')
+            || \str_starts_with($path, '/storage')
+        ) {
             return;
         }
 
