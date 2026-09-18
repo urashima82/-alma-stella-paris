@@ -7,6 +7,7 @@ namespace App\Service\Content;
 use App\Entity\Product;
 use App\Entity\ProductCategory;
 use App\Entity\Stone;
+use App\Repository\ProductRepository;
 
 /**
  * Builds the multimodal prompt sent to Gemini for AI content filling.
@@ -25,6 +26,7 @@ final class ContentPromptBuilder
     public function __construct(
         private readonly ContentBrandVoiceProvider $brandVoice,
         private readonly ContentFewShotProvider $fewShot,
+        private readonly ProductRepository $productRepository,
     ) {
     }
 
@@ -40,6 +42,11 @@ final class ContentPromptBuilder
             "FEW-SHOT EXAMPLES (output style only — do not copy content):\n\n".$this->fewShot->renderForPrompt(),
             $this->renderDynamicContext($category, $stones->toArray()),
         ];
+
+        $takenNames = $this->renderTakenNames($category, $product->getId());
+        if ($takenNames !== null) {
+            $sections[] = $takenNames;
+        }
 
         if ($additionalContext !== null && \trim($additionalContext) !== '') {
             $sections[] = "ADDITIONAL STEERING (mandatory): {$additionalContext}";
@@ -63,11 +70,11 @@ final class ContentPromptBuilder
             'properties' => [
                 'nameFr' => [
                     'type' => 'STRING',
-                    'description' => 'Product name in French (2 to 4 words, evocative).',
+                    'description' => 'Product name in French: piece type then proper name, e.g. "Jonc Marina".',
                 ],
                 'nameEn' => [
                     'type' => 'STRING',
-                    'description' => 'Product name in English (2 to 4 words, same register as nameFr).',
+                    'description' => 'Product name in English: proper name then piece type, e.g. "Marina Bangle". Same proper name as nameFr.',
                 ],
                 'descriptionFr' => [
                     'type' => 'STRING',
@@ -116,6 +123,45 @@ final class ContentPromptBuilder
         }
 
         return "FALLBACK INSTRUCTIONS:\n- ".\implode("\n- ", $instructions);
+    }
+
+    /**
+     * Names already worn in this category family, so the model can steer clear.
+     *
+     * This is what actually keeps names apart. The old "[colour] [material]
+     * [motif]" scheme had a finite vocabulary and saturated — 25 black sleeper
+     * earrings left only the motif word to tell them apart — whereas a proper
+     * name plus this list leaves the model somewhere to go.
+     *
+     * The constraint is on the whole name, never on the proper name alone: since
+     * the sub-category word is part of the name, "Bracelet Jonc Elsa" and
+     * "Bracelet Chaîne Elsa" are already distinct. Forbidding "Elsa" family-wide
+     * would burn a first name on every piece and starve the model for nothing.
+     */
+    private function renderTakenNames(?ProductCategory $category, ?int $productId): ?string
+    {
+        if ($category === null) {
+            return null;
+        }
+
+        $names = $this->productRepository->findFamilyNames($category, $productId);
+        if ($names === []) {
+            return null;
+        }
+
+        $root = $category->getParent() ?? $category;
+
+        $lines = [\sprintf(
+            'NAMES ALREADY IN USE IN THE "%s" FAMILY — your nameFr and nameEn must match none of these in full. '
+            .'Reusing one of their proper names under a different sub-category is fine:',
+            $root->getNameFr(),
+        )];
+
+        foreach ($names as $name) {
+            $lines[] = \sprintf('- %s / %s', $name['nameFr'], $name['name']);
+        }
+
+        return \implode("\n", $lines);
     }
 
     /**

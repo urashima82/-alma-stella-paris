@@ -173,6 +173,37 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * Names already worn inside a category family, so the AI content prompt can be
+     * told what not to propose.
+     *
+     * The scope is the family (the root category and all its children), not the
+     * leaf: the type word in a name comes from the root — every child of
+     * "Bracelets" yields "Jonc …" — so two pieces in sibling leaves would
+     * otherwise be free to land on the very same displayed name.
+     *
+     * @return list<array{name: string, nameFr: string}>
+     */
+    public function findFamilyNames(ProductCategory $category, ?int $excludeProductId = null): array
+    {
+        $root = $category->getParent() ?? $category;
+
+        $qb = $this->createQueryBuilder('p')
+            ->select('p.name AS name', 'p.nameFr AS nameFr')
+            ->innerJoin('p.category', 'c')
+            ->where('c = :root OR c.parent = :root')
+            ->setParameter('root', $root)
+            ->orderBy('p.name', 'ASC');
+
+        if ($excludeProductId !== null) {
+            $qb->andWhere('p.id != :excludeProductId')
+                ->setParameter('excludeProductId', $excludeProductId);
+        }
+
+        /* @var list<array{name: string, nameFr: string}> */
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
      * Is this English slug already worn by another product? The two slug columns
      * are independent namespaces: the detail route matches `slug` in English and
      * `slugFr` in French, so a collision across the two is harmless.

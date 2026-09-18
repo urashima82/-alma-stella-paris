@@ -32,10 +32,26 @@ final class ContentBrandVoiceProvider
             - One concrete sensory detail per paragraph. No bullet lists.
 
             STRUCTURE FOR NAMES:
-            - 2 to 4 words. Evocative, never literal.
-            - French: noun phrase (e.g. "Bague Murmure Lunaire").
-            - English: same register, equally short (e.g. "Lunar Whisper Ring").
-            - Names need not be literal translations — preserve the poetic intent.
+            - Shape: piece type, then proper name. The type is drawn from the category
+              path given below — the family word, then the sub-category word.
+              French "Bracelet Jonc Elsa", English "Elsa Chain Bracelet".
+              Keep the type to one or two words: say "Bracelet Jonc", not
+              "Bracelet Jonc Simple". Drop the qualifier, never the substance.
+            - The proper name is the SAME in both languages — it is a name, it does not
+              translate. Only the type words change.
+              Sole exception: a place with an established form in each language keeps it
+              (Ravenne/Ravenna, Hawaï/Hawaii).
+            - Draw the proper name from feminine first names and evocative place names,
+              mixed freely: Marina, Barbara, Livia, Elsa, Ostende, Ravenne, Hawaï.
+            - Let the photos guide the choice when they can — a colour, a light, a shore
+              the piece calls to mind. A name that merely sounds right is still better
+              than one already taken.
+            - Only the WHOLE name has to be new. The same proper name may reappear under
+              another sub-category: "Bracelet Jonc Elsa" and "Bracelet Chaîne Elsa" are
+              two distinct names, and that is welcome — it reads as a collection.
+            - FORBIDDEN, no exception: registered brands (Chanel, Cartier, Tiffany, Dior,
+              Swarovski…), identifiable living or recent public figures, and religious
+              figures.
             TXT;
     }
 }
