@@ -14,6 +14,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -23,6 +24,8 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[Vich\Uploadable]
+#[UniqueEntity(fields: ['slug'], message: 'Ce slug est déjà utilisé par une autre pièce.', errorPath: 'slug')]
+#[UniqueEntity(fields: ['slugFr'], message: 'Ce slug (FR) est déjà utilisé par une autre pièce.', errorPath: 'slugFr')]
 class Product
 {
     public const string COUNTRY_FRANCE = 'france';

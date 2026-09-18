@@ -48,7 +48,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\String\Slugger\AsciiSlugger;
 use Twig\Environment;
 
 /** @extends AbstractCrudController<Product> */
@@ -63,6 +62,7 @@ class ProductCrudController extends AbstractCrudController
         private readonly VisualApprovalHandler $visualApprovalHandler,
         private readonly ImageStorage $imageStorage,
         private readonly ProductContentSuggestionRepository $contentSuggestionRepository,
+        private readonly \App\Service\ProductSlugger $productSlugger,
     ) {
     }
 
@@ -745,12 +745,14 @@ class ProductCrudController extends AbstractCrudController
 
         // Wizard-created drafts have placeholder slugs (`draft-…`) until a content
         // suggestion is approved — recompute them from the approved name so the
-        // product gets a real, browseable URL.
+        // product gets a real, browseable URL. The name comes from the AI and is
+        // not unique, so the slugger arbitrates rather than letting the unique
+        // index turn an approval into a 500.
         if (\str_starts_with($product->getSlug(), 'draft-')) {
-            $product->setSlug((string) (new AsciiSlugger())->slug($product->getName())->lower());
+            $product->setSlug($this->productSlugger->uniqueSlug($product->getName(), $product->getId()));
         }
         if (\str_starts_with($product->getSlugFr(), 'draft-')) {
-            $product->setSlugFr((string) (new AsciiSlugger('fr'))->slug($product->getNameFr())->lower());
+            $product->setSlugFr($this->productSlugger->uniqueSlugFr($product->getNameFr(), $product->getId()));
         }
 
         $suggestion->setStatus(ContentSuggestionStatus::Applied);

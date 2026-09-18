@@ -173,6 +173,36 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     /**
+     * Is this English slug already worn by another product? The two slug columns
+     * are independent namespaces: the detail route matches `slug` in English and
+     * `slugFr` in French, so a collision across the two is harmless.
+     */
+    public function slugExists(string $slug, ?int $excludeId = null): bool
+    {
+        return $this->slugTaken('p.slug', $slug, $excludeId);
+    }
+
+    public function slugFrExists(string $slugFr, ?int $excludeId = null): bool
+    {
+        return $this->slugTaken('p.slugFr', $slugFr, $excludeId);
+    }
+
+    private function slugTaken(string $field, string $value, ?int $excludeId): bool
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->where($field.' = :value')
+            ->setParameter('value', $value);
+
+        if ($excludeId !== null) {
+            $qb->andWhere('p.id != :excludeId')
+                ->setParameter('excludeId', $excludeId);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /**
      * Resets products stuck in PendingVisuals back to Draft.
      *
      * @return int number of products reset
