@@ -122,22 +122,33 @@ class ProductCrudController extends AbstractCrudController
     {
         // ── Index only ──
         if ($pageName === Crud::PAGE_INDEX) {
-            yield IdField::new('id');
+            // The `cell-*` classes are layout hooks, not decoration: below 767px
+            // admin.css rebuilds each row into a card, and EasyAdmin gives both
+            // "Nom" and "Catégorie" the same `field-text` class. Targeting them
+            // by `data-label` instead would tie the layout to a French string.
+            // `setCssClass()` REPLACES the generated `field-*` class rather than
+            // adding to it, so each call restates the original alongside the hook.
+            yield IdField::new('id')
+                ->setCssClass('field-id cell-id');
             yield ImageField::new('thumbnail', 'Vignette')
                 ->setBasePath('/uploads/products');
-            yield TextField::new('nameFr', 'Nom');
+            yield TextField::new('nameFr', 'Nom')
+                ->setCssClass('field-text cell-name');
             yield NumberField::new('basePrice', 'Prix affiché (EUR)')
                 ->setNumDecimals(2)
+                ->setCssClass('field-number cell-price')
                 ->formatValue(fn ($value, Product $entity): string => \number_format(
                     $this->shippingCostProvider->getDisplayPrice($entity->getBasePrice(), $entity->getShippingTier()),
                     2,
                 ).' €');
             yield TextField::new('category', 'Catégorie')
+                ->setCssClass('field-text cell-category')
                 ->formatValue(static fn ($value, Product $entity): string => (string) $entity->getCategory());
             yield BooleanField::new('isFeatured', 'Coup de cœur');
             yield BooleanField::new('isPublished', 'Publié');
             yield BooleanField::new('isSoldOut', 'Vendu');
             yield DateTimeField::new('soldAt', 'Vendu le')
+                ->setCssClass('field-datetime cell-sold-at')
                 ->setFormat('dd/MM/yyyy HH:mm');
 
             return;

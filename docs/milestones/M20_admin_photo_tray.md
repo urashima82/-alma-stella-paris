@@ -105,6 +105,23 @@ et l'état survit au remplacement du fragment après un envoi.
 
 Le wizard n'est pas concerné : les photos y sont le sujet de la page.
 
+## Suite du 2026-09-20 — liste produits en écran étroit
+
+EasyAdmin empile une ligne de datagrid en paires libellé/valeur sous 767 px :
+neuf paires par produit ici, soit un écran entier par pièce. La ligne est
+désormais reconstruite en carte — vignette, nom, prix, catégorie et menu
+d'actions en haut, puis les trois interrupteurs en lignes pleine largeur. La
+hauteur passe d'environ 400 px à 213 px, soit trois fiches visibles au lieu
+d'une.
+
+`ID` et `Vendu le` sont masqués en mobile : techniques ou secondaires au doigt,
+ils restent en desktop et sur la fiche produit. La vignette absente, qu'EasyAdmin
+rend en badge « Null », devient une tuile neutre — un produit n'en a
+légitimement pas tant qu'aucun visuel IA n'est approuvé.
+
+Portée par `body.ea-index-Product`, la classe qu'EasyAdmin émet par entité :
+aucune autre liste n'est touchée, et le desktop est inchangé.
+
 ## Pièges rencontrés
 
 - **CSP.** `SecurityHeadersSubscriber` pose `img-src 'self' data:` pour tout le
@@ -117,6 +134,13 @@ Le wizard n'est pas concerné : les photos y sont le sujet de la page.
 - **`hidden` battu par `display`.** Une règle auteur `display: flex` l'emporte sur
   le `[hidden] { display: none }` de la feuille du navigateur : la zone d'ajout
   serait restée visible une fois les 4 photos atteintes.
+- **`setCssClass()` remplace la classe `field-*`.** Les colonnes de l'index
+  perdaient silencieusement le style natif d'EasyAdmin ; chaque appel restitue
+  donc la classe d'origine à côté du hook.
+- **Spécificité contre soi-même.** Le reset `tr:not(.empty-row) > td` battait mes
+  propres règles écrites plus court : colonnes censées être masquées toujours
+  visibles, libellés d'interrupteurs absents. Toutes les règles du bloc partagent
+  maintenant la même base.
 - **Fragment serveur désynchronisé.** `sourcesFragmentResponse()` remplace tout
   le balisage du plateau : avoir oublié d'y passer `collapsible` faisait
   disparaître le bouton de pli dès la première photo ajoutée, alors que le rendu

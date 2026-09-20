@@ -272,6 +272,16 @@ Production runs on shared hosting; these things exist only because of it:
 - **Image previews use `data:` URLs, never `blob:`** — `SecurityHeadersSubscriber` sets
   `img-src 'self' data:` for the whole site, so a blob URL renders as a broken image with
   no console error. Applies to the decode fallback in `admin-photo-tray.js` too.
+- **The product list becomes a card below 767px** (`admin.css`, scoped by
+  `body.ea-index-Product`, a class EasyAdmin emits per entity). Nine stacked
+  label/value pairs per product filled a whole phone screen. Two couplings to
+  respect: the breakpoint mirrors the one EasyAdmin uses to switch a datagrid into
+  its stacked mode — move one without the other and the table ends up half
+  converted — and every rule repeats the same `tr:not(.empty-row) > td` base,
+  because the cell reset outranks any leaner selector written next to it.
+- **`Field::setCssClass()` replaces the generated `field-*` class, it does not add
+  to it.** The index columns therefore restate theirs (`'field-text cell-name'`);
+  dropping it costs EasyAdmin's own per-type styling with no visible error.
 - **`PhotoAngle` is admin-facing metadata only** — no prompt builder and no handler reads
   it; every source photo is sent to Gemini undifferentiated. It is kept because the tray
   assigns it for free, but wiring it into the prompts is a behaviour change to validate,

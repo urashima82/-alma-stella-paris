@@ -2224,3 +2224,206 @@ span.photo-card__thumb {
         font-size: 0.75rem;
     }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Product list on a narrow screen
+   EasyAdmin already stacks a datagrid row into label/value pairs
+   below 767px — nine of them per product here, so a single piece
+   filled the whole screen. These rules rebuild the row as a card:
+   thumbnail, name, price and category on the left, actions on the
+   right, then the three switches as full-width settings lines.
+
+   Scoped by `body.ea-index-Product`, a class EasyAdmin emits per
+   entity, so no other list is touched. The breakpoint mirrors the
+   one EasyAdmin uses to switch the datagrid to its stacked mode —
+   moving one without the other leaves the table half converted.
+   Column hooks (`cell-*`) come from ProductCrudController.
+
+   Every rule below keeps the same `tr:not(.empty-row) > td` base:
+   the cell reset is specific enough to beat a shorter selector, so
+   a rule written any leaner silently loses to it.
+   ══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+    .ea-index-Product table.datagrid:not(.datagrid-empty) {
+        display: block;
+        border: 0;
+        background: none;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) thead {
+        display: none;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) {
+        display: grid;
+        grid-template-columns: auto 64px minmax(0, 1fr) auto;
+        grid-template-areas:
+            'select thumb name     actions'
+            'select thumb price    actions'
+            'select thumb category actions';
+        align-items: center;
+        gap: 0.1rem 0.7rem;
+        padding: 0.7rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #fff;
+    }
+
+    .ea-dark-scheme.ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) {
+        background: #1f1f1f;
+        border-color: #3a3a3a;
+    }
+
+    /* Back to plain blocks: the stacked mode gives each cell its own border,
+       background, outline, generous padding and an absolutely placed label. */
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td {
+        display: block;
+        min-height: 0;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        background: none;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td:before {
+        content: none;
+    }
+
+    /* Technical or secondary on a phone — both stay on desktop and on the
+       product form. */
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.cell-id,
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.cell-sold-at {
+        display: none;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.batch-actions-selector {
+        grid-area: select;
+        align-self: start;
+        padding-top: 0.15rem;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-image {
+        grid-area: thumb;
+        align-self: start;
+        width: 64px;
+        height: 64px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-image img {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* No thumbnail yet — EasyAdmin prints a "Null" badge, which reads as an
+       error in a card. Turn the cell into a quiet placeholder tile instead.
+       A product legitimately has none until an AI visual is approved. */
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-image:has(.badge) {
+        border: 1px dashed #d1d5db;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-image .badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        font-size: 0;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-image .badge:after {
+        content: '\f03e';
+        font-family: 'Font Awesome 6 Free', 'Font Awesome 5 Free', sans-serif;
+        font-weight: 900;
+        font-size: 1rem;
+        color: #d1d5db;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.cell-name {
+        grid-area: name;
+        font-weight: 600;
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.cell-price {
+        grid-area: price;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #c9a84c;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.cell-category {
+        grid-area: category;
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .ea-dark-scheme.ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.cell-category {
+        color: #9ca3af;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.actions {
+        grid-area: actions;
+        align-self: start;
+    }
+
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.actions .dropdown-toggle {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    /* The switches land in implicit rows under the block above, in DOM order
+       (coup de cœur, publié, vendu). No named area on purpose: auto-placement
+       keeps working if a boolean column is added or removed. */
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-boolean {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        min-height: 40px;
+        padding: 0 0.15rem;
+        border-top: 1px solid #f1f3f5;
+    }
+
+    .ea-dark-scheme.ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-boolean {
+        border-top-color: #2e2e2e;
+    }
+
+    /* EasyAdmin's switch is 32x18 — fine for a mouse, small for a thumb. It
+       sizes itself from these custom properties, and the invisible input that
+       receives the tap fills the whole `.ea-switch`, so the target grows with
+       them. Overriding its width/height directly would leave the thumb behind. */
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-boolean .ea-switch {
+        --ea-switch-width: 44px;
+        --ea-switch-thumb-size: 22px;
+        --ea-switch-thumb-inset: 2px;
+    }
+
+    /* Put the label back, this time in the flow rather than absolutely placed. */
+    .ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-boolean:before {
+        content: attr(data-label);
+        position: static;
+        display: block;
+        inline-size: auto;
+        padding: 0;
+        font-size: 0.85rem;
+        color: #4b5563;
+    }
+
+    .ea-dark-scheme.ea-index-Product table.datagrid:not(.datagrid-empty) tr:not(.empty-row) > td.field-boolean:before {
+        color: #d1d5db;
+    }
+}

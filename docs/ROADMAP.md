@@ -66,6 +66,7 @@ order of completion:
 - [x] 20g — Correction de la collision de positions des photos sources (écrasement silencieux de fichier) + test de régression
 - [x] 20h — Soumission du wizard en XHR : erreurs peintes en place, la page ne se re-rend plus et les photos en attente survivent à tout rejet
 - [x] 20i — Panneau « Photos sources » repliable quand le workspace passe en une colonne (déplié si aucune photo, état conservé après envoi)
+- [x] 20j — Liste produits en carte sous 767 px (vignette, nom, prix, catégorie, interrupteurs pleine largeur) ; desktop inchangé
 
 ---
 
