@@ -40,7 +40,9 @@
 - **Bot protection:** Cloudflare Turnstile on public forms. It is an API the
   server calls, not a proxy in front of the site, and it is the **only** use of
   Cloudflare here.
-- **TLS:** managed by the host.
+- **Domain, DNS and TLS:** all at o2switch. The domain is registered there, its
+  zone is served by o2switch's nameservers, and the certificate is issued and
+  renewed by the host. Nothing to do at a third party.
 - **Payment:** Stripe, always charged in **EUR** (see "Money" in
   `ARCHITECTURE.md` — display currencies are cosmetic).
 - **Email:** SMTP provider.
@@ -221,12 +223,16 @@ at runtime.
 |------------|---------|
 | PHP | 8.3 |
 | MariaDB | 10.11 |
-| Web server | Apache 2.4+ with `mod_rewrite`, `mod_expires`, `mod_headers` |
+| Web server | LiteSpeed (o2switch) — Apache-compatible, reads the same `.htaccess` |
 | PHP extensions | `intl`, `mbstring`, `pdo_mysql`, `gd` or `imagick`, `curl`, `openssl` |
 | Composer | 2.x |
 | Disk | ~500 MB (app + vendor + uploads) |
 
-### Apache modules required
+### Web server modules
+
+o2switch runs LiteSpeed with `mod_rewrite`, `mod_expires` and `mod_headers`
+equivalents already active, so `public/.htaccess` works as written and there is
+nothing to enable. On a stock Apache host the equivalent would be:
 
 ```bash
 a2enmod rewrite expires headers
@@ -332,7 +338,7 @@ list.
 
 ## Post-deployment checklist
 
-- [ ] HTTPS served and forced by the host
+- [ ] HTTPS issued and forced by o2switch (domain, DNS and certificate all live there)
 - [ ] `TRUSTED_PROXIES` empty in the production env (nothing proxies the site —
       a non-empty value makes every IP-based rate limit and the maintenance
       allowlist spoofable)
