@@ -164,6 +164,19 @@ Dans la foulée, les deux montants formatés à la main dans l'admin
 français : `number_format()` ne suit pas la locale, et la liste affichait
 `24.00 €` à côté d'une fiche à `45,00 €`.
 
+## Suite du 2026-09-20 — onglets de la fiche sur une seule ligne
+
+Les trois onglets passaient à la ligne en mobile. « Fiche produit » est devenu
+« Fiche » : 334 px au total avant, 283 px après, ce qui tient jusqu'à 320 px de
+large. « Produit » aurait fait doublon avec le titre de page (« Modifier
+Produit »).
+
+Le renommage change l'identifiant du volet (`tab-fiche-produit` →
+`tab-fiche`), sans conséquence : seuls `tab-visuels-ia` et `tab-contenu-ia`
+sont référencés ailleurs — par l'injection JS des deux espaces IA, par
+`ProductWizardController::buildProductEditUrl()` et par les liens des listes
+de visuels et de suggestions.
+
 ## Pièges rencontrés
 
 - **CSP.** `SecurityHeadersSubscriber` pose `img-src 'self' data:` pour tout le

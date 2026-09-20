@@ -175,7 +175,9 @@ class ProductCrudController extends AbstractCrudController
         //  Form layout — Tabs + WordPress-style 2-column
         // ══════════════════════════════════════════════
 
-        yield FormField::addTab('Fiche produit', 'fa fa-pen-fancy');
+        // Short on purpose: three tabs have to sit on one line down to a 320px
+        // screen, and the page heading already says "Produit".
+        yield FormField::addTab('Fiche', 'fa fa-pen-fancy');
 
         // ── Left column: main content ──
         yield FormField::addColumn(8);

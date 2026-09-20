@@ -69,6 +69,7 @@ order of completion:
 - [x] 20j — Liste produits en carte sous 767 px (vignette, nom, prix, catégorie, interrupteurs pleine largeur) ; desktop inchangé
 - [x] 20k — Fiche produit : barre d'actions fixée en bas en mobile (secondaires en icône seule), « Sauvegarder et modifier » remplacé par « Retour à la liste »
 - [x] 20l — Back-office forcé en `fr` (libellés natifs EasyAdmin traduits) sans contaminer la locale boutique ; montants admin en séparateurs français
+- [x] 20m — Onglet « Fiche produit » renommé « Fiche » : les trois onglets tiennent sur une ligne jusqu'à 320 px
 
 ---
 
