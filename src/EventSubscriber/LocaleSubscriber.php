@@ -16,6 +16,12 @@ class LocaleSubscriber implements EventSubscriberInterface
     private const COOKIE_LIFETIME_DAYS = 30;
     private const SUPPORTED_LOCALES = ['en', 'fr'];
 
+    /** Mirrors the `admin` firewall pattern in `config/packages/security.yaml`. */
+    private const ADMIN_PATH_PREFIX = '/admin';
+
+    /** The back-office is French by decision — see CLAUDE.md. */
+    private const ADMIN_LOCALE = 'fr';
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -37,6 +43,17 @@ class LocaleSubscriber implements EventSubscriberInterface
         }
 
         $path = $request->getPathInfo();
+
+        // Back-office URLs carry no locale prefix, so without this they fell
+        // through to the visitor's shop cookie — which is why EasyAdmin's own
+        // labels ("Save changes", "Edit", "Delete") rendered in English
+        // whenever that cookie said `en`, or was simply absent.
+        if ($this->isAdminPath($path)) {
+            $request->setLocale(self::ADMIN_LOCALE);
+
+            return;
+        }
+
         if (\preg_match('#^/(en|fr)(/|$)#', $path, $matches)) {
             $request->setLocale($matches[1]);
 
@@ -66,6 +83,14 @@ class LocaleSubscriber implements EventSubscriberInterface
         }
 
         $request = $event->getRequest();
+
+        // The session and cookie below hold the visitor's *storefront* choice.
+        // An admin page runs on a forced locale, so persisting it here would
+        // silently flip the shop to French behind the back office.
+        if ($this->isAdminPath($request->getPathInfo())) {
+            return;
+        }
+
         $locale = $request->getLocale();
 
         $request->getSession()->set('_locale', $locale);
@@ -80,5 +105,11 @@ class LocaleSubscriber implements EventSubscriberInterface
                     ->withSameSite('lax')
             );
         }
+    }
+
+    private function isAdminPath(string $path): bool
+    {
+        return $path === self::ADMIN_PATH_PREFIX
+            || \str_starts_with($path, self::ADMIN_PATH_PREFIX.'/');
     }
 }

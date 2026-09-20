@@ -149,9 +149,14 @@ class ProductCrudController extends AbstractCrudController
             yield NumberField::new('basePrice', 'Prix affiché (EUR)')
                 ->setNumDecimals(2)
                 ->setCssClass('field-number cell-price')
+                // French separators: the back-office runs on the `fr` locale, and
+                // every other amount on it (MoneyField on the form) already reads
+                // `45,00 €`. `number_format` does not follow the locale on its own.
                 ->formatValue(fn ($value, Product $entity): string => \number_format(
                     $this->shippingCostProvider->getDisplayPrice($entity->getBasePrice(), $entity->getShippingTier()),
                     2,
+                    ',',
+                    "\u{00A0}",
                 ).' €');
             yield TextField::new('category', 'Catégorie')
                 ->setCssClass('field-text cell-category')

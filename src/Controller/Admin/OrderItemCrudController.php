@@ -37,7 +37,8 @@ class OrderItemCrudController extends AbstractCrudController
 
         yield NumberField::new('lineTotal', 'Total ligne')
             ->setNumDecimals(2)
-            ->formatValue(static fn (mixed $value): string => \number_format((float) ($value ?? 0), 2).' €')
+            // French separators — see the note in ProductCrudController.
+            ->formatValue(static fn (mixed $value): string => \number_format((float) ($value ?? 0), 2, ',', "\u{00A0}").' €')
             ->setDisabled();
     }
 }

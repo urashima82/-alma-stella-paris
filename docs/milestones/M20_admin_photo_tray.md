@@ -138,6 +138,32 @@ Sur tous les écrans, « Save and continue editing » disparaît au profit de
 « Retour à la liste » — l'ancienne action laissait la gérante sur une page
 qu'elle venait de terminer.
 
+## Suite du 2026-09-20 — back-office réellement en français
+
+`CLAUDE.md` impose un EasyAdmin en français, mais les libellés natifs du bundle
+sortaient en anglais (« Save changes », « Edit », « Delete », « Filters »).
+
+La cause n'était pas une traduction manquante — `EasyAdminBundle.fr.php` est
+bien livré — mais la **locale de la requête**. Les URLs d'admin n'ont pas de
+préfixe de langue : `LocaleSubscriber` les faisait donc retomber sur le cookie
+boutique du visiteur, `en` par défaut. La locale est désormais forcée à `fr`
+sur `^/admin`.
+
+Le piège se trouvait dans l'autre moitié du même subscriber : `onKernelResponse`
+réécrit la locale courante dans la session et un cookie de 30 jours. Sans
+garde-fou, ouvrir l'admin aurait basculé la **boutique** en français. La
+persistance est donc ignorée sur `/admin`. Vérifié de bout en bout : boutique
+`en` → admin `fr` → retour boutique toujours `en`.
+
+Vérifié aussi avant de toucher à quoi que ce soit : les emails clients prennent
+leur langue de `Order::getCustomerLocale()`, jamais de la requête — forcer la
+locale de l'admin ne pouvait pas envoyer de français à un client anglophone.
+
+Dans la foulée, les deux montants formatés à la main dans l'admin
+(`ProductCrudController`, `OrderItemCrudController`) passent en séparateurs
+français : `number_format()` ne suit pas la locale, et la liste affichait
+`24.00 €` à côté d'une fiche à `45,00 €`.
+
 ## Pièges rencontrés
 
 - **CSP.** `SecurityHeadersSubscriber` pose `img-src 'self' data:` pour tout le

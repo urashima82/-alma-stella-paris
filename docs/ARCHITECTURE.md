@@ -279,6 +279,16 @@ Production runs on shared hosting; these things exist only because of it:
   its stacked mode — move one without the other and the table ends up half
   converted — and every rule repeats the same `tr:not(.empty-row) > td` base,
   because the cell reset outranks any leaner selector written next to it.
+- **The back office runs on a forced `fr` locale** (`LocaleSubscriber`). Admin URLs
+  carry no locale prefix, so they used to fall through to the visitor's storefront
+  cookie — which is why EasyAdmin's built-in labels rendered in English whenever
+  that cookie said `en` or was absent. The same subscriber deliberately skips its
+  response half on `/admin`: persisting the forced locale would flip the shop to
+  French behind the back office. Customer emails are unaffected either way, they
+  take their locale from `Order::getCustomerLocale()`, never from the request.
+- **`number_format()` does not follow the locale**, so the admin's hand-formatted
+  amounts pass `','` and a non-breaking space explicitly. Without it a list reads
+  `24.00 €` next to a `MoneyField` form showing `45,00 €`.
 - **The product edit actions are pinned to the bottom of a phone screen** and lose
   their labels except the primary one. It works because EasyAdmin renders those
   buttons with `form="edit-Product-form"`, so they submit from anywhere in the
