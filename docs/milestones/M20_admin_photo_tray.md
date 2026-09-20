@@ -63,9 +63,33 @@
   `env(safe-area-inset-bottom)`, et une modale `<dialog>` (`window.AdminConfirm`)
   à la place de `window.confirm()`.
 - **Garde-fou côté client dans le wizard** : le bouton de soumission reste
-  verrouillé tant que le compte de photos ne satisfait pas la règle serveur.
-  Nécessaire parce qu'un navigateur ne repeuple jamais un `<input type="file">`
-  après un re-rendu : un rejet serveur perdrait les photos en attente.
+  verrouillé tant que le compte de photos ne satisfait pas la règle serveur —
+  confort, pour prévenir l'erreur la plus courante plutôt que l'expliquer. Le
+  vrai filet est la soumission XHR décrite plus bas.
+
+## Suite du 2026-09-20 — perte des photos sur erreur de formulaire
+
+Premier retour d'usage : un champ manquant (catégorie, prix) faisait re-rendre
+la page, et les photos déjà choisies disparaissaient. Le verrou client ne
+couvrait que le **nombre de photos**, pas les autres champs obligatoires.
+
+La correction proposée — téléverser dès la sélection — a été écartée après
+vérification : `Product.category` est en `nullable: false`, donc impossible de
+créer le produit brouillon à l'ouverture du wizard pour y rattacher les photos,
+sauf à rendre la colonne nullable pour *tous* les produits sur une base de
+production.
+
+Surtout, la cause racine n'est pas « les fichiers sont côté client » mais
+« **la page se re-rend** ». Le formulaire est donc soumis en XHR : le serveur
+répond `422` avec ses erreurs en JSON, le JS les peint à côté des champs, et on
+ne navigue jamais. Les photos survivent ainsi à *toutes* les causes de rejet —
+champ manquant, coupure réseau, refus serveur non anticipé — et pas seulement à
+la validation.
+
+Écartées au passage : le stockage temporaire de session (endpoint + modèle de
+données distinct + déplacement des fichiers + cron de purge) et l'extension du
+verrou client aux autres champs (colmatage : le serveur peut toujours refuser
+pour un motif que le client ignore).
 
 ## Pièges rencontrés
 
@@ -76,6 +100,13 @@
 - **`<template>` inerte.** Une `<img>` clonée depuis un `<template>` ne charge
   rien si sa `src` est posée avant l'insertion dans le document : l'adoption ne
   relance pas le chargement. La carte est insérée d'abord, la `src` posée ensuite.
+- **`hidden` battu par `display`.** Une règle auteur `display: flex` l'emporte sur
+  le `[hidden] { display: none }` de la feuille du navigateur : la zone d'ajout
+  serait restée visible une fois les 4 photos atteintes.
+- **Toast générique sur 422.** `admin-toast.js` intercepte les mutations `/admin`
+  et affichait « Une erreur est survenue » par-dessus les messages précis du
+  formulaire. Un 422 est une réponse de validation, pas une panne : il est
+  désormais ignoré par l'intercepteur.
 
 ## Reste ouvert
 

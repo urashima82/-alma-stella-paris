@@ -24,6 +24,8 @@
         'data-wiz-form': '',
     } }) }}
 
+    <div class="wiz-banner" data-wiz-banner hidden></div>
+
     {# ─── Photos ────────────────────────────────────────────────── #}
     <div class="wiz-card">
         {% include 'admin/product/_source_photo_tray.html.twig' with {
@@ -32,6 +34,10 @@
             photoAngles: photoAngles,
             defaultAngles: defaultAngles,
         } only %}
+
+        {# Target for the `photos` errors: the tray replaces form_row, so there
+           is no widget for the JS to hang them off. #}
+        <div class="wiz-error" data-wiz-field-error="photos" hidden></div>
 
         {% if form.photos.vars.errors|length > 0 %}
             <div class="wiz-error">{{ form_errors(form.photos) }}</div>
@@ -123,15 +129,17 @@
     <script>
         (function () {
             document.querySelectorAll('[data-wiz-pills]').forEach(initPillGroup);
-            initSubmitGate();
+            initSubmit();
 
             /**
-             * The staged photos live in file inputs the browser refuses to
-             * repopulate after a re-render, so a server-side rejection would
-             * silently drop them. The submit button therefore stays locked
-             * until the tray reports a photo count the server will accept.
+             * The staged photos live in file inputs no browser repopulates after
+             * a re-render, so the page must never navigate on a rejection. The
+             * form is posted over XHR: the server answers 422 with its errors as
+             * JSON, they get painted in place, and every photo stays put. The
+             * button is still gated on the photo count so the common mistake is
+             * prevented rather than explained.
              */
-            function initSubmitGate() {
+            function initSubmit() {
                 const form = document.querySelector('[data-wiz-form]');
                 const submit = document.querySelector('[data-wiz-submit]');
                 const hint = document.querySelector('[data-wiz-hint]');
@@ -173,12 +181,127 @@
                 }
                 apply();
 
-                form.addEventListener('submit', () => {
-                    if (!submit.disabled) {
-                        submit.disabled = true;
-                        submit.classList.add('is-loading');
+                form.addEventListener('submit', (event) => {
+                    event.preventDefault();
+                    if (submit.disabled) {
+                        return;
                     }
+
+                    submit.disabled = true;
+                    submit.classList.add('is-loading');
+                    clearErrors(form);
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        body: new FormData(form),
+                    })
+                        .then((response) => {
+                            const type = response.headers.get('content-type') || '';
+                            if (type.indexOf('application/json') === -1) {
+                                // Session expired, or anything else that handed
+                                // back a page — go wherever it landed.
+                                window.location.href = response.url;
+
+                                return null;
+                            }
+
+                            return response.json().then((payload) => ({ response, payload }));
+                        })
+                        .then((result) => {
+                            if (!result) {
+                                return;
+                            }
+                            if (result.response.ok && result.payload.redirect) {
+                                window.location.href = result.payload.redirect;
+
+                                return;
+                            }
+                            paintErrors(form, result.payload);
+                            releaseSubmit();
+                        })
+                        .catch(() => {
+                            paintErrors(form, {
+                                global: ['Connexion perdue. Vos photos sont conservées, réessayez.'],
+                                fields: [],
+                            });
+                            releaseSubmit();
+                        });
                 });
+
+                function releaseSubmit() {
+                    submit.classList.remove('is-loading');
+                    apply();
+                }
+            }
+
+            function clearErrors(form) {
+                form.querySelectorAll('[data-wiz-generated]').forEach((node) => node.remove());
+                form.querySelectorAll('.is-invalid').forEach((node) => node.classList.remove('is-invalid'));
+
+                const banner = form.querySelector('[data-wiz-banner]');
+                if (banner) {
+                    banner.textContent = '';
+                    banner.hidden = true;
+                }
+
+                const photosError = form.querySelector('[data-wiz-field-error="photos"]');
+                if (photosError) {
+                    photosError.textContent = '';
+                    photosError.hidden = true;
+                }
+            }
+
+            function paintErrors(form, payload) {
+                const banner = form.querySelector('[data-wiz-banner]');
+                if (banner && (payload.global || []).length > 0) {
+                    banner.textContent = payload.global.join(' ');
+                    banner.hidden = false;
+                }
+
+                let firstTarget = null;
+
+                (payload.fields || []).forEach((field) => {
+                    const text = field.messages.join(' ');
+
+                    // The photo tray has no form_row of its own.
+                    const dedicated = form.querySelector('[data-wiz-field-error="' + field.name + '"]');
+                    if (dedicated) {
+                        dedicated.textContent = text;
+                        dedicated.hidden = false;
+                        firstTarget = firstTarget || dedicated;
+
+                        return;
+                    }
+
+                    const control = field.id ? document.getElementById(field.id) : null;
+                    if (!control) {
+                        // Nowhere sensible to put it — fold it into the banner
+                        // rather than dropping it on the floor.
+                        if (banner) {
+                            banner.textContent = (banner.textContent + ' ' + text).trim();
+                            banner.hidden = false;
+                        }
+
+                        return;
+                    }
+
+                    control.classList.add('is-invalid');
+                    const message = document.createElement('div');
+                    message.className = 'wiz-error';
+                    message.dataset.wizGenerated = '';
+                    message.textContent = text;
+
+                    const row = control.closest('.form-group, .form-row, .mb-3');
+                    (row || control).insertAdjacentElement('afterend', message);
+                    firstTarget = firstTarget || (row || control);
+                });
+
+                const target = firstTarget || banner;
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
 
             /**

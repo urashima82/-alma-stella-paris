@@ -1834,6 +1834,28 @@ span.photo-card__thumb {
     font-size: 0.85rem;
 }
 
+/* Carries the errors a rejected submit could not attach to a field, plus
+   network failures. No `display` is declared on either of these so the JS can
+   keep toggling them with the `hidden` attribute. */
+.wiz-banner {
+    margin-bottom: 1.1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #fca5a5;
+    border-left: 4px solid #dc2626;
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.ea-dark-scheme .wiz-banner {
+    background: rgba(220, 38, 38, 0.12);
+    border-color: rgba(220, 38, 38, 0.45);
+    border-left-color: #dc2626;
+    color: #fca5a5;
+}
+
 .wiz-row {
     display: grid;
     grid-template-columns: 1fr 1fr;

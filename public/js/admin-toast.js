@@ -117,6 +117,16 @@
     }
 
     /**
+     * 422 means the form was rejected and the response carries the reasons —
+     * the page paints them next to the offending fields. A generic "une erreur
+     * est survenue" on top of that is noise, and it reads like a breakdown when
+     * nothing broke.
+     */
+    function isHandledValidationFailure(status) {
+        return status === 422;
+    }
+
+    /**
      * Intercepte fetch() pour détecter les opérations AJAX d'EasyAdmin.
      */
     function interceptFetch() {
@@ -131,7 +141,7 @@
 
                 if (response.ok) {
                     flushAndShowFlashes();
-                } else {
+                } else if (!isHandledValidationFailure(response.status)) {
                     show('danger', 'Une erreur est survenue.');
                 }
 
@@ -165,7 +175,7 @@
                 xhr.addEventListener('load', function () {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         flushAndShowFlashes();
-                    } else if (xhr.status >= 400) {
+                    } else if (xhr.status >= 400 && !isHandledValidationFailure(xhr.status)) {
                         show('danger', 'Une erreur est survenue.');
                     }
                 });

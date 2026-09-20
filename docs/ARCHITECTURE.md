@@ -249,9 +249,16 @@ Production runs on shared hosting; these things exist only because of it:
   named for the `photos` CollectionType, and ride the form POST) and the edit workspace
   (`live` — batch upload whose response is the re-rendered tray, so the product form
   never reloads). **No draft product is created before submit**: that alternative was
-  rejected to avoid orphan drafts and a purge command. The price is that a server-side
-  rejection cannot repopulate file inputs, which is why the wizard gates its submit
-  button client-side rather than relying on the 422 branch.
+  rejected to avoid orphan drafts and a purge command, and `Product.category` is
+  `nullable: false`, so an empty draft could not be persisted anyway without weakening
+  that column for every product.
+- **The wizard submits over XHR and never re-renders.** No browser repopulates a file
+  input, so re-rendering the form on a validation failure would silently drop every
+  staged photo. `ProductWizardController::create()` therefore answers an XHR rejection
+  with `422` + the errors as JSON, which the page paints next to the offending fields;
+  the HTML branch is kept only for a non-JS caller. The client-side gate on the photo
+  count is a convenience on top, not the safety net. `admin-toast.js` deliberately stays
+  silent on `422` — the page already carries the reasons.
 - **Photos are re-encoded in the browser** (WebP, 2048px max) before they go anywhere.
   That is what keeps the wizard's single POST under `post_max_size` on a phone, and it
   shrinks every payload later base64-encoded into a Gemini call.

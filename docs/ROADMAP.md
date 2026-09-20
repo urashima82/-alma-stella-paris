@@ -64,6 +64,7 @@ order of completion:
 - [x] 20e — Fin du rechargement de page en édition : les mutations répondent le fragment re-rendu
 - [x] 20f — Passe tactile (cibles ≥ 44 px, suppression visible sans `:hover`, `<select>` à 16 px, barre collante `safe-area`, modale de confirmation à la place de `window.confirm`)
 - [x] 20g — Correction de la collision de positions des photos sources (écrasement silencieux de fichier) + test de régression
+- [x] 20h — Soumission du wizard en XHR : erreurs peintes en place, la page ne se re-rend plus et les photos en attente survivent à tout rejet
 
 ---
 

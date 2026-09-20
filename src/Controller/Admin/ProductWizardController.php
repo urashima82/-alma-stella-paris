@@ -27,6 +27,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -89,10 +90,17 @@ class ProductWizardController extends AbstractController
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
-            // A re-render cannot repopulate file inputs, so the staged photos are
-            // lost here. The tray mirrors every server-side rule client-side and
-            // blocks submission, which keeps this branch for tampering and for
-            // uploads the PHP front controller drops (post_max_size).
+            // A browser never repopulates a file input, so re-rendering the page
+            // would silently drop every photo already staged in the tray. The
+            // form is therefore submitted over XHR and rejections come back as
+            // JSON the page paints in place, without ever navigating away.
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse(
+                    $this->collectFormErrors($form),
+                    Response::HTTP_UNPROCESSABLE_ENTITY,
+                );
+            }
+
             return $this->render('admin/product/wizard_form.html.twig', [
                 'form' => $form,
                 'photoAngles' => PhotoAngle::cases(),
@@ -120,9 +128,57 @@ class ProductWizardController extends AbstractController
             $this->entityManager->flush();
         }
 
-        return $this->redirectToRoute('admin_product_wizard_wait', [
+        $waitUrl = $this->generateUrl('admin_product_wizard_wait', [
             'productId' => $product->getId(),
         ]);
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(['redirect' => $waitUrl]);
+        }
+
+        return $this->redirect($waitUrl);
+    }
+
+    /**
+     * Flattens the form errors into something the page can paint next to the
+     * offending fields. Field ids come from the form view rather than being
+     * rebuilt from the block prefix, so renaming the form type cannot silently
+     * break the mapping.
+     *
+     * @param FormInterface<ProductWizardData> $form
+     *
+     * @return array{global: list<string>, fields: list<array{name: string, id: string, messages: list<string>}>}
+     */
+    private function collectFormErrors(FormInterface $form): array
+    {
+        $view = $form->createView();
+
+        $global = [];
+        // Non-deep: violations routed to a child (the photo-count callback uses
+        // `atPath('photos')`) belong to that child, not to the banner.
+        foreach ($form->getErrors() as $error) {
+            $global[] = $error->getMessage();
+        }
+
+        $fields = [];
+        foreach ($form->all() as $name => $child) {
+            $messages = [];
+            foreach ($child->getErrors(true) as $error) {
+                $messages[] = $error->getMessage();
+            }
+
+            if ($messages === []) {
+                continue;
+            }
+
+            $fields[] = [
+                'name' => $name,
+                'id' => (string) ($view->children[$name]->vars['id'] ?? ''),
+                'messages' => \array_values(\array_unique($messages)),
+            ];
+        }
+
+        return ['global' => $global, 'fields' => $fields];
     }
 
     #[Route('/admin/product/wizard/wait/{productId}', name: 'admin_product_wizard_wait', methods: ['GET'], requirements: ['productId' => '\d+'])]
