@@ -187,10 +187,10 @@ class DashboardController extends AbstractDashboardController
      *
      * These files are served straight out of `public/`, so unlike everything
      * the AssetMapper compiles they carry no content hash in their name — while
-     * `public/.htaccess` hands every CSS and JS a one-year `immutable` cache and
-     * Cloudflare mirrors that at the edge. Without this suffix a deploy ships new
-     * markup to a browser still holding the previous stylesheet, and only a
-     * manual CDN purge clears it.
+     * `public/.htaccess` hands every CSS and JS a one-year `immutable` cache.
+     * `immutable` stops a returning browser from even revalidating, so without
+     * this suffix a deploy ships new markup to a browser still holding the
+     * previous stylesheet, and only a manual force-reload clears it.
      *
      * `filemtime()` changes exactly when the file does, so an untouched asset
      * keeps its cached copy across deploys. A missing file degrades to the bare

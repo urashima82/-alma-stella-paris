@@ -280,11 +280,13 @@ Production runs on shared hosting; these things exist only because of it:
   converted — and every rule repeats the same `tr:not(.empty-row) > td` base,
   because the cell reset outranks any leaner selector written next to it.
 - **Every CSS and JS under `public/` must carry a version in its URL.** `.htaccess`
-  gives them a year of `immutable`, which Cloudflare mirrors, so an unversioned file
-  is unreachable after a deploy short of a manual CDN purge. AssetMapper handles its
-  own with a content hash; the back-office files are plain paths, so
-  `DashboardController::configureAssets()` appends `?v=<filemtime>` — mtime rather
-  than a content hash so an untouched asset keeps its cached copy.
+  gives them a year of `Cache-Control: immutable`, so a returning browser will not
+  even revalidate an unversioned file: a deploy reaches the markup and not the
+  stylesheet. AssetMapper handles its own with a content hash; the back-office files
+  are plain paths, so `DashboardController::configureAssets()` appends
+  `?v=<filemtime>` — mtime rather than a content hash so an untouched asset keeps
+  its cached copy. (Cloudflare is used for Turnstile only, the site is not proxied,
+  so the browser is the only cache in play.)
 - **The back office runs on a forced `fr` locale** (`LocaleSubscriber`). Admin URLs
   carry no locale prefix, so they used to fall through to the visitor's storefront
   cookie — which is why EasyAdmin's built-in labels rendered in English whenever

@@ -54,14 +54,15 @@ DirectoryIndex index.php
     RewriteRule ^ %{ENV:BASE}/index.php [L]
 </IfModule>
 
-# Cache headers for static assets — Cloudflare and browsers will cache these.
+# Cache headers for static assets — browsers cache these for a year.
 # A year of `immutable` is only safe because every CSS and JS served here is
 # versioned in its URL, by one of two mechanisms:
 #   - AssetMapper fingerprints the filename with a content hash (public/assets/)
 #   - the back-office files under public/css/ and public/js/ are plain paths, so
 #     DashboardController::configureAssets() appends `?v=<filemtime>`
-# Serving an unversioned CSS or JS from public/ therefore ships a file no
-# visitor can be made to re-fetch short of a manual Cloudflare purge.
+# `immutable` means a returning browser does not even revalidate, so serving an
+# unversioned CSS or JS from public/ ships a file that no deploy can replace
+# until each visitor force-reloads by hand.
 <IfModule mod_expires.c>
     ExpiresActive On
 

@@ -64,6 +64,11 @@
 
 ### 4. Caching
 
+> **The site is not proxied through Cloudflare** — the account is used for
+> Turnstile only (see the section below). Nothing is cached at an edge; the
+> headers below act on visitors' browsers alone. The rest of this section
+> describes what would apply if the proxy were ever switched on.
+
 Cloudflare automatically caches static assets (CSS, JS, images, fonts) when
 the proxy is active. The `.htaccess` file is configured with proper cache
 headers:
@@ -77,8 +82,9 @@ AssetMapper does it with a content hash in the filename; the back-office files
 under `public/css/` and `public/js/` are plain paths, so
 `DashboardController::configureAssets()` appends `?v=<filemtime>` to each. Add
 an unversioned stylesheet or script under `public/` and a deploy will ship new
-markup to browsers still holding the old file — no `git pull` or `cache:clear`
-can reach them, only a manual Cloudflare purge.
+markup to browsers still holding the old file — `immutable` means they will not
+even ask the server whether it changed, so no `git pull` or `cache:clear` can
+reach them and each visitor has to force-reload by hand.
 
 ### 5. Trusted proxies (already configured)
 
@@ -318,7 +324,9 @@ php bin/console asset-map:compile
 php bin/console cache:clear
 ```
 
-No Cloudflare purge is needed: asset URLs change whenever their contents do.
+Nothing has to be purged and no one has to force-reload: asset URLs change
+whenever their contents do, so a browser fetches the new file simply because it
+has never seen that URL.
 Migrations are the only step that can be skipped when a release touches no
 mapping — `doctrine:migrations:migrate` is a no-op then, so it stays in the
 list.
