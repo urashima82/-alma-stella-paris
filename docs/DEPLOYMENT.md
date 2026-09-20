@@ -1,15 +1,18 @@
 # Deployment Guide — Alma Stella Paris
 
-> **Last updated:** 2026-04-15
-> **Status:** Pre-production — infrastructure preparation done in code,
-> awaiting domain purchase and hosting setup.
+> **Last updated:** 2026-09-20
+> **Status:** Deployed on o2switch, shop not yet open to the public.
+>
+> This file was first written in April 2026 as a plan, around a Cloudflare
+> proxy that was never put in place. It now describes the infrastructure as it
+> actually is.
 
 ---
 
 ## Table of contents
 
 1. [Infrastructure overview](#infrastructure-overview)
-2. [Cloudflare setup](#cloudflare-setup)
+2. [Caching & client IP](#caching--client-ip)
 3. [Cloudflare Turnstile (bot protection)](#cloudflare-turnstile-bot-protection)
 4. [Environment configuration](#environment-configuration)
 5. [Server requirements](#server-requirements)
@@ -21,61 +24,38 @@
 ## Infrastructure overview
 
 ```
-┌─────────────────┐     ┌───────────────────┐     ┌─────────────────────┐
-│   Visitor        │────▶│   Cloudflare       │────▶│   Hosting server     │
-│   (browser)      │◀────│   (DNS + CDN +     │◀────│   (PHP 8.3 + Apache  │
-│                  │     │    DDoS + Turnstile)│     │    + MariaDB 10.11)  │
-└─────────────────┘     └───────────────────┘     └─────────────────────┘
+┌─────────────────┐              ┌──────────────────────────────┐
+│   Visitor        │─────────────▶│  o2switch (shared hosting)    │
+│   (browser)      │◀─────────────│  LiteSpeed + PHP 8.3          │
+└─────────────────┘   no proxy    │  + MariaDB 10.11              │
+                      no CDN      └───────────────┬──────────────┘
+                                                  │ server to server
+                                                  ▼
+                                   Stripe · Turnstile · Gemini · SMTP
 ```
 
-- **DNS & CDN:** Cloudflare (free plan sufficient)
-- **Bot protection:** Cloudflare Turnstile on public forms
-- **SSL:** Managed by Cloudflare (Full Strict mode recommended)
-- **Payment:** Stripe (always charges in USD)
-- **Email:** SMTP provider (Postmark, Mailgun, or Amazon SES)
+- **Request path:** visitors reach the host directly. Nothing sits in front —
+  no CDN, no reverse proxy. This matters for caching and for client IPs, both
+  covered in the next section.
+- **Bot protection:** Cloudflare Turnstile on public forms. It is an API the
+  server calls, not a proxy in front of the site, and it is the **only** use of
+  Cloudflare here.
+- **TLS:** managed by the host.
+- **Payment:** Stripe, always charged in **EUR** (see "Money" in
+  `ARCHITECTURE.md` — display currencies are cosmetic).
+- **Email:** SMTP provider.
 
 ---
 
-## Cloudflare setup
+## Caching & client IP
 
-### 1. Add the domain
+Two consequences of having nothing in front of the host.
 
-1. Create a Cloudflare account at [dash.cloudflare.com](https://dash.cloudflare.com)
-2. Add the domain (e.g. `almastellaparis.com`)
-3. Cloudflare provides two nameservers — update them at the domain registrar
-4. Wait for DNS propagation (usually < 24h)
+### Static asset caching
 
-### 2. DNS records
-
-| Type  | Name              | Content              | Proxy |
-|-------|-------------------|----------------------|-------|
-| A     | `@`               | Server IP            | ✅ Proxied |
-| CNAME | `www`             | `almastellaparis.com`| ✅ Proxied |
-| MX    | `@`               | Mail provider        | ❌ DNS only |
-| TXT   | `@`               | SPF record           | ❌ DNS only |
-| TXT   | `_dmarc`          | DMARC record         | ❌ DNS only |
-
-### 3. SSL/TLS settings
-
-- **Encryption mode:** Full (Strict)
-- **Always Use HTTPS:** On
-- **Minimum TLS Version:** 1.2
-- **Automatic HTTPS Rewrites:** On
-
-### 4. Caching
-
-> **The site is not proxied through Cloudflare** — the account is used for
-> Turnstile only (see the section below). Nothing is cached at an edge; the
-> headers below act on visitors' browsers alone. The rest of this section
-> describes what would apply if the proxy were ever switched on.
-
-Cloudflare automatically caches static assets (CSS, JS, images, fonts) when
-the proxy is active. The `.htaccess` file is configured with proper cache
-headers:
-
-- **CSS/JS (versioned):** 1 year + `Cache-Control: immutable`
-- **Images:** 1 month
-- **Fonts:** 1 year
+`public/.htaccess` gives every CSS and JS a year of `Cache-Control: immutable`,
+images a month, fonts a year. There is no edge cache — these headers act on
+visitors' browsers alone, and there is nothing to purge on a deploy.
 
 That year is only safe because every CSS and JS carries a version in its URL.
 AssetMapper does it with a content hash in the filename; the back-office files
@@ -86,22 +66,35 @@ markup to browsers still holding the old file — `immutable` means they will no
 even ask the server whether it changed, so no `git pull` or `cache:clear` can
 reach them and each visitor has to force-reload by hand.
 
-### 5. Trusted proxies (already configured)
-
-The application is configured to trust Cloudflare's proxy headers in
-production (`config/packages/framework.yaml`):
+### Trusted proxies — must stay empty
 
 ```yaml
+# config/packages/framework.yaml
 when@prod:
     framework:
         trusted_proxies: '%env(TRUSTED_PROXIES)%'
         trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
 ```
 
-Set `TRUSTED_PROXIES=REMOTE_ADDR` in the production environment. This tells
-Symfony to read the real client IP from the `X-Forwarded-For` header sent by
-Cloudflare. Without this, rate limiting and logging would see Cloudflare's IP
-instead of the visitor's.
+**`TRUSTED_PROXIES` must be empty in production.** It exists for a reverse
+proxy that is not there.
+
+Setting it to `REMOTE_ADDR` — as this guide wrongly instructed until
+2026-09-20 — tells Symfony to trust the machine the request came from. With a
+proxy in front that is the proxy; without one it is the **visitor**, who can
+then set `X-Forwarded-For` to anything and have `Request::getClientIp()` return
+it. Every IP-based control in the app reads that value:
+
+| Where | What a spoofed IP buys |
+|---|---|
+| `MaintenanceModeSubscriber` | walks past maintenance mode using an allowlisted IP |
+| `AdminLoginController` | unlimited magic-link emails to the admin address |
+| `SecurityController`, `ContactController`, `CheckoutController` | rate limiters reset on every request |
+| `security.yaml` `login_throttling` | customer login brute-force unthrottled |
+
+If a proxy or CDN is ever put in front of the site, set `TRUSTED_PROXIES` to
+that proxy's ranges — never to `REMOTE_ADDR` on a shared host, where the value
+is only as trustworthy as the immediate peer.
 
 ---
 
@@ -109,6 +102,10 @@ instead of the visitor's.
 
 Turnstile is Cloudflare's invisible CAPTCHA alternative. It protects public
 forms against bots without adding friction for legitimate users.
+
+This is the only part of Cloudflare in use: the domain is not on Cloudflare's
+nameservers and no traffic is proxied through it. Setting Turnstile up needs
+nothing but an account and a site registered in the dashboard.
 
 ### Protected forms
 
@@ -202,7 +199,7 @@ cp .env.prod.dist .env.prod.local
 | `STRIPE_PUBLIC_KEY` | `pk_live_...` | Stripe Dashboard → API keys |
 | `STRIPE_SECRET_KEY` | `sk_live_...` | Stripe Dashboard → API keys |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Stripe Dashboard → Webhooks |
-| `TRUSTED_PROXIES` | `REMOTE_ADDR` | Required behind Cloudflare |
+| `TRUSTED_PROXIES` | *(empty)* | Nothing proxies this site — see "Trusted proxies" |
 | `TURNSTILE_SITE_KEY` | `0x4AAA...` | Cloudflare Dashboard → Turnstile |
 | `TURNSTILE_SECRET_KEY` | `0x4AAA...` | Cloudflare Dashboard → Turnstile |
 | `DEFAULT_URI` | `https://www.almastellaparis.com` | For CLI URL generation |
@@ -335,10 +332,10 @@ list.
 
 ## Post-deployment checklist
 
-- [ ] DNS points to Cloudflare nameservers
-- [ ] Cloudflare proxy enabled (orange cloud) on A and CNAME records
-- [ ] SSL mode set to Full (Strict) in Cloudflare
-- [ ] `TRUSTED_PROXIES=REMOTE_ADDR` in production env
+- [ ] HTTPS served and forced by the host
+- [ ] `TRUSTED_PROXIES` empty in the production env (nothing proxies the site —
+      a non-empty value makes every IP-based rate limit and the maintenance
+      allowlist spoofable)
 - [ ] Turnstile site created and keys configured
 - [ ] Stripe webhook endpoint configured: `https://domain.com/en/checkout/webhook`
 - [ ] Stripe webhook signing secret set in `STRIPE_WEBHOOK_SECRET`

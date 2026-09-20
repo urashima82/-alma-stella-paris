@@ -206,6 +206,11 @@ Production runs on shared hosting; these things exist only because of it:
   the committed manifests. The host also drops `error_log` files at the webroot;
   they are gitignored, not Symfony logs — read them on the server.
 
+- **`TRUSTED_PROXIES` must stay empty.** Nothing proxies the site — Cloudflare is
+  used for Turnstile only, as an API the server calls, not as a front. Setting it
+  to `REMOTE_ADDR` trusts the immediate peer, which here is the visitor, so anyone
+  could forge `X-Forwarded-For` and steer `getClientIp()`: the maintenance-mode
+  allowlist, every rate limiter and `login_throttling` all read it.
 - **The host kills PATCH requests** (HTTP/2 protocol error before the app), which broke
   every EasyAdmin index toggle. The fix has two halves that only work together:
   `public/js/admin-method-override.js` rewrites same-origin PATCH fetches to
