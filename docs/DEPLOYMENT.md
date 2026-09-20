@@ -184,11 +184,19 @@ The CSP in `SecurityHeadersSubscriber` already allows Turnstile:
 ### Template
 
 A documented production template is available at **`.env.prod.dist`**.
-To configure production:
+
+The server keeps its real values in **`.env.local`**, which Dotenv loads for
+every environment. `.env.prod.local` would work too — it is read later and wins
+— but only one of the two should carry a given variable, or the winner is
+decided by a load order nobody remembers:
+
+```
+.env  →  .env.local  →  .env.prod  →  .env.prod.local
+```
 
 ```bash
-cp .env.prod.dist .env.prod.local
-# Edit .env.prod.local with real values
+cp .env.prod.dist .env.local
+# Edit .env.local with real values, on the server only (it is gitignored)
 ```
 
 ### Required variables
@@ -206,14 +214,21 @@ cp .env.prod.dist .env.prod.local
 | `TURNSTILE_SECRET_KEY` | `0x4AAA...` | Cloudflare Dashboard → Turnstile |
 | `DEFAULT_URI` | `https://www.almastellaparis.com` | For CLI URL generation |
 
-### Compiling env for production
+### Compiling env for production — optional, and sticky
 
 ```bash
 composer dump-env prod
 ```
 
-This creates `.env.local.php` with all variables compiled — no file parsing
-at runtime.
+This creates `.env.local.php` with all variables compiled, so nothing is parsed
+at runtime. It is **not** currently used on this deployment, and it is worth
+knowing why that matters before running it: once `.env.local.php` exists,
+`Dotenv::bootEnv()` loads it and stops — every `.env*` file is ignored. Editing
+`.env.local` then changes nothing until `composer dump-env prod` is run again,
+with no warning and no error.
+
+If it is ever adopted, add that command to the deployment steps above, right
+after the `git pull`.
 
 ---
 
