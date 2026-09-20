@@ -56,7 +56,6 @@ class ProductCrudController extends AbstractCrudController
 {
     public function __construct(
         private readonly AiGenerationDispatcher $aiDispatcher,
-        private readonly \App\Service\ShippingCostProvider $shippingCostProvider,
         private readonly EntityManagerInterface $entityManager,
         private readonly AdminUrlGenerator $adminUrlGenerator,
         private readonly GeneratedVisualRepository $generatedVisualRepository,
@@ -146,14 +145,19 @@ class ProductCrudController extends AbstractCrudController
                 ->setBasePath('/uploads/products');
             yield TextField::new('nameFr', 'Nom')
                 ->setCssClass('field-text cell-name');
-            yield NumberField::new('basePrice', 'Prix affiché (EUR)')
+            // The raw price as typed on the form, not the shipping-inclusive
+            // display price: the list is where the shop owner checks what she
+            // entered, and a different number there reads like a mistake. It also
+            // makes the column agree with its own sort, which runs on `base_price`
+            // and ignored the tier the old value folded in.
+            yield NumberField::new('basePrice', 'Prix de base (hors FDP)')
                 ->setNumDecimals(2)
                 ->setCssClass('field-number cell-price')
                 // French separators: the back-office runs on the `fr` locale, and
                 // every other amount on it (MoneyField on the form) already reads
                 // `45,00 €`. `number_format` does not follow the locale on its own.
-                ->formatValue(fn ($value, Product $entity): string => \number_format(
-                    $this->shippingCostProvider->getDisplayPrice($entity->getBasePrice(), $entity->getShippingTier()),
+                ->formatValue(static fn ($value, Product $entity): string => \number_format(
+                    $entity->getBasePrice(),
                     2,
                     ',',
                     "\u{00A0}",

@@ -70,6 +70,7 @@ order of completion:
 - [x] 20k — Fiche produit : barre d'actions fixée en bas en mobile (secondaires en icône seule), « Sauvegarder et modifier » remplacé par « Retour à la liste »
 - [x] 20l — Back-office forcé en `fr` (libellés natifs EasyAdmin traduits) sans contaminer la locale boutique ; montants admin en séparateurs français
 - [x] 20m — Onglet « Fiche produit » renommé « Fiche » : les trois onglets tiennent sur une ligne jusqu'à 320 px
+- [x] 20n — Liste produits : colonne prix sur `base_price` brut, libellée « Prix de base (hors FDP) », cohérente avec la fiche et avec son tri
 
 ---
 

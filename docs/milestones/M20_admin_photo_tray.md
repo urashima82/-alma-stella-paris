@@ -177,6 +177,20 @@ sont référencés ailleurs — par l'injection JS des deux espaces IA, par
 `ProductWizardController::buildProductEditUrl()` et par les liens des listes
 de visuels et de suggestions.
 
+## Suite du 2026-09-20 — prix de la liste sans les frais de port
+
+La colonne prix affichait le prix de vente public, frais de port du
+`ShippingTier` compris : le produit 222 valait `45,00 €` sur sa fiche et
+`55,00 €` dans la liste. Estelle s'y perdait — la liste est l'endroit où elle
+relit ce qu'elle a saisi.
+
+La colonne montre donc désormais `base_price` brut, libellée
+« Prix de base (hors FDP) » pour reprendre le terme du formulaire. Effet de
+bord bienvenu : la colonne s'accorde enfin avec son propre tri, qui porte sur
+`base_price` et ignorait la tranche que l'ancienne valeur y ajoutait.
+`ShippingCostProvider` n'était injecté dans `ProductCrudController` que pour ce
+calcul et en a été retiré.
+
 ## Pièges rencontrés
 
 - **CSP.** `SecurityHeadersSubscriber` pose `img-src 'self' data:` pour tout le
