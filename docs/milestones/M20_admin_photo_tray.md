@@ -91,6 +91,20 @@ données distinct + déplacement des fichiers + cron de purge) et l'extension du
 verrou client aux autres champs (colmatage : le serveur peut toujours refuser
 pour un motif que le client ignore).
 
+## Suite du 2026-09-20 — panneau sources repliable en écran étroit
+
+Deuxième retour d'usage : dans l'onglet Visuels IA, les photos sources
+occupaient tout l'écran avant les visuels générés dès que la mise en page passe
+en une colonne. Le panneau se replie désormais au clic sur son en-tête, avec le
+compteur (« 2 / 4 ») qui reste visible replié.
+
+Le pli n'existe **que** sous le point de rupture de `.ai-workspace__split` : au
+dessus, l'en-tête redevient un titre inerte. Il est déplié par défaut quand le
+produit n'a encore aucune photo — sinon on masquerait la seule chose à faire —
+et l'état survit au remplacement du fragment après un envoi.
+
+Le wizard n'est pas concerné : les photos y sont le sujet de la page.
+
 ## Pièges rencontrés
 
 - **CSP.** `SecurityHeadersSubscriber` pose `img-src 'self' data:` pour tout le
@@ -103,6 +117,10 @@ pour un motif que le client ignore).
 - **`hidden` battu par `display`.** Une règle auteur `display: flex` l'emporte sur
   le `[hidden] { display: none }` de la feuille du navigateur : la zone d'ajout
   serait restée visible une fois les 4 photos atteintes.
+- **Fragment serveur désynchronisé.** `sourcesFragmentResponse()` remplace tout
+  le balisage du plateau : avoir oublié d'y passer `collapsible` faisait
+  disparaître le bouton de pli dès la première photo ajoutée, alors que le rendu
+  initial était correct.
 - **Toast générique sur 422.** `admin-toast.js` intercepte les mutations `/admin`
   et affichait « Une erreur est survenue » par-dessus les messages précis du
   formulaire. Un 422 est une réponse de validation, pas une panne : il est

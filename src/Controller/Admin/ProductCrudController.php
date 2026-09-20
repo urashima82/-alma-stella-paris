@@ -484,6 +484,10 @@ class ProductCrudController extends AbstractCrudController
                 'sourcePhotos' => $product->getSourcePhotos(),
                 'photoAngles' => PhotoAngle::cases(),
                 'defaultAngles' => PhotoAngle::defaultSequence(),
+                // Must mirror the include in _ai_workspace.html.twig: this
+                // fragment replaces that markup wholesale, so omitting the flag
+                // silently strips the fold away on the first upload.
+                'collapsible' => true,
             ]),
         ]);
     }

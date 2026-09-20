@@ -259,6 +259,13 @@ Production runs on shared hosting; these things exist only because of it:
   the HTML branch is kept only for a non-JS caller. The client-side gate on the photo
   count is a convenience on top, not the safety net. `admin-toast.js` deliberately stays
   silent on `422` — the page already carries the reasons.
+- **The sources panel folds once the workspace stacks into one column**, so the photos
+  stop burying the generated visuals on a phone. Two traps: the breakpoint is written in
+  both `admin.css` and `admin-photo-tray.js` and has to stay in sync with
+  `.ai-workspace__split`, and `sourcesFragmentResponse()` must pass `collapsible` exactly
+  like the workspace include — the fragment replaces that markup wholesale, so omitting
+  it silently strips the fold away on the first upload. The wizard opts out: there the
+  photos are the subject of the page, not a side panel.
 - **Photos are re-encoded in the browser** (WebP, 2048px max) before they go anywhere.
   That is what keeps the wizard's single POST under `post_max_size` on a phone, and it
   shrinks every payload later base64-encoded into a Gemini call.

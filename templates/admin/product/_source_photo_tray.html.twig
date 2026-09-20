@@ -15,6 +15,10 @@
    - photoAngles   PhotoAngle[]      — options of every angle select
    - defaultAngles PhotoAngle[]      — angle proposed to the nth staged photo
    - minPhotos / maxPhotos           — optional overrides of the entity bounds
+   - collapsible   bool              — when true, the body folds away once the
+                                       workspace stacks into one column. Off in
+                                       the wizard, where the photos are the
+                                       subject of the page, not a side panel.
    - sourcePhotos  iterable<SourcePhoto> (live)
    - product       App\Entity\Product     (live)
    - fieldName     string                 (staged) — e.g. `product_wizard[photos]`
@@ -24,6 +28,10 @@
 {% set max_photos = maxPhotos|default(constant('App\\Entity\\SourcePhoto::MAX_PER_PRODUCT')) %}
 {% set is_live = mode == 'live' %}
 {% set saved_photos = is_live ? sourcePhotos : [] %}
+{% set is_collapsible = collapsible|default(false) %}
+{# Start folded only when there is something to fold: with no photo yet the
+   "Ajouter des photos" zone is the whole point of the panel. #}
+{% set starts_folded = is_collapsible and saved_photos|length > 0 %}
 
 <div class="photo-tray"
      data-photo-tray
@@ -31,19 +39,31 @@
      data-tray-min="{{ min_photos }}"
      data-tray-max="{{ max_photos }}"
      data-tray-default-angles="{{ defaultAngles|map(a => a.value)|join(',') }}"
+     {% if is_collapsible %}
+         data-tray-collapsible
+         data-tray-collapsed="{{ starts_folded ? '1' : '0' }}"
+     {% endif %}
      {% if is_live %}
          data-tray-upload-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineUploadSources').setEntityId(product.id).generateUrl() }}"
      {% else %}
          data-tray-field-name="{{ fieldName }}"
      {% endif %}>
 
-    <div class="photo-tray__head">
+    {# Always the same markup; only the collapsible variant is a <button>, and
+       CSS strips it back to a plain header above the stacking breakpoint. #}
+    <{{ is_collapsible ? 'button' : 'div' }} class="photo-tray__head"
+        {%- if is_collapsible %} type="button" data-tray-toggle aria-controls="photo-tray-body" aria-expanded="{{ starts_folded ? 'false' : 'true' }}"{% endif %}>
         <span class="photo-tray__title">
             <i class="fa fa-camera" aria-hidden="true"></i>
             Photos sources
         </span>
         <span class="photo-tray__counter" data-tray-counter>0 / {{ max_photos }}</span>
-    </div>
+        {% if is_collapsible %}
+            <i class="fa fa-chevron-down photo-tray__chevron" aria-hidden="true"></i>
+        {% endif %}
+    </{{ is_collapsible ? 'button' : 'div' }}>
+
+    <div class="photo-tray__body" id="photo-tray-body">
 
     <p class="photo-tray__empty" data-tray-empty hidden>
         Ajoutez {{ min_photos }} à {{ max_photos }} photos du bijou. L'IA s'en sert pour écrire la fiche et générer les visuels.
@@ -95,6 +115,8 @@
         <button type="button" class="btn btn-link photo-tray__discard" data-tray-discard>
             {{ is_live ? 'Retirer les nouvelles' : 'Tout retirer' }}
         </button>
+    </div>
+
     </div>
 
     {# Cloned by the JS for every staged pick. The hidden file input only gets a

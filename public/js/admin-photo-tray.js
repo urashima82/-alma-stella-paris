@@ -270,6 +270,31 @@
         });
     }
 
+    // ── Collapsing (narrow screens only) ────────────────────────────────────
+
+    /**
+     * Matches the breakpoint where `.ai-workspace__split` stops being two
+     * columns: once the sources panel is full width it pushes the generated
+     * visuals off screen, which is the whole reason to fold it. Above it the
+     * CSS ignores the collapsed flag entirely.
+     */
+    const COLLAPSE_QUERY = '(max-width: 1100px)';
+
+    function collapseApplies() {
+        return window.matchMedia(COLLAPSE_QUERY).matches;
+    }
+
+    function syncCollapse(tray) {
+        const toggle = tray.querySelector('[data-tray-toggle]');
+        if (!toggle) {
+            return;
+        }
+        // aria has to describe what the viewer actually sees, and above the
+        // breakpoint the body is open whatever the flag says.
+        const folded = collapseApplies() && tray.dataset.trayCollapsed === '1';
+        toggle.setAttribute('aria-expanded', folded ? 'false' : 'true');
+    }
+
     // ── Tray state ──────────────────────────────────────────────────────────
 
     function setBusy(tray, busy, message) {
@@ -381,6 +406,12 @@
             window.location.reload();
 
             return;
+        }
+
+        // The server re-renders with its own default fold state; refolding the
+        // panel under the viewer right after she uploaded into it would be rude.
+        if (newTray.hasAttribute('data-tray-collapsible') && oldTray.dataset.trayCollapsed !== undefined) {
+            newTray.dataset.trayCollapsed = oldTray.dataset.trayCollapsed;
         }
 
         oldTray.replaceWith(newTray);
@@ -583,6 +614,20 @@
             return;
         }
 
+        const toggle = event.target.closest('[data-tray-toggle]');
+        if (toggle) {
+            event.preventDefault();
+            const tray = toggle.closest('[data-photo-tray]');
+            // Above the breakpoint the head is a plain title: clicking it does
+            // nothing rather than flipping a flag with no visible effect.
+            if (tray && collapseApplies()) {
+                tray.dataset.trayCollapsed = tray.dataset.trayCollapsed === '1' ? '0' : '1';
+                syncCollapse(tray);
+            }
+
+            return;
+        }
+
         const removeButton = event.target.closest('[data-tray-remove]');
         if (removeButton) {
             event.preventDefault();
@@ -656,6 +701,7 @@
         tray.dataset.trayReady = '1';
         renumber(tray);
         refreshState(tray);
+        syncCollapse(tray);
     }
 
     function initAll() {
@@ -664,6 +710,15 @@
 
     function boot() {
         initAll();
+
+        // Crossing the breakpoint (rotation, resize) changes what is on screen
+        // without touching the flag, so aria has to be recomputed.
+        const query = window.matchMedia(COLLAPSE_QUERY);
+        const resync = () => document.querySelectorAll('[data-photo-tray]').forEach(syncCollapse);
+        if (typeof query.addEventListener === 'function') {
+            query.addEventListener('change', resync);
+        }
+
         // The edit page moves the workspace into its tab pane after load, so a
         // tray can appear well after DOMContentLoaded.
         new MutationObserver(initAll).observe(document.body, { childList: true, subtree: true });
