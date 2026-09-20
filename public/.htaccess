@@ -55,11 +55,17 @@ DirectoryIndex index.php
 </IfModule>
 
 # Cache headers for static assets — Cloudflare and browsers will cache these.
-# AssetMapper fingerprints filenames (content hash), so long cache is safe.
+# A year of `immutable` is only safe because every CSS and JS served here is
+# versioned in its URL, by one of two mechanisms:
+#   - AssetMapper fingerprints the filename with a content hash (public/assets/)
+#   - the back-office files under public/css/ and public/js/ are plain paths, so
+#     DashboardController::configureAssets() appends `?v=<filemtime>`
+# Serving an unversioned CSS or JS from public/ therefore ships a file no
+# visitor can be made to re-fetch short of a manual Cloudflare purge.
 <IfModule mod_expires.c>
     ExpiresActive On
 
-    # Fingerprinted assets (CSS, JS): 1 year (immutable via content hash)
+    # Versioned assets (CSS, JS): 1 year — see the note above
     ExpiresByType text/css "access plus 1 year"
     ExpiresByType text/javascript "access plus 1 year"
     ExpiresByType application/javascript "access plus 1 year"

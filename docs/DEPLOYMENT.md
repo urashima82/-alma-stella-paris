@@ -68,9 +68,17 @@ Cloudflare automatically caches static assets (CSS, JS, images, fonts) when
 the proxy is active. The `.htaccess` file is configured with proper cache
 headers:
 
-- **CSS/JS (fingerprinted):** 1 year + `Cache-Control: immutable`
+- **CSS/JS (versioned):** 1 year + `Cache-Control: immutable`
 - **Images:** 1 month
 - **Fonts:** 1 year
+
+That year is only safe because every CSS and JS carries a version in its URL.
+AssetMapper does it with a content hash in the filename; the back-office files
+under `public/css/` and `public/js/` are plain paths, so
+`DashboardController::configureAssets()` appends `?v=<filemtime>` to each. Add
+an unversioned stylesheet or script under `public/` and a deploy will ship new
+markup to browsers still holding the old file — no `git pull` or `cache:clear`
+can reach them, only a manual Cloudflare purge.
 
 ### 5. Trusted proxies (already configured)
 
@@ -309,6 +317,11 @@ php bin/console tailwind:build --minify
 php bin/console asset-map:compile
 php bin/console cache:clear
 ```
+
+No Cloudflare purge is needed: asset URLs change whenever their contents do.
+Migrations are the only step that can be skipped when a release touches no
+mapping — `doctrine:migrations:migrate` is a no-op then, so it stays in the
+list.
 
 ---
 

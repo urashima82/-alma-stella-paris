@@ -18,6 +18,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +35,8 @@ class DashboardController extends AbstractDashboardController
         private readonly TestimonialRepository $testimonialRepository,
         private readonly SiteSettingsRepository $siteSettingsRepository,
         private readonly GeneratedVisualRepository $generatedVisualRepository,
+        #[Autowire('%kernel.project_dir%')]
+        private readonly string $projectDir,
     ) {
     }
 
@@ -165,18 +168,39 @@ class DashboardController extends AbstractDashboardController
     public function configureAssets(): Assets
     {
         return Assets::new()
-            ->addJsFile('js/admin-method-override.js')
-            ->addCssFile('css/admin.css')
-            ->addCssFile('vendor/cropperjs/cropper.min.css')
-            ->addCssFile('css/admin-crop.css')
-            ->addJsFile('vendor/cropperjs/cropper.min.js')
-            ->addJsFile('js/admin-image-crop.js')
-            ->addJsFile('js/admin-toast.js')
-            ->addJsFile('js/admin-lightbox.js')
-            ->addJsFile('js/admin-photo-tray.js')
-            ->addJsFile('js/admin-ai-poll.js')
-            ->addJsFile('js/admin-ai-actions.js')
-            ->addJsFile('js/admin-ai-content.js');
+            ->addJsFile($this->versioned('js/admin-method-override.js'))
+            ->addCssFile($this->versioned('css/admin.css'))
+            ->addCssFile($this->versioned('vendor/cropperjs/cropper.min.css'))
+            ->addCssFile($this->versioned('css/admin-crop.css'))
+            ->addJsFile($this->versioned('vendor/cropperjs/cropper.min.js'))
+            ->addJsFile($this->versioned('js/admin-image-crop.js'))
+            ->addJsFile($this->versioned('js/admin-toast.js'))
+            ->addJsFile($this->versioned('js/admin-lightbox.js'))
+            ->addJsFile($this->versioned('js/admin-photo-tray.js'))
+            ->addJsFile($this->versioned('js/admin-ai-poll.js'))
+            ->addJsFile($this->versioned('js/admin-ai-actions.js'))
+            ->addJsFile($this->versioned('js/admin-ai-content.js'));
+    }
+
+    /**
+     * Stamps a back-office asset URL with the file's last modification time.
+     *
+     * These files are served straight out of `public/`, so unlike everything
+     * the AssetMapper compiles they carry no content hash in their name — while
+     * `public/.htaccess` hands every CSS and JS a one-year `immutable` cache and
+     * Cloudflare mirrors that at the edge. Without this suffix a deploy ships new
+     * markup to a browser still holding the previous stylesheet, and only a
+     * manual CDN purge clears it.
+     *
+     * `filemtime()` changes exactly when the file does, so an untouched asset
+     * keeps its cached copy across deploys. A missing file degrades to the bare
+     * path rather than breaking the page.
+     */
+    private function versioned(string $path): string
+    {
+        $modifiedAt = @\filemtime($this->projectDir.'/public/'.$path);
+
+        return $modifiedAt === false ? $path : $path.'?v='.$modifiedAt;
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu
