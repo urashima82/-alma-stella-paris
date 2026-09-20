@@ -1,0 +1,265 @@
+<title>Livraison et douane Alma Stella</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #FAF8F4;
+    --surface: #F0EBE1;
+    --line: #E8DDD0;
+    --text: #2C2418;
+    --muted: #7A6E5E;
+    --gold: #C9A84C;
+    --gold-ink: #8F7328;
+    --ok: #4F7A4A;
+    --warn: #B4622A;
+    --font-serif: "Cormorant Garamond", Georgia, serif;
+    --font-sans: Inter, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1E1913;
+      --surface: #2A241C;
+      --line: #3B3328;
+      --text: #F0EBE1;
+      --muted: #B3A692;
+      --gold: #D4B45E;
+      --gold-ink: #E2C878;
+      --ok: #8DBA86;
+      --warn: #E09262;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1E1913;
+    --surface: #2A241C;
+    --line: #3B3328;
+    --text: #F0EBE1;
+    --muted: #B3A692;
+    --gold: #D4B45E;
+    --gold-ink: #E2C878;
+    --ok: #8DBA86;
+    --warn: #E09262;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .page { max-width: 44rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  .eyebrow {
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold-ink); font-weight: 600; margin: 0 0 0.75rem;
+  }
+  h1 {
+    font-family: var(--font-serif); font-weight: 500; font-size: 2.6rem;
+    line-height: 1.1; margin: 0 0 0.5rem; text-wrap: balance;
+  }
+  .lede { color: var(--muted); margin: 0 0 2.5rem; font-size: 1.05rem; max-width: 36rem; }
+  h2 {
+    font-family: var(--font-serif); font-weight: 600; font-size: 1.85rem;
+    line-height: 1.15; margin: 3rem 0 1rem; text-wrap: balance;
+    padding-top: 1.25rem; border-top: 1px solid var(--line);
+  }
+  h3 {
+    font-family: var(--font-serif); font-weight: 600; font-size: 1.35rem;
+    margin: 2rem 0 0.5rem; text-wrap: balance;
+  }
+  p { margin: 0 0 1rem; max-width: 40rem; }
+  ul, ol { margin: 0 0 1rem; padding-left: 1.25rem; max-width: 40rem; }
+  li { margin-bottom: 0.4rem; }
+  strong { font-weight: 600; }
+  .summary {
+    background: var(--surface); border-left: 3px solid var(--gold);
+    padding: 1.25rem 1.5rem; margin: 0 0 2rem; max-width: 40rem;
+  }
+  .summary p:last-child { margin-bottom: 0; }
+  .pair { display: grid; gap: 0.75rem; margin: 0 0 1.25rem; }
+  .pair > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1rem; align-items: baseline; }
+  .pair .k { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .pair .k.do { color: var(--gold-ink); }
+  .pair p { margin: 0; }
+  @media (max-width: 480px) { .pair > div { grid-template-columns: 1fr; gap: 0.2rem; } }
+  .tablewrap { overflow-x: auto; margin: 0 0 1.5rem; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pill { display: inline-block; font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 999px; }
+  .pill.ok { color: var(--ok); border: 1px solid currentColor; }
+  .pill.warn { color: var(--warn); border: 1px solid currentColor; }
+  .steps { counter-reset: step; list-style: none; padding: 0; max-width: 40rem; }
+  .steps li { counter-increment: step; display: grid; grid-template-columns: 2rem 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .steps li::before {
+    content: counter(step); font-family: var(--font-serif); font-size: 1.3rem; font-weight: 600;
+    color: var(--gold-ink); line-height: 1.2;
+  }
+  .check { list-style: none; padding: 0; max-width: 40rem; }
+  .check li { display: grid; grid-template-columns: 1.25rem 1fr; gap: 0.6rem; }
+  .check li::before { content: ""; width: 0.9rem; height: 0.9rem; border: 1.5px solid var(--gold); margin-top: 0.35rem; }
+  .note { font-size: 0.9rem; color: var(--muted); }
+  .foot { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); }
+</style>
+
+<div class="page">
+  <p class="eyebrow">Alma Stella Paris · point du 3 septembre 2026</p>
+  <h1>Livraison et douane : ce qui a changé, et quoi faire</h1>
+  <p class="lede">Les règles d'envoi vers l'étranger ont beaucoup bougé en un an. Voici, destination par destination, ce que ça change pour toi et la façon la plus simple de t'organiser avant l'ouverture.</p>
+
+  <div class="summary">
+    <p><strong>En bref.</strong> Pour la France et l'Union européenne, rien ne change. Pour les États-Unis, tu paies désormais toi-même les droits de douane au moment d'acheter l'étiquette Colissimo, avant que le colis parte. Pour le Royaume-Uni, vendre à un particulier oblige à s'immatriculer à la TVA britannique : le plus simple est de ne pas y livrer. Pour la Suisse et le Canada, c'est la cliente qui paie des taxes à la réception, il faut juste le lui dire clairement. Et si tu préfères rester légère, une ouverture sans les États-Unis est comparée plus bas : c'est ce que je te conseille pour démarrer.</p>
+  </div>
+
+  <h2>Destination par destination</h2>
+
+  <h3>France et Union européenne <span class="pill ok">rien à faire</span></h3>
+  <div class="pair">
+    <div><span class="k">Ce qui change</span><p>Rien pour toi. Le droit européen autorise à offrir la livraison sur certains pays et à la faire payer sur d'autres, tant que le tarif dépend de l'adresse de livraison et pas de la nationalité de la cliente.</p></div>
+    <div><span class="k do">Conseil</span><p>Garde la livraison offerte. Pour les DOM-TOM, la participation aux frais actuelle est légitime : un Colissimo vers La Réunion coûte bien plus cher qu'en métropole.</p></div>
+  </div>
+
+  <h3>Suisse <span class="pill warn">à expliquer</span></h3>
+  <div class="pair">
+    <div><span class="k">Ce qui change</span><p>Rien de nouveau, mais un point souvent oublié : dès environ 60 CHF de valeur, la cliente suisse paie la TVA suisse (8,1 %) et des frais de dédouanement de la Poste suisse d'environ 13 CHF à la réception.</p></div>
+    <div><span class="k do">Conseil</span><p>Continuer à livrer, mais avec une phrase claire sur la fiche produit et au paiement : « TVA suisse et frais de dédouanement à régler à la réception ». Une cliente prévenue ne se plaint pas, une cliente surprise laisse un mauvais avis.</p></div>
+  </div>
+
+  <h3>Royaume-Uni <span class="pill warn">à retirer</span></h3>
+  <div class="pair">
+    <div><span class="k">Ce qui change</span><p>Depuis le Brexit, tout vendeur étranger qui expédie un colis de moins de 135 £ à un particulier britannique doit être immatriculé à la TVA au Royaume-Uni, facturer 20 % de TVA au moment du paiement et faire des déclarations trimestrielles là-bas.</p></div>
+    <div><span class="k do">Conseil</span><p>Ne pas livrer au Royaume-Uni. Ce n'est pas ton marché cible, et la paperasse ne vaut pas les quelques ventes. Si un jour une clientèle britannique se dessine, on rouvrira la question avec un comptable.</p></div>
+  </div>
+
+  <h3>États-Unis <span class="pill warn">nouvelle routine</span></h3>
+  <div class="pair">
+    <div><span class="k">Ce qui change</span><p>Jusqu'en août 2025, un colis de moins de 800 $ entrait sans droits de douane. C'est terminé : tout colis est taxé dès le premier dollar. Et surtout, pour un envoi par La Poste, <strong>c'est toi qui paies ces droits en achetant l'étiquette sur laposte.fr</strong>, avant le départ du colis. Ta cliente n'a plus rien à payer à la réception.</p></div>
+    <div><span class="k">Combien</span><p>Cela dépend du pays où le bijou a été fabriqué, pas de celui où tu l'as acheté : environ 21 % de la valeur pour une pièce fabriquée en Europe, autour de 35 % pour une pièce fabriquée en Chine, plus de petits frais de gestion de La Poste. L'affranchissement Colissimo vers les États-Unis est d'environ 35 €, quel que soit le poids en dessous de 500 g. Pour un bijou à 79 € fabriqué en Europe, cela fait autour de 54 € de coût réel pour toi.</p></div>
+    <div><span class="k do">Conseil</span><p>Transforme la contrainte en argument de vente : « droits de douane inclus, aucun frais à la réception ». C'est exactement ce que la clientèle américaine cherche depuis la fin de la franchise. Fais payer un forfait <strong>par commande</strong>, pas par bijou : deux ou trois pièces voyagent dans le même colis pour le même prix, ce qui encourage à commander plusieurs pièces.</p></div>
+  </div>
+
+  <h3>Canada <span class="pill warn">à expliquer</span></h3>
+  <div class="pair">
+    <div><span class="k">Ce qui change</span><p>Rien de nouveau. Le Canada taxe tout colis postal dès 20 CAD : la cliente paie à la réception les taxes canadiennes (5 à 15 % selon la province), d'éventuels droits, et 9,95 CAD de frais de Postes Canada.</p></div>
+    <div><span class="k do">Conseil</span><p>Même forfait d'envoi que les États-Unis, mais une phrase honnête au paiement : « taxes canadiennes à régler à la réception, environ 15 à 25 % ». Si le Canada devient important, on regardera plus tard une solution où tu paies pour elle.</p></div>
+  </div>
+
+  <h3>Reste du monde</h3>
+  <p>Même logique que le Canada : forfait d'envoi par commande, et une phrase indiquant que les taxes locales éventuelles sont à la charge de la cliente. Inutile de détailler pays par pays.</p>
+
+  <h2>Tu ne fabriques pas, tu sélectionnes : ce que ça change</h2>
+  <p>Acheter chez un grossiste puis remettre le bijou dans ton propre écrin ne change ni sa valeur déclarée ni son pays d'origine. Trois conséquences pratiques :</p>
+
+  <h3>Le pays d'origine, c'est celui du fabricant</h3>
+  <p>Pour la douane, un bijou fabriqué en Chine reste chinois même acheté à Paris ou à Mexico et reconditionné à Toulouse. C'est ce pays qu'il faut déclarer, jamais « France ». Une fausse origine est une fausse déclaration, et c'est le pays d'origine qui fixe le taux des droits américains, du simple au double selon les cas.</p>
+  <ul>
+    <li>Demande à chaque grossiste le pays de fabrication, écrit sur sa facture. S'il ne sait pas, change de grossiste : il est censé le savoir.</li>
+    <li>Cette information sert à la déclaration douanière. Elle n'a pas à figurer sur le site : voir plus bas ce qui peut rester discret.</li>
+  </ul>
+
+  <h3>Ramener du stock du Mexique est une importation</h3>
+  <p>Les bijoux achetés au Mexique pour être revendus ne sont pas des souvenirs : la franchise voyageur de 430 € ne s'applique qu'aux achats personnels. Au retour, il faut passer par la file « marchandises à déclarer » avec les factures du grossiste ; la douane prélève environ 4 % de droits et 20 % de TVA sur le prix d'achat. Deux façons de te simplifier la vie :</p>
+  <ul>
+    <li>Le plus simple : acheter chez des grossistes installés en France ou en Europe. Les bijoux sont déjà dédouanés, le grossiste porte la responsabilité de l'importation, et sa facture indique l'origine.</li>
+    <li>Si tu tiens au sourcing mexicain : fais expédier par le grossiste vers la France avec une facture commerciale, ou déclare à l'aéroport. Ce que tu paies à la douane est une charge déductible.</li>
+  </ul>
+
+  <h3>Rester discrète sur la provenance : ce qui est possible</h3>
+  <p>Depuis décembre 2024, toute boutique en ligne européenne doit afficher sur chaque fiche produit le nom et l'adresse du « fabricant ». Pris au pied de la lettre, cela reviendrait à nommer ton grossiste ou l'usine. Il existe une voie propre pour l'éviter, celle de toutes les marques qui vendent sous leur nom des pièces qu'elles ne fabriquent pas :</p>
+  <ul>
+    <li><strong>Vendre sous ta marque fait de toi le fabricant au sens de la loi.</strong> Un bijou mis sur le marché sous le nom « Alma Stella Paris » a pour fabricant Alma Stella Paris. Sur la fiche produit, c'est donc ton nom et ton adresse professionnelle qui apparaissent, et personne d'autre. Aucun fournisseur à nommer, aucun pays à afficher.</li>
+    <li><strong>La contrepartie :</strong> tu assumes la responsabilité de la sécurité du bijou. Pour de l'acier inoxydable, le risque est faible, mais demande à chaque grossiste une attestation de conformité européenne (nickel, plomb, cadmium) et garde-la avec ses factures. C'est ton seul vrai devoir.</li>
+    <li><strong>En Europe, rien ne t'oblige à indiquer le pays de fabrication.</strong> La seule règle est de ne pas laisser croire le contraire : « sélectionné à Paris et au Mexique » est parfait, « fabriqué en France » ou « fait main par Estelle » serait trompeur. Si une cliente demande, réponds simplement que tu sélectionnes des pièces auprès d'ateliers partenaires.</li>
+  </ul>
+  <p><strong>La limite, ce sont les États-Unis.</strong> La douane américaine exige que le pays de fabrication soit écrit sur la déclaration collée sur le colis et lisible par la cliente sur le bijou ou son emballage. Impossible d'y échapper, mais tu peux le rendre discret : une petite mention « Made in … » sous la boîte, pas sur la carte de la marque. La clientèle américaine y est habituée et ne s'en formalise pas.</p>
+  <p class="note">Ton adresse professionnelle apparaît déjà dans tes conditions de vente. Si tu préfères ne pas afficher ton adresse personnelle sur chaque fiche produit, une adresse de domiciliation d'entreprise fait l'affaire.</p>
+
+  <h2>Ce que paie la cliente, en un coup d'œil</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Destination</th><th>Au paiement sur le site</th><th>À la réception du colis</th></tr></thead>
+      <tbody>
+        <tr><td>France, Union européenne</td><td>Prix du bijou, livraison offerte</td><td>Rien</td></tr>
+        <tr><td>Suisse</td><td>Prix du bijou, livraison offerte</td><td>TVA 8,1 % + environ 13 CHF de frais</td></tr>
+        <tr><td>États-Unis</td><td>Prix du bijou + forfait, droits inclus</td><td>Rien</td></tr>
+        <tr><td>Canada, reste du monde</td><td>Prix du bijou + forfait</td><td>Taxes locales et frais du transporteur</td></tr>
+        <tr><td>Royaume-Uni</td><td colspan="2">Pas de livraison</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Un tarif simple à tenir</h2>
+  <p>Aujourd'hui le site fait payer, hors zone offerte, une participation par bijou. Comme toutes tes pièces sont légères et voyagent dans une seule enveloppe, un forfait par commande est plus simple pour toi et plus attractif pour elle. Une proposition de départ, à ajuster avec Nicolas :</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Zone</th><th>Forfait par commande</th><th>Ce qu'il couvre</th></tr></thead>
+      <tbody>
+        <tr><td>Union européenne, Suisse</td><td class="num">Offert</td><td>Colissimo Europe, déjà compris dans le prix affiché</td></tr>
+        <tr><td>États-Unis</td><td class="num">39 €, droits inclus</td><td>Colissimo (~35 €) et une partie des droits ; le reste est absorbé par ta marge, surtout sur les commandes d'une seule pièce</td></tr>
+        <tr><td>Canada, reste du monde</td><td class="num">29 €</td><td>Colissimo international, la cliente paie ses taxes à l'arrivée</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Ces montants sont indicatifs. L'important est le principe : un seul chiffre par zone, par commande, que tu peux changer toi-même dans l'administration du site.</p>
+
+  <h2>L'option radicale : ouvrir moins de pays</h2>
+  <p>Tu gères tout seule. La question mérite d'être posée franchement : est-ce que l'international vaut le temps qu'il demande ? La réponse n'est pas tout ou rien, parce que le poids administratif ne vient pas de « l'étranger » en général, mais de deux pays précis.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Destinations</th><th>Ce que ça te demande par commande</th><th>Poids pour toi</th></tr></thead>
+      <tbody>
+        <tr><td>France, Union européenne</td><td>Une étiquette Colissimo, rien d'autre</td><td class="num"><span class="pill ok">aucun</span></td></tr>
+        <tr><td>Suisse, Canada, Australie, Japon…</td><td>La même étiquette, plus une déclaration de contenu en anglais sur laposte.fr. La cliente paie ses taxes à l'arrivée, tu n'avances rien.</td><td class="num"><span class="pill ok">léger</span></td></tr>
+        <tr><td>États-Unis</td><td>Déclaration détaillée, droits payés par toi au départ, numéro EORI, amende en cas d'erreur, coût réel autour de 54 € par colis</td><td class="num"><span class="pill warn">lourd</span></td></tr>
+        <tr><td>Royaume-Uni</td><td>Immatriculation à la TVA britannique et déclarations trimestrielles</td><td class="num"><span class="pill warn">lourd</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Trois configurations possibles, de la plus légère à la plus ouverte :</p>
+  <ol class="steps">
+    <li><span><strong>Europe seulement</strong> (Union européenne et Suisse). Zéro douane, zéro déclaration. Le revers : la boutique a été pensée pour une clientèle américaine et canadienne, avec les prix en dollars. Si ton audience Instagram est surtout là-bas, tu fermes la porte à tes meilleures clientes.</span></li>
+    <li><span><strong>Tout sauf les États-Unis et le Royaume-Uni.</strong> Tu gardes le Canada et le reste du monde, où la cliente paie ses taxes elle-même : pour toi, c'est la même étiquette que pour la Suisse. C'est le meilleur rapport entre simplicité et ouverture.</span></li>
+    <li><span><strong>Tout, États-Unis compris</strong>, avec la routine décrite plus bas. À réserver au moment où tu auras des demandes américaines réelles, et où tu auras déjà fait quelques envois vers le Canada pour prendre la main.</span></li>
+  </ol>
+  <div class="summary">
+    <p><strong>Ce que je te conseille :</strong> ouvrir avec la configuration 2, et décider pour les États-Unis sur des faits plutôt que sur une crainte. Regarde dans tes statistiques Instagram d'où viennent tes abonnées : si les États-Unis pèsent lourd, ouvre-les dès que ta routine canadienne est rodée ; sinon, laisse-les fermés sans regret. Nicolas prévoira que tu puisses ouvrir ou fermer un pays toi-même dans l'administration du site, sans nouvelle intervention technique.</p>
+  </div>
+
+  <h2>Ta routine pour un envoi vers les États-Unis</h2>
+  <ol class="steps">
+    <li><span>Achète l'étiquette Colissimo <strong>sur laposte.fr</strong>, jamais au guichet : le guichet ne prend plus les marchandises pour les États-Unis.</span></li>
+    <li><span>Déclare la valeur réelle payée par la cliente pour le bijou, hors frais de port. Ne coche jamais « cadeau » : c'est une vente, et une fausse déclaration coûte cher.</span></li>
+    <li><span>Décris le contenu en anglais, toujours la même phrase : <em>stainless steel fashion jewelry with natural stones</em>, code douanier 7117.19, et le pays de fabrication indiqué par le grossiste.</span></li>
+    <li><span>Renseigne le numéro de téléphone portable et l'État de la cliente : sans eux, le colis est bloqué.</span></li>
+    <li><span>Paie les droits en ligne avec l'étiquette et garde le justificatif avec la facture de la commande.</span></li>
+    <li><span>Valeur maximale par Colissimo : 650 €. Au-delà, il faut passer par Chronopost.</span></li>
+  </ol>
+  <p>À faire une fois : demander un numéro EORI sur douane.gouv.fr. C'est gratuit, ça prend quelques minutes et La Poste le réclame pour les envois commerciaux hors Europe.</p>
+
+  <h2>Quand une cliente hors Europe renvoie un bijou</h2>
+  <p>Depuis le 1er juillet 2026, tout colis qui entre en Europe depuis l'étranger est taxé, même un retour. Pour éviter de payer des droits et de la TVA sur ton propre bijou, demande à la cliente d'écrire <strong>« Returned goods »</strong> sur la déclaration douanière et de glisser une copie de sa facture dans le colis. Les frais de retour restent à sa charge, comme le prévoient déjà tes conditions de vente.</p>
+
+  <h2>Côté site, avant l'ouverture</h2>
+  <p>Ces points sont pour Nicolas, tu n'as rien à faire dessus, mais il faut qu'ils soient en place le jour où la boutique ouvre :</p>
+  <ul class="check">
+    <li>Un bouton « Renoncer au contrat ici » sur le site, obligatoire depuis le 19 juin 2026 pour toute vente en ligne. Aujourd'hui la rétractation ne passe que par e-mail.</li>
+    <li>L'étiquette harmonisée de garantie légale sur les fiches produit, obligatoire à partir du 27 septembre 2026.</li>
+    <li>Le nouveau tarif par zone, les phrases sur les taxes pour la Suisse et le Canada, et une liste de pays livrables que tu peux modifier toi-même dans l'administration.</li>
+    <li>Sur chaque fiche produit, la mention fabricant avec le nom et l'adresse professionnelle d'Alma Stella Paris ; le pays d'origine reste dans l'administration du site, pour la douane seulement.</li>
+    <li>La mise à jour des conditions générales de vente et de la page livraison.</li>
+  </ul>
+
+  <h2>Ta liste à toi</h2>
+  <ul class="check">
+    <li>Choisir ta configuration de départ : Europe seule, tout sauf États-Unis et Royaume-Uni, ou tout.</li>
+    <li>Regarder dans tes statistiques Instagram d'où viennent tes abonnées.</li>
+    <li>Créer ton compte sur laposte.fr et faire un premier envoi test hors Europe (Suisse ou Canada) pour voir le parcours réel.</li>
+    <li>Si tu ouvres les États-Unis : demander ton numéro EORI sur douane.gouv.fr.</li>
+    <li>Valider avec Nicolas les forfaits par zone.</li>
+    <li>Préparer ta phrase type en anglais pour la déclaration douanière et la coller quelque part sous la main.</li>
+    <li>Pour chaque grossiste, obtenir par écrit le pays de fabrication et une attestation de conformité européenne (nickel, plomb, cadmium).</li>
+    <li>Prévoir une petite mention « Made in … » discrète sous la boîte pour les envois vers les États-Unis.</li>
+    <li>Décider où tu achètes ton stock : grossistes européens (le plus simple) ou sourcing au Mexique avec déclaration au retour.</li>
+  </ul>
+
+  <p class="foot">Sources vérifiées le 3 septembre 2026 : Commission européenne, Federal Register et douanes américaines, La Poste (aide en ligne et offre entreprise), HMRC, Poste suisse, Postes Canada, ordonnance n° 2026-2 sur la fonction de rétractation. Les taux de droits américains changent souvent ; le montant exact s'affiche sur laposte.fr au moment d'acheter l'étiquette.</p>
+</div>

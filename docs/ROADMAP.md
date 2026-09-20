@@ -50,6 +50,29 @@ order of completion:
 
 ## Open milestones
 
+### Milestone 19 — Shipping, customs & pre-launch compliance — **blocked on Estelle's decisions**
+
+> Opened 2026-09-03 after a regulatory review (US de minimis gone, UK £135 VAT
+> rule, Swiss/Canadian import taxes, mandatory online withdrawal function since
+> 2026-06-19, GPSR manufacturer block, legal-guarantee label on 2026-09-27).
+> Full findings, pending decisions and the report shared with Estelle:
+> [M19_shipping_customs_2026.md](milestones/M19_shipping_customs_2026.md).
+> No code changed yet. Sub-steps below are provisional until Estelle answers.
+
+Legal before public launch, independent of her answer:
+
+- [ ] 19a — Online withdrawal function ("Renoncer au contrat ici", art. L221-21)
+- [ ] 19b — Harmonised legal-guarantee label (directive 2024/825)
+- [ ] 19c — GPSR manufacturer block on product pages + admin-only origin field
+- [ ] 19d — Shipping / terms copy update (free-shipping claims, taxes on delivery, returned goods)
+
+Depending on her decisions:
+
+- [ ] 19e — Shippable country list as an admin setting
+- [ ] 19f — Per-zone, per-order flat shipping grid replacing the "tier × 2" surcharge
+- [ ] 19g — US "duties included" component (only if the US stays open)
+- [ ] 19h — United Kingdom removed from the included zone or from shippable countries
+
 ### Milestone 20 — Admin produits : upload multiple & ergonomie mobile — **à valider**
 
 > Ouvert et livré le 2026-09-20. Estelle administre la boutique depuis son
@@ -87,9 +110,9 @@ order of completion:
   - B — AI consumption dashboard (monthly cost, trend, top products, budget alert)
   - C — advanced UX (side-by-side comparisons, prompt preview, cross-product pending view, per-product prompt override)
   - D — robustness (real-time polling during generation, full history, HD source download)
-- **Withdrawal webform (deferred 2026-08-18)** — "Rétractation" motive on the
-  contact form + mandatory automatic acknowledgement email (art. L221-21).
-  Pure UX, no legal obligation.
+- ~~Withdrawal webform (deferred 2026-08-18 as "pure UX")~~ **Reclassified
+  2026-09-03 as a legal obligation** (online withdrawal function mandatory
+  since 2026-06-19, ordonnance 2026-2) — now sub-step 19a of Milestone 19.
 - **Estelle's personal data decoupling (deferred 2026-08-18)** — home address
   and personal phone are published in the legal notice by assumed choice.
   If revisited: commercial domiciliation and/or virtual line (translation keys
