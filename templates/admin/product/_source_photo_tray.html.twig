@@ -1,0 +1,123 @@
+{# templates/admin/product/_source_photo_tray.html.twig
+
+   The one source-photo picker, driven by public/js/admin-photo-tray.js.
+
+   Two modes, one layout:
+   - `staged` — creation wizard. No product exists yet, so the cards carry
+     hidden inputs named for the `photos` CollectionType and travel with the
+     form POST.
+   - `live` — edit page. Persisted photos are rendered server-side; new picks
+     are staged the same way, then confirmed in one batch request that answers
+     with this very partial re-rendered.
+
+   Variables:
+   - mode          'staged' | 'live'
+   - photoAngles   PhotoAngle[]      — options of every angle select
+   - defaultAngles PhotoAngle[]      — angle proposed to the nth staged photo
+   - minPhotos / maxPhotos           — optional overrides of the entity bounds
+   - sourcePhotos  iterable<SourcePhoto> (live)
+   - product       App\Entity\Product     (live)
+   - fieldName     string                 (staged) — e.g. `product_wizard[photos]`
+#}
+
+{% set min_photos = minPhotos|default(constant('App\\Entity\\SourcePhoto::MIN_PER_PRODUCT')) %}
+{% set max_photos = maxPhotos|default(constant('App\\Entity\\SourcePhoto::MAX_PER_PRODUCT')) %}
+{% set is_live = mode == 'live' %}
+{% set saved_photos = is_live ? sourcePhotos : [] %}
+
+<div class="photo-tray"
+     data-photo-tray
+     data-tray-mode="{{ mode }}"
+     data-tray-min="{{ min_photos }}"
+     data-tray-max="{{ max_photos }}"
+     data-tray-default-angles="{{ defaultAngles|map(a => a.value)|join(',') }}"
+     {% if is_live %}
+         data-tray-upload-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineUploadSources').setEntityId(product.id).generateUrl() }}"
+     {% else %}
+         data-tray-field-name="{{ fieldName }}"
+     {% endif %}>
+
+    <div class="photo-tray__head">
+        <span class="photo-tray__title">
+            <i class="fa fa-camera" aria-hidden="true"></i>
+            Photos sources
+        </span>
+        <span class="photo-tray__counter" data-tray-counter>0 / {{ max_photos }}</span>
+    </div>
+
+    <p class="photo-tray__empty" data-tray-empty hidden>
+        Ajoutez {{ min_photos }} à {{ max_photos }} photos du bijou. L'IA s'en sert pour écrire la fiche et générer les visuels.
+    </p>
+
+    <div class="photo-tray__grid" data-tray-grid>
+        {% for source in saved_photos %}
+            <article class="photo-card"
+                     data-tray-card
+                     data-tray-delete-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineDeleteSource').setEntityId(product.id).set('sourceId', source.id).generateUrl() }}"
+                     data-tray-angle-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineUpdateSourceAngle').setEntityId(product.id).set('sourceId', source.id).generateUrl() }}">
+                <button type="button" class="photo-card__thumb js-admin-lightbox-trigger" title="Agrandir">
+                    <img src="/storage/products/{{ source.path }}" alt="Photo source {{ source.position }}">
+                </button>
+                <span class="photo-card__index" data-tray-index>Photo {{ loop.index }}</span>
+                <button type="button" class="photo-card__remove" data-tray-remove title="Retirer cette photo">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    <span class="visually-hidden">Retirer cette photo</span>
+                </button>
+                <label class="photo-card__angle">
+                    <span class="photo-card__angle-label">Angle de vue</span>
+                    <select data-tray-angle>
+                        {% for angle in photoAngles %}
+                            <option value="{{ angle.value }}" {{ angle == source.angle ? 'selected' : '' }}>{{ angle.label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </article>
+        {% endfor %}
+    </div>
+
+    <label class="photo-tray__add" data-tray-add>
+        {# `image/*` rather than a strict list so the phone offers both the
+           camera and the gallery; everything is re-encoded to WebP client-side
+           and the accepted types are enforced again server-side. #}
+        <input type="file" accept="image/*" multiple data-tray-picker>
+        <span class="photo-tray__add-icon"><i class="fa fa-plus" aria-hidden="true"></i></span>
+        <span class="photo-tray__add-label">Ajouter des photos</span>
+        <span class="photo-tray__add-hint">Plusieurs à la fois — {{ max_photos }} au total</span>
+    </label>
+
+    <p class="photo-tray__status" data-tray-status hidden></p>
+    <progress class="photo-tray__progress" data-tray-progress max="100" hidden></progress>
+
+    <div class="photo-tray__footer" data-tray-footer hidden>
+        {% if is_live %}
+            <button type="button" class="btn btn-primary photo-tray__confirm" data-tray-confirm>Téléverser</button>
+        {% endif %}
+        <button type="button" class="btn btn-link photo-tray__discard" data-tray-discard>
+            {{ is_live ? 'Retirer les nouvelles' : 'Tout retirer' }}
+        </button>
+    </div>
+
+    {# Cloned by the JS for every staged pick. The hidden file input only gets a
+       name in staged mode, so it stays out of the live upload payload. #}
+    <template data-tray-card-template>
+        <article class="photo-card" data-tray-card data-tray-pending>
+            <span class="photo-card__thumb">
+                <img data-tray-thumb alt="">
+            </span>
+            <span class="photo-card__index" data-tray-index></span>
+            <button type="button" class="photo-card__remove" data-tray-remove title="Retirer cette photo">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                <span class="visually-hidden">Retirer cette photo</span>
+            </button>
+            <label class="photo-card__angle">
+                <span class="photo-card__angle-label">Angle de vue</span>
+                <select data-tray-angle>
+                    {% for angle in photoAngles %}
+                        <option value="{{ angle.value }}">{{ angle.label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <input type="file" data-tray-file hidden>
+        </article>
+    </template>
+</div>

@@ -226,21 +226,6 @@ body {
     letter-spacing: 0.02em;
 }
 
-.ai-count {
-    background: #f3f4f6;
-    color: #4b5563;
-    padding: 0.1rem 0.45rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    margin-left: 0.4rem;
-}
-
-.ea-dark-scheme .ai-count {
-    background: #2e2e2e;
-    color: #d4d4d4;
-}
-
 /* ── Published images strip (horizontal compact band) ── */
 .ai-workspace__strip {
     display: flex;
@@ -372,7 +357,7 @@ body {
 /* ── 2-column split: sources (left) + generated (right) ── */
 .ai-workspace__split {
     display: grid;
-    grid-template-columns: 320px 1fr;
+    grid-template-columns: 360px 1fr;
     gap: 1rem;
 }
 
@@ -440,172 +425,386 @@ body {
     font-size: 0.8rem;
 }
 
-/* ── Source photos grid (left col, narrow) ── */
-.ai-source-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 0.5rem;
-}
+/* ── Photo tray — shared source-photo picker ──────────────────────
+   Used by the creation wizard (staged mode) and the Visuels IA tab
+   (live mode). Markup contract:
+   templates/admin/product/_source_photo_tray.html.twig
+   Sizing rule for the whole component: every control the shop owner
+   taps is at least 44px, and every <select> sits at 16px so iOS
+   Safari does not zoom the page in when it takes focus. */
 
-.ai-source-tile {
-    position: relative;
-    margin: 0;
-    border-radius: 6px;
-    overflow: hidden;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    aspect-ratio: 1;
+.photo-tray {
     display: flex;
     flex-direction: column;
+    gap: 0.75rem;
 }
 
-.ea-dark-scheme .ai-source-tile {
-    background: #1f1f1f;
-    border-color: #3a3a3a;
-}
-
-.ai-source-tile__preview {
-    flex: 1;
-    border: none;
-    background: transparent;
-    padding: 0;
-    cursor: zoom-in;
-    overflow: hidden;
-    display: flex;
-}
-
-.ai-source-tile__preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.2s;
-}
-
-.ai-source-tile__preview:hover img {
-    transform: scale(1.05);
-}
-
-.ai-source-tile__caption {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.2rem 0.4rem;
-    background: rgba(255, 255, 255, 0.95);
-    font-size: 0.6rem;
-    color: #4b5563;
-}
-
-.ea-dark-scheme .ai-source-tile__caption {
-    background: rgba(31, 31, 31, 0.95);
-    color: #d4d4d4;
-}
-
-.ai-source-tile__angle {
-    font-weight: 600;
-}
-
-.ai-source-tile__position {
-    color: #9ca3af;
-}
-
-.ai-source-tile__delete {
-    position: absolute;
-    top: 0.25rem;
-    right: 0.25rem;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(239, 68, 68, 0.9);
-    color: #fff;
-    font-size: 0.6rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 2;
-}
-
-.ai-source-tile:hover .ai-source-tile__delete {
-    opacity: 1;
-}
-
-.ai-source-tile__delete:hover {
-    background: #dc2626;
-}
-
-.ai-source-upload {
-    border: 2px dashed #d1d5db;
-    border-radius: 6px;
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: #fff;
-    transition: border-color 0.15s, background 0.15s, opacity 0.15s;
-}
-
-.ai-source-upload--busy {
+.photo-tray--busy {
     opacity: 0.6;
     pointer-events: none;
 }
 
-.ea-dark-scheme .ai-source-upload {
+.photo-tray__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.photo-tray__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.photo-tray__title i {
+    color: #c9a84c;
+}
+
+.photo-tray__counter {
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: #f1f3f5;
+    color: #4b5563;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.photo-tray__counter.is-valid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.photo-tray__counter.is-invalid {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.ea-dark-scheme .photo-tray__counter {
+    background: #2e2e2e;
+    color: #d4d4d4;
+}
+
+.photo-tray__empty {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: #6b7280;
+}
+
+.ea-dark-scheme .photo-tray__empty {
+    color: #9ca3af;
+}
+
+.photo-tray__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.6rem;
+}
+
+/* Two rows so the angle <select> always spans the full card: at sidebar
+   width it would otherwise clip its own longest label ("Trois-quarts"). */
+.photo-card {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr) auto;
+    grid-template-areas:
+        'thumb index remove'
+        'thumb angle angle';
+    align-items: center;
+    gap: 0.4rem 0.7rem;
+    margin: 0;
+    padding: 0.5rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.photo-card[data-tray-pending] {
+    border-style: dashed;
+    border-color: #c9a84c;
+    background: #fffdf7;
+}
+
+.ea-dark-scheme .photo-card {
     background: #1f1f1f;
     border-color: #3a3a3a;
 }
 
-.ai-source-upload:hover {
-    border-color: #c9a84c;
-    background: #fffbf0;
-}
-
-.ea-dark-scheme .ai-source-upload:hover {
+.ea-dark-scheme .photo-card[data-tray-pending] {
     background: #2a2820;
+    border-color: #c9a84c;
 }
 
-.ai-source-upload__angle {
+.photo-card__thumb {
+    grid-area: thumb;
+    display: block;
+    width: 88px;
+    height: 88px;
+    padding: 0;
     border: none;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
-    padding: 0.25rem;
-    font-size: 0.65rem;
-    cursor: pointer;
-    color: #4b5563;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f3f4f6;
+    cursor: zoom-in;
 }
 
-.ea-dark-scheme .ai-source-upload__angle {
+span.photo-card__thumb {
+    cursor: default;
+}
+
+.photo-card__thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ea-dark-scheme .photo-card__thumb {
+    background: #2a2a2a;
+}
+
+.photo-card__index {
+    grid-area: index;
+    align-self: end;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.ea-dark-scheme .photo-card__index {
+    color: #9ca3af;
+}
+
+.photo-card__angle {
+    grid-area: angle;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin: 0;
+    min-width: 0;
+}
+
+.photo-card__angle-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #9ca3af;
+}
+
+.photo-card__angle select {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.35rem 0.5rem;
+    font-size: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    color: #2c2418;
+}
+
+.ea-dark-scheme .photo-card__angle select {
     background: #232323;
-    border-bottom-color: #3a3a3a;
+    border-color: #3a3a3a;
     color: #d4d4d4;
 }
 
-.ai-source-upload__dropzone {
-    flex: 1;
+.photo-card__remove {
+    grid-area: remove;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.08);
+    color: #dc2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.photo-card__remove:hover {
+    background: rgba(239, 68, 68, 0.18);
+}
+
+.photo-tray__add {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.2rem;
-    cursor: pointer;
-    color: #6b7280;
     margin: 0;
+    padding: 1.1rem 1rem;
+    min-height: 96px;
+    text-align: center;
+    background: #fff;
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
 }
 
-.ai-source-upload__dropzone i {
-    font-size: 1rem;
+.photo-tray__add:hover,
+.photo-tray__add.is-dragover {
+    border-color: #c9a84c;
+    background: #fffbf0;
+}
+
+.ea-dark-scheme .photo-tray__add {
+    background: #1f1f1f;
+    border-color: #3a3a3a;
+}
+
+.ea-dark-scheme .photo-tray__add:hover,
+.ea-dark-scheme .photo-tray__add.is-dragover {
+    background: #2a2820;
+    border-color: #c9a84c;
+}
+
+/* Kept in the layout (not display:none) so it stays focusable by keyboard. */
+.photo-tray__add input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.photo-tray__add-icon {
+    font-size: 1.1rem;
     color: #c9a84c;
 }
 
-.ai-source-upload__dropzone span {
-    font-size: 0.7rem;
-    font-weight: 500;
+.photo-tray__add-label {
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
-.ai-source-upload__dropzone input[type="file"] {
+.photo-tray__add-hint {
+    font-size: 0.78rem;
+    color: #6b7280;
+}
+
+.ea-dark-scheme .photo-tray__add-hint {
+    color: #9ca3af;
+}
+
+.photo-tray__status {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #6b7280;
+}
+
+.photo-tray__progress {
+    width: 100%;
+    height: 6px;
+}
+
+.photo-tray__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* An author `display` beats the UA stylesheet's `[hidden] { display: none }`,
+   so the two flex blocks the JS toggles need it spelled out — otherwise the
+   add zone stays on screen once the tray is full. */
+.photo-tray__add[hidden],
+.photo-tray__footer[hidden] {
     display: none;
+}
+
+/* Compound selectors to beat EA's own `.btn` rules. */
+.btn.photo-tray__confirm {
+    flex: 1 1 auto;
+    min-height: 44px;
+    font-weight: 600;
+    block-size: auto;
+}
+
+.btn.photo-tray__discard {
+    min-height: 44px;
+    block-size: auto;
+}
+
+/* ── Confirmation dialog (replaces window.confirm) ───────────────── */
+
+.admin-confirm {
+    width: min(26rem, calc(100vw - 2rem));
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    color: #2c2418;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.admin-confirm::backdrop {
+    background: rgba(17, 24, 39, 0.45);
+}
+
+.ea-dark-scheme .admin-confirm {
+    background: #1f1f1f;
+    border-color: #3a3a3a;
+    color: #e5e5e5;
+}
+
+.admin-confirm__message {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.admin-confirm__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.admin-confirm__btn {
+    min-height: 44px;
+    padding: 0 1.1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    color: #2c2418;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-confirm__btn--danger {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+}
+
+.ea-dark-scheme .admin-confirm__btn {
+    background: #232323;
+    border-color: #3a3a3a;
+    color: #d4d4d4;
+}
+
+.ea-dark-scheme .admin-confirm__btn--danger {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+}
+
+@media (max-width: 480px) {
+    .admin-confirm__actions {
+        flex-direction: column-reverse;
+    }
+
+    .admin-confirm__btn {
+        width: 100%;
+    }
 }
 
 /* ── Generated visuals 3-column layout (right col, wide) ── */
@@ -1586,4 +1785,367 @@ body {
 
 .ea-dark-scheme .asp-stats-periods__item--active {
     color: #1a1a1a;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Product creation wizard (/admin/product/wizard/new)
+   Moved out of wizard_form.html.twig so the page is styled from the
+   same sheet as the rest of the admin — and so the mobile rules below
+   sit next to the ones for the edit workspace.
+   ══════════════════════════════════════════════════════════════ */
+
+.wiz {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem 0 7rem;
+}
+
+.wiz-subtitle {
+    margin: 0.4rem 0 0;
+    color: #6b7280;
+}
+
+.ea-dark-scheme .wiz-subtitle {
+    color: #9ca3af;
+}
+
+.wiz-card {
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 1.1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.ea-dark-scheme .wiz-card {
+    background: #1f1f1f;
+    border-color: #3a3a3a;
+}
+
+.wiz-card__title {
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.wiz-error {
+    margin-top: 0.75rem;
+    color: #b91c1c;
+    font-size: 0.85rem;
+}
+
+.wiz-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.wiz-card .form-row {
+    margin-bottom: 0;
+}
+
+.wiz-card .form-row + .form-row {
+    margin-top: 0.85rem;
+}
+
+/* ── Stones as pill checkboxes ──────────────────────────────────
+   The Bootstrap 5 form theme wraps each expanded choice in a
+   `.form-check`. That wrapper is flattened, the native checkbox
+   hidden, and the label turned into a tappable pill. */
+
+.wiz-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 0.25rem 0;
+}
+
+.wiz-pills > div {
+    display: contents;
+}
+
+.wiz-pills .form-check {
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+}
+
+.wiz-pills .form-check-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    margin: 0;
+}
+
+.wiz-pills .form-check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.55rem 0.95rem;
+    min-height: 40px;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.12s;
+}
+
+.wiz-pills .form-check-label:hover {
+    border-color: #c9a84c;
+}
+
+.wiz-pills .form-check-input:checked ~ .form-check-label,
+.wiz-pills .form-check-label.is-checked {
+    background: #c9a84c;
+    border-color: #c9a84c;
+    color: #fff;
+}
+
+.ea-dark-scheme .wiz-pills .form-check-label {
+    background: #232323;
+    border-color: #3a3a3a;
+    color: #d4d4d4;
+}
+
+/* ── Publish / generate toggles ─────────────────────────────── */
+
+.wiz-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.12s;
+}
+
+.wiz-toggle + .wiz-toggle {
+    margin-top: 0.75rem;
+}
+
+.wiz-toggle:hover {
+    border-color: #c9a84c;
+}
+
+.ea-dark-scheme .wiz-toggle {
+    border-color: #3a3a3a;
+}
+
+.wiz-toggle input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.wiz-toggle__switch {
+    flex: 0 0 auto;
+    position: relative;
+    width: 44px;
+    height: 26px;
+    border-radius: 999px;
+    background: #d0d4d9;
+    transition: background 0.15s;
+}
+
+.wiz-toggle__switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s;
+}
+
+.wiz-toggle input:checked ~ .wiz-toggle__switch {
+    background: #c9a84c;
+}
+
+.wiz-toggle input:checked ~ .wiz-toggle__switch::after {
+    transform: translateX(18px);
+}
+
+.wiz-toggle__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.wiz-toggle__title {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.wiz-toggle__hint {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.82rem;
+    color: #6b7280;
+}
+
+.ea-dark-scheme .wiz-toggle__hint {
+    color: #9ca3af;
+}
+
+/* ── Sticky action bar ──────────────────────────────────────── */
+
+.wiz-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    /* The home-indicator strip on iOS overlaps anything pinned to the
+       bottom — without this the submit button sits under it. */
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.ea-dark-scheme .wiz-actions {
+    background: #1f1f1f;
+    border-color: #3a3a3a;
+}
+
+.wiz-actions__primary {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.wiz-actions__hint {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.ea-dark-scheme .wiz-actions__hint {
+    color: #9ca3af;
+}
+
+.btn.wiz-actions__submit {
+    min-height: 44px;
+    min-width: 200px;
+    font-weight: 600;
+    block-size: auto;
+}
+
+.btn.wiz-actions__submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.btn.wiz-actions__cancel {
+    min-height: 44px;
+    block-size: auto;
+}
+
+@media (max-width: 768px) {
+    .wiz {
+        padding-bottom: 9rem;
+    }
+
+    .wiz-card {
+        padding: 1rem;
+    }
+
+    .wiz-row {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+    }
+
+    .wiz-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 0.6rem;
+        padding: 0.85rem 0.85rem;
+        padding-bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .wiz-actions__primary {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .wiz-actions__hint {
+        order: 2;
+        text-align: center;
+    }
+
+    .btn.wiz-actions__submit {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Touch & narrow-screen pass on the AI workspace
+   Estelle administers the shop from her phone, so nothing here may
+   depend on hover and no control may fall under 44px.
+   ══════════════════════════════════════════════════════════════ */
+
+@media (hover: none) {
+    /* Hover-revealed affordances are unreachable with a finger. */
+    .ai-visual-tile__cancel {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 767px) {
+    .ai-workspace__col {
+        padding: 0.7rem;
+    }
+
+    .ai-workspace__col-header--with-cta {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn.ai-workspace__generate-all,
+    .btn.ai-visual-column__generate {
+        width: 100%;
+        min-height: 42px;
+        font-size: 0.85rem;
+        justify-content: center;
+    }
+
+    .ai-visual-column__header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.4rem;
+    }
+
+    .ai-visual-tile__actions .btn {
+        min-height: 40px;
+        font-size: 0.8rem;
+    }
+
+    /* 9.6px captions are unreadable at arm's length. */
+    .ai-visual-tile__variant,
+    .ai-visual-tile__status-badge {
+        font-size: 0.7rem;
+    }
+
+    .ai-visual-tile__error-text {
+        font-size: 0.75rem;
+    }
 }

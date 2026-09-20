@@ -30,15 +30,17 @@ class ProductWizardType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            // The photo tray creates the inputs itself (one hidden file input plus
+            // the angle select per staged photo, named for this collection), so the
+            // collection starts empty and `allow_add` absorbs whatever indices the
+            // browser submits. No prototype is rendered — nothing consumes one.
             ->add('photos', CollectionType::class, [
                 'entry_type' => ProductWizardPhotoType::class,
                 'allow_add' => true,
                 'allow_delete' => true,
                 'by_reference' => false,
-                'prototype' => true,
-                'prototype_name' => '__photo_index__',
+                'prototype' => false,
                 'label' => false,
-                'attr' => ['class' => 'wizard-photos'],
             ])
             ->add('category', EntityType::class, [
                 'label' => 'Catégorie',

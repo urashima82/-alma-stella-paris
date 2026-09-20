@@ -19,6 +19,7 @@ use App\Message\FillProductContentMessage;
 use App\Message\GenerateVisualMessage;
 use App\Repository\GeneratedVisualRepository;
 use App\Repository\ProductContentSuggestionRepository;
+use App\Repository\SourcePhotoRepository;
 use App\Service\AiGenerationDispatcher;
 use App\Service\Visual\ImageStorage;
 use App\Service\Visual\VisualApprovalHandler;
@@ -63,6 +64,8 @@ class ProductCrudController extends AbstractCrudController
         private readonly ImageStorage $imageStorage,
         private readonly ProductContentSuggestionRepository $contentSuggestionRepository,
         private readonly \App\Service\ProductSlugger $productSlugger,
+        private readonly SourcePhotoRepository $sourcePhotoRepository,
+        private readonly Environment $twig,
     ) {
     }
 
@@ -98,7 +101,13 @@ class ProductCrudController extends AbstractCrudController
         return $actions
             ->add(Crud::PAGE_INDEX, $viewOnSite)
             ->add(Crud::PAGE_EDIT, $viewOnSite)
-            ->add(Crud::PAGE_INDEX, $newWithAi);
+            ->add(Crud::PAGE_INDEX, $newWithAi)
+            // The blank EasyAdmin form cannot produce a usable product: content
+            // and visuals both come from the AI pipelines, which need source
+            // photos. Leaving both buttons side by side sent the shop owner
+            // down the manual path by habit. Super admins keep it as the escape
+            // hatch for debugging, and the permission also guards the route.
+            ->setPermission(Action::NEW, 'ROLE_SUPER_ADMIN');
     }
 
     public function configureFilters(Filters $filters): Filters
@@ -254,8 +263,9 @@ class ProductCrudController extends AbstractCrudController
             return $responseParameters;
         }
 
-        $sourcePhotos = $product->getSourcePhotos()->toArray();
-        \usort($sourcePhotos, static fn (SourcePhoto $a, SourcePhoto $b): int => $a->getPosition() <=> $b->getPosition());
+        // Ordering comes from the `#[ORM\OrderBy(['position' => 'ASC'])]` on
+        // Product::$sourcePhotos — no sorting needed here.
+        $sourcePhotos = $product->getSourcePhotos();
 
         $responseParameters->set('ai_workspace', [
             'product' => $product,
@@ -263,11 +273,12 @@ class ProductCrudController extends AbstractCrudController
             'groupedVisuals' => $this->generatedVisualRepository->findByProductGroupedByType($product),
             'visualTypes' => VisualType::cases(),
             'photoAngles' => PhotoAngle::cases(),
+            'defaultAngles' => PhotoAngle::defaultSequence(),
         ]);
 
         $responseParameters->set('ai_content_workspace', [
             'product' => $product,
-            'sourcePhotosCount' => \count($sourcePhotos),
+            'sourcePhotosCount' => $sourcePhotos->count(),
             'activeSuggestion' => $this->contentSuggestionRepository->findLatestActiveForProduct($product),
             'recentSuggestions' => $this->contentSuggestionRepository->findBy(
                 ['product' => $product],
@@ -283,39 +294,90 @@ class ProductCrudController extends AbstractCrudController
     //  Inline AI workspace actions (bound to /admin/product edit page)
     // ══════════════════════════════════════════════
 
-    /** @param AdminContext<Product> $context */
+    /**
+     * Batch upload — the photo tray stages every pick client-side (downscaled,
+     * angle assigned) and confirms the whole set in one request, so create and
+     * edit share the same "pick, review, validate" flow.
+     *
+     * @param AdminContext<Product> $context
+     */
     #[AdminRoute(options: ['methods' => ['POST']])]
-    public function inlineUploadSource(AdminContext $context): Response
+    public function inlineUploadSources(AdminContext $context): Response
     {
         /** @var Product $product */
         $product = $context->getEntity()->getInstance();
         $request = $context->getRequest();
 
-        /** @var UploadedFile|null $file */
-        $file = $request->files->get('file');
-        if ($file === null) {
+        /** @var list<UploadedFile> $files */
+        $files = \array_values(\array_filter(
+            $request->files->all('files'),
+            static fn (mixed $file): bool => $file instanceof UploadedFile,
+        ));
+
+        if ($files === []) {
             $this->addFlash('danger', 'Aucune photo reçue.');
 
-            return $this->inlineAjaxResponse($context, $product);
+            return $this->sourcesFragmentResponse($context, $product);
         }
 
-        $angleValue = (string) $request->request->get('angle', PhotoAngle::Front->value);
-        $angle = PhotoAngle::tryFrom($angleValue) ?? PhotoAngle::Front;
+        /** @var array<int, string> $angles */
+        $angles = $request->request->all('angles');
 
-        $sourcePhoto = new SourcePhoto();
-        $sourcePhoto->setProduct($product);
-        $sourcePhoto->setAngle($angle);
-        $sourcePhoto->setPosition($product->getSourcePhotos()->count() + 1);
+        $freeSlots = SourcePhoto::MAX_PER_PRODUCT - $product->getSourcePhotos()->count();
+        if ($freeSlots <= 0) {
+            $this->addFlash('warning', \sprintf(
+                'Ce produit a déjà %d photos sources, le maximum. Supprimez-en une avant d\'en ajouter.',
+                SourcePhoto::MAX_PER_PRODUCT,
+            ));
 
-        $path = $this->imageStorage->storeSourcePhoto($file, $product);
-        $sourcePhoto->setPath($path);
+            return $this->sourcesFragmentResponse($context, $product);
+        }
 
-        $this->entityManager->persist($sourcePhoto);
-        $this->entityManager->flush();
+        $added = 0;
+        $skipped = [];
 
-        $this->addFlash('success', \sprintf('Photo source « %s » ajoutée.', $angle->label()));
+        foreach ($files as $index => $file) {
+            if ($added >= $freeSlots) {
+                $skipped[] = $file->getClientOriginalName();
+                continue;
+            }
+            if (!$this->isAcceptableSourcePhoto($file)) {
+                $skipped[] = $file->getClientOriginalName();
+                continue;
+            }
 
-        return $this->inlineAjaxResponse($context, $product);
+            $angle = PhotoAngle::tryFrom((string) ($angles[$index] ?? '')) ?? PhotoAngle::Front;
+            // Re-read the next position on every iteration (and flush below) —
+            // it is a MAX() over rows already in the database.
+            $position = $this->sourcePhotoRepository->nextPositionFor($product);
+
+            $sourcePhoto = new SourcePhoto();
+            $sourcePhoto->setProduct($product);
+            $sourcePhoto->setAngle($angle);
+            $sourcePhoto->setPosition($position);
+            $sourcePhoto->setPath($this->imageStorage->storeSourcePhoto($file, $product, $position));
+
+            $this->entityManager->persist($sourcePhoto);
+            $product->addSourcePhoto($sourcePhoto);
+            $this->entityManager->flush();
+
+            ++$added;
+        }
+
+        if ($added > 0) {
+            $this->addFlash('success', $added === 1
+                ? 'Photo source ajoutée.'
+                : \sprintf('%d photos sources ajoutées.', $added));
+        }
+        if ($skipped !== []) {
+            $this->addFlash('warning', \sprintf(
+                '%d photo(s) ignorée(s) — format non accepté, fichier trop lourd, ou maximum de %d atteint.',
+                \count($skipped),
+                SourcePhoto::MAX_PER_PRODUCT,
+            ));
+        }
+
+        return $this->sourcesFragmentResponse($context, $product);
     }
 
     /** @param AdminContext<Product> $context */
@@ -324,22 +386,106 @@ class ProductCrudController extends AbstractCrudController
     {
         /** @var Product $product */
         $product = $context->getEntity()->getInstance();
-        $sourceId = (int) $context->getRequest()->query->get('sourceId', 0);
 
-        $source = $this->entityManager->getRepository(SourcePhoto::class)->find($sourceId);
-        if ($source === null || $source->getProduct() !== $product) {
-            $this->addFlash('danger', 'Photo source introuvable.');
-
-            return $this->inlineAjaxResponse($context, $product);
+        $source = $this->resolveSourceForProduct($context, $product);
+        if ($source === null) {
+            return $this->sourcesFragmentResponse($context, $product);
         }
 
         $this->imageStorage->delete($source->getPath());
         $this->entityManager->remove($source);
+        // Drop it from the in-memory collection too — the fragment rendered
+        // below reads that collection, not a fresh query. `removeElement` is
+        // deliberate over `Product::removeSourcePhoto()`, which would also null
+        // the owning side of a row already scheduled for deletion.
+        $product->getSourcePhotos()->removeElement($source);
         $this->entityManager->flush();
 
         $this->addFlash('success', 'Photo source supprimée.');
 
-        return $this->inlineAjaxResponse($context, $product);
+        return $this->sourcesFragmentResponse($context, $product);
+    }
+
+    /** @param AdminContext<Product> $context */
+    #[AdminRoute(options: ['methods' => ['POST']])]
+    public function inlineUpdateSourceAngle(AdminContext $context): Response
+    {
+        /** @var Product $product */
+        $product = $context->getEntity()->getInstance();
+
+        $source = $this->resolveSourceForProduct($context, $product);
+        if ($source === null) {
+            return $this->sourcesFragmentResponse($context, $product);
+        }
+
+        $angle = PhotoAngle::tryFrom((string) $context->getRequest()->request->get('angle', ''));
+        if ($angle === null) {
+            $this->addFlash('danger', 'Angle de vue inconnu.');
+
+            return $this->sourcesFragmentResponse($context, $product);
+        }
+
+        $source->setAngle($angle);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', \sprintf('Angle mis à jour : %s.', $angle->label()));
+
+        return $this->sourcesFragmentResponse($context, $product);
+    }
+
+    /**
+     * Mirrors the constraints `ProductWizardPhotoData` declares for the
+     * creation wizard — the edit workspace uploads bypass the Form component,
+     * so the same contract has to be enforced by hand here.
+     */
+    private function isAcceptableSourcePhoto(UploadedFile $file): bool
+    {
+        if (!$file->isValid() || $file->getSize() > SourcePhoto::MAX_FILE_SIZE_BYTES) {
+            return false;
+        }
+
+        return \in_array($file->getMimeType(), SourcePhoto::ACCEPTED_MIME_TYPES, true);
+    }
+
+    /** @param AdminContext<Product> $context */
+    private function resolveSourceForProduct(AdminContext $context, Product $product): ?SourcePhoto
+    {
+        $sourceId = (int) $context->getRequest()->query->get('sourceId', 0);
+
+        $source = $this->sourcePhotoRepository->find($sourceId);
+        if ($source === null || $source->getProduct() !== $product) {
+            $this->addFlash('danger', 'Photo source introuvable.');
+
+            return null;
+        }
+
+        return $source;
+    }
+
+    /**
+     * Source-photo mutations answer with the re-rendered tray so the tab can
+     * swap it in place. Reloading the whole edit page — what the single-file
+     * uploader used to do — threw away any unsaved edit in the product form
+     * and, on mobile, scrolled the shop owner back to the top on every photo.
+     *
+     * @param AdminContext<Product> $context
+     */
+    private function sourcesFragmentResponse(AdminContext $context, Product $product): Response
+    {
+        if (!$context->getRequest()->isXmlHttpRequest()) {
+            return $this->inlineAjaxResponse($context, $product);
+        }
+
+        return $this->json([
+            'count' => $product->getSourcePhotos()->count(),
+            'html' => $this->twig->render('admin/product/_source_photo_tray.html.twig', [
+                'mode' => 'live',
+                'product' => $product,
+                'sourcePhotos' => $product->getSourcePhotos(),
+                'photoAngles' => PhotoAngle::cases(),
+                'defaultAngles' => PhotoAngle::defaultSequence(),
+            ]),
+        ]);
     }
 
     /** @param AdminContext<Product> $context */
@@ -601,14 +747,12 @@ class ProductCrudController extends AbstractCrudController
      * @param AdminContext<Product> $context
      */
     #[AdminRoute]
-    public function aiStatus(
-        AdminContext $context,
-        Environment $twig,
-    ): JsonResponse {
+    public function aiStatus(AdminContext $context): JsonResponse
+    {
         /** @var Product $product */
         $product = $context->getEntity()->getInstance();
 
-        return $this->json($this->buildAiStatusPayload($product, $twig));
+        return $this->json($this->buildAiStatusPayload($product, $this->twig));
     }
 
     // ══════════════════════════════════════════════
@@ -796,14 +940,12 @@ class ProductCrudController extends AbstractCrudController
      * @param AdminContext<Product> $context
      */
     #[AdminRoute]
-    public function aiContentStatus(
-        AdminContext $context,
-        Environment $twig,
-    ): JsonResponse {
+    public function aiContentStatus(AdminContext $context): JsonResponse
+    {
         /** @var Product $product */
         $product = $context->getEntity()->getInstance();
 
-        return $this->json($this->buildAiContentStatusPayload($product, $twig));
+        return $this->json($this->buildAiContentStatusPayload($product, $this->twig));
     }
 
     /** @param AdminContext<Product> $context */

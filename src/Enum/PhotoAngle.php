@@ -12,6 +12,18 @@ enum PhotoAngle: string
     case Back = 'back';
     case Other = 'other';
 
+    /**
+     * Angles proposed to the nth staged photo, in the order a piece is
+     * naturally shot. Defaults only — the tray keeps every angle editable, and
+     * a product may hold fewer photos than this sequence has entries.
+     *
+     * @return list<self>
+     */
+    public static function defaultSequence(): array
+    {
+        return [self::Front, self::ThreeQuarter, self::Detail, self::Back];
+    }
+
     public function label(): string
     {
         return match ($this) {

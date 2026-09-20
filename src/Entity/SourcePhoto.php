@@ -12,6 +12,19 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 #[ORM\Entity(repositoryClass: SourcePhotoRepository::class)]
 class SourcePhoto
 {
+    /**
+     * Bounds shared by the creation wizard and the edit workspace so both
+     * entry points enforce the same contract. The AI prompts were tuned for a
+     * handful of angles: fewer than two leaves the model guessing the shape,
+     * and every extra photo is re-encoded into each Gemini call.
+     */
+    public const int MIN_PER_PRODUCT = 2;
+    public const int MAX_PER_PRODUCT = 4;
+    public const int MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
+    /** @var list<string> */
+    public const array ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

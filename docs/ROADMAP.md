@@ -50,9 +50,20 @@ order of completion:
 
 ## Open milestones
 
-**None** — every milestone of the initial scope is completed and archived
-(arbitration of 2026-08-18). New work starts as a new milestone here, or is
-picked from the V2 backlog below.
+### Milestone 20 — Admin produits : upload multiple & ergonomie mobile — **à valider**
+
+> Ouvert et livré le 2026-09-20. Estelle administre la boutique depuis son
+> téléphone : le parcours de création la trompait et l'upload se faisait photo
+> par photo. Arbitrages, bugs trouvés et pièges (CSP, `<template>` inerte) :
+> [M20_admin_photo_tray.md](milestones/M20_admin_photo_tray.md).
+
+- [x] 20a — Bouton « Nouveau » natif réservé au `ROLE_SUPER_ADMIN` (masqué et route fermée)
+- [x] 20b — Composant unique de galerie photo (`_source_photo_tray.html.twig` + `admin-photo-tray.js`), partagé wizard (staging client) et édition (upload par lot)
+- [x] 20c — Upload multiple avec aperçu, angle par photo et validation explicite
+- [x] 20d — Compression navigateur des photos (WebP, 2048 px) avant envoi
+- [x] 20e — Fin du rechargement de page en édition : les mutations répondent le fragment re-rendu
+- [x] 20f — Passe tactile (cibles ≥ 44 px, suppression visible sans `:hover`, `<select>` à 16 px, barre collante `safe-area`, modale de confirmation à la place de `window.confirm`)
+- [x] 20g — Correction de la collision de positions des photos sources (écrasement silencieux de fichier) + test de régression
 
 ---
 

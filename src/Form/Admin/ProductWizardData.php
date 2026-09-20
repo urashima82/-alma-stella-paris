@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form\Admin;
 
 use App\Entity\ProductCategory;
+use App\Entity\SourcePhoto;
 use App\Entity\Stone;
 use App\Enum\ShippingTier;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -56,19 +57,38 @@ class ProductWizardData
         ));
     }
 
+    /**
+     * The photo tray builds its entries client-side, so the collection starts
+     * empty and grows with whatever indices the browser submitted. `by_reference`
+     * is false on the CollectionType, which routes new entries through these.
+     */
+    public function addPhoto(ProductWizardPhotoData $photo): void
+    {
+        if (!$this->photos->contains($photo)) {
+            $this->photos->add($photo);
+        }
+    }
+
+    public function removePhoto(ProductWizardPhotoData $photo): void
+    {
+        $this->photos->removeElement($photo);
+    }
+
     #[Assert\Callback]
     public function validatePhotoCount(ExecutionContextInterface $context): void
     {
         $count = \count($this->getUploadedPhotos());
 
-        if ($count < 2) {
-            $context->buildViolation('Au moins 2 photos sources sont requises.')
-                ->atPath('photos')
-                ->addViolation();
-        } elseif ($count > 4) {
-            $context->buildViolation('Maximum 4 photos sources.')
-                ->atPath('photos')
-                ->addViolation();
+        if ($count < SourcePhoto::MIN_PER_PRODUCT) {
+            $context->buildViolation(\sprintf(
+                'Au moins %d photos sources sont requises.',
+                SourcePhoto::MIN_PER_PRODUCT,
+            ))->atPath('photos')->addViolation();
+        } elseif ($count > SourcePhoto::MAX_PER_PRODUCT) {
+            $context->buildViolation(\sprintf(
+                'Maximum %d photos sources.',
+                SourcePhoto::MAX_PER_PRODUCT,
+            ))->atPath('photos')->addViolation();
         }
     }
 }

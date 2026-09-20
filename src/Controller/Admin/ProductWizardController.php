@@ -36,13 +36,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class ProductWizardController extends AbstractController
 {
-    private const array DEFAULT_ANGLES = [
-        PhotoAngle::Front,
-        PhotoAngle::ThreeQuarter,
-        PhotoAngle::Detail,
-        PhotoAngle::Back,
-    ];
-
     private const string DRAFT_SLUG_PREFIX = 'draft-';
 
     public function __construct(
@@ -77,11 +70,12 @@ class ProductWizardController extends AbstractController
     {
         $this->attachAdminContext($request);
 
-        $data = $this->buildSeededData();
-        $form = $this->createForm(ProductWizardType::class, $data);
+        $form = $this->createForm(ProductWizardType::class, new ProductWizardData());
 
         return $this->render('admin/product/wizard_form.html.twig', [
             'form' => $form,
+            'photoAngles' => PhotoAngle::cases(),
+            'defaultAngles' => PhotoAngle::defaultSequence(),
         ]);
     }
 
@@ -90,13 +84,19 @@ class ProductWizardController extends AbstractController
     {
         $this->attachAdminContext($request);
 
-        $data = $this->buildSeededData();
+        $data = new ProductWizardData();
         $form = $this->createForm(ProductWizardType::class, $data);
         $form->handleRequest($request);
 
         if (!$form->isSubmitted() || !$form->isValid()) {
+            // A re-render cannot repopulate file inputs, so the staged photos are
+            // lost here. The tray mirrors every server-side rule client-side and
+            // blocks submission, which keeps this branch for tampering and for
+            // uploads the PHP front controller drops (post_max_size).
             return $this->render('admin/product/wizard_form.html.twig', [
                 'form' => $form,
+                'photoAngles' => PhotoAngle::cases(),
+                'defaultAngles' => PhotoAngle::defaultSequence(),
             ], new Response(null, $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
         }
 
@@ -227,18 +227,6 @@ class ProductWizardController extends AbstractController
             ->generateUrl();
 
         return $url.'#tab-contenu-ia';
-    }
-
-    private function buildSeededData(): ProductWizardData
-    {
-        $data = new ProductWizardData();
-        foreach (self::DEFAULT_ANGLES as $angle) {
-            $photo = new ProductWizardPhotoData();
-            $photo->angle = $angle;
-            $data->photos->add($photo);
-        }
-
-        return $data;
     }
 
     private function createDraftProduct(ProductWizardData $data): Product

@@ -173,6 +173,7 @@ class DashboardController extends AbstractDashboardController
             ->addJsFile('js/admin-image-crop.js')
             ->addJsFile('js/admin-toast.js')
             ->addJsFile('js/admin-lightbox.js')
+            ->addJsFile('js/admin-photo-tray.js')
             ->addJsFile('js/admin-ai-poll.js')
             ->addJsFile('js/admin-ai-actions.js')
             ->addJsFile('js/admin-ai-content.js');

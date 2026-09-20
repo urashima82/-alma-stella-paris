@@ -13,10 +13,8 @@
  *     data-ai-generate-btn
  *     data-ai-generate-type="all|vignette|worn|lifestyle"
  *
- *   <div data-ai-upload-url="...">
- *     <select data-ai-upload-angle>...</select>
- *     <input type="file" data-ai-upload-file>
- *   </div>
+ * Source photos are not handled here — admin-photo-tray.js owns that whole
+ * flow, uploads included.
  *
  * Default flow after a successful POST:
  *   - dispatch a `ai-action-completed` CustomEvent (admin-ai-poll.js listens
@@ -110,6 +108,27 @@
         document.dispatchEvent(new CustomEvent('ai-action-completed'));
     }
 
+    function notifyFailure(message) {
+        if (window.AdminToast && typeof window.AdminToast.show === 'function') {
+            window.AdminToast.show('danger', message);
+        } else {
+            window.alert(message);
+        }
+    }
+
+    function askConfirmation(message) {
+        if (!message) {
+            return Promise.resolve(true);
+        }
+        // admin-photo-tray.js exposes a styled <dialog>; window.confirm is the
+        // fallback when that script has not loaded.
+        if (typeof window.AdminConfirm === 'function') {
+            return window.AdminConfirm(message, 'Confirmer');
+        }
+
+        return Promise.resolve(window.confirm(message));
+    }
+
     function handleClick(event) {
         const btn = event.target.closest('[data-ai-action]');
         if (!btn) {
@@ -121,11 +140,14 @@
             return;
         }
 
-        const confirmMessage = btn.dataset.aiConfirm;
-        if (confirmMessage && !window.confirm(confirmMessage)) {
-            return;
-        }
+        askConfirmation(btn.dataset.aiConfirm).then((confirmed) => {
+            if (confirmed) {
+                runAction(btn);
+            }
+        });
+    }
 
+    function runAction(btn) {
         const url = btn.dataset.aiUrl;
         if (!url) {
             return;
@@ -156,7 +178,7 @@
             .catch((err) => {
                 btn.dataset.aiBusy = '';
                 btn.removeAttribute('disabled');
-                window.alert('Action échouée : ' + err.message);
+                notifyFailure('Action échouée : ' + err.message);
                 // Force a poll so server state wipes any optimistic placeholder/disable we applied.
                 if (isGenerateBtn) {
                     document.dispatchEvent(new CustomEvent('ai-action-completed'));
@@ -164,45 +186,5 @@
             });
     }
 
-    function handleFileChange(event) {
-        const fileInput = event.target.closest('[data-ai-upload-file]');
-        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-            return;
-        }
-        const container = fileInput.closest('[data-ai-upload-url]');
-        if (!container) {
-            return;
-        }
-        if (container.dataset.aiBusy === '1') {
-            return;
-        }
-
-        const angleSelect = container.querySelector('[data-ai-upload-angle]');
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-        if (angleSelect) {
-            formData.append('angle', angleSelect.value);
-        }
-
-        container.dataset.aiBusy = '1';
-        container.classList.add('ai-source-upload--busy');
-
-        postAction(container.dataset.aiUploadUrl, formData)
-            .then((response) => {
-                if (!response.ok && response.status !== 302) {
-                    throw new Error('HTTP ' + response.status);
-                }
-                // Source list is SSR-rendered, full reload needed
-                window.location.reload();
-            })
-            .catch((err) => {
-                container.dataset.aiBusy = '';
-                container.classList.remove('ai-source-upload--busy');
-                fileInput.value = '';
-                window.alert('Upload échoué : ' + err.message);
-            });
-    }
-
     document.addEventListener('click', handleClick);
-    document.addEventListener('change', handleFileChange);
 })();

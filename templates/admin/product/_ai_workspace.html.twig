@@ -3,8 +3,9 @@
    Variables expected:
    - product: App\Entity\Product
    - groupedVisuals: array<string, GeneratedVisual[]>  (keyed by VisualType value)
-   - sourcePhotos: SourcePhoto[]
+   - sourcePhotos: iterable<SourcePhoto>
    - photoAngles: PhotoAngle[]
+   - defaultAngles: PhotoAngle[]
    - visualTypes: VisualType[]
 #}
 
@@ -50,54 +51,13 @@
 
         {# ── LEFT: Source photos ── #}
         <section class="ai-workspace__col ai-workspace__col--sources">
-            <header class="ai-workspace__col-header">
-                <h3>
-                    <i class="fa fa-camera"></i>
-                    Photos sources
-                    <span class="ai-count">{{ sourcePhotos|length }}</span>
-                </h3>
-            </header>
-
-            <div class="ai-source-grid">
-                {% for source in sourcePhotos %}
-                    <figure class="ai-source-tile">
-                        <button type="button" class="ai-source-tile__preview js-admin-lightbox-trigger"
-                               >
-                            <img src="/storage/products/{{ source.path }}"
-                                 alt="Source {{ source.position }}"
-                                >
-                        </button>
-                        <figcaption class="ai-source-tile__caption">
-                            <span class="ai-source-tile__angle">{{ source.angle.label }}</span>
-                            <span class="ai-source-tile__position">#{{ source.position }}</span>
-                        </figcaption>
-                        <button type="button"
-                                class="ai-source-tile__delete"
-                                data-ai-action="post"
-                                data-ai-reload="true"
-                                data-ai-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineDeleteSource').setEntityId(product_id).set('sourceId', source.id).generateUrl() }}"
-                                data-ai-confirm="Supprimer cette photo source ?"
-                                title="Supprimer">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </figure>
-                {% endfor %}
-
-                {# Upload tile — angle picked first, file change triggers AJAX upload #}
-                <div class="ai-source-upload"
-                     data-ai-upload-url="{{ ea_url().setController('App\\Controller\\Admin\\ProductCrudController').setAction('inlineUploadSource').setEntityId(product_id).generateUrl() }}">
-                    <select class="ai-source-upload__angle" title="Angle" data-ai-upload-angle>
-                        {% for angle in photoAngles %}
-                            <option value="{{ angle.value }}">{{ angle.label }}</option>
-                        {% endfor %}
-                    </select>
-                    <label class="ai-source-upload__dropzone">
-                        <input type="file" accept="image/jpeg,image/png,image/webp" data-ai-upload-file>
-                        <i class="fa fa-plus"></i>
-                        <span>Ajouter</span>
-                    </label>
-                </div>
-            </div>
+            {% include 'admin/product/_source_photo_tray.html.twig' with {
+                mode: 'live',
+                product: product,
+                sourcePhotos: sourcePhotos,
+                photoAngles: photoAngles,
+                defaultAngles: defaultAngles,
+            } only %}
         </section>
 
         {# ── RIGHT: Generated visuals ── #}

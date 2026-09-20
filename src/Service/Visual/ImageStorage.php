@@ -25,7 +25,7 @@ final class ImageStorage
         // in-memory collection count stays at 0 between iterations and every
         // file ends up overwriting `01.{ext}`.
         $resolvedPosition = $position ?? ($product->getSourcePhotos()->count() + 1);
-        $path = \sprintf('%d/sources/%02d.%s', $productId, $resolvedPosition, $extension);
+        $path = $this->freeSourcePath((int) $productId, $resolvedPosition, $extension);
 
         $this->defaultStorage->write($path, (string) \file_get_contents($file->getPathname()));
 
@@ -36,7 +36,7 @@ final class ImageStorage
     {
         $productId = $product->getId();
         $extension = \pathinfo($sourcePath, \PATHINFO_EXTENSION) ?: 'jpg';
-        $path = \sprintf('%d/sources/%02d.%s', $productId, $position, $extension);
+        $path = $this->freeSourcePath((int) $productId, $position, $extension);
 
         $content = \file_get_contents($sourcePath);
         if ($content === false) {
@@ -73,5 +73,22 @@ final class ImageStorage
     public function getPublicUrl(string $path): string
     {
         return '/storage/products/'.$path;
+    }
+
+    /**
+     * Source paths are derived from the photo position, which makes them
+     * readable but not inherently unique: a position can be reused after a
+     * deletion, and two uploads can race. Writing over an existing file would
+     * silently repoint another SourcePhoto row at the new image, so a taken
+     * path gets a random suffix instead.
+     */
+    private function freeSourcePath(int $productId, int $position, string $extension): string
+    {
+        $path = \sprintf('%d/sources/%02d.%s', $productId, $position, $extension);
+        if (!$this->defaultStorage->fileExists($path)) {
+            return $path;
+        }
+
+        return \sprintf('%d/sources/%02d-%s.%s', $productId, $position, \bin2hex(\random_bytes(4)), $extension);
     }
 }

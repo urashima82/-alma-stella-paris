@@ -237,6 +237,36 @@ Production runs on shared hosting; these things exist only because of it:
   `ProductImage` as an entity was removed on purpose: a product has exactly three
   image slots (`thumbnail`, `wornPhoto`, `contextPhoto`), not a gallery.
 
+## Admin back-office
+
+- **A product can only be created through the AI wizard.** The native EasyAdmin `NEW`
+  action is permission-gated to `ROLE_SUPER_ADMIN`, which hides the button *and* closes
+  the route: a blank form cannot produce a usable product (both content and visuals need
+  source photos), and two adjacent buttons kept sending the shop owner down the manual
+  path out of habit. Super admins keep it as a debugging escape hatch.
+- **One photo picker, two transports.** `_source_photo_tray.html.twig` +
+  `admin-photo-tray.js` serve the wizard (`staged` — files stay in the browser in inputs
+  named for the `photos` CollectionType, and ride the form POST) and the edit workspace
+  (`live` — batch upload whose response is the re-rendered tray, so the product form
+  never reloads). **No draft product is created before submit**: that alternative was
+  rejected to avoid orphan drafts and a purge command. The price is that a server-side
+  rejection cannot repopulate file inputs, which is why the wizard gates its submit
+  button client-side rather than relying on the 422 branch.
+- **Photos are re-encoded in the browser** (WebP, 2048px max) before they go anywhere.
+  That is what keeps the wizard's single POST under `post_max_size` on a phone, and it
+  shrinks every payload later base64-encoded into a Gemini call.
+- **Image previews use `data:` URLs, never `blob:`** — `SecurityHeadersSubscriber` sets
+  `img-src 'self' data:` for the whole site, so a blob URL renders as a broken image with
+  no console error. Applies to the decode fallback in `admin-photo-tray.js` too.
+- **`PhotoAngle` is admin-facing metadata only** — no prompt builder and no handler reads
+  it; every source photo is sent to Gemini undifferentiated. It is kept because the tray
+  assigns it for free, but wiring it into the prompts is a behaviour change to validate,
+  not a refactor.
+- **Source photo paths are position-derived and collision-guarded.** Positions come from
+  `MAX(position) + 1` (`SourcePhotoRepository::nextPositionFor`) and `ImageStorage`
+  suffixes a path that already exists. A `COUNT()`-based position silently overwrote a
+  sibling's file after any mid-list deletion.
+
 ## Analytics (privacy-first)
 
 - **No IP, no cookie, no visitor identifier is ever stored** — one `views` counter per

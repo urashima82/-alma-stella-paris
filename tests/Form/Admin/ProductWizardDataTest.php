@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Form\Admin;
 
+use App\Entity\SourcePhoto;
 use App\Enum\PhotoAngle;
 use App\Form\Admin\ProductWizardData;
 use App\Form\Admin\ProductWizardPhotoData;
@@ -56,7 +57,9 @@ final class ProductWizardDataTest extends TestCase
 
     public function testEmptySlotsAreIgnoredInCount(): void
     {
-        // Simulates the wizard pre-seeded form: 4 slots, but only 2 with files.
+        // A browser can submit an entry whose file never made it (cancelled
+        // picker, discarded card): those entries must not count towards the
+        // 2..4 bound.
         $data = new ProductWizardData();
         for ($i = 0; $i < 4; ++$i) {
             $photo = new ProductWizardPhotoData();
@@ -68,6 +71,34 @@ final class ProductWizardDataTest extends TestCase
         self::assertCount(2, $data->getUploadedPhotos());
         $violations = $this->validator()->validate($data);
         self::assertFalse($this->hasViolationFor($violations, 'photos'));
+    }
+
+    /**
+     * The photo tray builds its entries client-side, so the CollectionType runs
+     * with `allow_add`/`allow_delete` and routes them through these two.
+     */
+    public function testAddAndRemovePhotoDriveTheCollection(): void
+    {
+        $data = new ProductWizardData();
+        $photo = new ProductWizardPhotoData();
+
+        $data->addPhoto($photo);
+        $data->addPhoto($photo);
+        self::assertCount(1, $data->photos);
+
+        $data->removePhoto($photo);
+        self::assertCount(0, $data->photos);
+    }
+
+    public function testBoundsFollowTheSourcePhotoContract(): void
+    {
+        // The wizard and the edit workspace must not drift apart: both read the
+        // bounds off the entity.
+        $tooFew = $this->newData(SourcePhoto::MIN_PER_PRODUCT - 1);
+        $tooMany = $this->newData(SourcePhoto::MAX_PER_PRODUCT + 1);
+
+        self::assertTrue($this->hasViolationFor($this->validator()->validate($tooFew), 'photos'));
+        self::assertTrue($this->hasViolationFor($this->validator()->validate($tooMany), 'photos'));
     }
 
     private function newData(int $photoCount): ProductWizardData
