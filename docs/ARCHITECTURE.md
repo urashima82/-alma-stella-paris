@@ -279,6 +279,14 @@ Production runs on shared hosting; these things exist only because of it:
   its stacked mode — move one without the other and the table ends up half
   converted — and every rule repeats the same `tr:not(.empty-row) > td` base,
   because the cell reset outranks any leaner selector written next to it.
+- **The product edit actions are pinned to the bottom of a phone screen** and lose
+  their labels except the primary one. It works because EasyAdmin renders those
+  buttons with `form="edit-Product-form"`, so they submit from anywhere in the
+  document and can be taken out of the header's flow. "Save and continue editing"
+  was dropped for a "Retour à la liste" action.
+- **`@EasyAdmin/crud/edit.html.twig` renders `entity.actions|reverse`.** An order
+  passed to `Actions::reorder()` for `PAGE_EDIT` therefore comes out backwards —
+  `ProductCrudController` lists them reversed on purpose.
 - **`Field::setCssClass()` replaces the generated `field-*` class, it does not add
   to it.** The index columns therefore restate theirs (`'field-text cell-name'`);
   dropping it costs EasyAdmin's own per-type styling with no visible error.

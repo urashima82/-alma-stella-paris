@@ -122,6 +122,22 @@ légitimement pas tant qu'aucun visuel IA n'est approuvé.
 Portée par `body.ea-index-Product`, la classe qu'EasyAdmin émet par entité :
 aucune autre liste n'est touchée, et le desktop est inchangé.
 
+## Suite du 2026-09-20 — barre d'actions de la fiche produit
+
+EasyAdmin place les actions de page dans l'en-tête. Sur un formulaire long et en
+mobile, elles sortent de l'écran : enregistrer imposait de remonter au-dessus de
+trois onglets de champs. Elles sont désormais fixées en bas de l'écran sous
+767 px, les deux actions secondaires réduites à leur icône, l'action principale
+gardant son libellé et le reste de la largeur.
+
+Ça ne coûte rien de les sortir du flux : EasyAdmin leur pose
+`form="edit-Product-form"`, elles soumettent donc depuis n'importe où dans le
+document.
+
+Sur tous les écrans, « Save and continue editing » disparaît au profit de
+« Retour à la liste » — l'ancienne action laissait la gérante sur une page
+qu'elle venait de terminer.
+
 ## Pièges rencontrés
 
 - **CSP.** `SecurityHeadersSubscriber` pose `img-src 'self' data:` pour tout le
@@ -134,6 +150,9 @@ aucune autre liste n'est touchée, et le desktop est inchangé.
 - **`hidden` battu par `display`.** Une règle auteur `display: flex` l'emporte sur
   le `[hidden] { display: none }` de la feuille du navigateur : la zone d'ajout
   serait restée visible une fois les 4 photos atteintes.
+- **Ordre des actions inversé.** `@EasyAdmin/crud/edit.html.twig` rend
+  `entity.actions|reverse` : l'ordre passé à `Actions::reorder()` ressort à
+  l'envers, il faut donc le déclarer à l'envers.
 - **`setCssClass()` remplace la classe `field-*`.** Les colonnes de l'index
   perdaient silencieusement le style natif d'EasyAdmin ; chaque appel restitue
   donc la classe d'origine à côté du hook.

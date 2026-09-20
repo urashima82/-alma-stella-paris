@@ -2427,3 +2427,85 @@ span.photo-card__thumb {
         color: #d1d5db;
     }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Product edit — action bar pinned to the bottom on a phone
+   EasyAdmin puts the page actions in the header, so on a long
+   form they scroll out of reach: saving meant scrolling back up
+   past three tabs of fields. Pinned, they stay one thumb away.
+
+   The buttons carry `form="edit-Product-form"`, so they submit
+   from anywhere in the document — taking them out of the flow
+   costs nothing. Scoped by `body.ea-edit-Product`, and only the
+   secondary actions lose their label, the primary one keeps it.
+   ══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+    .ea-edit-Product .content-header .page-actions {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 1030;
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+        padding: 0.6rem 0.85rem;
+        padding-bottom: calc(0.6rem + env(safe-area-inset-bottom, 0px));
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    .ea-dark-scheme.ea-edit-Product .content-header .page-actions {
+        background: #1f1f1f;
+        border-top-color: #3a3a3a;
+        box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Clears the pinned bar so the last field is reachable. */
+    .ea-edit-Product .content-wrapper {
+        padding-bottom: 5.5rem;
+    }
+
+    .ea-edit-Product .content-header .page-actions .btn {
+        min-height: 46px;
+        block-size: auto;
+    }
+
+    /* Icon only: the label carries no information a list arrow and an
+       external-link arrow do not already give at this size. */
+    .ea-edit-Product .content-header .page-actions .action-backToList,
+    .ea-edit-Product .content-header .page-actions .action-viewOnSite {
+        flex: 0 0 auto;
+        justify-content: center;
+        width: 50px;
+        padding: 0;
+    }
+
+    /* Hidden from the eye, kept for a screen reader — `display: none` would
+       drop it from the accessibility tree along with the only naming these
+       two buttons have. */
+    .ea-edit-Product .content-header .page-actions .action-backToList .btn-label,
+    .ea-edit-Product .content-header .page-actions .action-viewOnSite .btn-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        clip-path: inset(50%);
+    }
+
+    .ea-edit-Product .content-header .page-actions .action-saveAndReturn {
+        flex: 1 1 auto;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+    /* The header keeps only the title once the actions are pinned. */
+    .ea-edit-Product .content-header {
+        margin-bottom: 0.5rem;
+    }
+}

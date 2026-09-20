@@ -98,10 +98,22 @@ class ProductCrudController extends AbstractCrudController
             ->linkToUrl($this->generateUrl('admin_product_wizard_new'))
             ->setCssClass('btn btn-primary');
 
+        $backToList = Action::new('backToList', 'Retour à la liste', 'fa fa-arrow-left')
+            ->linkToCrudAction(Action::INDEX);
+
         return $actions
             ->add(Crud::PAGE_INDEX, $viewOnSite)
             ->add(Crud::PAGE_EDIT, $viewOnSite)
+            ->add(Crud::PAGE_EDIT, $backToList)
             ->add(Crud::PAGE_INDEX, $newWithAi)
+            // "Save and continue editing" left the shop owner on a page she had
+            // just finished with, one tap away from the one she actually wanted.
+            ->remove(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE)
+            // Listed backwards on purpose: `@EasyAdmin/crud/edit.html.twig`
+            // renders `entity.actions|reverse`, so this comes out as
+            // "Retour à la liste · Voir sur le site · Save changes" — primary on
+            // the right on a desktop, and last in the fixed bar on a phone.
+            ->reorder(Crud::PAGE_EDIT, [Action::SAVE_AND_RETURN, 'viewOnSite', 'backToList'])
             // The blank EasyAdmin form cannot produce a usable product: content
             // and visuals both come from the AI pipelines, which need source
             // photos. Leaving both buttons side by side sent the shop owner
